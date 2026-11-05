@@ -7,6 +7,7 @@ import {
   recordWebhookEvent,
   type LicenseRecord,
 } from "@/lib/license";
+import { recordOrder } from "@/lib/orders";
 import type { NormalizedSubEvent } from "@/lib/payments/types";
 
 export const runtime = "nodejs";
@@ -127,6 +128,23 @@ export async function POST(req: Request) {
       }
 
       await grantLicense(e);
+
+      // Record a provider-agnostic order row for every event that carries a
+      // plan. Idempotent on (provider, providerOrderId) so retries never
+      // duplicate; status updates keep the order current.
+      if (e.plan) {
+        await recordOrder({
+          provider: provider.name,
+          providerOrderId: e.orderId ?? e.subscriptionId,
+          email: e.email,
+          plan: e.plan,
+          amount: e.amount ?? null,
+          currency: e.currency ?? null,
+          status: e.status === "active" ? "active" : e.status,
+        }).catch((err) =>
+          console.warn("order record skipped:", (err as Error).message),
+        );
+      }
     }
   } catch (err) {
     // 5xx → gateway retries; a paid order is never silently dropped.

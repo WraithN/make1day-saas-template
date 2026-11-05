@@ -98,6 +98,8 @@ const ADMIN_FILES = [
   "app/admin/layout.tsx",
   "app/admin/page.tsx",
   "app/admin/licenses/page.tsx",
+  "app/admin/orders/page.tsx",
+  "app/admin/access/page.tsx",
   "app/admin/users/page.tsx",
   "app/admin/stats/page.tsx",
   "app/admin/system/page.tsx",

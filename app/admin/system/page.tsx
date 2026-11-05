@@ -2,6 +2,7 @@ import { getLang } from "@/lib/i18n-server";
 import { consoleCopy } from "@/lib/content/console";
 import { getAdminSnapshot } from "@/lib/console";
 import { roleKey } from "@/lib/rbac";
+import { env } from "@/lib/env";
 import {
   ConsoleSection,
   KeyValue,
@@ -9,6 +10,13 @@ import {
 } from "@/components/console/ConsoleUI";
 
 export const dynamic = "force-dynamic";
+
+const PROVIDER_LABELS: Record<string, string> = {
+  stripe: "Stripe",
+  creem: "Creem",
+  paypal: "PayPal",
+  waffo: "Waffo",
+};
 
 export default async function AdminSystemPage() {
   const lang = await getLang();
@@ -44,6 +52,10 @@ export default async function AdminSystemPage() {
             {
               key: c["admin.system.licenseGate"],
               value: snap.gateEnabled ? c["admin.system.on"] : c["admin.system.off"],
+            },
+            {
+              key: c["admin.system.paymentProvider"],
+              value: `${PROVIDER_LABELS[env.paymentProvider()] ?? env.paymentProvider()} · ${c["admin.system.paymentSwitchNote"]}`,
             },
             {
               key: c["admin.system.persistence"],

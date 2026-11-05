@@ -20,8 +20,10 @@
 | `/admin` | 运营者 | KPI：已签发授权、浏览量、已知账户 | `getAdminSnapshot()` |
 | `/admin/users` | 运营者 | 用户列表 + 角色列（admin/staff/member），管理员可改他人角色 | `profiles` + `UserRoleSelect` |
 | `/admin/licenses` | 运营者 | 全部已签发授权码 | `listLicenses()` |
+| `/admin/orders` | 运营者 | 订单流水：客户、支付商、套餐、金额、状态、订单号 | `getAdminSnapshot().orders` ← `lib/orders.ts` |
+| `/admin/access` | 运营者 | 付费查看聚合：付费邮箱用户数、已签发授权数、订阅记录数、最近授权明细 | `getAdminSnapshot().access` |
 | `/admin/stats` | 运营者 | 第一方页面浏览统计 | `getStats()` |
-| `/admin/system` | 运营者 | 只读运行时开关，**不显示密钥值** | 环境变量推导 |
+| `/admin/system` | 运营者 | 只读运行时开关，**不显示密钥值**（含当前支付商与切换说明） | 环境变量推导 |
 
 两个后台共用：
 
@@ -52,6 +54,49 @@
 - `/admin/system` 只输出「已配置 / 未配置」标志与数量，从不打印邮箱列表、密钥或完整 env 值。
 - 授权码只在登录用户自己的 `/account/licenses` 和管理员 `/admin/licenses` 展示，不进日志、统计或 JSON-LD。
 
+## 3.5 付费查看（Paid access）/ 订单 / 付费墙样例
+
+两类需求都来自「ShipKit 站 + 生成模板都要」：在后台看得到，模板里也有可运行样例。
+
+### 订单数据层（支付商无关 / provider-agnostic）
+
+`lib/orders.ts` 维护一张 `orders` 表（`supabase/migrations/0005_orders.sql`）：
+
+- 字段：`provider`、`provider_order_id`（与 `provider` 联合唯一）、`customer_email`、
+  `plan`、`amount numeric(12,2)`、`currency`、`status`、`created_at`。
+- 写入：webhook 落地后由 `app/api/webhook/route.ts` 调 `recordOrder()`，按
+  `provider + provider_order_id` **幂等 upsert**；Supabase 不可用时回退到
+  `.data/orders.json`（带串行写入队列，避免并发撕裂）。
+- 读取：`listOrders()` 取最近 100 条给 `/admin/orders`。
+
+四种支付商（Stripe / Creem / PayPal / Waffo）的 `verifyWebhook` 在归一化事件
+（`NormalizedSubEvent`）里都填充 `amount` / `currency`，金额走 `toMajor()`
+做最小单位 → 主单位换算（JPY / KRW 等零小数货币自动处理），因此订单金额与
+具体网关解耦，后台无需为每家写分支。
+
+### 付费查看聚合（/admin/access）
+
+`getAdminSnapshot().access` 由 `readAccess()` 汇总三类来源：
+
+- 已签发授权码（`licenses` 去重邮箱）
+- 有效订阅（`subscriptions`）
+- 最近 50 条授权明细（`AccessGrant { email, plan, type: license|subscription, since }`）
+
+页面展示三张统计卡（付费邮箱用户 / 已签发授权 / 订阅记录）+ 明细表。
+
+### 付费墙样例页（/premium，站点与模板共用）
+
+`app/premium/page.tsx` 是一个**可运行的付费墙样例**：
+
+- 服务端用 `headers()` 构造 `Request` 调 `checkEntitlement(req)`，按授权网关判定是否放行；
+- 放行 → 渲染付费内容；未放行 → 显示「用套餐解锁」CTA（指向 `/pricing`）；
+- `LICENSE_GATE` 关闭时显示提示条（内联样式，不依赖 `components/console/ConsoleUI`，
+  因此两套后台被剪枝时 /premium 仍可独立存活）；
+- 四语文案在 `lib/i18n-core.ts` 的 `premium.*` 键下。
+
+> 此页是「模板里也要有付费墙样例」的落地：克隆出的客户工程直接带一个能跑的内容
+> 付费墙，配合任意支付商即可上线。
+
 ## 4. 数据边界（不虚构功能）
 
 - 用户列表：配置 `SUPABASE_SERVICE_ROLE_KEY` 时从 `profiles` 读取角色映射（`getRolesByEmail()`）；否则只从 `licenses` 与 `subscriptions` 推导，页面明确标注「不完整」。
@@ -77,7 +122,10 @@
 | 两个都选 | 两套路由树 + 共享层 | — |
 | 只选 account | `/account/*` + 共享层 | `/admin/*` |
 | 只选 admin | `/admin/*` + 共享层 | `/account/*` |
-| 都不选 | — | 两套路由树 + `components/console/*` + `lib/console.ts` + `lib/content/console.ts` |
+| 都不选 | — | 两套路由树（含 `/admin/orders`、`/admin/access`）+ `components/console/*` + `lib/console.ts` + `lib/content/console.ts` |
+
+`/premium` 是**通用站点页**（非后台），不在 `ADMIN_FILES` 内，两套后台都被剪枝时
+仍独立存活——它内联了自己的提示样式，不依赖 `components/console/ConsoleUI`。
 
 配套 rewrite（`lib/generator/prune.ts`）：
 
@@ -113,10 +161,10 @@ SUPABASE_SERVICE_ROLE_KEY=<service role>        # 用于完整用户目录 + 角
 
 ## 7. 相关文件
 
-`app/account/**`、`app/admin/**`、`components/console/**`、`lib/console.ts`、
-`lib/content/console.ts`、`lib/rbac.ts`、`middleware.ts`、
-`app/api/profile/route.ts`、`app/api/admin/users/route.ts`、
-`supabase/migrations/0004_profiles_rbac.sql`、
+`app/account/**`、`app/admin/**`、`app/premium/page.tsx`、`components/console/**`、
+`lib/console.ts`、`lib/orders.ts`、`lib/content/console.ts`、`lib/rbac.ts`、`middleware.ts`、
+`app/api/profile/route.ts`、`app/api/admin/users/route.ts`、`app/api/webhook/route.ts`、
+`supabase/migrations/0004_profiles_rbac.sql`、`supabase/migrations/0005_orders.sql`、
 `lib/generator/{config,schema,prune,pack,templates}.ts`、
 `scripts/lib/ai-docs.mjs`、`scripts/verify-matrix.mjs`、
 `.github/workflows/generated-matrix.yml`。

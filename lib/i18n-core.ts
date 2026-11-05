@@ -101,6 +101,20 @@ export const dict: Record<Lang, Record<string, string>> = {
     "styles.none": "Plain",
     "styles.designExcerpt": "design.md excerpt",
 
+    "premium.eyebrow": "MEMBERS ONLY",
+    "premium.title": "Premium playbook",
+    "premium.lockedTitle": "This is paid content",
+    "premium.lockedDesc":
+      "Unlock the full playbook with an active license or subscription. ShipKit's entitlement gate works with Stripe, Creem, PayPal and Waffo — the same code, any provider.",
+    "premium.unlock": "Unlock with a plan",
+    "premium.gateOffNote":
+      "License gate is OFF on this build, so everyone can read this. Set LICENSE_GATE=on to enforce the paywall.",
+    "premium.gateOnNote":
+      "License gate is ON. Sign in or redeem a license to view the content below.",
+    "premium.contentHeading": "How the paywall works",
+    "premium.contentBody":
+      "A single checkEntitlement() call decides what renders. Offline HMAC keys, an active subscription, or an email-matched license all grant access — and the data layer is provider-agnostic, so switching gateways never touches this page.",
+
     "hero.eyebrow": "AI SaaS STARTER · BY UNCORNE",
     "hero.title": "Ship your AI SaaS MVP in {{g}}days{{/g}}, not months.",
     "hero.subtitle":
@@ -403,6 +417,20 @@ export const dict: Record<Lang, Record<string, string>> = {
     "styles.none": "纯色",
     "styles.designExcerpt": "design.md 摘录",
 
+    "premium.eyebrow": "会员专属",
+    "premium.title": "付费实战手册",
+    "premium.lockedTitle": "这是付费内容",
+    "premium.lockedDesc":
+      "使用有效授权或订阅即可解锁完整手册。ShipKit 的访问网关适配 Stripe、Creem、PayPal 与 Waffo——同一套代码，任何付款方。",
+    "premium.unlock": "用套餐解锁",
+    "premium.gateOffNote":
+      "当前构建未启用授权门槛，因此所有人可读。设置 LICENSE_GATE=on 即可强制付费墙。",
+    "premium.gateOnNote":
+      "已启用授权门槛。登录或核销授权码以查看下方内容。",
+    "premium.contentHeading": "付费墙如何运作",
+    "premium.contentBody":
+      "一次 checkEntitlement() 调用即可决定渲染内容。离线 HMAC 授权、有效订阅或邮箱匹配的授权都能放行——且数据层与付款方无关，切换网关无需改动本页。",
+
     "hero.eyebrow": "AI SaaS 启动模板 · UNCORNE 出品",
     "hero.title": "用 {{g}}几天{{/g}} 交付你的 AI SaaS MVP，而非数月。",
     "hero.subtitle":
@@ -672,6 +700,20 @@ export const dict: Record<Lang, Record<string, string>> = {
     "styles.none": "無地",
     "styles.designExcerpt": "design.md 抜粋",
 
+    "premium.eyebrow": "会員限定",
+    "premium.title": "プレミアム実践ガイド",
+    "premium.lockedTitle": "これは有料コンテンツです",
+    "premium.lockedDesc":
+      "有効なライセンスまたは購読で全体を解放します。ShipKit のアクセスゲートは Stripe・Creem・PayPal・Waffo に対応——同じコードでどの決済元でも動きます。",
+    "premium.unlock": "プランで解放",
+    "premium.gateOffNote":
+      "このビルドではライセンスゲートが OFF のため誰でも閲覧できます。LICENSE_GATE=on でペイウォールを強制できます。",
+    "premium.gateOnNote":
+      "ライセンスゲートは ON です。ログインするかライセンスを登録して下のコンテンツを表示してください。",
+    "premium.contentHeading": "ペイウォールの仕組み",
+    "premium.contentBody":
+      "checkEntitlement() を 1 回呼ぶだけで表示内容が決まります。オフライン HMAC ライセンス、有効な購読、メール一致ライセンスのいずれもアクセスを許可します。データ層は決済元に依存しないため、ゲートウェイを替えてもこのページを変える必要はありません。",
+
     "hero.eyebrow": "AI SaaS スターター · UNCORNE 製",
     "rag.subtitle": "ドキュメントを取り込んで質問します。BM25 とベクトルを RRF で融合するハイブリッド検索が該当箇所を探し、引用付きで回答します。API キーなしでも試せます。",
     "rag.retrieval.hybrid": "ハイブリッド RRF",
@@ -923,6 +965,20 @@ export const dict: Record<Lang, Record<string, string>> = {
     "styles.glow": "Lueur",
     "styles.none": "Uni",
     "styles.designExcerpt": "extrait design.md",
+
+    "premium.eyebrow": "RÉSERVÉ AUX MEMBRES",
+    "premium.title": "Guide pratique premium",
+    "premium.lockedTitle": "Contenu payant",
+    "premium.lockedDesc":
+      "Débloquez le guide complet avec une licence ou un abonnement actif. La porte d'accès de ShipKit fonctionne avec Stripe, Creem, PayPal et Waffo — le même code, n'importe quel fournisseur.",
+    "premium.unlock": "Débloquer avec un forfait",
+    "premium.gateOffNote":
+      "La porte de licence est désactivée sur ce build, tout le monde peut donc lire. Réglez LICENSE_GATE=on pour appliquer le paywall.",
+    "premium.gateOnNote":
+      "La porte de licence est active. Connectez-vous ou validez une licence pour voir le contenu ci-dessous.",
+    "premium.contentHeading": "Comment fonctionne le paywall",
+    "premium.contentBody":
+      "Un seul appel checkEntitlement() décide ce qui s'affiche. Les clés HMAC hors ligne, un abonnement actif ou une licence correspondant à l'e-mail accordent l'accès — et la couche de données est indépendante du fournisseur, donc changer de passerelle ne touche jamais cette page.",
 
     "rag.subtitle": "Importez vos documents, puis posez une question. La recherche hybride (BM25 + vecteurs fusionnés par RRF) trouve les passages pertinents et répond avec des citations — sans clé API pour essayer.",
     "rag.retrieval.hybrid": "Hybride RRF",

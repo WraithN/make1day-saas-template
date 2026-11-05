@@ -31,9 +31,11 @@ export const env = {
       .filter(Boolean),
 
   // ── Payment provider (selects the active gateway) ────────────
-  // ShipKit's own checkout runs on Waffo. Generated projects pick their own
-  // gateway in the Builder; the default there is Waffo too.
-  paymentProvider: () => opt("PAYMENT_PROVIDER", "waffo").toLowerCase(),
+  // ShipKit's own checkout defaults to Creem; flip PAYMENT_PROVIDER to "waffo"
+  // (or stripe/paypal) to switch later without code changes — all four gateways
+  // share the same unified PaymentProvider interface. Generated projects pick
+  // their own gateway in the Builder; the default there mirrors this value.
+  paymentProvider: () => opt("PAYMENT_PROVIDER", "creem").toLowerCase(),
 
   // Stripe
   stripeSecretKey: () => req("STRIPE_SECRET_KEY"),

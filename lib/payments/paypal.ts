@@ -125,12 +125,15 @@ export const paypalProvider: PaymentProvider = {
       const r = event.resource ?? {};
       const subscriptionId = r.id ?? r.billing_agreement_id ?? r.subscription_id ?? "";
       const periodEnd = r.billing_info?.next_billing_time ?? r.next_billing_time ?? null;
+      const payAmount = r.billing_info?.last_payment?.amount;
       out.push({
         customerId: r.subscriber?.email_address ?? r.payer_email ?? r.id ?? "",
         subscriptionId: String(subscriptionId),
         status: normalizeStatus(r.status ?? "ACTIVE"),
         plan: planFromPaypalPlan(r.plan_id ?? r.plan?.id),
         periodEnd,
+        amount: payAmount ? Number(payAmount.value) : undefined,
+        currency: payAmount?.currency_code ?? undefined,
       });
     }
     return out;

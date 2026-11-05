@@ -28,6 +28,8 @@ export default async function AdminLayout({
     { href: "/admin", label: c["admin.nav.overview"] },
     { href: "/admin/users", label: c["admin.nav.users"] },
     { href: "/admin/licenses", label: c["admin.nav.licenses"] },
+    { href: "/admin/orders", label: c["admin.nav.orders"] },
+    { href: "/admin/access", label: c["admin.nav.access"] },
     { href: "/admin/stats", label: c["admin.nav.stats"] },
     { href: "/admin/system", label: c["admin.nav.system"] },
   ];

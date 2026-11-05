@@ -212,9 +212,12 @@ no online checkout.
 
 ## Implementation notes (current code)
 
-- **Waffo Pancake is the default gateway** (`PAYMENT_PROVIDER=waffo`,
-  `WAFFO_FLAVOR=pancake`), for this site and for the Builder's default project.
-  The separate `acquiring` flavor is supported for webhooks only.
+- **Creem is the default gateway** (`PAYMENT_PROVIDER=creem`), for this site and
+  for the Builder's default project. To switch to Waffo later, set
+  `PAYMENT_PROVIDER=waffo` (with `WAFFO_FLAVOR=pancake`); the single
+  `getPaymentProvider()` / `verifyWebhook` abstraction means **no code change** —
+  only an env flip. The Waffo `acquiring` flavor is supported for webhooks only.
+- `app/admin/system` shows the active provider label and a one-line switch note.
 - There is exactly **one** webhook route: `POST https://<domain>/api/webhook`.
   Do not register `/api/webhooks/<provider>` — those paths do not exist.
 - Webhooks are verified with **RSA public keys**, not HMAC. Missing keys cause

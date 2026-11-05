@@ -8,6 +8,7 @@ import type {
   PaymentProvider,
   PlanId,
 } from "./types";
+import { toMajor } from "./types";
 
 // Lazily construct the Stripe client (never at import time).
 let _stripe: Stripe | null = null;
@@ -96,6 +97,11 @@ export const stripeProvider: PaymentProvider = {
         plan:
           planFromPrice(s.line_items?.data?.[0]?.price?.id) ??
           (s.mode === "payment" ? "buyout" : undefined),
+        amount: toMajor(
+          s.amount_total ?? s.line_items?.data?.[0]?.price?.unit_amount ?? undefined,
+          s.currency ?? undefined,
+        ),
+        currency: s.currency ?? undefined,
       });
     } else if (
       event.type === "customer.subscription.created" ||
@@ -112,6 +118,11 @@ export const stripeProvider: PaymentProvider = {
         status: normalizeStatus(s.status),
         periodEnd,
         plan: planFromPrice(s.items.data[0]?.price?.id),
+        amount: toMajor(
+          s.items?.data?.[0]?.price?.unit_amount ?? undefined,
+          s.items?.data?.[0]?.price?.currency,
+        ),
+        currency: s.items?.data?.[0]?.price?.currency ?? undefined,
       });
     }
     return out;

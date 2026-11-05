@@ -30,7 +30,26 @@ export type NormalizedSubEvent = {
   orderId?: string; // gateway order id
   /** True when this event should create/refresh a download license. */
   grantsAccess?: boolean;
+  // ── Order metadata (provider-agnostic) ─────
+  /** Minor-unit amount as reported by the gateway (e.g. 4900 cents). Convert
+   *  with `toMajor()` before displaying. Absent when the gateway omits it. */
+  amount?: number;
+  /** ISO currency code, e.g. "usd", "eur". */
+  currency?: string;
 };
+
+// Currencies that have no minor unit (so the gateway amount is already whole).
+const ZERO_DECIMAL_CURRENCIES = new Set([
+  "JPY", "KRW", "CLP", "VND", "BIF", "XAF", "XOF", "PYG", "RWF", "UGX",
+  "VUV", "GNF", "KMF", "DJF", "XPF",
+]);
+
+/** Convert a gateway minor-unit amount to major units for display. */
+export function toMajor(minor?: number, currency?: string): number | undefined {
+  if (minor == null || Number.isNaN(minor)) return undefined;
+  if (ZERO_DECIMAL_CURRENCIES.has((currency ?? "").toUpperCase())) return minor;
+  return minor / 100;
+}
 
 export type CheckoutResult = {
   // Hosted checkout URL to redirect the browser to (Stripe / Creem / Waffo).

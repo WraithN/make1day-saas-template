@@ -8,6 +8,7 @@ import type {
   PaymentProvider,
   PlanId,
 } from "./types";
+import { toMajor } from "./types";
 
 // ───────────────────────────────────────────────────────────────
 // Waffo ships TWO incompatible products under the same brand. This adapter
@@ -316,6 +317,8 @@ function normalizePancakeEvent(payload: any): NormalizedSubEvent[] {
       eventId: String(payload?.eventId ?? payload?.id ?? identifier),
       orderId: data?.orderId ? String(data.orderId) : undefined,
       grantsAccess: status === "active",
+      amount: toMajor(data?.amount, data?.currency),
+      currency: data?.currency ?? undefined,
     },
   ];
 }
@@ -381,6 +384,8 @@ function normalizeAcquiringEvent(payload: any): NormalizedSubEvent[] {
       eventId: String(payload?.notifyId ?? obj?.acquiringOrderId ?? identifier),
       orderId: obj?.acquiringOrderId ? String(obj.acquiringOrderId) : undefined,
       grantsAccess: status === "active",
+      amount: toMajor(obj?.amount, obj?.currency),
+      currency: obj?.currency ?? undefined,
     },
   ];
 }

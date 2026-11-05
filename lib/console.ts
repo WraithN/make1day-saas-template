@@ -11,6 +11,7 @@ import {
   listLicenses,
   type LicenseRecord,
 } from "@/lib/license";
+import { listOrders, type OrderRecord } from "@/lib/orders";
 import { getStats } from "@/lib/stats";
 import {
   getCurrentSubscription,
@@ -145,8 +146,24 @@ export type ConsoleUser = {
   role?: Role | null;
 };
 
+export type AccessGrant = {
+  email: string;
+  plan: string | null;
+  type: "license" | "subscription";
+  since: string | null;
+};
+
+export type AccessSummary = {
+  issuedLicenses: number;
+  subscriptionRows: number;
+  paidEmailUsers: number;
+  grants: AccessGrant[];
+};
+
 export type AdminSnapshot = {
   licenses: LicenseRecord[];
+  orders: OrderRecord[];
+  access: AccessSummary;
   users: ConsoleUser[];
   userSource: "supabase" | "derived";
   stats: Awaited<ReturnType<typeof getStats>>;
@@ -241,6 +258,13 @@ export async function getAdminSnapshot(): Promise<AdminSnapshot> {
   await ensureSeedAdmins().catch(() => {});
 
   const licenses = await listLicenses().catch(() => [] as LicenseRecord[]);
+  const orders = await listOrders().catch(() => [] as OrderRecord[]);
+  const access = await readAccess(licenses).catch(() => ({
+    issuedLicenses: 0,
+    subscriptionRows: 0,
+    paidEmailUsers: 0,
+    grants: [],
+  }));
   const stats = await getStats().catch(() => ({
     total: 0,
     pages: {},
@@ -266,6 +290,8 @@ export async function getAdminSnapshot(): Promise<AdminSnapshot> {
 
   return {
     licenses,
+    orders,
+    access,
     users,
     userSource: source,
     stats,
@@ -276,5 +302,45 @@ export async function getAdminSnapshot(): Promise<AdminSnapshot> {
     adminEmail,
     currentRole,
     canManage: canManageRoles(currentRole),
+  };
+}
+
+/**
+ * Aggregate "who has paid access" from issued licenses + subscription rows.
+ * This is the management view behind 付费查看: it tells the operator how many
+ * buyers can view paid content and lists the most recent grants. Providers are
+ * flattened — a license from Waffo and a Stripe subscription count equally.
+ */
+async function readAccess(
+  licenses: LicenseRecord[],
+): Promise<AccessSummary> {
+  const subs = await readSubscriptions().catch(() => [] as ConsoleUser[]);
+  const emailSet = new Set(
+    licenses.map((l) => l.email?.toLowerCase()).filter(Boolean) as string[],
+  );
+  const grants: AccessGrant[] = [
+    ...licenses.map(
+      (l): AccessGrant => ({
+        email: l.email ?? "(unknown)",
+        plan: l.plan,
+        type: "license",
+        since: l.createdAt,
+      }),
+    ),
+    ...subs.map(
+      (s): AccessGrant => ({
+        email: s.email,
+        plan: s.plan ?? null,
+        type: "subscription",
+        since: s.createdAt ?? null,
+      }),
+    ),
+  ].sort((a, b) => (b.since ?? "").localeCompare(a.since ?? ""));
+
+  return {
+    issuedLicenses: licenses.length,
+    subscriptionRows: subs.length,
+    paidEmailUsers: emailSet.size,
+    grants: grants.slice(0, 50),
   };
 }

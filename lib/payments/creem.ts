@@ -7,6 +7,7 @@ import type {
   NormalizedSubEvent,
   PaymentProvider,
 } from "./types";
+import { toMajor } from "./types";
 
 // Creem base URL depends on the environment flag.
 function baseUrl(): string {
@@ -109,6 +110,8 @@ export const creemProvider: PaymentProvider = {
         status: normalizeStatus(obj.status ?? "active"),
         plan: planFromProduct(productId),
         periodEnd,
+        amount: toMajor(obj.amount, obj.currency),
+        currency: obj.currency ?? undefined,
       });
     }
     return out;
