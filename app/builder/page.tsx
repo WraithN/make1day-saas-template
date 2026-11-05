@@ -1,0 +1,44 @@
+import type { Metadata } from "next";
+import { Builder } from "@/components/Builder";
+import { Trans } from "@/lib/i18n";
+import { getLang } from "@/lib/i18n-server";
+import { STYLE_OPTIONS, type StyleId } from "@/lib/generator/config";
+
+export const metadata: Metadata = {
+  title: "SaaS Template Generator",
+  description:
+    "Pick your stack, auth, payments and AI providers, then download a production-ready AI SaaS starter.",
+  robots: { index: false, follow: false },
+};
+
+export default async function BuilderPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ style?: string }>;
+}) {
+  const lang = await getLang();
+  const params = await searchParams;
+  const requested = params?.style;
+  const validIds: string[] = STYLE_OPTIONS.map((o) => o.id);
+  const initialStyle =
+    requested && validIds.includes(requested) ? (requested as StyleId) : undefined;
+
+  return (
+    <section className="wrap py-10 sm:py-16">
+      <div className="max-w-2xl">
+        <div className="eyebrow mb-3">
+          <Trans k="builderPage.eyebrow" lang={lang} />
+        </div>
+        <h1 className="text-4xl font-semibold">
+          <Trans k="builderPage.title" lang={lang} />
+        </h1>
+        <p className="mt-4 text-ink-soft">
+          <Trans k="builderPage.body" lang={lang} />
+        </p>
+      </div>
+      <div className="mt-12">
+        <Builder initialStyle={initialStyle} />
+      </div>
+    </section>
+  );
+}

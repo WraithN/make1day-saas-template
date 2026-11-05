@@ -1,0 +1,70 @@
+name: Generated template build matrix
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  generated-build:
+    name: "case: ${{ matrix.case }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        case:
+          - default-waffo-midnight
+          - stripe-candy
+          - creem-aurora
+          - paypal-paper
+          - none-mono
+          - waffo-sunset-full
+          - waffo-ocean-no-dashboard
+          - waffo-slate-email-only
+          - waffo-emerald-gemini
+          - waffo-sand-cloudflare
+          - waffo-midnight-selfhost
+          - stripe-candy-rag
+          - none-slate-multitenancy
+          - creem-mono-all-skills
+          - account-only
+          - admin-only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate, extract and type-check
+        env:
+          LICENSE_GATE: "off"
+          NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3000
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: |
+          set -euo pipefail
+          npx next dev -p 3000 > /tmp/shipkit-dev.log 2>&1 &
+          DEV_PID=$!
+          trap 'kill "$DEV_PID" 2>/dev/null || true' EXIT
+          ready=0
+          for i in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:3000/api/payments/self-check > /dev/null 2>&1; then
+              ready=1
+              break
+            fi
+            if ! kill -0 "$DEV_PID" 2>/dev/null; then
+              echo "dev server exited early"
+              cat /tmp/shipkit-dev.log
+              exit 1
+            fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then
+            echo "dev server did not become ready"
+            cat /tmp/shipkit-dev.log
+            exit 1
+          fi
+          node scripts/verify-matrix.mjs --case "${{ matrix.case }}" --base http://127.0.0.1:3000

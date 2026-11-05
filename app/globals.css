@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  /* Palette as space-separated RGB channels so Tailwind opacity
+     modifiers (e.g. bg-surface/60) keep working. */
+  --bg: 10 11 15;
+  --surface: 17 19 25;
+  --line: 35 38 47;
+  --accent: 94 234 212;
+  --accent2: 96 165 250;
+  --ink: 242 244 247;
+  --ink-soft: 200 207 217;
+  --muted: 171 179 194;
+  /* System font stack — native hinting on every OS, zero web-font requests,
+     zero FOUT/CLS. CJK gets the platform's best face instead of falling back
+     from a Latin-only webfont (a common cause of blurry mixed-script text). */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text",
+    "Segoe UI", "Inter", "Helvetica Neue", Arial, "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei",
+    "Noto Sans CJK SC", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", "JetBrains Mono",
+    Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* Light presentation of the ShipKit site. Toggled by adding `light` to <html>.
+   Dark is the default (above). Colors use the same RGB-channel tokens so all
+   Tailwind `bg-surface/60` etc. opacity modifiers keep working. */
+html.light {
+  color-scheme: light;
+  --bg: 247 248 250;
+  --surface: 255 255 255;
+  --line: 226 232 240;
+  --accent: 79 70 229;
+  --accent2: 236 72 153;
+  --ink: 15 23 42;
+  --ink-soft: 71 85 105;
+  /* Darker than the old slate-400: ~4.8:1 on white, so small labels stay
+     legible instead of looking washed-out / blurry. */
+  --muted: 100 116 139;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html,
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--ink));
+  font-family: var(--font-sans);
+  font-weight: 400;
+  /* Crisp text: let the OS use its native (subpixel) antialiasing. Forcing
+     grayscale AA, `optimizeLegibility` or `font-synthesis: none` makes glyphs
+     thin and fuzzy — especially at 10–12px and on Windows. Compositing layers
+     (backdrop-blur / hover transforms) also drop subpixel AA, so surfaces are
+     kept solid and hover uses box-shadow only. */
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: auto;
+  font-synthesis: weight style;
+  font-kerning: normal;
+  font-optical-sizing: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  line-height: 1.6;
+  font-size: 16px;
+  /* `clip` (not `hidden`) keeps position: sticky working while preventing
+     any stray wide element from creating a horizontal scrollbar on phones. */
+  overflow-x: clip;
+}
+
+/* Wide content must never force the whole page to scroll sideways. */
+img,
+video,
+table,
+pre {
+  max-width: 100%;
+}
+
+/* Faint engineering grid backdrop (top only) */
+.tech-grid {
+  background-image: linear-gradient(
+      to right,
+      rgb(var(--accent) / 0.04) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgb(var(--accent) / 0.04) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 80% 50% at 50% 0%,
+    #000 40%,
+    transparent 75%
+  );
+  mask-image: radial-gradient(
+    ellipse 80% 50% at 50% 0%,
+    #000 40%,
+    transparent 75%
+  );
+}
+
+@layer components {
+  .wrap {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-5;
+  }
+  .eyebrow {
+    @apply font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-accent sm:text-xs sm:tracking-[0.22em];
+  }
+  .tag {
+    @apply inline-block font-mono text-[11px] font-medium uppercase tracking-wider text-muted border border-line rounded px-2 py-1;
+  }
+  .chip {
+    @apply font-mono text-[11px] font-medium text-ink-soft border border-line rounded px-2 py-1;
+  }
+  /* Solid surface (no backdrop-blur) keeps text crisp. */
+  .card {
+    @apply border border-line rounded-2xl bg-surface p-4 sm:p-5;
+  }
+  .btn-solid {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    background: rgb(var(--accent));
+    color: rgb(var(--bg));
+    font-weight: 600;
+    /* 44px minimum tap target for touch devices. */
+    min-height: 44px;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    transition: box-shadow 0.15s ease;
+  }
+  .btn-solid:hover {
+    /* No transform: a compositing layer would rasterise the label and make
+       it blurry. Box-shadow alone gives the same lift. */
+    box-shadow: 0 8px 26px -8px rgb(var(--accent) / 0.55);
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-line text-ink px-4 py-2.5 text-sm transition hover:border-accent hover:text-accent;
+    min-height: 44px;
+  }
+  .input {
+    /* 16px on mobile prevents iOS Safari from auto-zooming on focus. */
+    @apply w-full rounded-lg bg-bg border border-line px-3 py-2.5 text-base text-ink outline-none focus:border-accent sm:text-sm;
+    min-height: 44px;
+  }
+}
+
+.grad-text {
+  background: linear-gradient(
+    90deg,
+    rgb(var(--accent)),
+    rgb(var(--accent2))
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+::selection {
+  background: rgb(var(--accent) / 0.3);
+  color: rgb(var(--ink));
+}

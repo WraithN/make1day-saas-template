@@ -1,0 +1,38 @@
+{
+  "name": "shipkit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ShipKit — an AI SaaS MVP starter by Uncorne. Auth, subscriptions, one real AI feature, a clean admin. Clone it, reskin it, launch.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "waffo:preflight": "node scripts/waffo-preflight.mjs",
+    "verify:matrix": "node scripts/verify-matrix.mjs --all",
+    "rag:bench": "node scripts/rag-bench.mjs",
+    "rebrand": "node scripts/rebrand.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@google/generative-ai": "^0.21.0",
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.47.10",
+    "jszip": "^3.10.2",
+    "next": "^15.1.0",
+    "openai": "^4.73.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "stripe": "^17.2.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2"
+  }
+}
