@@ -33,7 +33,8 @@ case 定义在 `scripts/verify-matrix.mjs` 的 `CASES`；CI 的 `.github/workflo
 
 ```bash
 npm ci
-LICENSE_GATE=off npx next dev -p 3000          # 另一个终端
+npx next build                                  # 先做干净生产构建
+LICENSE_GATE=off npx next start -p 3000        # 另一个终端（只读 .next）
 node scripts/verify-matrix.mjs --all            # 或 npm run verify:matrix
 node scripts/verify-matrix.mjs --case stripe-candy
 node scripts/verify-matrix.mjs --list
@@ -43,7 +44,7 @@ node scripts/verify-matrix.mjs --all --build --publish
 node scripts/verify-matrix.mjs --case default-waffo-midnight --build --publish
 ```
 
-> CI 里把启动 dev server、等待就绪、执行验证放在**同一个 step**，并用 `trap` 清理进程，避免后台进程跨 step 被 runner 回收。
+> CI 里把启动服务、等待就绪、执行验证放在**同一个 step**，并用 `trap` 清理进程，避免后台进程跨 step 被 runner 回收。本地不要用 `next dev` 与 `next build` 共用同一个 `.next`，否则 `next start` 的路由清单会被 dev 覆盖。
 > `LICENSE_GATE=off` 是必须的：矩阵要下载**完整付费 ZIP**，而门禁在生产恒开（fail-safe），不开门禁 `/api/generate` 只会返回 402。生成出来的客户项目本身也强制 `LICENSE_GATE=off`，两者互不冲突。
 
 ## 断言清单（也是回归护栏）

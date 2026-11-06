@@ -37,6 +37,21 @@ import {
 } from "./prune";
 import { buildGlobalsCss, isLight } from "./themes";
 import { buildAiDocSpec } from "./spec";
+import {
+  injectAppCopy,
+  buildCustomerHome,
+  buildCustomerPricing,
+  buildCustomerSitemap,
+  buildCustomerRobots,
+  buildCustomerLegal,
+  neutralizeRootLayout,
+  customerNav,
+  customerNavBrand,
+  customerFooter,
+  customerLicenseLinks,
+  customerSeoLinks,
+  neutralizeBrand,
+} from "./customer-site";
 // Single source of truth for AGENTS.md / design.md / scoped rules. The very
 // same renderer ships inside the ZIP and powers `npm run ai:docs`, so a
 // customer regenerating docs after a config change gets identical output.
@@ -143,6 +158,8 @@ export async function listProjectFiles(
     "scripts/ai-setup.mjs",
     "scripts/lib/ai-docs.mjs",
     "scripts/export-local-profiles.mjs",
+    // package.json advertises `npm run rebrand`, so the script has to ship.
+    "scripts/rebrand.mjs",
   );
   if (config.deploy === "cloudflare") files.push("wrangler.toml");
 
@@ -222,13 +239,16 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     }
   }
 
-  // ── Site-only footer link → keep generated navigation link-free ──
+  // ── Footer: drop our own product links + wordmark, keep real routes ──
   try {
     const footerSrc = await fs.readFile(
       path.join(root, "components/Footer.tsx"),
       "utf8",
     );
-    zip.file("components/Footer.tsx", pruneAgentReadyLink(footerSrc));
+    zip.file(
+      "components/Footer.tsx",
+      customerFooter(pruneAgentReadyLink(footerSrc), config.appName),
+    );
   } catch {
     /* ignore */
   }
@@ -264,7 +284,10 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
   // Nav entry from every generated project (pruneNav additionally retargets
   // the account link only when the user console is absent).
   await rewrite("components/Nav.tsx", (s) =>
-    pruneNav(pruneStylesLink(pruneBuilderNav(s)), hasAccount, hasDashboard),
+    customerNavBrand(
+      customerNav(pruneNav(pruneStylesLink(pruneBuilderNav(s)), hasAccount, hasDashboard)),
+      config.appName,
+    ),
   );
 
   // The generator itself never ships, so every /builder link has to point
@@ -307,6 +330,37 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     await rewrite("app/account/layout.tsx", pruneWorkspacesLink);
   }
 
+  // ── Customer-owned site ────────────────────────────────────────────────
+  // ShipKit's own home / pricing / blog / compare / faq / license pages are
+  // pruned (SITE_MARKETING_FILES). These are their brand-free replacements,
+  // built from the customer's own BuilderConfig. Written AFTER the rewrites
+  // above so nothing re-introduces our marketing copy.
+  zip.file("app/page.tsx", buildCustomerHome(config));
+  zip.file("app/pricing/page.tsx", buildCustomerPricing(config));
+  zip.file("app/sitemap.ts", buildCustomerSitemap(config));
+  zip.file("app/robots.ts", buildCustomerRobots());
+  zip.file("app/privacy/page.tsx", buildCustomerLegal("privacy", config));
+  zip.file("app/terms/page.tsx", buildCustomerLegal("terms", config));
+
+  // The generated pages resolve their copy through the shipped dictionary.
+  await rewrite("lib/i18n-core.ts", (s) =>
+    neutralizeBrand(injectAppCopy(s), config.appName),
+  );
+  await rewrite("app/layout.tsx", (s) =>
+    neutralizeRootLayout(s, config.appName),
+  );
+  await rewrite("components/SeoLinks.tsx", customerSeoLinks);
+  await rewrite("app/account/licenses/page.tsx", customerLicenseLinks);
+  // Files that stay but still mention our product in prose / metadata.
+  for (const rel of [
+    "app/premium/page.tsx",
+    "app/rag/page.tsx",
+    "app/opengraph-image.tsx",
+    "app/api/ai/route.ts",
+  ]) {
+    await rewrite(rel, (s) => neutralizeBrand(s, config.appName));
+  }
+
   // Generated, selection-driven files.
   zip.file(".env.example", buildEnvExample(config));
   zip.file("README.md", buildReadme(config));
@@ -330,6 +384,8 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     // admin console tells the operator to run `npm run export:profiles`, so
     // the script has to exist in the generated project too.
     "scripts/export-local-profiles.mjs",
+    // Referenced by package.json's `npm run rebrand`.
+    "scripts/rebrand.mjs",
   ]) {
     zip.file(rel, await fs.readFile(path.join(root, rel), "utf8"));
   }

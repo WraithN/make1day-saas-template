@@ -29,7 +29,7 @@
 
 ## 为什么把「已知限制」写进机器可读文档
 
-`llms-full.txt` 第 12 节明确列出：Acquiring 下单未实现、AI 非流式、多租户只是勾选项、Cloudflare 选项仍有 Node runtime 冲突、白标未清理、无 LICENSE 文件、build matrix 只跑 `tsc` 不跑 `next build`、MCP 为无状态 JSON-RPC、`AGENTS.md`/scoped rules 只是文字约定而非 lint 强制。`/agent-ready` 四语页同样列出这些边界。
+`llms-full.txt` 第 12 节明确列出：Waffo Acquiring 下单报文未实现、Cloudflare 选项仍有 Node runtime 冲突、PayPal 无账单门户、多租户虽带 `0007_orgs.sql` + `lib/org.ts` 但工作区 UI 需同时勾选用户后台且业务表需自行加租户过滤、生成工程的法律页仍是占位符、build matrix 默认只跑 `tsc`（代表用例另跑 `next build`）、MCP 为无状态 JSON-RPC、`AGENTS.md`/scoped rules 只是文字约定而非 lint 强制。AI 已改为真流式并带每用户每日配额，客户首页/定价页已无 ShipKit 品牌并附带 MIT LICENSE——这些**不再**是限制。`/agent-ready` 四语页同样列出这些边界。
 
 答案引擎引用一份**诚实**的事实表，比引用一份夸大宣传更不容易在后续对话里被打脸；这也是 `/compare` 与 `/faq` 已经修正过的不实文案原则的延伸。
 

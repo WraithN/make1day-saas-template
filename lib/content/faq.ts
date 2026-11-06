@@ -37,11 +37,11 @@ export const faqContent: Record<string, { heading: string; eyebrow: string; subt
       },
       {
         q: "Is there multi-tenancy?",
-        a: "Not yet. The Builder shows a multi-tenancy toggle, but the generated project currently has no org/workspace tables and the flag does not change the output. Pick Makerkit or Supastarter if you need teams and RBAC on day one.",
+        a: "Yes, with caveats. Selecting multi-tenancy ships supabase/migrations/0007_orgs.sql (organizations, memberships, row-level security) and lib/org.ts helpers (getActiveOrgId, getUserOrgs, createOrg, requireTenant). The workspace switcher UI and /api/org endpoints ship only when the account console is ALSO selected, because they live under /account. You must run the migration yourself and add .eq(\"org_id\", ...) to your own domain tables — the starter cannot scope tables it does not know about. For a batteries-included B2B tenant model, Makerkit or Supastarter go deeper.",
       },
       {
         q: "Which AI providers are supported?",
-        a: "OpenAI-compatible (OpenAI / OpenRouter / DeepSeek / Groq), Anthropic (Claude) and Google Gemini. The chat endpoint returns a single completion (not token streaming); per-user quotas are not implemented yet — add them before exposing AI to end users.",
+        a: "OpenAI-compatible (OpenAI / OpenRouter / DeepSeek / Groq), Anthropic (Claude) and Google Gemini. /api/ai streams token-by-token from all three providers and enforces a per-user daily quota (AI_MESSAGES_PER_DAY, default 50) — exhausted budgets get HTTP 429. Provider errors are logged server-side instead of being disguised as a successful reply.",
       },
       {
         q: "What AI coding documents come inside the downloaded ZIP?",
@@ -100,11 +100,11 @@ export const faqContent: Record<string, { heading: string; eyebrow: string; subt
       },
       {
         q: "支持多租户吗？",
-        a: "暂未实现。Builder 里有该勾选项，但生成的工程目前没有组织/工作区表，勾选也不会改变产物。若第一天就需要团队与 RBAC，请选 Makerkit 或 Supastarter。",
+        a: "有，但有前提。勾选多租户会附带 supabase/migrations/0007_orgs.sql（organizations、memberships 表与 RLS）以及 lib/org.ts 助手（getActiveOrgId / getUserOrgs / createOrg / requireTenant）。工作区切换 UI 与 /api/org 接口位于 /account 下，因此**还需要同时勾选用户后台**才会随包交付。迁移需要你自己执行，你自己的业务表也要自行加 .eq(\"org_id\", ...) 做租户隔离——起步工程无法替你隔离它不知道的表。若要开箱即用的 B2B 租户模型，Makerkit 或 Supastarter 更完整。",
       },
       {
         q: "支持哪些 AI 供应商？",
-        a: "OpenAI 兼容（OpenAI / OpenRouter / DeepSeek / Groq）、Anthropic（Claude）与 Google Gemini。当前对话接口返回单次结果（非流式），每用户配额尚未实现——对外开放前请自行补齐。",
+        a: "OpenAI 兼容（OpenAI / OpenRouter / DeepSeek / Groq）、Anthropic（Claude）与 Google Gemini。/api/ai 对三家都按 token 流式返回，并有每用户每日配额（AI_MESSAGES_PER_DAY，默认 50），用尽返回 429。provider 报错会记录在服务端日志，不再伪装成正常回复。",
       },
       {
         q: "下载的 ZIP 里有哪些给 AI coding agent 用的文档？",

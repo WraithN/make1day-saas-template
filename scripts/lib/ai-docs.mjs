@@ -155,7 +155,7 @@ const RULES_META = [
       "The system page is read-only and must never print secret VALUES — only configured / not-configured flags.",
       "A missing SUPABASE_SERVICE_ROLE_KEY means the user list is derived from licenses and subscriptions; label it honestly as incomplete.",
       "License keys are shown only inside /admin; do not add them to logs, analytics payloads or JSON-LD.",
-      "No org/RBAC table exists. Do not describe this console as multi-tenant.",
+      "The consoles are read-only starters with no profile mutation endpoint. Org tables (0007_orgs.sql) and lib/org.ts belong to the multi-tenancy feature and are NOT part of this console; do not describe /admin as a tenant administration UI.",
     ],
   },
 ];
@@ -335,14 +335,14 @@ function buildAgents(spec, rules) {
     L.push(`- **Payments (${spec.labels.payment.label}):** see \`lib/payments/${c.payment}.ts\`. The single webhook URL is \`/api/webhook\`.`);
   }
   L.push(`- **Auth:** ${list(spec.labels.auth)}. OAuth buttons come from \`NEXT_PUBLIC_OAUTH_PROVIDERS\` and must also be enabled in Supabase.`);
-  L.push(`- **AI:** ${list(spec.labels.ai)}. \`lib/ai/index.ts\` exposes \`chat()\` / \`streamChat()\`; responses are NOT token-streamed and there is no per-user quota.`);
+  L.push(`- **AI:** ${list(spec.labels.ai)}. \`lib/ai/index.ts\` exposes \`chat()\` / \`streamChat()\` plus \`streamChatChunks()\` (async generator). \`/api/ai\` streams token-by-token and enforces a per-user daily quota (\`AI_MESSAGES_PER_DAY\`, default 50, HTTP 429 when exhausted).`);
   if (c.features.includes("rag")) {
     L.push("- **RAG:** hybrid retrieval — BM25 (Latin + CJK n-grams) fused with dense embeddings via RRF (k=60). Set `EMBEDDING_*` (or `OPENAI_API_KEY`) for the vector branch; without it the module degrades to BM25-only. `RAG_VECTOR_STORE=supabase` needs `0002_rag.sql` (1536 dims).");
   } else {
     L.push("- **RAG:** not included in this build. Do not add `lib/rag/*` imports.");
   }
   if (c.features.includes("multitenancy")) {
-    L.push("- **Multi-tenancy:** ⚠️ the Builder flag is selected but this build ships **no org/RBAC tables**. Treat it as a placeholder, not a feature.");
+    L.push("- **Multi-tenancy:** `0007_orgs.sql` (organizations + memberships + RLS) and `lib/org.ts` (`getActiveOrgId`, `getUserOrgs`, `createOrg`, `requireTenant`) ship in this build. Run the migration yourself and add `.eq(\"org_id\", ...)` to your OWN domain tables — the starter cannot scope tables it does not know. The workspace switcher UI / `/api/org` routes only ship when the `account` console is also selected.");
   }
   if (!c.features.includes("dashboard")) {
     L.push("- **Dashboard:** excluded. The legacy demo console is not part of this build; post-login redirects were rewritten to an existing route.");

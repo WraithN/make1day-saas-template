@@ -131,11 +131,11 @@ function productInfo() {
     ],
     knownLimitations: [
       "Waffo acquiring create-order payload is unimplemented (pancake is complete)",
-      "AI chat is not token-streamed and has no per-user quota",
-      "The multitenancy Builder flag ships no org/RBAC tables",
+      "AI chat streams token-by-token and has a per-user daily quota (AI_MESSAGES_PER_DAY, default 50, HTTP 429 when exhausted)",
+      "Multi-tenancy ships 0007_orgs.sql + lib/org.ts, but the workspace UI requires the account console too and you must scope your own tables by org_id",
       "Both consoles are read-only starters (no profile mutations, no customer billing portal)",
       "Cloudflare output still contains Node-runtime routes",
-      "Generated ZIPs retain ShipKit branding; no LICENSE file yet",
+      "Generated home/pricing pages are brand-free and ship an MIT LICENSE, but /privacy and /terms are placeholders",
       "Build matrix runs tsc --noEmit, not next build",
     ],
     machineReadable: ["/llms.txt", "/llms-full.txt", "/openapi.json", "/api/mcp", "/agent-ready"],
@@ -158,7 +158,7 @@ function builderContract() {
       ],
     },
     notes: [
-      "features=multitenancy is currently a placeholder — no org/RBAC tables are generated",
+      "features=multitenancy ships 0007_orgs.sql (organizations + memberships + RLS) and lib/org.ts; the workspace UI also requires features=account and you must add org_id scoping to your own tables",
       "deploy=cloudflare still emits Node-runtime API routes",
       "payment=paypal creates subscription checkouts only; use stripe/waffo for one-time Buyout",
       "skills controls which skills/*.md playbooks and scoped rules are shipped",

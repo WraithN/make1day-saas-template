@@ -44,7 +44,7 @@ ShipKit 的 $99 处于最低付费档，但功能密度接近 $299 档——这�
 | llms.txt / GEO 机器可读 | ✅ llms-full + OpenAPI 3.1 | ❌ | ❌ | 未强调 | 未强调 | ❌ |
 | 端到端 RAG | ✅ BM25 + 向量 + RRF | ❌ | ❌ | 付费模板 | ❌ | ✅ |
 | 五语 i18n | ✅ EN/ZH/JA/FR/DE | ❌ | ❌ | ✅ | ✅ | ❌ |
-| 多租户 / RBAC | ❌（仅勾选项） | ❌ | ❌ | ✅ | ✅ | ✅ |
+| 多租户 / RBAC | ⚠️ 表 + RLS + 助手（UI 需同时勾选用户后台） | ❌ | ❌ | ✅ | ✅ | ✅ |
 | IaC / CI / Docker | ⚠️ 16 组生成矩阵 CI（每组 tsc），无 IaC/Docker | ❌ | ❌ | 基础 | 基础 | ✅ |
 | MoR 收款（无公司实体） | ✅ Waffo Pancake | ❌ Stripe 系 | ❌ | ❌ | ❌ | ❌ |
 | 社区规模 | 无 | 5,000+ | 沉寂 | 活跃 | 活跃 | 新 |
@@ -73,7 +73,7 @@ ShipKit 的 $99 处于最低付费档，但功能密度接近 $299 档——这�
 
 ### ❌ 伪差异（别写进文案）
 
-- 「多租户」：Builder 勾选项不改变产物，0001_init.sql 无 org 表。
+- 「多租户」：`0007_orgs.sql` 与 `lib/org.ts` 是真实产物，但工作区 UI 依赖同时勾选 `account`，且客户业务表要自行加 `.eq("org_id", ...)`；不要声称「开箱即用的 B2B 租户隔离」。
 - 「Observability」：无 error boundary / logger。
 - 「1-click deploy 到 Cloudflare」：API 依赖 Node runtime / node:crypto / fs。
 - 「流式 AI」「每天 5 条」：chat() 是 `stream:false`，无配额。

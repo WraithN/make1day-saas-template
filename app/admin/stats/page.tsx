@@ -2,6 +2,7 @@ import { getLang } from "@/lib/i18n-server";
 import { consoleCopy } from "@/lib/content/console";
 import { getAdminSnapshot } from "@/lib/console";
 import { getTrafficReport } from "@/lib/traffic";
+import { getAiUsageSummary, listAiUsage } from "@/lib/ai-usage";
 import {
   ConsoleSection,
   ConsoleTable,
@@ -10,6 +11,25 @@ import {
 import { Funnel } from "@/components/console/Funnel";
 
 export const dynamic = "force-dynamic";
+
+// AI-quota copy is intentionally hard-coded English: the shared console
+// dictionaries are frozen while this feature is being built.
+const AI_COPY = {
+  calls: "AI calls today",
+  limit: "Daily quota per user",
+  activeUsers: "Users on AI today",
+  used: "Quota units consumed",
+  store: "Store",
+  storeLocal: "Local SQLite",
+  storeSupabase: "Supabase",
+  section: "AI usage quota",
+  sectionDesc:
+    "Every AI chat request spends one unit of the caller's daily budget (AI_MESSAGES_PER_DAY). The counter resets at 00:00 UTC.",
+  user: "User",
+  callsCol: "Calls today",
+  noData: "No AI calls recorded today.",
+  day: "Quota day (UTC)",
+} as const;
 
 function percent(value: number): string {
   if (!Number.isFinite(value)) return "0%";
@@ -23,6 +43,14 @@ export default async function AdminStatsPage() {
   const c = consoleCopy(lang);
   const { stats } = await getAdminSnapshot();
   const traffic = await getTrafficReport();
+  const aiUsage = await getAiUsageSummary();
+  let aiRows: { userId: string; used: number }[] = [];
+  try {
+    aiRows = await listAiUsage(aiUsage.day);
+  } catch {
+    // The per-user breakdown is a nice-to-have; the totals above are not.
+    aiRows = [];
+  }
 
   const topPages = Object.entries(stats.pages).sort((a, b) => b[1] - a[1]);
   const updated =
@@ -68,6 +96,49 @@ export default async function AdminStatsPage() {
           hint={c["admin.stats.window"]}
         />
       </div>
+
+      {/* ── AI usage quota ──────────────────────────────────────────────── */}
+      <ConsoleSection title={AI_COPY.section} desc={AI_COPY.sectionDesc}>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            label={AI_COPY.calls}
+            value={aiUsage.calls}
+            hint={`${AI_COPY.day}: ${aiUsage.day}`}
+          />
+          <StatCard
+            label={AI_COPY.limit}
+            value={aiUsage.limit}
+            hint={`${AI_COPY.store}: ${aiUsage.local ? AI_COPY.storeLocal : AI_COPY.storeSupabase}`}
+          />
+          <StatCard
+            label={AI_COPY.activeUsers}
+            value={aiUsage.activeUsers}
+            hint={AI_COPY.used}
+          />
+          <StatCard
+            label={AI_COPY.used}
+            value={aiUsage.calls}
+            hint={`${AI_COPY.limit}: ${aiUsage.limit}`}
+          />
+        </div>
+        <div className="mt-5">
+          <ConsoleTable
+            columns={[AI_COPY.user, AI_COPY.callsCol, AI_COPY.limit]}
+            empty={AI_COPY.noData}
+            rows={aiRows.map((row) => [
+              <span key="user" className="font-mono text-xs">
+                {row.userId}
+              </span>,
+              <span key="used" className="tabular-nums">
+                {row.used}
+              </span>,
+              <span key="limit" className="tabular-nums">
+                {aiUsage.limit}
+              </span>,
+            ])}
+          />
+        </div>
+      </ConsoleSection>
 
       {/* ── Funnel ───────────────────────────────────────────────────────── */}
       <ConsoleSection

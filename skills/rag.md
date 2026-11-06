@@ -21,6 +21,12 @@ This is a **working** implementation (strategy B), not a placeholder.
 - `POST /api/rag/query` — `{ question, provider? }` → `{ answer, citations, mode, retrieval }`.
 - `retrieval` reports strategy / embedding / lexical / semantic / pgvector / store so the UI can show *why* an answer appeared.
 
+## Auth (do not remove)
+- Ingest (`POST` + `GET`) requires a signed-in user **or** an operator session → `401` otherwise.
+- Query requires a signed-in user **with** an active subscription → `401` without a session, `402` without a subscription. Every query runs a real LLM, so there is no anonymous free tier.
+- Demo mode (no Supabase configured) is treated as signed-in + subscribed, so the zero-config demo keeps working.
+- The client (`components/RagDemo.tsx`) degrades to a "log in / see plans" panel on `401` / `402` — keep that instead of dumping raw HTTP errors.
+
 ## Rules
 - **Never require an API key to run the demo.** No embedding key → BM25-only. No chat key → extractive fallback. Both degradations must stay intact.
 - `EMBEDDING_*` falls back to `OPENAI_*`, so one key covers chat + retrieval.

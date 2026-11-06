@@ -174,8 +174,16 @@ export function buildReadme(c: BuilderConfig): string {
   );
   lines.push(``);
   lines.push(
-    `> **Rebrand:** run \`npm run rebrand -- "Your Brand"\` to replace every ` +
-      `\`ShipKit\`/\`Uncorne\` string (and the \`LICENSE\` copyright line) before you ship.`,
+    `> **Your site, not a template demo.** The home and pricing pages are ` +
+      `generated for **${c.appName}** from your selections — no starter-vendor ` +
+      `branding, competitor comparisons or placeholder marketing posts. Edit ` +
+      `the \`app.*\` copy in \`lib/i18n-core.ts\` and the plan data in ` +
+      `\`app/pricing/page.tsx\`. \`/privacy\` and \`/terms\` are placeholders: ` +
+      `replace them with your own legal text before launch.`,
+  );
+  lines.push(
+    `> To rename the app everywhere, run ` +
+      `\`npm run rebrand -- "Your Brand"\` (also rewrites the LICENSE copyright line).`,
   );
   lines.push(``);
   lines.push(`## What's in this build`);
@@ -290,6 +298,7 @@ export function buildReadme(c: BuilderConfig): string {
     lines.push(``);
     lines.push(`- \`POST /api/rag/ingest\` — body \`{ title, text }\`, splits + indexes a document (embeddings are generated when a key is available).`);
     lines.push(`- \`POST /api/rag/query\` — body \`{ question, provider? }\`, returns \`{ answer, citations, mode, retrieval }\`.`);
+    lines.push(`- Both endpoints are **authenticated**: ingest needs a signed-in user (or an operator), query needs a signed-in user with an active subscription (\`401\` / \`402\` otherwise) because every query runs a real LLM. Demo mode counts as signed-in + subscribed.`);
     lines.push(`- Open \`/rag\` for the demo UI (ask questions and ingest your own docs).`);
     lines.push(`- Retrieval is **hybrid**: Okapi BM25 (Latin words + CJK uni/bigrams) **plus** dense embeddings, combined with **Reciprocal Rank Fusion** (RRF, k=60) in \`lib/rag/hybrid.ts\`.`);
     lines.push(`- \`EMBEDDING_*\` (or \`OPENAI_API_KEY\`) enables the vector branch via an OpenAI-compatible \`/embeddings\` endpoint. Without a key it degrades to BM25-only — the demo still works.`);

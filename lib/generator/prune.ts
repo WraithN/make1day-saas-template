@@ -175,6 +175,36 @@ const SITE_ONLY_FILES = [
   "components/StylePlayground.tsx",
 ];
 
+// ShipKit's OWN marketing site.
+//
+// A customer who downloads a starter must not go live advertising our
+// product: the $99 source license, the "ShipKit vs Makerkit" comparison, five
+// of our SEO posts, an FAQ about OUR download gate, and a license-redemption
+// page for OUR builder. Those pages are replaced by brand-free customer pages
+// (see lib/generator/customer-site.ts), and their content/components are
+// pruned here so no dead import or dangling nav link survives.
+const SITE_MARKETING_FILES = [
+  "app/blog/page.tsx",
+  "app/blog/[slug]/page.tsx",
+  "app/compare/page.tsx",
+  "app/faq/page.tsx",
+  "app/license/page.tsx",
+  "lib/content/blog.ts",
+  "lib/content/compare.ts",
+  "lib/content/faq.ts",
+  "components/CompareContent.tsx",
+  "components/FaqContent.tsx",
+  "components/CustomService.tsx",
+  "components/LicensePanel.tsx",
+  // Home-page-only marketing sections. The customer home page is generated
+  // from their own BuilderConfig and imports none of these.
+  "components/home/BoundarySection.tsx",
+  "components/home/PitfallSection.tsx",
+  "components/home/ThemePreviewSection.tsx",
+  "components/home/FeatureMatrix.tsx",
+  "components/home/BlogTeaser.tsx",
+];
+
 // The generator itself.
 //
 // A customer project must NOT ship the factory: one purchase would then
@@ -184,6 +214,7 @@ const SITE_ONLY_FILES = [
 // account console, sitemap or robots file.
 const GENERATOR_FILES = [
   "lib/generator/config.ts",
+  "lib/generator/customer-site.ts",
   "lib/generator/pack.ts",
   "lib/generator/prune.ts",
   "lib/generator/preview.ts",
@@ -204,6 +235,8 @@ const GENERATOR_FILES = [
 /** Source files that should be excluded from the generated zip. */
 export function computeSkip(config: BuilderConfig): Set<string> {
   const skip = new Set<string>(SITE_ONLY_FILES);
+  // ShipKit's marketing site must never appear in a customer's project.
+  for (const f of SITE_MARKETING_FILES) skip.add(f);
   // The generator never ships: one purchase must not mean unlimited
   // generations of the product that was just paid for.
   for (const f of GENERATOR_FILES) skip.add(f);
@@ -571,6 +604,80 @@ function geminiClient(apiKey: string): GoogleGenerativeAI {
   }`);
   }
 
+  const streamBranches: string[] = [];
+  if (openaiSel) {
+    streamBranches.push(`  if (cfg.kind === "openai-compatible") {
+    if (!cfg.apiKey) {
+      yield NO_KEY_TEXT;
+      return;
+    }
+    const client = openaiClient(cfg.baseURL, cfg.apiKey);
+    const completion = await client.chat.completions.create({
+      model: cfg.model,
+      messages,
+      stream: true,
+      temperature: 0.4,
+    });
+    for await (const chunk of completion) {
+      const text = chunk.choices[0]?.delta?.content;
+      if (text) yield text;
+    }
+    return;
+  }`);
+  }
+  if (anthSel) {
+    streamBranches.push(`  if (cfg.kind === "anthropic") {
+    if (!cfg.apiKey) {
+      yield NO_KEY_TEXT;
+      return;
+    }
+    const client = anthropicClient(cfg.apiKey);
+    const system = messages.filter((m) => m.role === "system").map((m) => m.content).join(" ");
+    const conv = messages
+      .filter((m) => m.role !== "system")
+      .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+    const stream = await client.messages.create({
+      model: cfg.model,
+      max_tokens: 1024,
+      system: system || undefined,
+      messages: conv,
+      stream: true,
+    });
+    for await (const event of stream) {
+      if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+        yield event.delta.text;
+      }
+    }
+    return;
+  }`);
+  }
+  if (gemSel) {
+    streamBranches.push(`  if (cfg.kind === "gemini") {
+    if (!cfg.apiKey) {
+      yield NO_KEY_TEXT;
+      return;
+    }
+    const client = geminiClient(cfg.apiKey);
+    const system = messages.filter((m) => m.role === "system").map((m) => m.content).join(" ");
+    const contents = messages
+      .filter((m) => m.role !== "system")
+      .map((m) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      }));
+    const model = client.getGenerativeModel({
+      model: cfg.model,
+      systemInstruction: system || undefined,
+    });
+    const result = await model.generateContentStream({ contents });
+    for await (const chunk of result.stream) {
+      const text = chunk.text();
+      if (text) yield text;
+    }
+    return;
+  }`);
+  }
+
   return `import { env } from "@/lib/env";
 ${sdkImports.join("\n")}
 import { resolveAiConfig, type AiProviderKey } from "./providers";
@@ -603,6 +710,38 @@ ${branches.join("\n\n")}
 export async function streamChat(messages: ChatMessage[], provider?: string): Promise<string> {
   const key = provider && provider.trim() ? provider.trim() : env.aiProvider();
   return chat(key, messages);
+}
+
+/**
+ * Whether the selected provider has an API key configured. /api/ai uses this
+ * to decide between the built-in demo reply and a real (streamed) call, so a
+ * configured-but-broken provider never masquerades as a normal answer.
+ */
+export function hasAiProviderKey(providerKey?: string): boolean {
+  const key = providerKey && providerKey.trim() ? providerKey.trim() : env.aiProvider();
+  return Boolean(resolveAiConfig(key).apiKey);
+}
+
+const NO_KEY_TEXT =
+  "[AI] No API key is configured for the selected provider. " +
+  "Add the matching key in .env.local to enable real streamed replies. " +
+  "Until then the endpoint returns the built-in demo reply.";
+
+/**
+ * Real token streaming: each yield is one incremental text chunk from the
+ * provider. Errors are deliberately NOT swallowed - a provider that has a key
+ * but fails throws, so the caller can log the real error and surface a clear
+ * failure instead of a fake friendly answer.
+ */
+export async function* streamChatChunks(
+  providerKey: string | undefined,
+  messages: ChatMessage[],
+): AsyncGenerator<string> {
+  const cfg = resolveAiConfig(
+    providerKey && providerKey.trim() ? providerKey.trim() : env.aiProvider(),
+  );
+
+${streamBranches.join("\n\n")}
 }
 
 export type { AiProviderKey };

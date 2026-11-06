@@ -20,15 +20,17 @@ ShipKit is one codebase serving two purposes:
 | Machine-readable discovery | `app/llms.txt/route.ts`, `app/llms-full.txt/route.ts`, `app/openapi.json/route.ts`, `app/api/mcp/route.ts`, `app/agent-ready/page.tsx` |
 | Payments | `lib/payments/*`, `app/api/checkout/route.ts`, `app/api/webhook/route.ts`, `lib/license.ts` |
 | RAG (hybrid) | `lib/rag/*`, `supabase/migrations/0002_rag.sql` |
-| i18n (4 locales) | `lib/i18n-core.ts`, `lib/i18n.tsx`, `lib/i18n-server.ts`, `middleware.ts` |
-| Verification | `scripts/verify-matrix.mjs`, `scripts/waffo-preflight.mjs`, `scripts/ai-docs.mjs`, `scripts/ai-setup.mjs` |
+| i18n (5 locales) | `lib/i18n-core.ts`, `lib/i18n.tsx`, `lib/i18n-server.ts`, `middleware.ts` |
+| Verification | `scripts/verify-matrix.mjs`, `scripts/smoke-*.cjs`, `scripts/waffo-preflight.mjs`, `scripts/ai-docs.mjs`, `scripts/ai-setup.mjs` |
 
 ## 2. Commands
 
 ```bash
 npx tsc --noEmit
 NEXT_PRIVATE_SUPPRESS_TRACE=1 npx next build
+LICENSE_GATE=off npx next start -p 3000   # matrix server, read-only .next
 node scripts/verify-matrix.mjs --all --base http://127.0.0.1:3000
+npm run smoke                              # licence gate + AI quota/stream runtime suites
 node scripts/waffo-preflight.mjs --strict
 ```
 
@@ -55,13 +57,15 @@ will 404 every route. Stop dev → delete `.next` → build → start.
 6. **Be honest in machine-readable docs.** `llms-full.txt`, `openapi.json`,
    `/compare`, `/faq` and README's Known gaps must list real limitations, not
    aspirational marketing.
-7. **Verify before claiming done.** `tsc`, clean `next build`, and the matrix.
+7. **Verify before claiming done.** `tsc`, clean `next build`, the matrix and
+   the runtime smoke suites (`npm run smoke`).
 
 ## 4. Definition of done
 
 - [ ] `npx tsc --noEmit` clean
 - [ ] clean `npx next build` (dev server stopped, `.next` removed)
 - [ ] `verify-matrix --all` passes (ZIP extracted + type-checked per case)
+- [ ] `npm run smoke` passes (paywall, preview quota, AI quota/stream, RAG auth)
 - [ ] new machine-readable facts added to `llms.txt` / `llms-full.txt` / `openapi.json`
 - [ ] all five locales updated
 - [ ] no secrets in client code or logs
@@ -69,11 +73,19 @@ will 404 every route. Stop dev → delete `.next` → build → start.
 
 ## 5. Known gaps (do not "fix" by claiming they work)
 
-Waffo `acquiring` checkout payload is unimplemented; AI chat is not streamed
-and has no quota; the local SQLite store (accounts, roles, licenses, orders,
-traffic) and the in-memory RAG index are not durable on serverless — a
-production deployment should configure Supabase; Cloudflare output still has
-Node-runtime routes; generated ZIPs retain ShipKit branding; the local user
-directory is an account + role list, not a full auth provider (no password
-reset, no e-mail verification) — Supabase Auth takes over once
-`SUPABASE_SERVICE_ROLE_KEY` is configured.
+Waffo `acquiring` checkout payload is unimplemented (Pancake is complete);
+the local SQLite store (accounts, roles, licenses, orders, traffic, AI usage)
+and the in-memory RAG index are not durable on serverless — a production
+deployment should configure Supabase; Cloudflare output still has Node-runtime
+routes, so that deploy target needs edge-compatible route handlers; PayPal
+has no billing portal; the local user directory is an account + role list, not
+a full auth provider (no password reset, no e-mail verification) — Supabase
+Auth takes over once `SUPABASE_SERVICE_ROLE_KEY` is configured.
+
+Multi-tenancy is real but partial: `0007_orgs.sql` (organizations +
+memberships + RLS) and `lib/org.ts` ship with every build, while the workspace
+UI / `/api/org` routes only ship when BOTH `multitenancy` and `account` are
+selected. Customers must run the migration and add `.eq("org_id", ...)` to
+their own domain tables themselves. Generated projects no longer contain
+ShipKit marketing pages (home/pricing are brand-free), but legal pages are
+placeholders the customer must replace.

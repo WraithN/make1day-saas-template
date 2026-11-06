@@ -22,7 +22,7 @@ drop in your own keys.
 | **Admin console `/admin`** — users, issued licenses, traffic, runtime status; Basic Auth + optional `ADMIN_EMAILS` | ✅ |
 | **Selectable, prunable consoles in generated ZIPs** — `account` / `admin` Builder features with dead-link rewrites | ✅ |
 | 1-click deploy (Vercel-ready) | ✅ |
-| **License gate** — offline HMAC keys, email auto-claim, per-IP trial quota, `/admin/licenses` | ✅ |
+| **License gate** — offline HMAC keys, active subscription / email auto-claim, source-free anonymous preview, `/admin/licenses` | ✅ |
 | **Content paywall** — edge-gated premium routes (`middleware.ts` → `lib/paywall.ts`) + reusable `<Paywall>` component, `PREMIUM_ROUTES` config, `premium` Builder feature | ✅ |
 | **Waffo Pancake** — real MoR checkout + RSA webhook verification, config self-check | ✅ |
 | **Hybrid RAG** — chunking, BM25 (EN + CJK) + embeddings fused with RRF, cited answers, `/rag` demo UI, optional pgvector | ✅ |
@@ -42,6 +42,12 @@ drop in your own keys.
 `POST /api/rag/ingest` (`{ title, text }`) splits, embeds and indexes a document;
 `POST /api/rag/query` (`{ question, provider? }`) returns
 `{ answer, citations, mode, retrieval }`. Open `/rag` for the demo UI.
+
+- **Both endpoints are authenticated.** Ingest (`POST` + `GET`) needs a signed-in
+  user or an operator; query needs a signed-in user **with** an active
+  subscription — every query runs a real LLM, so anonymous callers get `401`
+  (not signed in) / `402` (no subscription) instead of a free pass. Demo mode
+  (no Supabase configured) counts as signed-in + subscribed.
 
 - **Two retrieval branches**: Okapi BM25 over Latin words + CJK unigrams/bigrams
   (`lib/rag/retrieve.ts`) and dense embeddings from any OpenAI-compatible
@@ -73,6 +79,9 @@ It posts each golden question to `/api/rag/query`, then checks whether the
 expected source document appears in the top-4 citations. Metric: **recall@4**
 (fraction of questions whose expected source is in the top-K) and **MRR**.
 Zero configuration is enough — BM25-only retrieval works with no embedding key.
+The query endpoint is authenticated, so the runner sends the demo session
+cookie (`sk_demo=1`); against a Supabase-configured server, point `RAG_COOKIE`
+at a real session cookie instead.
 
 Latest measured run (8 golden queries, top-4): **recall@4 = 100%, MRR = 0.917**.
 Known gap: cross-lingual retrieval (an English query against a Chinese-only
@@ -104,13 +113,13 @@ them to a customer:
 - Waffo `acquiring` flavor verifies webhooks but its create-order payload is
   contract-specific and must be implemented before checkout can be used (see
   `docs/waffo.md`). The default `pancake` flavor is complete.
-- AI chat is not token-streamed and has no per-user quota; the "5 messages/day" copy is aspirational.
+- AI chat now streams token-by-token (OpenAI / Anthropic / Gemini) as incremental `text/plain` chunks and enforces a per-user daily quota (`AI_MESSAGES_PER_DAY`, default 50, HTTP 429 `ai_quota_exceeded` when exhausted). The 429 carries `resetAt` = next 00:00 UTC, an accurate `Retry-After` and `X-AI-Quota-*` headers. Provider errors are logged server-side instead of being disguised as a reply. RAG ingest/query require a signed-in user with an active subscription.
 - `/admin` and `/api/stats` are **closed by default** in production: if `ADMIN_USER` / `ADMIN_PASSWORD` are not set they return `503` (open only in dev, with a loud warning). Stats are durable in the `pageviews` table when a service role is configured, falling back to a local JSON file in dev.
 - Both consoles now support **profile mutation** (`/api/profile` PATCH), an **org/RBAC model** (`profiles.role` + `organizations`/`memberships` tables, `lib/org.ts`), and a **customer billing portal** (`/api/billing/portal`, real for Stripe/Creem; PayPal/Waffo fall back to a contact-support path). The operator user directory reads from Supabase Auth + the `profiles` table when `SUPABASE_SERVICE_ROLE_KEY` is set; without it, accounts and roles live in the local SQLite database (`.data/shipkit.db`) and the role column is really writable. `npm run export:profiles` moves the local roles across when you switch to Supabase.
-- The Builder's `multitenancy` flag is now real: selecting it ships the workspace UI (`/account/workspaces`, switcher) + `lib/org.ts` + org migrations and removes them when off (asserted in the build matrix).
+- Multi-tenancy is real but partial: `0007_orgs.sql` (organizations + memberships + RLS) and `lib/org.ts` helpers ship with every build, while the workspace UI (`/account/workspaces`, switcher) and `/api/org` routes ship ONLY when both `multitenancy` and `account` are selected. Run the migration yourself and add `.eq("org_id", ...)` to your own domain tables.
 - PayPal creates subscription checkouts only; Creem's portal endpoint/field names are best-effort assumptions (wrapped in try/catch so a miss degrades gracefully).
 - Cloudflare deploy output still contains Node-runtime routes and `node:crypto` / `fs` imports.
-- Generated projects keep ShipKit's marketing pages and branding — run `npm run rebrand -- "Your Brand"` to replace every `ShipKit`/`Uncorne` string (and the `LICENSE` copyright line) before shipping.
+- Generated projects ship **brand-free** home and pricing pages built from the customer's `appName` and module picks; ShipKit's own blog / compare / faq / license redemption pages are pruned. `/privacy` and `/terms` are placeholders the customer must replace with their own legal text. `npm run rebrand -- "Your Brand"` is still available for a global rename.
 - Every generated project ships an MIT `LICENSE` file; edit its copyright line to your name after rebranding.
 - The build matrix runs `tsc --noEmit` on all 16 cases; a representative subset also runs a real `next build` (pass rate + artifact sizes are published to `public/build-matrix.json` and shown on `/build-matrix`). Run `node scripts/verify-matrix.mjs --all --build --publish` to refresh it.
 - `/api/mcp` is stateless JSON-RPC only — no sampling, prompts, subscriptions or SSE streaming. `scaffold_project` returns configuration JSON by default; `includeZip=true` is license-gated.
@@ -311,15 +320,29 @@ The starter is meant to be evaluated **by AI agents**, not only by humans:
 **Generated-template build matrix** (`docs/build-matrix.md`):
 
 ```bash
-LICENSE_GATE=off npx next dev -p 3000     # terminal 1
+npx next build                            # build first; never share .next with next dev
+LICENSE_GATE=off npx next start -p 3000   # terminal 1 (read-only .next)
 npm run verify:matrix                     # terminal 2, or: node scripts/verify-matrix.mjs --all
 ```
 
-`.github/workflows/generated-matrix.yml` runs 14 parallel cases covering all 5
+`.github/workflows/generated-matrix.yml` runs 16 parallel cases covering all 5
 payment gateways, all 10 styles, all 3 deploy targets and the RAG/dashboard/skills
-switches. Each case downloads a real ZIP, asserts that site-only endpoints and
-unselected modules were pruned, then runs `tsc --noEmit` inside the extracted
-project. Currently `tsc`, not `next build` — see Known gaps.
+switches. Each case downloads a real ZIP, asserts that site-only endpoints, ShipKit
+marketing pages, the generator itself and unselected modules were pruned, then
+runs `tsc --noEmit` inside the extracted project. A representative subset also
+runs a real `next build` (see Known gaps).
+
+**Runtime smoke tests** (each one starts its own `next start` on a dedicated
+port with a throwaway SQLite DB, apart from the matrix run above):
+
+```bash
+npm run smoke              # all four suites
+# or individually:
+npm run smoke:gate         # 402 paywall, source-free preview, signed quota, paid key, P0 stripping, RAG auth
+npm run smoke:ai:quota     # local SQLite daily quota, 429 + resetAt + Retry-After
+npm run smoke:ai:quota:supabase  # consume_ai_usage RPC path
+npm run smoke:ai:stream    # real SSE token chunks + provider-error handling
+```
 
 The four site-only endpoints are excluded via `SITE_ONLY_FILES` in
 `lib/generator/prune.ts`, and site-only npm scripts are stripped from the

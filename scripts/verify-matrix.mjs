@@ -173,10 +173,33 @@ const SITE_ONLY_FILES = [
   "app/agent-ready/page.tsx",
   "lib/content/agent-ready.ts",
 ];
+// ShipKit's OWN marketing site. A customer going live must not be advertsing
+// our $99 license, our competitors or our SEO posts. These are replaced by
+// brand-free customer pages built from their BuilderConfig.
+const SITE_MARKETING_FILES = [
+  "app/blog/page.tsx",
+  "app/blog/[slug]/page.tsx",
+  "app/compare/page.tsx",
+  "app/faq/page.tsx",
+  "app/license/page.tsx",
+  "lib/content/blog.ts",
+  "lib/content/compare.ts",
+  "lib/content/faq.ts",
+  "components/CompareContent.tsx",
+  "components/FaqContent.tsx",
+  "components/CustomService.tsx",
+  "components/LicensePanel.tsx",
+  "components/home/BoundarySection.tsx",
+  "components/home/PitfallSection.tsx",
+  "components/home/ThemePreviewSection.tsx",
+  "components/home/FeatureMatrix.tsx",
+  "components/home/BlogTeaser.tsx",
+];
 // The generator itself must never ship: one purchase would otherwise mean
 // unlimited generations (and resales) of the product that was just paid for.
 const GENERATOR_FILES = [
   "lib/generator/config.ts",
+  "lib/generator/customer-site.ts",
   "lib/generator/pack.ts",
   "lib/generator/prune.ts",
   "lib/generator/preview.ts",
@@ -339,6 +362,7 @@ async function verifyCase(entry, doBuild) {
     "scripts/ai-docs.mjs",
     "scripts/ai-setup.mjs",
     "scripts/export-local-profiles.mjs",
+    "scripts/rebrand.mjs",
   ]) {
     assert(exists(rel), `missing ${rel}`);
   }
@@ -354,25 +378,72 @@ async function verifyCase(entry, doBuild) {
     assert(!exists(rel), `site-only endpoint leaked into ZIP: ${rel}`);
   }
 
+  // ShipKit's own marketing pages/content must never reach a customer.
+  for (const rel of SITE_MARKETING_FILES) {
+    assert(!exists(rel), `ShipKit marketing page leaked into ZIP: ${rel}`);
+  }
   // The generator must never leak into a customer project.
   for (const rel of GENERATOR_FILES) {
     assert(!exists(rel), `generator leaked into ZIP: ${rel}`);
   }
-  // …and no dead /builder link may survive in the shipped project.
+  // …and no dead link to a pruned route may survive in the shipped project.
   for (const rel of [
     "components/Nav.tsx",
+    "components/Footer.tsx",
     "app/page.tsx",
+    "app/pricing/page.tsx",
     "app/sitemap.ts",
     "app/robots.ts",
-    "components/home/ThemePreviewSection.tsx",
+    "app/account/licenses/page.tsx",
   ]) {
     if (!exists(rel)) continue;
     const src = await read(rel);
-    assert(
-      !src.includes("/builder"),
-      `dead /builder link survived in ${rel}`,
-    );
+    for (const dead of [
+      "/builder",
+      "/agent-ready",
+      "/styles",
+      '"/blog"',
+      '"/compare"',
+      '"/faq"',
+      '"/license"',
+    ]) {
+      assert(
+        !src.includes(dead),
+        `dead link ${dead} survived in ${rel}`,
+      );
+    }
   }
+  // The customer's home + pricing pages must be THEIRS, not ours.
+  const customerHome = await read("app/page.tsx");
+  assert(
+    customerHome.includes("APP_NAME") && customerHome.includes("app.stack.title"),
+    "app/page.tsx is not the generated customer landing page",
+  );
+  const customerPricing = await read("app/pricing/page.tsx");
+  assert(
+    customerPricing.includes("app.pricing.title") &&
+      customerPricing.includes("app.plan.cta"),
+    "app/pricing/page.tsx is not the generated customer pricing page",
+  );
+  for (const rel of ["app/page.tsx", "app/pricing/page.tsx", "app/sitemap.ts"]) {
+    const src = await read(rel);
+    for (const brand of ["ShipKit", "Uncorne", "Makerkit", "Supastarter", "ShipFast"]) {
+      assert(!src.includes(brand), `our branding leaked into customer ${rel}: ${brand}`);
+    }
+  }
+  // The sitemap must only reference routes that exist in this build.
+  const shippedSitemap = await read("app/sitemap.ts");
+  assert(
+    !shippedSitemap.includes("@/lib/content/blog") &&
+      !shippedSitemap.includes("POSTS"),
+    "customer sitemap still imports our SEO blog posts",
+  );
+  // Root metadata must describe the customer's app, not ours.
+  const shippedLayout = await read("app/layout.tsx");
+  assert(
+    shippedLayout.includes("APP_NAME") && !shippedLayout.includes("by Uncorne"),
+    "root layout metadata still describes ShipKit",
+  );
   // The customer project must ship with the download gate OFF by default —
   // it must never inherit ShipKit's own (production = ON) paywall.
   const shippedEnv = await read("lib/env.ts");

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "@/lib/i18n";
 
@@ -68,20 +69,39 @@ export function RagDemo() {
   const [answer, setAnswer] = useState<Answer | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  // The RAG endpoints are authenticated (401 = not signed in, 402 = no
+  // subscription). Those are expected states, not crashes: we degrade to a
+  // "sign in / see plans" panel instead of dumping a raw HTTP error.
+  const [auth, setAuth] = useState<"login" | "subscribe" | null>(null);
+
+  /** Map an auth failure onto the panel; returns true when it handled it. */
+  function handleAuthStatus(status: number): boolean {
+    if (status === 401) {
+      setAuth("login");
+      return true;
+    }
+    if (status === 402) {
+      setAuth("subscribe");
+      return true;
+    }
+    return false;
+  }
 
   async function ask() {
     if (!question.trim()) return;
     setBusy(true);
     setError("");
     setNotice("");
+    setAuth(null);
     try {
       const res = await fetch("/api/rag/query", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ question }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        if (handleAuthStatus(res.status)) return;
         setError(data.error || "Query failed");
         return;
       }
@@ -97,14 +117,16 @@ export function RagDemo() {
     if (!title.trim() || !text.trim()) return;
     setBusy(true);
     setError("");
+    setAuth(null);
     try {
       const res = await fetch("/api/rag/ingest", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ title, text }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
+        if (handleAuthStatus(res.status)) return;
         setError(data.error || "Ingest failed");
         return;
       }
@@ -209,6 +231,26 @@ export function RagDemo() {
 
       {notice && <p className="mt-4 text-sm text-accent">{notice}</p>}
       {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+
+      {auth && (
+        <div className="card mt-4">
+          <div className="eyebrow mb-2">{t("rag.auth.title")}</div>
+          <p className="text-sm text-ink-soft">
+            {auth === "login"
+              ? t("rag.auth.loginRequired")
+              : t("rag.auth.subscribeRequired")}
+          </p>
+          <p className="mt-2 text-xs text-muted">{t("rag.auth.demoHint")}</p>
+          <Link
+            href={auth === "login" ? "/login" : "/pricing"}
+            className="btn-solid mt-3"
+          >
+            {auth === "login"
+              ? t("rag.auth.loginCta")
+              : t("rag.auth.subscribeCta")}
+          </Link>
+        </div>
+      )}
 
       {answer && (
         <div className="mt-6 space-y-4">

@@ -80,6 +80,15 @@ export const dict: Record<Lang, Record<string, string>> = {
     "rag.retrieval.store.pgvector": "pgvector",
     "rag.sending": "Working…",
     "rag.added": "Indexed",
+    "rag.auth.title": "Sign in to continue",
+    "rag.auth.loginRequired":
+      "Indexing documents and asking questions needs an account. Log in to use the RAG demo.",
+    "rag.auth.loginCta": "Log in",
+    "rag.auth.subscribeRequired":
+      "RAG queries call a real LLM, so an active subscription is required to run them.",
+    "rag.auth.subscribeCta": "See plans",
+    "rag.auth.demoHint":
+      "Just evaluating? The log-in page has a demo sign-in that needs no account.",
     "nav.builder": "Builder",
     "nav.styles": "Styles",
 
@@ -472,6 +481,12 @@ export const dict: Record<Lang, Record<string, string>> = {
     "rag.retrieval.store.pgvector": "pgvector",
     "rag.sending": "处理中…",
     "rag.added": "已索引",
+    "rag.auth.title": "请先登录",
+    "rag.auth.loginRequired": "索引文档和提问都需要账号。登录后即可使用 RAG 演示。",
+    "rag.auth.loginCta": "去登录",
+    "rag.auth.subscribeRequired": "RAG 查询会调用真实 LLM，需要有效订阅才能运行。",
+    "rag.auth.subscribeCta": "查看定价",
+    "rag.auth.demoHint": "只是先体验？登录页提供无需账号的演示登录。",
     "nav.builder": "生成器",
     "nav.styles": "主题",
 
@@ -875,6 +890,12 @@ export const dict: Record<Lang, Record<string, string>> = {
     "rag.retrieval.store.pgvector": "pgvector",
     "rag.citations": "参照元",
     "rag.cited": "引用済み",
+    "rag.auth.title": "サインインしてください",
+    "rag.auth.loginRequired": "ドキュメントの取り込みと質問にはアカウントが必要です。サインインすると RAG デモを利用できます。",
+    "rag.auth.loginCta": "ログイン",
+    "rag.auth.subscribeRequired": "RAG クエリは実際の LLM を呼び出すため、有効なサブスクリプションが必要です。",
+    "rag.auth.subscribeCta": "プランを見る",
+    "rag.auth.demoHint": "試すだけなら、ログインページのデモログイン（アカウント不要）を使ってください。",
     "hero.title": "AI SaaS の MVP を {{g}}数日{{/g}} で。月数ヶ月ではなく。",
     "hero.subtitle":
       "あらゆる SaaS の 60% を占める汎用的な部分——認証、決済、DB、管理画面——はすでに本番品質。あなたは残り 40% の独自部分に集中できます。",
@@ -1215,6 +1236,12 @@ export const dict: Record<Lang, Record<string, string>> = {
     "rag.retrieval.store.pgvector": "pgvector",
     "rag.citations": "SOURCES",
     "rag.cited": "CITÉ",
+    "rag.auth.title": "Connectez-vous pour continuer",
+    "rag.auth.loginRequired": "Indexer des documents et poser des questions nécessite un compte. Connectez-vous pour utiliser la démo RAG.",
+    "rag.auth.loginCta": "Se connecter",
+    "rag.auth.subscribeRequired": "Les requêtes RAG appellent un vrai LLM : un abonnement actif est requis.",
+    "rag.auth.subscribeCta": "Voir les offres",
+    "rag.auth.demoHint": "Juste pour essayer ? La page de connexion propose une connexion démo, sans compte.",
 
     "hero.eyebrow": "STARTER AI SaaS · PAR UNCORNE",
     "hero.title": "Livrez votre MVP AI SaaS en {{g}}jours{{/g}}, pas en mois.",
@@ -1537,6 +1564,12 @@ export const dict: Record<Lang, Record<string, string>> = {
     "rag.retrieval.store.pgvector": "pgvector",
     "rag.sending": "Wird verarbeitet…",
     "rag.added": "Indiziert",
+    "rag.auth.title": "Anmelden, um fortzufahren",
+    "rag.auth.loginRequired": "Dokumente zu indexieren und Fragen zu stellen erfordert ein Konto. Melden Sie sich an, um die RAG-Demo zu nutzen.",
+    "rag.auth.loginCta": "Anmelden",
+    "rag.auth.subscribeRequired": "RAG-Abfragen rufen ein echtes LLM auf und benötigen daher ein aktives Abonnement.",
+    "rag.auth.subscribeCta": "Tarife ansehen",
+    "rag.auth.demoHint": "Nur ausprobieren? Auf der Anmeldeseite gibt es eine Demo-Anmeldung ganz ohne Konto.",
     "nav.builder": "Builder",
     "nav.styles": "Stile",
 

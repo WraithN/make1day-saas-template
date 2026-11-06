@@ -82,5 +82,5 @@ node scripts/ai-docs.mjs --dry-run   # 只报告哪些文件会变
 - Scoped rules 是否自动生效取决于客户端是否读取 `.cursor/rules` / `CLAUDE.md` / `globs`；
   `AGENTS.md` 是通用兜底。
 - Cursor 的 `.mdc` 格式、`@import` 语法会随工具版本变化，接入示例见 `docs/mcp.md`。
-- 生成工程仍保留 ShipKit 品牌与营销页；白标清理是 P2，不在本次范围。
+- 生成工程的首页/定价页已由 `lib/generator/customer-site.ts` 从客户配置生成，ShipKit 自家营销页（blog / compare / faq / license 兑换页）已从客户包剪掉；但 `/privacy`、`/terms` 只是占位法律页，客户上线前必须替换。
 - **改 `style` 只重建文档，不会重写 `app/globals.css`**（CSS 是打包时注入的）。要真正换配色必须回 Builder 重新生成 ZIP；`ai:docs` 覆盖的是 skills / features / payment / auth / deploy 等不改变 CSS 的配置。

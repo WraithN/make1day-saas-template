@@ -42,7 +42,7 @@ export function ChatDemo() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        setReply((p) => p + dec.decode(value));
+        setReply((p) => p + dec.decode(value, { stream: true }));
       }
     } catch {
       setErr("Network error");

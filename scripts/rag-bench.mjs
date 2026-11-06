@@ -10,12 +10,20 @@
 //   node scripts/rag-bench.mjs [baseUrl] [--json]
 //   BASE=http://localhost:3000 node scripts/rag-bench.mjs
 //
+// /api/rag/query is authenticated: it needs a signed-in account (401) with an
+// active subscription (402). The default "sk_demo=1" cookie covers a template
+// running in demo mode (no Supabase configured); with Supabase configured,
+// point RAG_COOKIE at a real session cookie:
+//
+//   RAG_COOKIE="sb-xxx-auth-token=..." node scripts/rag-bench.mjs
+//
 // Exit code is non-zero if recall@4 falls below the threshold (CI gate).
 
 const BASE = process.env.BASE || process.argv[2] || "http://localhost:3000";
 const asJson = process.argv.includes("--json");
 const K = 4;
 const THRESHOLD = Number(process.env.BENCH_THRESHOLD || 0.9);
+const COOKIE = process.env.RAG_COOKIE ?? "sk_demo=1";
 
 // Golden set: each question should be answerable from exactly one seeded doc.
 // `source` is the seeded document title that must surface in the top-K.
@@ -33,10 +41,24 @@ const GOLDEN = [
 async function query(question) {
   const res = await fetch(`${BASE}/api/rag/query`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      ...(COOKIE ? { cookie: COOKIE } : {}),
+    },
     body: JSON.stringify({ question }),
   });
-  if (!res.ok) throw new Error(`query failed: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    if (res.status === 401 || res.status === 402) {
+      throw new Error(
+        `query failed: ${res.status} — /api/rag/query needs an authenticated ` +
+          `account with an active subscription. The default cookie "sk_demo=1" ` +
+          `works in demo mode; with Supabase configured, export ` +
+          `RAG_COOKIE="<your session cookie>". ${body}`,
+      );
+    }
+    throw new Error(`query failed: ${res.status} ${body}`);
+  }
   return res.json();
 }
 

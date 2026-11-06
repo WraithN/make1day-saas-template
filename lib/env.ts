@@ -105,6 +105,15 @@ export const env = {
   // Default provider used by /api/ai when none is requested.
   aiProvider: () => opt("AI_PROVIDER", "openai").toLowerCase(),
 
+  // AI chat quota: how many AI messages a single user may send per UTC day.
+  // 0 disables the AI feature entirely (every request is refused with 429).
+  // The counter is keyed by the Supabase user id and resets at 00:00 UTC.
+  // See lib/ai-usage.ts.
+  aiMessagesPerDay: () => {
+    const n = Number(opt("AI_MESSAGES_PER_DAY", "50"));
+    return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 50;
+  },
+
   // OpenAI-compatible (OpenAI / OpenRouter / DeepSeek / Groq share the SDK)
   openaiApiKey: () => opt("OPENAI_API_KEY"),
   openaiBaseUrl: () => opt("OPENAI_BASE_URL", "https://api.openai.com/v1"),

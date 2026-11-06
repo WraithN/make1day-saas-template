@@ -247,6 +247,9 @@ export function GET() {
         post: {
           tags: ["RAG"],
           summary: "Chunk, embed and index a document",
+          description:
+            "Requires a signed-in user or an operator. Anonymous visitors get 401 — the index is shared state and must not be writable by anyone who lands on the page.",
+          security: [{ supabaseSession: [] }, { operatorSession: [] }],
           requestBody: {
             required: true,
             content: {
@@ -265,13 +268,18 @@ export function GET() {
           responses: {
             "200": json(200, "Indexed", ref("RagIngestResponse")),
             "400": err("Missing title or text"),
+            "401": err("Unauthorized"),
           },
         },
         get: {
           tags: ["RAG"],
           summary: "List indexed documents",
+          description:
+            "Requires a signed-in user or an operator. Anonymous visitors get 401.",
+          security: [{ supabaseSession: [] }, { operatorSession: [] }],
           responses: {
             "200": json(200, "Documents", { type: "object", properties: { documents: { type: "array", items: { type: "object" } } } }),
+            "401": err("Unauthorized"),
           },
         },
       },
@@ -279,6 +287,9 @@ export function GET() {
         post: {
           tags: ["RAG"],
           summary: "Hybrid retrieval (BM25 + embeddings, RRF) with cited answer",
+          description:
+            "Requires a signed-in user WITH an active subscription (401 without a session, 402 without a subscription) — every call runs a real LLM. The anonymous trial quota does not apply.",
+          security: [{ supabaseSession: [] }],
           requestBody: {
             required: true,
             content: {
@@ -297,6 +308,8 @@ export function GET() {
           responses: {
             "200": json(200, "Answer with citations", ref("RagQueryResponse")),
             "400": err("Missing question"),
+            "401": err("Unauthorized"),
+            "402": err("Subscription required"),
             "500": err("Retrieval failed"),
           },
         },
@@ -304,7 +317,12 @@ export function GET() {
       "/api/ai": {
         post: {
           tags: ["AI"],
-          summary: "Multi-provider chat (plan-gated outside demo mode)",
+          summary: "Multi-provider streaming chat (plan-gated outside demo mode)",
+          description:
+            "Real token-by-token streaming for OpenAI-compatible, Anthropic and Gemini providers. " +
+            "A demo session is unlimited; signed-in subscribers are charged one message per day " +
+            "from AI_MESSAGES_PER_DAY (default 50, UTC-day bucket). Provider failures are logged " +
+            "server-side and surfaced as a generic [AI provider error] text, never as a fake reply.",
           security: [{ supabaseSession: [] }, {}],
           requestBody: {
             required: true,
@@ -313,16 +331,26 @@ export function GET() {
                 schema: {
                   type: "object",
                   required: ["message"],
-                  properties: { message: { type: "string", maxLength: 2000 } },
+                  properties: {
+                    message: { type: "string", maxLength: 2000 },
+                    provider: { type: "string", maxLength: 40 },
+                  },
                 },
               },
             },
           },
           responses: {
-            "200": { description: "Text/event-stream style response body" },
+            "200": {
+              description:
+                "Incremental plain-text stream (text/plain; charset=utf-8), one chunk per provider token. " +
+                "Carries X-AI-Quota-Limit / X-AI-Quota-Used / X-AI-Quota-Remaining for billed users.",
+            },
             "400": err("Invalid message"),
             "401": err("Unauthorized"),
             "402": err("Subscription required"),
+            "429": err(
+              "Daily AI quota exhausted (ai_quota_exceeded); resetAt is the NEXT 00:00 UTC and Retry-After is the real seconds left",
+            ),
           },
         },
       },
@@ -437,6 +465,13 @@ export function GET() {
           type: "apiKey",
           in: "header",
           name: "X-Waffo-Signature",
+        },
+        operatorSession: {
+          type: "apiKey",
+          in: "cookie",
+          name: "sk_admin_session",
+          description:
+            "Operator (console) session cookie; alternative to a Supabase session",
         },
         adminBasic: { type: "http", scheme: "basic" },
       },

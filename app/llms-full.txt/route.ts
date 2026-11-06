@@ -194,7 +194,7 @@ Admin console (feature=admin, route /admin):
 
 Both use components/console/* for the shell and tables, and
 lib/content/console.ts for complete en/zh/ja/fr/de copy. They are read-only
-starters: no profile mutation endpoint, no org/RBAC table. See docs/consoles.md.
+starters: no profile mutation endpoint. Org tables (0007_orgs.sql) and lib/org.ts ship separately under the multi-tenancy feature; see section 12. See docs/consoles.md.
 
 ## 5. RAG (strategy B, hybrid retrieval)
 
@@ -212,6 +212,11 @@ starters: no profile mutation endpoint, no org/RBAC table. See docs/consoles.md.
   "retrieval" object describing which branches actually ran.
 - Endpoints: POST /api/rag/ingest {title,text}, GET /api/rag/ingest,
   POST /api/rag/query {question,provider?}. Demo UI: /rag (noindex).
+- Auth: ingest (POST + GET) needs a signed-in user or an operator session
+  (401 otherwise); query needs a signed-in user WITH an active subscription
+  (401 without a session, 402 without a subscription) because every call runs
+  a real LLM. The anonymous trial quota never applies to these endpoints.
+  Demo mode (no Supabase configured) is treated as signed-in + subscribed.
 
 ## 6. Payments — ${PROVIDER} (this site's gateway)
 
@@ -257,9 +262,9 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
 | POST | /api/checkout | Create a Waffo checkout session {plan:"buyout"\|"care"} | Supabase session |
 | POST | /api/webhook | Verify + normalize payment events, issue keys | RSA signature |
 | GET | /api/payments/self-check | Read-only config readiness (no secrets) | public |
-| POST | /api/rag/ingest | Chunk, embed and index a document | public |
-| GET | /api/rag/ingest | List indexed documents | public |
-| POST | /api/rag/query | Hybrid retrieval + cited answer | public |
+| POST | /api/rag/ingest | Chunk, embed and index a document | Supabase session / operator |
+| GET | /api/rag/ingest | List indexed documents | Supabase session / operator |
+| POST | /api/rag/query | Hybrid retrieval + cited answer | Supabase session + subscription |
 | POST | /api/ai | Multi-provider chat (plan-gated outside demo) | Supabase session |
 | POST | /api/track | Aggregate pageview (consent-gated) | public |
 | GET | /api/stats | First-party stats | Operator session |
@@ -323,16 +328,16 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
 
 - Waffo "acquiring" flavor verifies webhooks but its create-order payload is
   contract-specific and NOT implemented; Pancake is complete.
-- AI chat is not token-streamed and has no per-user quota.
+- AI chat streams token-by-token (OpenAI / Anthropic / Gemini) as incremental text/plain chunks and enforces a per-user daily quota (AI_MESSAGES_PER_DAY, default 50, HTTP 429 ai_quota_exceeded when exhausted). The 429 body's resetAt is the NEXT 00:00 UTC and Retry-After the real seconds remaining; X-AI-Quota-* headers report the counter. RAG ingest/query require a signed-in user with an active subscription. Runtime regressions are checked by scripts/smoke-ai-stream.cjs and scripts/smoke-ai-quota*.cjs.
 - /admin and /api/stats are open unless ADMIN_USER / ADMIN_PASSWORD are set;
   ADMIN_EMAILS adds an optional signed-in role check. /account is session-gated
   but read-only (no profile mutations). Both consoles are five-language.
   First-party stats use a local SQLite file (not durable on serverless).
-- The Builder's "multitenancy" flag is a selection only: no org/RBAC tables.
+- The "multitenancy" feature ships 0007_orgs.sql (organizations, memberships, RLS) and lib/org.ts helpers. The workspace switcher UI and /api/org routes live under /account, so they ship ONLY when the account console is also selected. Run the migration yourself and add .eq("org_id", ...) to your own tables.
 - PayPal creates subscription checkouts only; Creem field names are unverified.
 - Cloudflare deploy output still contains Node-runtime routes.
-- Generated projects keep ShipKit marketing pages/branding — rebrand first.
-- The README declares MIT but no LICENSE file ships; decide before selling.
+- Generated projects ship brand-free home/pricing pages and an MIT LICENSE, but /privacy and /terms are placeholders the customer must replace.
+- Waffo acquiring checkout is unimplemented; Cloudflare builds still contain Node-runtime routes; PayPal has no billing portal.
 - The build matrix runs tsc --noEmit, not next build, on generated projects;
   no live pass-rate page or artifact-size dashboard exists.
 - /api/mcp is stateless JSON-RPC: no sampling, prompts, subscriptions or SSE

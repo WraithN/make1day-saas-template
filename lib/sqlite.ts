@@ -143,6 +143,18 @@ CREATE TABLE IF NOT EXISTS quota (
   used   INTEGER NOT NULL DEFAULT 0
 );
 
+-- AI chat quota: one row per user, reset every UTC day.
+-- The Supabase mirror of this table lives in
+-- supabase/migrations/0009_ai_usage.sql. The "day" column holds the UTC day
+-- (YYYY-MM-DD) the counter belongs to, so a row from an earlier day starts
+-- over at zero.
+CREATE TABLE IF NOT EXISTS ai_usage (
+  user_id TEXT PRIMARY KEY,
+  day     TEXT NOT NULL,
+  used    INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_ai_usage_day ON ai_usage(day);
+
 CREATE TABLE IF NOT EXISTS pageviews (
   path       TEXT PRIMARY KEY,
   count      INTEGER NOT NULL DEFAULT 0,
