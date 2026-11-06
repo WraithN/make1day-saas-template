@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { env } from "@/lib/env";
-import { isDemoMode } from "@/lib/demo";
+import { isDemoMode, DEMO_USER } from "@/lib/demo";
 import { useLanguage } from "@/lib/i18n";
 
 type OAuthProvider = "google" | "github" | "apple" | "microsoft" | "gitlab" | "slack";
@@ -106,6 +106,29 @@ export default function LoginPage() {
                 </button>
               ))}
             </div>
+          </>
+        )}
+
+        {isDemoMode() && (
+          <>
+            <div className="my-5 flex items-center gap-3 text-xs text-muted">
+              <span className="h-px flex-1 bg-line" /> demo{" "}
+              <span className="h-px flex-1 bg-line" />
+            </div>
+            <button
+              type="button"
+              className="btn w-full"
+              onClick={() => {
+                document.cookie =
+                  "sk_demo=1; path=/; max-age=86400; samesite=lax";
+                router.push("/account");
+              }}
+            >
+              Demo 登录（体验账号 {DEMO_USER.email}）
+            </button>
+            <p className="mt-2 text-center text-xs text-muted">
+              未配置 Supabase 时的演示入口，仅用于本地预览。
+            </p>
           </>
         )}
 
