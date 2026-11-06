@@ -7,6 +7,8 @@ import type {
   NormalizedSubEvent,
   PaymentProvider,
   PlanId,
+  PortalParams,
+  PortalResult,
 } from "./types";
 import { toMajor } from "./types";
 
@@ -126,5 +128,14 @@ export const stripeProvider: PaymentProvider = {
       });
     }
     return out;
+  },
+
+  async createPortalSession(p: PortalParams): Promise<PortalResult | null> {
+    if (!p.customerId) return null;
+    const session = await stripe().billingPortal.sessions.create({
+      customer: p.customerId,
+      return_url: p.returnUrl,
+    });
+    return session.url ? { url: session.url } : null;
   },
 };

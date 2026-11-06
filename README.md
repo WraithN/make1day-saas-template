@@ -31,9 +31,12 @@ drop in your own keys.
 | **Agent-Native Delivery** — root `AGENTS.md`, style-locked `design.md`, scoped rules, 12 skills, `.cursor/rules/*.mdc`, `CLAUDE.md`, deterministic `npm run ai:docs` | ✅ |
 | **MCP `scaffold_project`** — stateless JSON-RPC 2.0 endpoint + stdio bridge for Cursor / Claude Code, license-gated ZIP option | ✅ |
 | **`/agent-ready` landing page** — four-language guide to the machine-readable stack | ✅ |
-| Observability (structured logs + error boundary) | ⚠️ not implemented |
-| Multi-tenancy / org helpers | ⚠️ Builder flag + copy only, no implementation |
-| True token streaming / per-user rate limits / customer portal | ⚠️ not implemented |
+| Observability — structured JSON logger (`lib/logger.ts`), route + global error boundaries, `/api/health` | ✅ |
+| Multi-tenancy — real org/workspace scaffolding: `organizations` + `memberships` tables, workspace switcher, per-tenant data scoping (`lib/org.ts`) | ✅ |
+| Customer billing portal — self-serve subscription management (Stripe + Creem real; PayPal/Waffo fall back to contact-support) | ✅ |
+| Profile mutation — `/api/profile` PATCH (display name / full name / company) + `ProfileForm` | ✅ |
+| Org/RBAC tables — `profiles.role` RBAC + `organizations`/`memberships` tenancy | ✅ |
+| True token streaming / per-user rate limits | ⚠️ not implemented |
 
 ### RAG module (strategy B — hybrid retrieval)
 `POST /api/rag/ingest` (`{ title, text }`) splits, embeds and indexes a document;
@@ -102,10 +105,10 @@ them to a customer:
   contract-specific and must be implemented before checkout can be used (see
   `docs/waffo.md`). The default `pancake` flavor is complete.
 - AI chat is not token-streamed and has no per-user quota; the "5 messages/day" copy is aspirational.
-- `/admin` and `/api/stats` are open unless `ADMIN_USER` / `ADMIN_PASSWORD` are set; `ADMIN_EMAILS` adds an optional signed-in role check. Stats are a local JSON file (not durable on serverless).
-- Both consoles are **read-only starters**: no profile-mutation endpoint, no org/RBAC table, no customer billing portal. The user directory falls back to a derived buyer list without `SUPABASE_SERVICE_ROLE_KEY`.
-- The Builder's `multitenancy` flag does not change the generated project.
-- PayPal creates subscription checkouts only; Creem's endpoint/field names are unverified assumptions.
+- `/admin` and `/api/stats` are **closed by default** in production: if `ADMIN_USER` / `ADMIN_PASSWORD` are not set they return `503` (open only in dev, with a loud warning). Stats are durable in the `pageviews` table when a service role is configured, falling back to a local JSON file in dev.
+- Both consoles now support **profile mutation** (`/api/profile` PATCH), an **org/RBAC model** (`profiles.role` + `organizations`/`memberships` tables, `lib/org.ts`), and a **customer billing portal** (`/api/billing/portal`, real for Stripe/Creem; PayPal/Waffo fall back to a contact-support path). The operator user directory derives from Supabase when `SUPABASE_SERVICE_ROLE_KEY` is set, otherwise from the license/subscription lists.
+- The Builder's `multitenancy` flag is now real: selecting it ships the workspace UI (`/account/workspaces`, switcher) + `lib/org.ts` + org migrations and removes them when off (asserted in the build matrix).
+- PayPal creates subscription checkouts only; Creem's portal endpoint/field names are best-effort assumptions (wrapped in try/catch so a miss degrades gracefully).
 - Cloudflare deploy output still contains Node-runtime routes and `node:crypto` / `fs` imports.
 - Generated projects keep ShipKit's marketing pages and branding — run `npm run rebrand -- "Your Brand"` to replace every `ShipKit`/`Uncorne` string (and the `LICENSE` copyright line) before shipping.
 - Every generated project ships an MIT `LICENSE` file; edit its copyright line to your name after rebranding.

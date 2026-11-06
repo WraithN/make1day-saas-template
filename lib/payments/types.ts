@@ -82,4 +82,21 @@ export interface PaymentProvider {
     rawBody: string,
     headers: Record<string, string | undefined>,
   ): Promise<NormalizedSubEvent[]>;
+  /**
+   * Create a customer-facing billing portal session (update card, cancel,
+   * view invoices). Optional — providers without a self-serve portal (e.g.
+   * PayPal, Waffo Pancake) return null, and the UI falls back to a managed
+   * "contact support" path. Implemented for Stripe (real) and Creem.
+   */
+  createPortalSession?(p: PortalParams): Promise<PortalResult | null>;
 }
+
+export type PortalParams = {
+  customerId: string;
+  returnUrl: string;
+};
+
+export type PortalResult = {
+  /** Hosted billing portal URL to redirect the browser to. */
+  url: string;
+};

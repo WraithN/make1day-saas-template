@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getPaymentProvider } from "@/lib/payments";
 import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: Request) {
   const supabase = await createSupabaseServerClient();
@@ -39,6 +40,11 @@ export async function POST(req: Request) {
     }
     return NextResponse.json({ url });
   } catch (e) {
+    logger.error("checkout failed", {
+      userId: user?.id,
+      plan: parsed.success ? parsed.data.plan : undefined,
+      err: (e as Error).message,
+    });
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
 }

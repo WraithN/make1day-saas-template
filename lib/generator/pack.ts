@@ -25,6 +25,7 @@ import {
   prunePostLoginRedirects,
   pruneAgentReadyLink,
   pruneAdminLink,
+  pruneWorkspacesLink,
   pruneStylesLink,
   pruneStylesSitemap,
   postLoginTarget,
@@ -185,7 +186,14 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
 
   const rewrite = async (rel: string, fn: (src: string) => string) => {
     try {
-      const src = await fs.readFile(path.join(root, rel), "utf8");
+      // Read from the zip if the file was already added (by walk) or rewritten
+      // above — never straight from disk. Otherwise a second rewrite of the
+      // same file (e.g. app/account/layout.tsx) would re-read the pristine
+      // source and clobber the first rewrite's output.
+      const existing = zip.file(rel);
+      const src = existing
+        ? await existing.async("string")
+        : await fs.readFile(path.join(root, rel), "utf8");
       zip.file(rel, fn(src));
     } catch {
       /* optional file */
@@ -215,6 +223,10 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
   // operators. If /admin was pruned, retarget it instead of leaving a 404.
   if (hasAccount && !hasAdmin) {
     await rewrite("app/account/layout.tsx", pruneAdminLink);
+  }
+  // When multitenancy is OFF, drop the workspaces nav entry (dead route).
+  if (hasAccount && !config.features.includes("multitenancy")) {
+    await rewrite("app/account/layout.tsx", pruneWorkspacesLink);
   }
 
   // Generated, selection-driven files.

@@ -7,6 +7,7 @@ import {
   KeyValue,
   Notice,
 } from "@/components/console/ConsoleUI";
+import { BillingPortalButton } from "@/components/console/BillingPortalButton";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,8 @@ export default async function AccountBillingPage() {
   const lang = await getLang();
   const c = consoleCopy(lang);
   const { subscription: sub } = await getAccountSnapshot();
+  const hasActiveSub =
+    !!sub && (sub.status === "active" || sub.status === "trialing");
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -54,6 +57,17 @@ export default async function AccountBillingPage() {
             </Link>
           </Notice>
         )}
+
+        {hasActiveSub ? (
+          <>
+            <Notice>{c["account.billing.portalNote"]}</Notice>
+            <BillingPortalButton
+              label={c["account.billing.manage"]}
+              unsupportedLabel={c["account.billing.manageUnsupported"]}
+              supportHref="/pricing"
+            />
+          </>
+        ) : null}
       </ConsoleSection>
 
       <ConsoleSection title={c["console.viewDocs"]}>

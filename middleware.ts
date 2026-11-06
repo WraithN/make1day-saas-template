@@ -2,6 +2,12 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { isDemoMode, DEMO_COOKIE } from "@/lib/demo";
 import { guardPremium } from "@/lib/paywall";
+import {
+  isAdminConfigured,
+  adminClosedResponse,
+  adminUnauthorizedResponse,
+  adminAuthorized,
+} from "@/lib/admin-guard";
 
 const LANGS = ["en", "zh", "ja", "fr"];
 
@@ -28,23 +34,13 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/account") || pathname.startsWith("/dashboard");
   const adminArea = pathname.startsWith("/admin");
 
-  // Admin area: protect /admin with HTTP Basic Auth when ADMIN_USER /
-  // ADMIN_PASSWORD are configured. Without them the route is open (template
-  // default) so the console is reachable in dev without secrets — the UI
-  // shows a loud warning in that case.
+  // Admin area: never open to the public. If credentials are not configured we
+  // CLOSE it in production (503); in dev we allow but the UI warns loudly.
   if (adminArea) {
-    const user = process.env.ADMIN_USER;
-    const pass = process.env.ADMIN_PASSWORD;
-    if (user && pass) {
-      const auth = request.headers.get("authorization");
-      const expected =
-        "Basic " + Buffer.from(`${user}:${pass}`).toString("base64");
-      if (auth !== expected) {
-        return new NextResponse("Authentication required", {
-          status: 401,
-          headers: { "WWW-Authenticate": 'Basic realm="ShipKit Admin"' },
-        });
-      }
+    const closed = adminClosedResponse();
+    if (closed) return closed;
+    if (!adminAuthorized(request.headers.get("authorization"))) {
+      return adminUnauthorizedResponse();
     }
   }
 

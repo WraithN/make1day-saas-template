@@ -124,6 +124,19 @@ const PREMIUM_FILES = [
   "components/Paywall.tsx",
 ];
 
+// Multi-tenancy: when OFF, drop the workspace UI + its API routes + helpers so
+// the generated project has no org scaffolding. lib/org.ts is the tenant helper
+// but it is only imported by these files, so it is pruned too. When ON, the
+// workspace switcher appears in the account nav and orgs are real.
+const MULTI_FILES = [
+  "app/account/workspaces/page.tsx",
+  "components/console/WorkspaceSwitcher.tsx",
+  "components/console/WorkspaceManager.tsx",
+  "app/api/org/route.ts",
+  "app/api/org/active/route.ts",
+  "lib/org.ts",
+];
+
 // ShipKit-site-only endpoints that must never ship in a customer project.
 // Reasons:
 //  1. self-check statically imports lib/payments/waffo.ts, which IS pruned for
@@ -196,6 +209,16 @@ export function computeSkip(config: BuilderConfig): Set<string> {
   // isn't selected. lib/paywall.ts (the interception engine) stays.
   if (!config.features.includes("premium")) {
     for (const f of PREMIUM_FILES) skip.add(f);
+  }
+
+  // Multi-tenancy: drop the workspace UI + API routes + helper when OFF, or
+  // when the account console is OFF (the workspace UI lives under /account and
+  // imports shared console modules that would otherwise be pruned).
+  if (
+    !config.features.includes("multitenancy") ||
+    !config.features.includes("account")
+  ) {
+    for (const f of MULTI_FILES) skip.add(f);
   }
 
   return skip;
@@ -590,6 +613,17 @@ export function pruneAdminLink(source: string): string {
       'label: c["account.adminEntry"]',
       'label: c["console.backToSite"]',
     );
+}
+
+/**
+ * When the `multitenancy` feature is OFF, the workspaces nav entry is a dead
+ * route. Remove the item line (and the WORKSPACES_HREF constant) from
+ * app/account/layout.tsx so the generated project links only to real pages.
+ */
+export function pruneWorkspacesLink(source: string): string {
+  return source
+    .replace(/\s*\{ href: WORKSPACES_HREF, label: c\["account\.nav\.workspaces"\] \},/, "")
+    .replace(/const WORKSPACES_HREF = "\/account\/workspaces";\n/, "");
 }
 
 /**

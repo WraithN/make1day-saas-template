@@ -97,6 +97,34 @@
 > 此页是「模板里也要有付费墙样例」的落地：克隆出的客户工程直接带一个能跑的内容
 > 付费墙，配合任意支付商即可上线。
 
+## 3.6 组织 / 多租户（真实落地）
+
+`multitenancy` 不再是「只有文案的开关」，而是真实脚手架：
+
+- **数据模型**（`supabase/migrations/0007_orgs.sql`）：`organizations`、`memberships`
+  （`user_id + org_id + role`，role ∈ `owner/admin/member`）+ `profiles.org_id`。
+  带 RLS——成员只可读自己所在组织的行，owner/admin 可改组织。
+- **帮助函数** `lib/org.ts`：`getUserOrgs()` / `createOrg()` / `getActiveOrgId()` /
+  `requireTenant()`。当前租户用 `sk_org` cookie 记录，查询时应 `.eq("org_id", orgId)`
+  做租户隔离。无 Supabase / 无此表时全部优雅降级为空。
+- **UI**：`app/account/workspaces`（创建 / 切换工作区，`WorkspaceManager`）、
+  `/api/org`（创建并切换）、`/api/org/active`（切换当前租户）。账号导航的
+  Workspaces 入口由 `WORKSPACES_HREF` 常量控制，生成器在**未选**多租户时通过
+  `pruneWorkspacesLink` 剪掉该入口与 `lib/org.ts` 等文件（build matrix 断言）。
+
+## 3.7 统计持久化 + 后台访问加固
+
+两条此前已知的短板已补齐：
+
+- **统计 durable**：`lib/stats.ts` 在配置 `SUPABASE_SERVICE_ROLE_KEY` 时把
+  pageview 计数写入 `pageviews` 表（原子自增 RPC `increment_pageview`，
+  `supabase/migrations/0006_observability.sql`），serverless / 多实例下不再丢失；
+  未配置时回退到 `.data/site-stats.json`（仅本地开发，非持久）。
+- **后台不再默认开放**：`/admin` 与 `/api/stats` 共用 `lib/admin-guard.ts`——
+  生产环境若未设置 `ADMIN_USER` / `ADMIN_PASSWORD`，直接返回 **503**（关闭），
+  而非公开可读；开发环境仍允许访问但 UI 显示醒目警告。`/admin` 在已配置时先过
+  Basic Auth，再叠加 RBAC 角色校验。
+
 ## 4. 数据边界（不虚构功能）
 
 - 用户列表：配置 `SUPABASE_SERVICE_ROLE_KEY` 时从 `profiles` 读取角色映射（`getRolesByEmail()`）；否则只从 `licenses` 与 `subscriptions` 推导，页面明确标注「不完整」。

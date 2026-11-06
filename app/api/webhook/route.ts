@@ -8,6 +8,7 @@ import {
   type LicenseRecord,
 } from "@/lib/license";
 import { recordOrder } from "@/lib/orders";
+import { logger } from "@/lib/logger";
 import type { NormalizedSubEvent } from "@/lib/payments/types";
 
 export const runtime = "nodejs";
@@ -86,7 +87,10 @@ export async function POST(req: Request) {
   try {
     events = await provider.verifyWebhook(rawBody, headers);
   } catch (err) {
-    console.error("webhook verification failed", err);
+    logger.error("webhook verification failed", {
+      provider: provider.name,
+      err: (err as Error).message,
+    });
     return NextResponse.json({ error: "Webhook verification failed" }, { status: 400 });
   }
 
@@ -123,7 +127,11 @@ export async function POST(req: Request) {
         } catch (err) {
           // A missing Supabase config must not swallow a paid order: the
           // license below is still issued and can be claimed later.
-          console.warn("subscription upsert skipped:", (err as Error).message);
+          logger.warn("subscription upsert skipped", {
+            provider: provider.name,
+            userId: e.userId,
+            err: (err as Error).message,
+          });
         }
       }
 
@@ -142,13 +150,16 @@ export async function POST(req: Request) {
           currency: e.currency ?? null,
           status: e.status === "active" ? "active" : e.status,
         }).catch((err) =>
-          console.warn("order record skipped:", (err as Error).message),
+          logger.warn("order record skipped", { err: (err as Error).message }),
         );
       }
     }
   } catch (err) {
     // 5xx → gateway retries; a paid order is never silently dropped.
-    console.error("webhook entitlement persistence failed", err);
+    logger.error("webhook entitlement persistence failed", {
+      provider: provider.name,
+      err: (err as Error).message,
+    });
     return NextResponse.json(
       { error: "Webhook persistence failed" },
       { status: 500 },

@@ -68,7 +68,7 @@ export const FEATURE_OPTIONS: { id: Feature; label: string; note: string }[] = [
   { id: "landing", label: "Landing page", note: "Marketing home + demo console" },
   { id: "dashboard", label: "Dashboard", note: "Signed-in area + AI demo" },
   { id: "rag", label: "RAG module", note: "Document Q&A boilerplate" },
-  { id: "multitenancy", label: "Multi-tenancy", note: "Org/workspace helpers" },
+  { id: "multitenancy", label: "Multi-tenancy", note: "Real org/workspace scaffolding: tables, switcher, per-tenant data scoping" },
   {
     id: "account",
     label: "User console",

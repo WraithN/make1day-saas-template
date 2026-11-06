@@ -13,9 +13,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Stable constant so the generator can rewrite this single link when the
-// admin console is not selected (see pruneConsoleLinks in lib/generator/prune.ts).
+// Stable constants so the generator can rewrite these links when a console is
+// not selected (see lib/generator/prune.ts).
 const ADMIN_HREF = "/admin";
+// When the `multitenancy` Builder feature is OFF, the generator removes the
+// workspaces nav entry and the workspaces page / component entirely.
+const WORKSPACES_HREF = "/account/workspaces";
 
 export default async function AccountLayout({
   children,
@@ -31,6 +34,7 @@ export default async function AccountLayout({
     { href: "/account/billing", label: c["account.nav.billing"] },
     { href: "/account/licenses", label: c["account.nav.licenses"] },
     { href: "/account/settings", label: c["account.nav.settings"] },
+    { href: WORKSPACES_HREF, label: c["account.nav.workspaces"] },
   ];
 
   const badge = snap.email

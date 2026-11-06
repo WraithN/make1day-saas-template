@@ -252,6 +252,32 @@ visitors. The edge interception only redirects visitors with no entitlement
 signal at all (no license key, no Supabase session), so it never blocks a
 signed-in user who might hold a subscription.
 
+## Customer billing portal (self-serve subscription management)
+
+Buyers can self-manage their subscription (update card, cancel, view invoices)
+without operator involvement. The flow is provider-agnostic through the
+`PaymentProvider.createPortalSession()` optional method:
+
+- **Stripe** — real, via `stripe.billingPortal.sessions.create({ customer })`.
+- **Creem** — best-effort via `POST /customers/{id}/portal-sessions`; wrapped in
+  try/catch so a mismatched endpoint degrades to the fallback below.
+- **PayPal / Waffo** — no self-serve portal exposed; the API returns
+  `422 reason: unsupported_provider` and the UI shows a "contact support" path.
+
+**Endpoints / UI:**
+
+- `POST /api/billing/portal` — auth-required; looks up the caller's active
+  subscription + gateway customer id and returns the hosted portal URL.
+- `app/account/billing` — when the user has an active subscription, shows a
+  "Manage subscription" button (`components/console/BillingPortalButton`) that
+  opens the provider portal; on an unsupported provider it links to support.
+- One-time **Buyout** purchases don't create a subscription row, so the portal
+  button only appears for active recurring subscriptions.
+
+**Note:** the portal is a hosted, provider-controlled page — ShipKit never
+touches card data. After the buyer finishes, they are returned to
+`/account/billing`.
+
 ## Implementation notes (current code)
 
 - **Creem is the default gateway** (`PAYMENT_PROVIDER=creem`), for this site and

@@ -390,6 +390,28 @@ async function verifyCase(entry, doBuild) {
     exists("lib/paywall.ts"),
     "paywall interception engine must always ship (core, never pruned)",
   );
+  const hasMulti = config.features.includes("multitenancy");
+  const shipsMulti = hasMulti && hasAccount;
+  for (const rel of [
+    "app/account/workspaces/page.tsx",
+    "components/console/WorkspaceSwitcher.tsx",
+    "components/console/WorkspaceManager.tsx",
+    "app/api/org/route.ts",
+    "app/api/org/active/route.ts",
+    "lib/org.ts",
+  ]) {
+    assert(
+      exists(rel) === shipsMulti,
+      `multitenancy file ${rel} must ship iff multitenancy AND account are selected`,
+    );
+  }
+  if (hasAccount && !hasMulti) {
+    const accountLayout = await read("app/account/layout.tsx");
+    assert(
+      !accountLayout.includes('const WORKSPACES_HREF = "/account/workspaces"'),
+      "user console still links to a pruned /account/workspaces",
+    );
+  }
   if (hasAccount && !hasAdmin) {
     const accountLayout = await read("app/account/layout.tsx");
     assert(

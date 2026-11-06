@@ -6,6 +6,8 @@ import type {
   NormalizedStatus,
   NormalizedSubEvent,
   PaymentProvider,
+  PortalParams,
+  PortalResult,
 } from "./types";
 import { toMajor } from "./types";
 
@@ -115,5 +117,25 @@ export const creemProvider: PaymentProvider = {
       });
     }
     return out;
+  },
+
+  async createPortalSession(p: PortalParams): Promise<PortalResult | null> {
+    if (!p.customerId) return null;
+    // Creem's hosted customer portal. Endpoint/shape may differ by account;
+    // wrap in try/catch so a missing/again endpoint degrades to the fallback
+    // "contact support" UI rather than crashing the request.
+    try {
+      const data = await creemFetch(
+        `/customers/${encodeURIComponent(p.customerId)}/portal-sessions`,
+        {
+          method: "POST",
+          body: JSON.stringify({ return_url: p.returnUrl }),
+        },
+      );
+      const url = data?.portal_url ?? data?.url ?? data?.checkout_url;
+      return url ? { url } : null;
+    } catch {
+      return null;
+    }
   },
 };
