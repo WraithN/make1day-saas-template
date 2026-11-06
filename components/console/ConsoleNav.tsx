@@ -34,6 +34,20 @@ export function ConsoleNav({
   action?: ReactNode;
 }) {
   const pathname = usePathname() ?? "";
+
+  // Exactly one tab may be highlighted. A path can match several items by
+  // prefix (`/admin/orders` matches both `/admin` and `/admin/orders`), so we
+  // keep only the MOST SPECIFIC match — the longest matching href. Without
+  // this, the overview tab stays lit on every sub-page.
+  const activeHref = items.reduce<string | null>((best, item) => {
+    const matches =
+      item.href === pathname ||
+      (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+    if (!matches) return best;
+    if (best === null || item.href.length > best.length) return item.href;
+    return best;
+  }, null);
+
   const tone =
     badgeTone === "warning"
       ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
@@ -75,9 +89,7 @@ export function ConsoleNav({
           className="mt-7 flex gap-1 overflow-x-auto pb-3 text-sm"
         >
           {items.map((item) => {
-            const active =
-              item.href === pathname ||
-              (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+            const active = item.href === activeHref;
             return (
               <Link
                 key={item.href}
