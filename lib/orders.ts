@@ -17,7 +17,7 @@ import { all, run } from "@/lib/sqlite";
 
 export type OrderRecord = {
   id: string;
-  provider: string; // stripe | creem | paypal | waffo
+  provider: string; // stripe | creem | paypal | waffo | lemonsqueezy
   providerOrderId: string;
   email?: string;
   plan?: string | null;

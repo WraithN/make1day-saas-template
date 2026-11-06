@@ -77,6 +77,13 @@ export function CustomService({
               {contactEmail}
             </a>
           </p>
+          {/* The mailto / booking link stays as a fallback, but the real
+              support form is now the primary route. */}
+          <p className="mt-2 text-xs text-muted">
+            <a href="/support" className="underline underline-offset-2 hover:text-ink">
+              {t("nav.support")}
+            </a>
+          </p>
         </div>
       </div>
     </section>

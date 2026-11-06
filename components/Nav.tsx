@@ -57,6 +57,7 @@ export function Nav() {
     { href: "/blog", label: t("nav.blog") },
     { href: "/styles", label: t("nav.styles") },
     { href: "/builder", label: t("nav.builder") },
+    { href: "/support", label: t("nav.support") },
     { href: "/pricing", label: t("nav.pricing") },
   ];
 

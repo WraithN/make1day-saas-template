@@ -28,6 +28,7 @@ const PROVIDER_LABELS: Record<string, string> = {
   creem: "Creem",
   paypal: "PayPal",
   waffo: "Waffo",
+  lemonsqueezy: "Lemon Squeezy",
 };
 const PROVIDER_LABEL =
   PROVIDER_LABELS[env.paymentProvider()] ?? env.paymentProvider();
@@ -124,21 +125,37 @@ function productInfo() {
       "A style-locked design.md plus a root AGENTS.md generated per configuration",
       "Scoped rules with globs, 12 skills, .cursor/rules/*.mdc and CLAUDE.md in every download",
       "npm run ai:docs rebuilds every AI document after a config change",
-      "16-case build matrix type-checks each extracted ZIP and asserts console pruning",
+      "17-case build matrix type-checks each extracted ZIP and asserts console pruning",
       "Selectable five-language user console (/account) and admin console (/admin) ship in every default generated project",
       "llms.txt + llms-full.txt + OpenAPI 3.1 + MCP endpoint for agent discovery",
       `Working hybrid RAG (BM25 + embeddings + RRF), five-language i18n, checkout via ${PROVIDER_LABEL}`,
     ],
     knownLimitations: [
-      "Waffo acquiring create-order payload is unimplemented (pancake is complete)",
+      "Waffo acquiring checkout is implemented but all contract fields come from WAFFO_ACQUIRING_* env vars and its signing string / response shape are 需按你的 Waffo 合同核对 (docs/waffo.md §5); Pancake is complete",
       "AI chat streams token-by-token and has a per-user daily quota (AI_MESSAGES_PER_DAY, default 50, HTTP 429 when exhausted)",
       "Multi-tenancy ships 0007_orgs.sql + lib/org.ts, but the workspace UI requires the account console too and you must scope your own tables by org_id",
       "Both consoles are read-only starters (no profile mutations, no customer billing portal)",
       "Cloudflare output still contains Node-runtime routes",
       "Generated home/pricing pages are brand-free and ship an MIT LICENSE, but /privacy and /terms are placeholders",
       "Build matrix runs tsc --noEmit, not next build",
+      "MAIL_PROVIDER=smtp is NOT implemented (no nodemailer dependency); resend / webhook / none are the working providers, and none is a degraded log-only mode",
+      "The code only sends mail — SPF / DKIM / DMARC, a dedicated sending subdomain and warm-up are DNS / provider-side work that decides inbox placement (docs/email.md)",
+      "Mail, support tickets and auth recovery are ShipKit-site-only: they are pruned from every generated customer ZIP, whose nav/footer/login/admin links are rewritten out",
+      "Local SQLite auth recovery is real but NOT equivalent to Supabase Auth: no local password sign-in consumer, no MFA, no OAuth, no session rotation",
     ],
     machineReadable: ["/llms.txt", "/llms-full.txt", "/openapi.json", "/api/mcp", "/agent-ready"],
+    // ShipKit-site HTTP surface beyond the generator. Auth notes are explicit
+    // so an agent never assumes an endpoint is public when it is not.
+    siteOnlyHttpApi: [
+      { method: "GET", path: "/api/mail/self-check", auth: "public", note: "config state only, no secrets" },
+      { method: "POST", path: "/api/support/tickets", auth: "public (honeypot + rate limit)", note: "creates ticket, sends 2 mails best-effort" },
+      { method: "GET", path: "/api/support/tickets", auth: "Supabase session (own) / operator (all) / 401 anonymous", note: "ticket list" },
+      { method: "PATCH", path: "/api/support/tickets/{id}", auth: "operator only", note: "status open|answered|closed" },
+      { method: "POST", path: "/api/auth/password-reset", auth: "public (rate limited)", note: "action=request|confirm, anti-enumeration" },
+      { method: "POST", path: "/api/auth/verify-email", auth: "public (rate limited)", note: "action=send|confirm" },
+      { method: "GET", path: "/api/auth/verify-email", auth: "public", note: "email-link token confirmation + redirect" },
+      { method: "GET", path: "/api/payments/self-check", auth: "public", note: "payment + license config readiness" },
+    ],
   };
 }
 
@@ -147,7 +164,7 @@ function builderContract() {
     defaultConfig: DEFAULT_CONFIG,
     enums: {
       auth: ["email", "google", "github", "apple", "microsoft"],
-      payment: ["none", "stripe", "creem", "paypal", "waffo"],
+      payment: ["none", "stripe", "creem", "paypal", "waffo", "lemonsqueezy"],
       ai: ["openai", "anthropic", "gemini"],
       features: ["landing", "dashboard", "rag", "multitenancy", "account", "admin"],
       deploy: ["vercel", "selfhost", "cloudflare"],
@@ -161,6 +178,7 @@ function builderContract() {
       "features=multitenancy ships 0007_orgs.sql (organizations + memberships + RLS) and lib/org.ts; the workspace UI also requires features=account and you must add org_id scoping to your own tables",
       "deploy=cloudflare still emits Node-runtime API routes",
       "payment=paypal creates subscription checkouts only; use stripe/waffo for one-time Buyout",
+      "payment=lemonsqueezy uses variant ids (LEMONSQUEEZY_VARIANT_ID_BUYOUT / _CARE); its webhook custom-data echo location and portal id mapping are 需按你的 Lemon Squeezy 账户核对",
       "skills controls which skills/*.md playbooks and scoped rules are shipped",
     ],
   };

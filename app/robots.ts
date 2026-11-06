@@ -13,6 +13,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: [
           "/",
           "/builder",
+          "/support",
           "/agent-ready",
           "/llms.txt",
           "/llms-full.txt",
@@ -37,6 +38,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: [
           "/",
           "/builder",
+          "/support",
           "/agent-ready",
           "/llms.txt",
           "/llms-full.txt",

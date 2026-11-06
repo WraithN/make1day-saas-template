@@ -101,7 +101,7 @@ export const paypalProvider: PaymentProvider = {
     try {
       event = JSON.parse(rawBody);
     } catch {
-      return [];
+      throw new Error("Invalid PayPal webhook JSON");
     }
 
     // PayPal's own signature-verification endpoint.
@@ -117,7 +117,9 @@ export const paypalProvider: PaymentProvider = {
         webhook_event: event,
       }),
     });
-    if (verifyRes.verification_status !== "SUCCESS") return [];
+    if (verifyRes.verification_status !== "SUCCESS") {
+      throw new Error("PayPal webhook signature verification failed");
+    }
 
     const out: NormalizedSubEvent[] = [];
     const type: string = event.event_type ?? "";

@@ -62,7 +62,7 @@ const EN: AgentReadyCopy = {
   limits: [
     "The MCP endpoint is stateless JSON-RPC over HTTP — no sampling, prompts, subscriptions or SSE streaming.",
     "scaffold_project defaults to configuration JSON; includeZip=true is gated by the same license check as the website.",
-    "The build matrix type-checks 16 generated ZIPs with tsc and runs a real next build on a representative subset; /build-matrix reads a CI snapshot, so it is only as fresh as the last `npm run verify:matrix --build --publish`.",
+    "The build matrix type-checks 17 generated ZIPs with tsc and runs a real next build on a representative subset; /build-matrix reads a CI snapshot, so it is only as fresh as the last `npm run verify:matrix --build --publish`.",
     "AI chat streams token-by-token and has a per-user daily quota (AI_MESSAGES_PER_DAY, 429 when exhausted); RAG ingest/query require a signed-in subscriber.",
     "Multi-tenancy ships 0007_orgs.sql (organizations + memberships + RLS) and lib/org.ts helpers, but the workspace UI only ships when the account console is also selected, and you must scope your OWN tables with .eq(\"org_id\", ...).",
     "Generated projects ship brand-free home/pricing pages and an MIT LICENSE, but the Waffo acquiring checkout payload, a Cloudflare edge build and an out-of-the-box billing portal are still yours to add.",
@@ -110,7 +110,7 @@ const ZH: AgentReadyCopy = {
   limits: [
     "MCP 端点是 HTTP 上的无状态 JSON-RPC，没有 sampling、prompts、订阅或 SSE 流式。",
     "scaffold_project 默认只返回配置 JSON；includeZip=true 与网站走同一个授权校验。",
-    "构建矩阵用 tsc 校验 16 个生成 ZIP，并对代表性组合跑真实 next build；/build-matrix 读取 CI 快照，只反映最近一次 `npm run verify:matrix --build --publish` 的结果。",
+    "构建矩阵用 tsc 校验 17 个生成 ZIP，并对代表性组合跑真实 next build；/build-matrix 读取 CI 快照，只反映最近一次 `npm run verify:matrix --build --publish` 的结果。",
     "AI chat 已按 token 流式返回，并有每用户每日配额（AI_MESSAGES_PER_DAY，用尽返回 429）；RAG 摄入/查询需要登录且有效订阅。",
     "多租户附带 0007_orgs.sql（organizations + memberships + RLS）与 lib/org.ts 助手，但工作区 UI 需同时勾选用户后台才随包交付，且你自己的业务表要自行加 .eq(\"org_id\", ...) 做租户隔离。",
     "生成工程的首页/定价页已无 ShipKit 品牌并附带 MIT LICENSE；Waffo acquiring 下单报文、Cloudflare 边缘构建与开箱即用的账单门户仍需自行补齐。",
@@ -158,7 +158,7 @@ const JA: AgentReadyCopy = {
   limits: [
     "MCP エンドポイントは HTTP 上のステートレス JSON-RPC で、sampling / prompts / 購読 / SSE は未対応です。",
     "scaffold_project は既定で設定 JSON のみ。includeZip=true はサイトと同じライセンスチェックを受けます。",
-    "ビルド行列は 16 個の ZIP を tsc で検証し、代表的な組み合わせには実際の next build も実行します。/build-matrix は CI スナップショットを読むため、直近の `npm run verify:matrix --build --publish` 時点の結果です。",
+    "ビルド行列は 17 個の ZIP を tsc で検証し、代表的な組み合わせには実際の next build も実行します。/build-matrix は CI スナップショットを読むため、直近の `npm run verify:matrix --build --publish` 時点の結果です。",
     "AI chat はトークン単位でストリーミングし、ユーザーごとの日次クォータ（AI_MESSAGES_PER_DAY、超過で 429）があります。RAG の投入/検索にはログインと有効なサブスクが必要です。",
     "multitenancy には 0007_orgs.sql（organizations + memberships + RLS）と lib/org.ts が付属しますが、ワークスペース UI は account も選択した場合のみ同梱され、自社テーブルには自分で .eq(\"org_id\", ...) を追加する必要があります。",
     "生成プロジェクトのホーム/料金ページからは ShipKit ブランドを除去し MIT LICENSE を同梱しています。Waffo acquiring の注文ペイロード、Cloudflare エッジビルド、請求ポータルは未実装です。",
@@ -206,7 +206,7 @@ const FR: AgentReadyCopy = {
   limits: [
     "L'endpoint MCP est un JSON-RPC sans état sur HTTP : pas de sampling, prompts, abonnements ni streaming SSE.",
     "scaffold_project renvoie du JSON par défaut ; includeZip=true passe le même contrôle de licence que le site.",
-    "La matrice de build vérifie 16 ZIP avec tsc et lance un vrai next build sur un sous-ensemble représentatif ; /build-matrix lit un instantané CI, frais seulement après `npm run verify:matrix --build --publish`.",
+    "La matrice de build vérifie 17 ZIP avec tsc et lance un vrai next build sur un sous-ensemble représentatif ; /build-matrix lit un instantané CI, frais seulement après `npm run verify:matrix --build --publish`.",
     "Le chat IA est diffusé par tokens avec un quota quotidien par utilisateur (AI_MESSAGES_PER_DAY, 429 une fois épuisé) ; l'ingestion et l'interrogation RAG exigent un abonnement connecté.",
     "Le multi-tenant fournit 0007_orgs.sql (organizations + memberships + RLS) et les helpers lib/org.ts, mais l'UI des espaces n'est livrée que si la console account est aussi sélectionnée, et vous devez ajouter .eq(\"org_id\", ...) à VOS tables.",
     "Les projets générés ont des pages d'accueil/tarifs sans marque et une licence MIT ; le payload Waffo acquiring, un build Cloudflare edge et un portail de facturation restent à faire.",
@@ -254,7 +254,7 @@ const DE: AgentReadyCopy = {
   limits: [
     "Der MCP-Endpoint ist zustandsloses JSON-RPC über HTTP — kein Sampling, keine Prompts, keine Subscriptions oder SSE-Streaming.",
     "scaffold_project liefert standardmäßig Konfigurations-JSON; includeZip=true wird vom selben Lizenz-Check wie die Website abgesichert.",
-    "Die Build-Matrix prüft 16 generierte ZIPs mit tsc und führt für eine repräsentative Auswahl ein echtes next build aus; /build-matrix liest einen CI-Snapshot und ist nur so aktuell wie das letzte `npm run verify:matrix --build --publish`.",
+    "Die Build-Matrix prüft 17 generierte ZIPs mit tsc und führt für eine repräsentative Auswahl ein echtes next build aus; /build-matrix liest einen CI-Snapshot und ist nur so aktuell wie das letzte `npm run verify:matrix --build --publish`.",
     "Der KI-Chat wird tokenweise gestreamt und hat ein tägliches Kontingent pro Nutzer (AI_MESSAGES_PER_DAY, 429 bei Erschöpfung); RAG-Ingest und -Query verlangen einen angemeldeten Abonnenten.",
     "Multi-Tenancy liefert 0007_orgs.sql (organizations + memberships + RLS) und lib/org.ts, aber die Workspace-UI nur bei zusätzlich gewähltem account-Modul; eigene Tabellen müssen selbst mit .eq(\"org_id\", ...) isoliert werden.",
     "Generierte Projekte haben markenfreie Home-/Pricing-Seiten und eine MIT-LICENSE; Waffo-acquiring-Payload, ein Cloudflare-Edge-Build und ein fertiges Abrechnungsportal bleiben offen.",

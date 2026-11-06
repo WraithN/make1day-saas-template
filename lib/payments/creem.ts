@@ -78,19 +78,21 @@ export const creemProvider: PaymentProvider = {
     headers: Record<string, string | undefined>,
   ): Promise<NormalizedSubEvent[]> {
     const signature = headers["creem-signature"];
-    if (!signature) return [];
+    if (!signature) throw new Error("Missing creem-signature header");
     const expected = createHmac("sha256", env.creemWebhookSecret())
       .update(rawBody)
       .digest("hex");
     const a = Buffer.from(expected);
     const b = Buffer.from(signature);
-    if (a.length !== b.length || !timingSafeEqual(a, b)) return [];
+    if (a.length !== b.length || !timingSafeEqual(a, b)) {
+      throw new Error("Invalid Creem webhook signature");
+    }
 
     let payload: any;
     try {
       payload = JSON.parse(rawBody);
     } catch {
-      return [];
+      throw new Error("Invalid Creem webhook JSON");
     }
 
     const out: NormalizedSubEvent[] = [];

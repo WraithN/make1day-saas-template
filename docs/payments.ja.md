@@ -104,7 +104,7 @@ Waffo には**互換性のない 2 製品**があります。契約中のもの�
 | フレーバー | ドキュメント | チェックアウト | Webhook |
 |---|---|---|---|
 | `pancake`（既定） | docs.waffo.ai | `POST https://api.waffo.ai/v1/actions/checkout/create-session` | `X-Waffo-Signature: t=<ms>,v1=<base64>` |
-| `acquiring` | waffo.com/docs | `POST /api/v1/order/create`（契約依存） | `X-SIGNATURE`（base64 RSA） |
+| `acquiring` | waffo.com/docs | `POST /api/v1/order/create`（実装済み；契約項目は `WAFFO_ACQUIRING_*` env から） | `X-SIGNATURE`（base64 RSA） |
 
 **Pancake の設定**
 
@@ -139,11 +139,51 @@ WAFFO_WEBHOOK_PUBLIC_KEY_PROD="-----BEGIN PUBLIC KEY-----
 検証は `${t}.${rawBody}` への RSA-SHA256、許容 45 分。
 `subscription.payment_succeeded` は初回支払いで `subscription.activated` と
 併発するため意図的に無視します。旧 `WAFFO_WEBHOOK_SECRET`（HMAC）は未使用。
-詳細は `docs/waffo.md`。
+**Acquiring の order/create は実装済み**：`merchantInfo` / `userInfo` /
+`paymentInfo` / 注文項目はすべて `WAFFO_ACQUIRING_*` 環境変数から取得し
+（ShipKit は値を捏造しません）、ID は実行時生成、署名文字列とレスポンス形状は
+**ご自身の Waffo 契約で要確認**。詳細は `docs/waffo.md` §5。
 
 ---
 
-## 5. 決済なし
+## 5. Lemon Squeezy（デジタル製品向け MoR）
+
+Lemon Squeezy はホステッド決済とカスタマーポータルを備えた MoR です。
+アダプタは JSON:API REST エンドポイントを使用します。
+
+1. 2 つの **variant**（一度きりの Buyout と定期の Care）を作成し、
+   `LEMONSQUEEZY_VARIANT_ID_BUYOUT` / `LEMONSQUEEZY_VARIANT_ID_CARE` を設定。
+2. `LEMONSQUEEZY_API_KEY`、`LEMONSQUEEZY_WEBHOOK_SECRET`、
+   `LEMONSQUEEZY_STORE_ID`（`relationships.store` 用）を設定。
+3. 単一 Webhook `POST https://<ドメイン>/api/webhook` を登録。`x-signature`
+   （raw body の hex HMAC-SHA256）を **timing-safe** 比較
+   （`node:crypto.timingSafeEqual`）で検証します。
+4. `GET /api/payments/self-check` が不足している `LEMONSQUEEZY_*` を列挙します。
+
+```bash
+PAYMENT_PROVIDER=lemonsqueezy
+LEMONSQUEEZY_API_KEY=xxx
+LEMONSQUEEZY_WEBHOOK_SECRET=xxx
+LEMONSQUEEZY_STORE_ID=12345
+LEMONSQUEEZY_VARIANT_ID_BUYOUT=12345
+LEMONSQUEEZY_VARIANT_ID_CARE=12345
+```
+
+`POST /v1/checkouts` は `checkout_data.custom` に `userId` / `plan` を格納し、
+Webhook は `data.attributes`（`customer_id`、`user_email`、`status`、`renews_at`、
+`product_id` / `variant_id`、`urls.customer_portal`）を `NormalizedSubEvent` に
+正規化します。ポータルは best-effort：`GET /v1/subscriptions/{id}` →
+`data.attributes.urls.customer_portal`、取得できない場合は `null` を返し UI は
+「サポートに連絡」にフォールバックします。
+
+> ご自身の Lemon Squeezy アカウントで要確認：`custom` データが Webhook の
+> どこに返るか、`{id}` が customer id か subscription id か、正確な
+> status / event 名。公開 REST ドキュメントに基づく尽力マッピングであり、
+> 検証済みのエンドツーエンド統合ではありません。
+
+---
+
+## 6. 決済なし
 
 これを選ぶと収益化を完全にスキップ。生成アプリはチェックアウトも Webhook も課金 UI も持たない——
 内部ツール、ウェイトリスト、無料プロダクトに便利。後から `PAYMENT_PROVIDER` を変更し環境変数を追加すれば
@@ -180,6 +220,9 @@ WAFFO_WEBHOOK_PUBLIC_KEY_PROD="-----BEGIN PUBLIC KEY-----
   各管理画面で一度きり / 定期課金として設定してください。
 - PayPal：このアダプタはサブスクリプション決済のみ対応です。一度きりの
   Buyout には Waffo または Stripe を使用してください。
+- Lemon Squeezy：`LEMONSQUEEZY_VARIANT_ID_BUYOUT`（一度きり variant）と
+  `LEMONSQUEEZY_VARIANT_ID_CARE`（定期 variant）。`priceForPlan()` の同じ
+  マッピングが checkout の variant 選択と Webhook のプラン解決に使われます。
 - 1:1 カスタム：`NEXT_PUBLIC_BOOKING_URL` と
   `NEXT_PUBLIC_CONTACT_EMAIL` を設定します。予約リンクがない場合は
   下書き入りメールにフォールバックし、見積はすべて手動です。
@@ -190,9 +233,13 @@ WAFFO_WEBHOOK_PUBLIC_KEY_PROD="-----BEGIN PUBLIC KEY-----
 
 - **既定の決済事業者は Waffo Pancake**（`PAYMENT_PROVIDER=waffo`、
   `WAFFO_FLAVOR=pancake`）。本サイトと Builder の既定生成プロジェクトに適用。
-  `acquiring` は webhook 検証のみ対応。
+  `PAYMENT_PROVIDER=lemonsqueezy`（JSON:API 決済 + timing-safe HMAC Webhook +
+  ポータル）にも対応。`acquiring` の order/create は `WAFFO_ACQUIRING_*`
+  契約変数で実装済み（`docs/waffo.md` §5 参照）。
 - Webhook は**単一**ルート `POST https://<ドメイン>/api/webhook` のみ。
-- 検証は **RSA 公開鍵**（HMAC ではない）。未設定なら 400、未署名は受理しません。
+- 検証は各事業者の方式に従います（Waffo：**RSA 公開鍵**；
+  Lemon Squeezy / Creem / Stripe：**HMAC**）。未設定なら 400、
+  未署名は受理しません。
 - イベントは `(eventType, eventId)` で重複排除後に権限付与。支払い完了で
   オフライン `SK1.…` ライセンスキーを発行し、再送では二重発行しません。
 - `POST /api/generate` はライセンス / 有効サブスク / メール自動認領の

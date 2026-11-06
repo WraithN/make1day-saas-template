@@ -79,12 +79,12 @@ export const stripeProvider: PaymentProvider = {
     headers: Record<string, string | undefined>,
   ): Promise<NormalizedSubEvent[]> {
     const signature = headers["stripe-signature"];
-    if (!signature) return [];
+    if (!signature) throw new Error("Missing Stripe-Signature header");
     let event: Stripe.Event;
     try {
       event = stripe().webhooks.constructEvent(rawBody, signature, env.stripeWebhookSecret());
     } catch {
-      return [];
+      throw new Error("Invalid Stripe webhook signature");
     }
 
     const out: NormalizedSubEvent[] = [];

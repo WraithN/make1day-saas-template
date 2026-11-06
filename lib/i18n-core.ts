@@ -320,6 +320,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "builder.pay.creem.note": "Stripe-like, indie-friendly",
     "builder.pay.paypal.note": "Subscriptions + webhooks",
     "builder.pay.waffo.note": "MoR · Pancake + Acquiring",
+    "builder.pay.lemonsqueezy.note": "MoR for digital products — hosted checkout + portal",
     "builder.pay.none.note": "Skip monetization for now",
     "builder.deploy.vercel.note": "Zero-config, git push to ship",
     "builder.deploy.cloudflare.note": "Pages + Workers edge",
@@ -449,6 +450,9 @@ export const dict: Record<Lang, Record<string, string>> = {
     "homeBlog.viewAll": "Read all posts",
     "pricing.care.note": "Ongoing maintenance \u00b7 patches \u00b7 compliance",
     "hero.boundaries": "See honest boundaries",
+    "nav.support": "Support",
+    "footer.support": "Support",
+    "login.forgot": "Forgot password?",
   },
 
   zh: {
@@ -708,6 +712,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "builder.pay.creem.note": "类似 Stripe，对独立开发者友好",
     "builder.pay.paypal.note": "订阅 + Webhook",
     "builder.pay.waffo.note": "MoR · Pancake / Acquiring 双协议",
+    "builder.pay.lemonsqueezy.note": "数字产品 MoR——托管结账 + 账单门户",
     "builder.pay.none.note": "暂时跳过变现",
     "builder.deploy.vercel.note": "零配置，git 推送即上线",
     "builder.deploy.cloudflare.note": "Pages + Workers 边缘网络",
@@ -836,6 +841,9 @@ export const dict: Record<Lang, Record<string, string>> = {
     "homeBlog.viewAll": "\u67e5\u770b\u5168\u90e8\u6587\u7ae0",
     "pricing.care.note": "\u6301\u7eed\u7ef4\u62a4 \u00b7 \u8865\u4e01 \u00b7 \u98ce\u63a7\u5408\u89c4",
     "hero.boundaries": "\u770b\u8bda\u5b9e\u8fb9\u754c",
+    "nav.support": "支持",
+    "footer.support": "支持",
+    "login.forgot": "忘记密码？",
   },
 
   ja: {
@@ -1079,6 +1087,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "builder.pay.creem.note": "Stripe 類似、インディー向け",
     "builder.pay.paypal.note": "サブスク + Webhook",
     "builder.pay.waffo.note": "MoR · Pancake / Acquiring 両対応",
+    "builder.pay.lemonsqueezy.note": "デジタル製品向け MoR — ホステッド決済 + ポータル",
     "builder.pay.none.note": "今は収益化をスキップ",
     "builder.deploy.vercel.note": "ゼロコンフィグ、git プッシュで公開",
     "builder.deploy.cloudflare.note": "Pages + Workers エッジ",
@@ -1181,6 +1190,9 @@ export const dict: Record<Lang, Record<string, string>> = {
     "homeBlog.viewAll": "\u3059\u3079\u3066\u306e\u8a18\u4e8b\u3092\u8aad\u3080",
     "pricing.care.note": "\u7d9a\u7d9a\u30e1\u30f3\u30c6 \u00b7 \u30d1\u30c3\u30c1 \u00b7 \u30b3\u30f3\u30d7\u30e9\u30a4\u30a2\u30f3\u30b9",
     "hero.boundaries": "\u8aa0\u5b9f\u306a\u5883\u754c\u3092\u898b\u308b",
+    "nav.support": "サポート",
+    "footer.support": "サポート",
+    "login.forgot": "パスワードをお忘れですか？",
     "footer.blog": "ブログ",
     "pricing.month": "/月",
   },
@@ -1428,6 +1440,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "builder.pay.creem.note": "Type Stripe, ami des indés",
     "builder.pay.paypal.note": "Abonnements + Webhooks",
     "builder.pay.waffo.note": "MoR · Pancake / Acquiring",
+    "builder.pay.lemonsqueezy.note": "MoR pour produits numériques — checkout hébergé + portail",
     "builder.pay.none.note": "Passer la monétisation",
     "builder.deploy.vercel.note": "Zéro config, push git pour publier",
     "builder.deploy.cloudflare.note": "Pages + Workers edge",
@@ -1532,6 +1545,9 @@ export const dict: Record<Lang, Record<string, string>> = {
     "homeBlog.viewAll": "Lire tous les articles",
     "pricing.care.note": "Maintenance continue \u00b7 patchs \u00b7 conformit\u00e9",
     "hero.boundaries": "Voir les limites honn\u00eates",
+    "nav.support": "Support",
+    "footer.support": "Support",
+    "login.forgot": "Mot de passe oubli\u00e9 ?",
   },
 
   de: {
@@ -1788,6 +1804,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "builder.pay.creem.note": "Stripe-ähnlich, indie-freundlich",
     "builder.pay.paypal.note": "Abonnements + Webhooks",
     "builder.pay.waffo.note": "MoR · Pancake + Acquiring",
+    "builder.pay.lemonsqueezy.note": "MoR für digitale Produkte — gehostetes Checkout + Portal",
     "builder.pay.none.note": "Monetarisierung vorerst überspringen",
     "builder.deploy.vercel.note": "Zero-Config, Git-Push zum Livegehen",
     "builder.deploy.cloudflare.note": "Pages + Workers Edge",
@@ -1912,5 +1929,8 @@ export const dict: Record<Lang, Record<string, string>> = {
     "homeBlog.viewAll": "Alle Beitr\u00e4ge lesen",
     "pricing.care.note": "Laufende Wartung \u00b7 Patches \u00b7 Compliance",
     "hero.boundaries": "Ehrliche Grenzen ansehen",
+    "nav.support": "Support",
+    "footer.support": "Support",
+    "login.forgot": "Passwort vergessen?",
   },
 };

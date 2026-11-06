@@ -1,5 +1,10 @@
-import { createHash, createVerify, sign as rsaSign } from "node:crypto";
-import { env, priceForPlan } from "@/lib/env";
+import {
+  createHash,
+  createVerify,
+  randomUUID,
+  sign as rsaSign,
+} from "node:crypto";
+import { env, priceForPlan, waffoAcquiringMissing } from "@/lib/env";
 import type {
   CheckoutParams,
   CheckoutResult,
@@ -32,9 +37,10 @@ import { toMajor } from "./types";
 //       docs: https://waffo.com/docs/llms.txt
 //       webhook: X-SIGNATURE = base64 RSA-SHA256 over the raw body, verified
 //                with the Waffo public key; events are *_NOTIFICATION.
-//       checkout: POST /api/v1/order/create requires a much larger payload
-//                (merchantInfo / userInfo / paymentInfo / notifyUrl …). It is
-//                intentionally NOT faked — see createCheckoutAcquiring().
+//       checkout: POST /api/v1/order/create implemented via WAFFO_ACQUIRING_*
+//                env contract fields. The signing string and response shape
+//                are NOT specified by public docs, so they are configurable /
+//                best-effort and flagged 需按你的 Waffo 合同核对 (§5).
 //
 // Everything downstream consumes NormalizedSubEvent, so the rest of the app
 // (subscriptions, licenses, dashboard) stays protocol-agnostic.
@@ -180,19 +186,135 @@ async function createCheckoutPancake(
   return { url: String(url) };
 }
 
+// ── Acquiring: create-order request signing (configurable) ────────────────
+
 /**
- * Waffo Acquiring creates an order with a large merchant-specific payload
- * (`merchantInfo`, `userInfo`, `paymentInfo`, `notifyUrl`, `orderAmount`, …).
- * Those values come from your Waffo contract, so we refuse to invent them.
- * Either use Pancake (recommended for digital products) or wire the official
- * SDK into this function — see docs/waffo.md.
+ * RSA-SHA256 request signing for Acquiring, reusing Pancake's signing idea.
+ *
+ * The public Waffo docs do NOT specify Acquiring's canonical signing string,
+ * so `WAFFO_ACQUIRING_SIGN_MODE` selects one instead of pretending to know:
+ *   "pancake" (default) → METHOD\nPATH\nTS\nBASE64(SHA256(BODY))
+ *   "raw"               → the raw request body
+ * Both are 需按你的 Waffo 合同核对 (docs/waffo.md §5). The private key is the
+ * same PEM used by Pancake signed auth (WAFFO_PRIVATE_KEY); Waffo's public key
+ * verifies webhooks, the merchant's private key signs requests.
+ */
+function acquiringSignedHeaders(
+  method: string,
+  reqPath: string,
+  bodyStr: string,
+): Record<string, string> {
+  const privateKey = env.waffoPrivateKey();
+  const merchantId = env.waffoMerchantId();
+  if (!privateKey) {
+    throw new Error(
+      "Waffo Acquiring request signing requires WAFFO_PRIVATE_KEY (PEM, use \\n escapes for a single-line env). See docs/waffo.md §5.",
+    );
+  }
+  const mode = env.waffoAcquiringSignMode();
+  const ts = Math.floor(Date.now() / 1000).toString();
+  let canonical: string;
+  if (mode === "raw") {
+    canonical = bodyStr;
+  } else {
+    // "pancake" (default): the only canonical we actually have code for.
+    const bodyHash = createHash("sha256").update(bodyStr).digest("base64");
+    canonical = `${method}\n${reqPath}\n${ts}\n${bodyHash}`;
+  }
+  const signature = rsaSign(
+    "sha256",
+    Buffer.from(canonical),
+    privateKey,
+  ).toString("base64");
+
+  const headers: Record<string, string> = {
+    "content-type": "application/json",
+    "X-Timestamp": ts,
+    "X-Signature": signature,
+  };
+  if (merchantId) headers["X-Merchant-Id"] = merchantId;
+  return headers;
+}
+
+/**
+ * Waffo Acquiring create-order (POST /api/v1/order/create).
+ *
+ * Every merchant-contract field comes from a WAFFO_ACQUIRING_* env var — none
+ * are invented here (a missing one throws a named error from lib/env.ts). The
+ * remaining fields are runtime values: ids are random + traceable, notifyUrl
+ * is this site's single webhook, orderRequestedAt is "now".
+ *
+ * Field list / signing string / response shape are 需按你的 Waffo 合同核对 —
+ * see docs/waffo.md §5. This is a best-effort implementation against the
+ * public field list, NOT a verified end-to-end integration.
  */
 async function createCheckoutAcquiring(
-  _p: CheckoutParams,
+  p: CheckoutParams,
 ): Promise<CheckoutResult> {
-  throw new Error(
-    "WAFFO_FLAVOR=acquiring requires the full /api/v1/order/create payload (merchantInfo/userInfo/paymentInfo/notifyUrl) from your Waffo contract. Use WAFFO_FLAVOR=pancake for digital products, or implement createCheckoutAcquiring() with the official SDK. See docs/waffo.md.",
-  );
+  // Random + traceable: the ids carry plan/userId so ops can match a Waffo
+  // order back to a ShipKit checkout without inventing contract values.
+  const trace = `${p.plan}.${p.userId ?? "anon"}`;
+  const merchantOrderId = `SK-${trace}-${randomUUID()}`;
+  const paymentRequestId = randomUUID();
+
+  const body: Record<string, unknown> = {
+    merchantInfo: env.waffoAcquiringMerchantInfo(),
+    merchantOrderId,
+    notifyUrl: `${env.siteUrl().replace(/\/+$/, "")}/api/webhook`,
+    orderCurrency: env.waffoAcquiringCurrency(),
+    orderDescription: env.waffoAcquiringOrderDescription(),
+    orderRequestedAt: new Date().toISOString(),
+    paymentInfo: env.waffoAcquiringPaymentInfo(),
+    paymentRequestId,
+    userInfo: env.waffoAcquiringUserInfo(),
+  };
+
+  const reqPath = env.waffoCheckoutPath();
+  const bodyStr = JSON.stringify(body);
+  const headers = acquiringSignedHeaders("POST", reqPath, bodyStr);
+
+  const res = await fetch(`${env.waffoApiBase()}${reqPath}`, {
+    method: "POST",
+    headers,
+    body: bodyStr,
+    signal: AbortSignal.timeout(20_000),
+  });
+  const json: any = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = json?.message ?? json?.error ?? json?.msg ?? res.statusText;
+    throw new Error(
+      `Waffo Acquiring create-order failed (${res.status}): ${msg}`,
+    );
+  }
+
+  // docs/waffo.md describes data.orderAction as a JSON string carrying
+  // webUrl / deeplinkUrl. The exact wrapper is 需按你的 Waffo 合同核对, so we
+  // accept a few plausible shapes and never crash on an unknown one.
+  let action: any = json?.data?.orderAction ?? json?.orderAction ?? json?.data;
+  if (typeof action === "string") {
+    try {
+      action = JSON.parse(action);
+    } catch {
+      action = {};
+    }
+  }
+  const url =
+    action?.webUrl ??
+    action?.deeplinkUrl ??
+    json?.data?.checkoutUrl ??
+    json?.checkoutUrl ??
+    json?.url;
+  if (url) return { url: String(url) };
+
+  // No hosted URL: return the order id. NOTE /api/checkout currently only
+  // redirects on url/approvalUrl, so an id-only response needs the redirect
+  // step wired up for your contract — documented in docs/waffo.md §5.
+  const orderId =
+    json?.data?.orderId ??
+    json?.data?.acquiringOrderId ??
+    json?.orderId ??
+    merchantOrderId;
+  return { orderId: String(orderId) };
 }
 
 // ── Pancake: webhook verification ─────────────────────────────────────────
@@ -426,8 +548,9 @@ export function waffoConfigSummary() {
     if (!env.waffoWebhookPublicKeyProd() && !env.waffoWebhookPublicKey())
       missing.push("WAFFO_WEBHOOK_PUBLIC_KEY_PROD");
   } else {
-    if (!env.waffoWebhookPublicKey()) missing.push("WAFFO_WEBHOOK_PUBLIC_KEY");
-    missing.push("Acquiring create-order payload (see docs/waffo.md)");
+    // Acquiring create-order is implemented; it needs the full env contract
+    // (JSON blobs + signing key + webhook key). List each missing var by name.
+    for (const name of waffoAcquiringMissing()) missing.push(name);
   }
   if (!priceForPlan("buyout")) missing.push("WAFFO_PRICE_ID_BUYOUT");
   if (!priceForPlan("care")) missing.push("WAFFO_PRICE_ID_CARE");
@@ -438,7 +561,10 @@ export function waffoConfigSummary() {
       ? env.waffoMerchantId() && env.waffoPrivateKey()
         ? "api-key (RSA signed)"
         : "store-slug"
-      : "acquiring key",
+      : env.waffoPrivateKey()
+        ? "RSA signed (WAFFO_PRIVATE_KEY)"
+        : "missing WAFFO_PRIVATE_KEY",
+    signMode: pancake ? "n/a" : env.waffoAcquiringSignMode(),
     apiBase: env.waffoApiBase(),
     checkoutPath: env.waffoCheckoutPath(),
     webhookUrl: "/api/webhook",

@@ -105,7 +105,7 @@ Waffo désigne **deux produits incompatibles** — choisissez votre contrat.
 | Saveur | Docs | Checkout | Webhook |
 |---|---|---|---|
 | `pancake` (défaut) | docs.waffo.ai | `POST https://api.waffo.ai/v1/actions/checkout/create-session` | `X-Waffo-Signature: t=<ms>,v1=<base64>` |
-| `acquiring` | waffo.com/docs | `POST /api/v1/order/create` (payload contractuel) | `X-SIGNATURE` (base64 RSA) |
+| `acquiring` | waffo.com/docs | `POST /api/v1/order/create` (implémenté ; champs contractuels via `WAFFO_ACQUIRING_*`) | `X-SIGNATURE` (base64 RSA) |
 
 **Configuration Pancake**
 
@@ -141,11 +141,53 @@ Le checkout envoie `productType: "onetime" | "subscription"`, `buyerEmail`,
 est RSA-SHA256 sur `${t}.${rawBody}` (tolérance 45 min) ;
 `subscription.payment_succeeded` est ignoré car `subscription.activated`
 accompagne déjà le premier paiement. L'ancien `WAFFO_WEBHOOK_SECRET` (HMAC)
-n'est plus utilisé. Référence complète : `docs/waffo.md`.
+n'est plus utilisé. **La création de commande Acquiring est implémentée** :
+tous les champs `merchantInfo` / `userInfo` / `paymentInfo` / commande
+proviennent des variables `WAFFO_ACQUIRING_*` (ShipKit n'invente aucune valeur),
+les identifiants sont générés à l'exécution, et la chaîne de signature / la
+forme de la réponse sont **à vérifier avec votre contrat Waffo**.
+Référence complète : `docs/waffo.md` §5.
 
 ---
 
-## 5. Aucun paiement
+## 5. Lemon Squeezy (MoR pour produits numériques)
+
+Lemon Squeezy est un Merchant of Record avec checkout hébergé et portail client.
+L'adaptateur utilise ses endpoints REST JSON:API.
+
+1. Créez deux **variants** — Buyout (paiement unique) et Care (récurrent) — et
+   renseignez `LEMONSQUEEZY_VARIANT_ID_BUYOUT` / `LEMONSQUEEZY_VARIANT_ID_CARE`.
+2. Renseignez `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_WEBHOOK_SECRET` et
+   `LEMONSQUEEZY_STORE_ID` (utilisé dans `relationships.store`).
+3. Enregistrez l'unique webhook `POST https://<domaine>/api/webhook`. L'adaptateur
+   vérifie `x-signature` (HMAC-SHA256 hex du corps brut) avec une comparaison
+   **timing-safe** (`node:crypto.timingSafeEqual`).
+4. `GET /api/payments/self-check` liste les variables `LEMONSQUEEZY_*` manquantes.
+
+```bash
+PAYMENT_PROVIDER=lemonsqueezy
+LEMONSQUEEZY_API_KEY=xxx
+LEMONSQUEEZY_WEBHOOK_SECRET=xxx
+LEMONSQUEEZY_STORE_ID=12345
+LEMONSQUEEZY_VARIANT_ID_BUYOUT=12345
+LEMONSQUEEZY_VARIANT_ID_CARE=12345
+```
+
+`POST /v1/checkouts` place `userId` / `plan` dans `checkout_data.custom` ; le
+webhook normalise `data.attributes` (`customer_id`, `user_email`, `status`,
+`renews_at`, `product_id` / `variant_id`, `urls.customer_portal`) en
+`NormalizedSubEvent`. Le portail est best-effort : `GET /v1/subscriptions/{id}`
+→ `data.attributes.urls.customer_portal` ; un échec renvoie `null` et l'UI
+replie vers « contacter le support ».
+
+> À vérifier avec votre compte Lemon Squeezy : où les données `custom` sont
+> renvoyées dans le webhook, si `{id}` est un customer id ou un subscription id,
+> et les noms exacts de status / événements. Mapping best-effort basé sur la doc
+> REST publique, pas une intégration de bout en bout vérifiée.
+
+---
+
+## 6. Aucun paiement
 
 Choisissez ceci pour ignorer la monétisation. L'application générée n'a ni caisse, ni webhook, ni UI de facturation —
 utile pour les outils internes, les listes d'attente ou les produits gratuits. Vous pouvez basculer vers un vrai fournisseur plus tard en changeant `PAYMENT_PROVIDER` et en ajoutant les variables ci-dessus.
@@ -182,6 +224,9 @@ La page tarifs vend deux offres payantes — **Buyout** (paiement unique,
   les produits en paiement unique / récurrent dans le tableau de bord.
 - PayPal : cet adaptateur ne crée que des abonnements — utilisez Waffo ou Stripe pour
   le Buyout en paiement unique.
+- Lemon Squeezy : `LEMONSQUEEZY_VARIANT_ID_BUYOUT` (variant unique) et
+  `LEMONSQUEEZY_VARIANT_ID_CARE` (variant récurrent) ; le même mapping
+  `priceForPlan()` sert au choix du variant et à la résolution du plan en webhook.
 - Sur mesure 1:1 : renseignez `NEXT_PUBLIC_BOOKING_URL` et
   `NEXT_PUBLIC_CONTACT_EMAIL`. Le bouton ouvre le lien de réservation, ou un
   e-mail prérempli à défaut. Les devis sont toujours manuels.
@@ -192,9 +237,13 @@ La page tarifs vend deux offres payantes — **Buyout** (paiement unique,
 
 - **Waffo Pancake est le prestataire par défaut** (`PAYMENT_PROVIDER=waffo`,
   `WAFFO_FLAVOR=pancake`), pour ce site et le projet généré par défaut.
-  Le mode `acquiring` ne couvre que la vérification des webhooks.
+  `PAYMENT_PROVIDER=lemonsqueezy` est également pris en charge (checkout JSON:API
+  + webhook HMAC timing-safe + portail client). La création de commande
+  `acquiring` est implémentée via les variables contractuelles
+  `WAFFO_ACQUIRING_*` — voir `docs/waffo.md` §5.
 - Une **seule** route webhook : `POST https://<domaine>/api/webhook`.
-- Vérification par **clé publique RSA**, pas HMAC. Clé absente → 400, aucun
+- Vérification selon le schéma de chaque prestataire (Waffo : **clé publique
+  RSA** ; Lemon Squeezy / Creem / Stripe : **HMAC**). Clé absente → 400, aucun
   corps non signé n'est accepté.
 - Les événements sont dédupliqués sur `(eventType, eventId)` avant toute
   attribution ; un paiement émet une clé `SK1.…`, un retry n'en émet pas de

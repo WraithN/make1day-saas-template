@@ -46,12 +46,12 @@ create trigger on_auth_user_created
 
 -- ─────────────────────────────────────────────
 -- subscriptions: payment-provider ↔ Supabase bridge
--- Provider-agnostic: works with Stripe / Creem / PayPal / Waffo.
+-- Provider-agnostic: works with Stripe / Creem / PayPal / Waffo / Lemon Squeezy.
 -- ─────────────────────────────────────────────
 create table if not exists public.subscriptions (
   id                       uuid primary key default gen_random_uuid(),
   user_id                  uuid not null references auth.users (id) on delete cascade,
-  provider                 text not null default 'stripe', -- stripe | creem | paypal | waffo
+  provider                 text not null default 'stripe', -- stripe | creem | paypal | waffo | lemonsqueezy
   provider_customer_id     text,
   provider_subscription_id text,
   status                   text not null default 'incomplete', -- active | trialing | canceled | past_due | incomplete

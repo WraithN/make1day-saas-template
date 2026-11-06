@@ -55,11 +55,11 @@ export const compareContent: Record<
       { feature: "Built-in i18n", shipkit: "EN / ZH / JA / FR", shipfast: "No", makerkit: "Yes", supastarter: "Yes" },
       { feature: "Merchant-of-Record checkout", shipkit: "Waffo Pancake (no company needed)", shipfast: "No", makerkit: "No", supastarter: "No" },
       { feature: "Machine-readable API contract", shipkit: "llms.txt + llms-full.txt + OpenAPI 3.1", shipfast: "No", makerkit: "Not emphasised", supastarter: "Not emphasised" },
-      { feature: "Generated-project build matrix", shipkit: "16 CI cases, all 5 gateways / 10 styles, tsc on every ZIP", shipfast: "No", makerkit: "No", supastarter: "No" },
+      { feature: "Generated-project build matrix", shipkit: "17 CI cases, all 6 gateways / 10 styles, tsc on every ZIP", shipfast: "No", makerkit: "No", supastarter: "No" },
       { feature: "User console + admin console", shipkit: "Both included, five-language, selectable and fully pruned when unchecked", shipfast: "Account page only", makerkit: "Admin + RBAC", supastarter: "Admin basics" },
     ],
     verdict:
-      "Pick ShipKit if you build with an AI coding agent: it is the only starter here that generates AGENTS.md AND a style-specific design.md, prunes modules you did not select, ships working hybrid RAG, five-language i18n and agent-readable llms.txt — at the lowest price in the category. Choose ShipFast for the biggest community, Makerkit for deep B2B multi-tenancy, Supastarter for maximum breadth, or VibeReady ($149–399) if enforced commit-time quality gates and Terraform matter more than i18n and a visual generator. ShipKit also ships scoped rules, 12 skills, `npm run ai:docs` for deterministic regeneration, an MCP `scaffold_project` tool, an OpenAPI 3.1 contract and a public 16-case build matrix, plus selectable /account and /admin consoles in every generated project, so an agent can both assemble a project and verify that its ZIP type-checks instead of trusting a README.",
+      "Pick ShipKit if you build with an AI coding agent: it is the only starter here that generates AGENTS.md AND a style-specific design.md, prunes modules you did not select, ships working hybrid RAG, five-language i18n and agent-readable llms.txt — at the lowest price in the category. Choose ShipFast for the biggest community, Makerkit for deep B2B multi-tenancy, Supastarter for maximum breadth, or VibeReady ($149–399) if enforced commit-time quality gates and Terraform matter more than i18n and a visual generator. ShipKit also ships scoped rules, 12 skills, `npm run ai:docs` for deterministic regeneration, an MCP `scaffold_project` tool, an OpenAPI 3.1 contract and a public 17-case build matrix, plus selectable /account and /admin consoles in every generated project, so an agent can both assemble a project and verify that its ZIP type-checks instead of trusting a README.",
   },
   zh: {
     eyebrow: "对比",
@@ -92,10 +92,10 @@ export const compareContent: Record<
       { feature: "内置多语言", shipkit: "中 / 英 / 日 / 法", shipfast: "否", makerkit: "是", supastarter: "是" },
       { feature: "MoR 收款（无需公司实体）", shipkit: "Waffo Pancake", shipfast: "否", makerkit: "否", supastarter: "否" },
       { feature: "机器可读 API 契约", shipkit: "llms.txt + llms-full.txt + OpenAPI 3.1", shipfast: "否", makerkit: "未强调", supastarter: "未强调" },
-      { feature: "生成产物构建矩阵", shipkit: "16 组 CI：5 支付商 / 10 风格全覆盖，每个 ZIP 跑 tsc", shipfast: "否", makerkit: "否", supastarter: "否" },
+      { feature: "生成产物构建矩阵", shipkit: "17 组 CI：6 支付商 / 10 风格全覆盖，每个 ZIP 跑 tsc", shipfast: "否", makerkit: "否", supastarter: "否" },
       { feature: "用户后台 + 管理员后台", shipkit: "两套五语后台，可勾选、未选即真剪枝", shipfast: "仅账户页", makerkit: "管理端 + RBAC", supastarter: "基础管理端" },
     ],
     verdict:
-      "如果你用 AI coding agent 写代码：ShipKit 是这批产品里唯一同时生成 AGENTS.md 与「随风格变化的 design.md」、按选项真实剪枝、内置可运行混合检索 RAG、五语 i18n 和面向智能体的 llms.txt 的启动包，而且价格最低。要最大社区选 ShipFast，深度 B2B 多租户选 Makerkit，功能广度选 Supastarter；若更看重提交时质量门禁与 Terraform 且不需要 i18n，可看 VibeReady（$149–399）。此外 ShipKit 还附带 scoped rules、12 份 skills、`npm run ai:docs` 确定性重建、MCP `scaffold_project` 工具、OpenAPI 3.1 契约与 16 组构建矩阵，并且每个生成工程都带可勾选的 /account 用户后台与 /admin 管理员后台——agent 既能自己组装工程，也能验证生成的 ZIP 能否通过类型检查，而不必只信 README。",
+      "如果你用 AI coding agent 写代码：ShipKit 是这批产品里唯一同时生成 AGENTS.md 与「随风格变化的 design.md」、按选项真实剪枝、内置可运行混合检索 RAG、五语 i18n 和面向智能体的 llms.txt 的启动包，而且价格最低。要最大社区选 ShipFast，深度 B2B 多租户选 Makerkit，功能广度选 Supastarter；若更看重提交时质量门禁与 Terraform 且不需要 i18n，可看 VibeReady（$149–399）。此外 ShipKit 还附带 scoped rules、12 份 skills、`npm run ai:docs` 确定性重建、MCP `scaffold_project` 工具、OpenAPI 3.1 契约与 17 组构建矩阵，并且每个生成工程都带可勾选的 /account 用户后台与 /admin 管理员后台——agent 既能自己组装工程，也能验证生成的 ZIP 能否通过类型检查，而不必只信 README。",
   },
 };

@@ -380,6 +380,9 @@ const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 const LANGS = ["en", "zh", "ja", "fr", "de"];
 
 // Only routes that exist in this build. Regenerate this list if you add pages.
+// Site-only routes (support, auth-recovery, the generator, marketing pages
+// and the operator ticket console) are deliberately NOT listed here: the
+// generated chrome strips their links so no dead link survives.
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
   const routes: { path: string; priority: number }[] = [
@@ -482,7 +485,10 @@ export function customerNav(source: string): string {
   return source
     .replace(/\s*\{ href: "\/blog", label: t\("nav\.blog"\) \},/, "")
     .replace(/\s*\{ href: "\/styles", label: t\("nav\.styles"\) \},/, "")
-    .replace(/\s*\{ href: "\/builder", label: t\("nav\.builder"\) \},/, "");
+    .replace(/\s*\{ href: "\/builder", label: t\("nav\.builder"\) \},/, "")
+    // /support is a ShipKit-site-only page. Strip its nav item so the
+    // generated project never links to a route that is absent from the ZIP.
+    .replace(/\s*\{ href: "\/support", label: t\("nav\.support"\) \},/, "");
 }
 
 /** Replace the "ShipKit by Uncorne" wordmark in Nav with the app name. */
@@ -501,6 +507,8 @@ export function customerFooter(source: string, appName: string): string {
   return source
     .replace(/\s*<Link href="\/blog"[\s\S]*?<\/Link>/, "")
     .replace(/\s*<Link href="\/agent-ready"[\s\S]*?<\/Link>/, "")
+    // /support is ShipKit-site-only — remove its footer link too.
+    .replace(/\s*<Link href="\/support"[\s\S]*?<\/Link>/, "")
     .replace(/\s*<a\s+href="https:\/\/github\.com\/uncorne\/shipkit"[\s\S]*?<\/a>/, "")
     .replace(
       /<span className="font-semibold text-ink">ShipKit<\/span>[\s\S]*?<span className="font-mono">Uncorne<\/span>\./,
@@ -515,6 +523,15 @@ export function customerFooter(source: string, appName: string): string {
 /** Point the /license shortcut at a route that survives in customer builds. */
 export function customerLicenseLinks(source: string): string {
   return source.replaceAll('href="/license"', 'href="/pricing"');
+}
+
+/**
+ * /forgot-password (and the whole auth-recovery flow) is ShipKit-site-only.
+ * The login page ships in every build, so strip its "forgot password" anchor
+ * or the generated project would link to a route that is absent from the ZIP.
+ */
+export function customerLoginLinks(source: string): string {
+  return source.replace(/\s*<a\s+href="\/forgot-password"[\s\S]*?<\/a>/, "");
 }
 
 /** Remove the hard-coded ShipKit domain fallback from the SEO helper. */

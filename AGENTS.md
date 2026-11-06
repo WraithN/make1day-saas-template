@@ -48,7 +48,11 @@ will 404 every route. Stop dev → delete `.next` → build → start.
    generated project can fail `tsc` with a dead import.
 3. **Config changes need schema + matrix.** A new `SkillId` / option requires
    updates to `config.ts`, `prune.ts`, the zod schema in
-   `app/api/generate/route.ts`, and the cases in `verify-matrix.mjs`.
+   `app/api/generate/route.ts`, and the cases in `verify-matrix.mjs`. A new
+   payment gateway additionally needs `lib/payments/<id>.ts` wired into
+   `index.ts`, `prune.ts`'s `PAYMENT_FILES` / `PAYMENT_LABELS`, `schema.ts`,
+   `env.ts`, `verify-matrix.mjs`'s `PAYMENT_FILES` + a case, and the
+   machine-readable gateway lists. An unselected adapter must never ship.
 4. **Payments verify on the raw body.** Waffo Pancake uses RSA-SHA256 over
    `${t}.${rawBody}`; the single webhook is `POST /api/webhook`. `buyout` is
    one-time, `care` is monthly. Never trust an unsigned event.
@@ -73,14 +77,30 @@ will 404 every route. Stop dev → delete `.next` → build → start.
 
 ## 5. Known gaps (do not "fix" by claiming they work)
 
-Waffo `acquiring` checkout payload is unimplemented (Pancake is complete);
-the local SQLite store (accounts, roles, licenses, orders, traffic, AI usage)
+Waffo `acquiring` create-order IS implemented, but every merchant-contract
+field comes from a `WAFFO_ACQUIRING_*` env var (ShipKit invents none) and its
+signing string / response shape / webhook attribution are 需按你的 Waffo 合同核对
+(docs/waffo.md §5); Pancake is complete. Lemon Squeezy's webhook custom-data
+echo location, the portal id (customer vs subscription) and the exact
+status/event names are 需按你的 Lemon Squeezy 账户核对. The local SQLite store
+(accounts, roles, licenses, orders, traffic, AI usage)
 and the in-memory RAG index are not durable on serverless — a production
 deployment should configure Supabase; Cloudflare output still has Node-runtime
 routes, so that deploy target needs edge-compatible route handlers; PayPal
-has no billing portal; the local user directory is an account + role list, not
-a full auth provider (no password reset, no e-mail verification) — Supabase
-Auth takes over once `SUPABASE_SERVICE_ROLE_KEY` is configured.
+has no billing portal. The local user directory now HAS password reset and
+e-mail verification flows: one-time, expiring tokens are stored ONLY as
+SHA-256 hashes in local SQLite `password_resets` / `email_verifications`
+(`lib/local-auth-tokens.ts`), new passwords use scrypt hashes, and links are
+sent through `lib/mail/*`. That is still NOT equivalent to Supabase Auth: there
+is no local password SIGN-IN consumer for those hashes yet, no MFA, no OAuth
+providers, no session rotation / refresh, and no email-confirmation-gated
+login. "send" endpoints always return the same generic success copy
+(anti-enumeration). Supabase Auth takes over once
+`NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` are configured
+(`resetPasswordForEmail` / `verifyOtp` / `updateUser` / `resend`); the exact
+Supabase redirect + email-template details are 需按 Supabase 文档核对.
+`SUPABASE_SERVICE_ROLE_KEY` additionally moves the account directory to
+Postgres.
 
 Multi-tenancy is real but partial: `0007_orgs.sql` (organizations +
 memberships + RLS) and `lib/org.ts` ship with every build, while the workspace
@@ -89,3 +109,18 @@ selected. Customers must run the migration and add `.eq("org_id", ...)` to
 their own domain tables themselves. Generated projects no longer contain
 ShipKit marketing pages (home/pricing are brand-free), but legal pages are
 placeholders the customer must replace.
+
+Transactional mail (`lib/mail/*`) implements `resend` (REST), a configurable
+`webhook` HTTP mailer and `none` (safe logged no-op). **`MAIL_PROVIDER=smtp`
+is NOT implemented** — there is no `nodemailer` dependency; installing it and
+adding a dynamic-import adapter is left to the operator (`docs/email.md`).
+`MAIL_PROVIDER=none` is degraded: verification / reset / ticket emails are
+logged but not delivered, and `GET /api/mail/self-check` flags it. The code
+only SENDS — SPF / DKIM / DMARC, a dedicated sending subdomain, suppression
+lists and warm-up are DNS / provider-side work, not code, and decide actual
+inbox placement. These three feature areas (mail, support tickets, auth
+recovery) are **ShipKit-site-only**: they live in this repo's own runtime but
+are pruned from every generated customer ZIP (`SITE_ONLY_FILES`), and the
+corresponding Nav / Footer / login / admin links are rewritten out of the
+customer package. The generated starter still has no built-in support form,
+no password-reset page and no transactional mail of its own.

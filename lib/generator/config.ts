@@ -3,7 +3,13 @@
 // generated template's env defaults, README and manifest.
 
 export type AuthProvider = "email" | "google" | "github" | "apple" | "microsoft";
-export type PaymentProvider = "none" | "stripe" | "creem" | "paypal" | "waffo";
+export type PaymentProvider =
+  | "none"
+  | "stripe"
+  | "creem"
+  | "paypal"
+  | "waffo"
+  | "lemonsqueezy";
 export type AiProvider = "openai" | "anthropic" | "gemini";
 export type Feature =
   | "landing"
@@ -95,6 +101,11 @@ export const PAYMENT_OPTIONS: {
   { id: "stripe", label: "Stripe", note: "Most mature — production ready" },
   { id: "creem", label: "Creem", note: "Indie-friendly (default)" },
   { id: "paypal", label: "PayPal", note: "Subscriptions + webhooks" },
+  {
+    id: "lemonsqueezy",
+    label: "Lemon Squeezy",
+    note: "MoR for digital products — hosted checkout + portal",
+  },
   { id: "none", label: "No payments", note: "Skip monetization for now" },
 ];
 

@@ -1,11 +1,11 @@
 -- ShipKit — orders (provider-agnostic purchase records)
--- Run after 0003_licenses.sql. Every gateway (Stripe / Creem / PayPal / Waffo)
+-- Run after 0003_licenses.sql. Every gateway (Stripe / Creem / PayPal / Waffo / Lemon Squeezy)
 -- is normalised into this single table so the admin console and the generated
 -- template never need gateway-specific code to list or reconcile orders.
 
 create table if not exists public.orders (
   id                uuid primary key default gen_random_uuid(),
-  provider          text not null,                 -- stripe | creem | paypal | waffo
+  provider          text not null,                 -- stripe | creem | paypal | waffo | lemonsqueezy
   provider_order_id text not null,                 -- gateway order / subscription / payment id
   customer_email    text,
   plan              text,                          -- buyout | care | pro | scale

@@ -3,7 +3,7 @@
 > 适用前提：`PAYMENT_PROVIDER=waffo` 且 `WAFFO_FLAVOR=pancake`（`docs.waffo.ai` 那套 MoR 产品）。
 > 依据 `lib/payments/waffo.ts` 的实际请求/验签逻辑与 `docs/waffo.md` 的官方协议整理。
 > **本清单按官方公开文档编写，尚未与你的真实商户后台联调**：后台菜单名称可能随版本变化，字段值一律以你的 Dashboard 为准。
-> 如果你签的是 `waffo.com` 的 Acquiring，请**停止**本清单，见 `docs/waffo.md` 第 5 节——下单 payload 依赖合同字段，当前未实现。
+> 如果你签的是 `waffo.com` 的 Acquiring，请**停止**本清单（本清单只针对 Pancake），见 `docs/waffo.md` 第 5 节——下单已实现，但 `merchantInfo` / `userInfo` / `paymentInfo` 等合同字段必须由 `WAFFO_ACQUIRING_*` 环境变量提供，签名串与响应结构需按你的 Waffo 合同核对。
 
 ---
 

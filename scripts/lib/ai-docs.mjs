@@ -328,7 +328,7 @@ function buildAgents(spec, rules) {
   if (c.payment === "none") {
     L.push("- **Payments:** disabled. `lib/payments/none.ts` throws a clear error on checkout; do not add a gateway without updating `lib/payments/index.ts`.");
   } else if (c.payment === "waffo") {
-    L.push("- **Payments (Waffo Pancake):** `WAFFO_FLAVOR=pancake`, `WAFFO_ENVIRONMENT`, `WAFFO_STORE_SLUG` **or** `WAFFO_MERCHANT_ID`+`WAFFO_PRIVATE_KEY`, `WAFFO_WEBHOOK_PUBLIC_KEY_TEST/PROD`, `WAFFO_PRICE_ID_BUYOUT` (one-time) / `_CARE` (subscription). Webhook is RSA-SHA256 over `\\${t}.\\${rawBody}`. `acquiring` is a different, incompatible product whose create-order payload is not implemented here.");
+    L.push("- **Payments (Waffo Pancake):** `WAFFO_FLAVOR=pancake`, `WAFFO_ENVIRONMENT`, `WAFFO_STORE_SLUG` **or** `WAFFO_MERCHANT_ID`+`WAFFO_PRIVATE_KEY`, `WAFFO_WEBHOOK_PUBLIC_KEY_TEST/PROD`, `WAFFO_PRICE_ID_BUYOUT` (one-time) / `_CARE` (subscription). Webhook is RSA-SHA256 over `\\${t}.\\${rawBody}`. `acquiring` is a different, incompatible product; its create-order IS implemented but every contract field comes from `WAFFO_ACQUIRING_*` env vars and the signing/response shape is 需按你的 Waffo 合同核对 (docs/waffo.md §5).");
   } else if (c.payment === "stripe") {
     L.push("- **Payments (Stripe):** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_BUYOUT` (one-time `mode: \"payment\"`), `STRIPE_PRICE_ID_CARE` (`mode: \"subscription\"`).");
   } else {

@@ -51,7 +51,7 @@ const ALL_SKILLS = [
   "payments", "database", "rag", "i18n", "deploy", "agents",
 ];
 
-// 16 representative combinations: all 5 payment choices, all 10 styles,
+// 17 representative combinations: all 6 payment choices, all 10 styles,
 // all 3 deploy targets, RAG on/off, dashboard on/off, both consoles on/off
 // and each console alone, multitenancy on/off, skills empty/full,
 // auth/AI provider variations.
@@ -115,6 +115,12 @@ const CASES = [
     id: "admin-only",
     config: c({ style: "slate", features: ["landing", "admin"] }),
   },
+  {
+    // Lemon Squeezy gateway: the selected adapter must ship and every other
+    // case must assert lemonsqueezy.ts is pruned.
+    id: "lemonsqueezy-slate",
+    config: c({ payment: "lemonsqueezy", style: "slate" }),
+  },
 ];
 
 if (argv.includes("--list")) {
@@ -149,6 +155,7 @@ const PAYMENT_FILES = {
   creem: "lib/payments/creem.ts",
   paypal: "lib/payments/paypal.ts",
   waffo: "lib/payments/waffo.ts",
+  lemonsqueezy: "lib/payments/lemonsqueezy.ts",
 };
 const SKILL_FILES = {
   frontend: "skills/frontend-dev.md",
@@ -172,6 +179,30 @@ const SITE_ONLY_FILES = [
   "app/api/mcp/route.ts",
   "app/agent-ready/page.tsx",
   "lib/content/agent-ready.ts",
+  // ShipKit-site operational features (mail / support / auth recovery).
+  // Pruned by lib/generator/prune.ts SITE_ONLY_FILES; the absence assertions
+  // below keep them out of every generated ZIP without adding matrix cases.
+  "lib/content/messaging.ts",
+  "lib/mail/types.ts",
+  "lib/mail/config.ts",
+  "lib/mail/index.ts",
+  "lib/mail/templates.ts",
+  "app/api/mail/self-check/route.ts",
+  "lib/tickets.ts",
+  "app/api/support/tickets/route.ts",
+  "app/api/support/tickets/[id]/route.ts",
+  "app/support/page.tsx",
+  "components/SupportForm.tsx",
+  "app/admin/tickets/page.tsx",
+  "components/TicketStatusSelect.tsx",
+  "lib/local-auth-tokens.ts",
+  "app/api/auth/password-reset/route.ts",
+  "app/api/auth/verify-email/route.ts",
+  "app/forgot-password/page.tsx",
+  "app/reset-password/page.tsx",
+  "app/verify-email/page.tsx",
+  "components/AuthFlow.tsx",
+  "supabase/migrations/0010_support_tickets.sql",
 ];
 // ShipKit's OWN marketing site. A customer going live must not be advertsing
 // our $99 license, our competitors or our SEO posts. These are replaced by
@@ -218,6 +249,10 @@ const GENERATOR_FILES = [
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
+
+// Guard the documented case count: adding/removing a case means the README,
+// CI workflow and machine-readable docs numbers must be updated too.
+assert(CASES.length === 17, `expected 17 matrix cases, got ${CASES.length}`);
 
 function dirSizeKb(dir) {
   let total = 0;

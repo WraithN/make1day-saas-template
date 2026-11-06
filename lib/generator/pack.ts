@@ -26,6 +26,7 @@ import {
   pruneAgentReadyLink,
   pruneAdminLink,
   pruneWorkspacesLink,
+  pruneTicketsNav,
   pruneStylesLink,
   pruneStylesSitemap,
   pruneBuilderNav,
@@ -49,6 +50,7 @@ import {
   customerNavBrand,
   customerFooter,
   customerLicenseLinks,
+  customerLoginLinks,
   customerSeoLinks,
   neutralizeBrand,
 } from "./customer-site";
@@ -289,6 +291,14 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
       config.appName,
     ),
   );
+
+  // /admin/tickets is a ShipKit-site-only page. The admin console (when it
+  // ships at all) must not link to a route that is absent from the ZIP.
+  await rewrite("app/admin/layout.tsx", pruneTicketsNav);
+
+  // The auth-recovery pages are ShipKit-site-only. The login page ships in
+  // every build, so its "forgot password" anchor must be removed.
+  await rewrite("app/login/page.tsx", customerLoginLinks);
 
   // The generator itself never ships, so every /builder link has to point
   // at a route that exists in the customer project.

@@ -68,7 +68,7 @@ node scripts/ai-docs.mjs --dry-run   # 只报告哪些文件会变
 
 ## 5. 验收方式
 
-- `verify-matrix.mjs --all`（16 组）对每组真实 ZIP 断言：`AGENTS.md` 存在且含本构建 style、
+- `verify-matrix.mjs --all`（17 组）对每组真实 ZIP 断言：`AGENTS.md` 存在且含本构建 style、
   `agents.md` 不存在、scoped rules 精确等于条件计数、`.cursor/rules/*.mdc` 与 `ai/rules/*.md` 数量一致、
   两套后台文件按勾选存活且无死链、
   `CLAUDE.md` import 完整、`ai/doc-spec.json` 的 style/skills 与配置一致、

@@ -29,6 +29,9 @@ export async function Footer() {
           <Link href="/login" className="hover:text-ink">
             <Trans k="footer.login" lang={lang} />
           </Link>
+          <Link href="/support" className="hover:text-ink">
+            <Trans k="footer.support" lang={lang} />
+          </Link>
           <a
             href="https://github.com/uncorne/shipkit"
             className="hover:text-ink"

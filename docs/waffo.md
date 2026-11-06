@@ -19,9 +19,9 @@
 | Webhook 头 | `X-Waffo-Signature: t=<ms>,v1=<base64>` | `X-SIGNATURE: <base64>` |
 | 验签 | RSA-SHA256 验 `${t}.${rawBody}`，45 分钟容差 | RSA-SHA256 验 rawBody |
 | 事件名 | `order.completed`、`subscription.activated`、… | `PAYMENT_NOTIFICATION`、`SUBSCRIPTION_*_NOTIFICATION` |
-| 适配状态 | ✅ checkout + webhook 全实现 | ⚠️ webhook 已实现；checkout 需补合同字段 |
+| 适配状态 | ✅ checkout + webhook 全实现 | ✅ checkout + webhook 已实现（合同字段由 env 提供；协议细节需按合同核对） |
 
-**本项目默认 `WAFFO_FLAVOR=pancake`**：卖数字产品 / 脚手架、一次性 + 月订阅、无公司实体，正好是 Pancake 的目标场景。如果你签的是 `waffo.com` 那套，把 flavor 改成 `acquiring` 并按第 5 节补下单 payload。
+**本项目默认 `WAFFO_FLAVOR=pancake`**：卖数字产品 / 脚手架、一次性 + 月订阅、无公司实体，正好是 Pancake 的目标场景。如果你签的是 `waffo.com` 那套，把 flavor 改成 `acquiring`，按第 5 节配置 `WAFFO_ACQUIRING_*` env 变量，并逐项核对标注「需按你的 Waffo 合同核对」的协议细节。
 
 ## 1. Pancake：创建结账会话
 
@@ -128,14 +128,41 @@ const ok = verifier.verify(publicKey, v1, 'base64');
 
 Webhook 已按官方实现：`X-SIGNATURE` 是 base64 的 RSA-SHA256(rawBody)，用 Waffo 公钥验；事件为 `PAYMENT_NOTIFICATION` 等，`result.acquiringOrderId` / `result.orderStatus=PAY_SUCCESS`。响应返回 `{"message":"success"}`。
 
-但下单 `POST /api/v1/order/create` 的必填体比较大，且依赖你的商户合同：
+**下单 `POST /api/v1/order/create` 已实现**（`createCheckoutAcquiring()`），但**所有商户合同字段必须由环境变量提供**，适配器绝不凭空发明。必填体按本节字段清单组装：
 
 ```
 merchantInfo, merchantOrderId, notifyUrl, orderCurrency, orderDescription,
 orderRequestedAt, paymentInfo, paymentRequestId, userInfo
 ```
 
-适配器**没有伪造这些字段**——`createCheckoutAcquiring()` 会明确抛错并指向本节。要么改用 Pancake，要么在 `lib/payments/waffo.ts` 里用官方 SDK 补齐这份 payload。
+| 字段 | 来源 |
+|---|---|
+| `merchantInfo` | `WAFFO_ACQUIRING_MERCHANT_INFO`（JSON 字符串，结构按合同） |
+| `userInfo` | `WAFFO_ACQUIRING_USER_INFO`（JSON 字符串，结构按合同） |
+| `paymentInfo` | `WAFFO_ACQUIRING_PAYMENT_INFO`（JSON 字符串，结构按合同） |
+| `orderCurrency` | `WAFFO_ACQUIRING_ORDER_CURRENCY`（标量，如 `USD`） |
+| `orderDescription` | `WAFFO_ACQUIRING_ORDER_DESCRIPTION`（标量） |
+| `notifyUrl` | 运行时生成：`NEXT_PUBLIC_SITE_URL` + `/api/webhook`（单一 webhook 入口） |
+| `orderRequestedAt` | 运行时生成：当前时间 ISO 8601 |
+| `merchantOrderId` | 运行时生成：`SK-<plan>.<userId>-<randomUUID>`（crypto 随机、可追溯） |
+| `paymentRequestId` | 运行时生成：`randomUUID()` |
+
+缺任何一个合同变量时，`lib/env.ts` 会抛出**指明变量名和取值位置**的错误（去你的 Waffo 商户合同 / `waffo.com/docs` 集成指南复制，ShipKit 不代填）。此外还必填 `WAFFO_PRIVATE_KEY`（PEM，用于 RSA-SHA256 请求签名）与 `WAFFO_WEBHOOK_PUBLIC_KEY`（验签 webhook）。
+
+可在 `.env.example` 的「Acquiring」段找到变量清单。`GET /api/payments/self-check` 的 `waffo.missing` 会列出所有仍缺失的 `WAFFO_ACQUIRING_*` 变量，`node scripts/waffo-preflight.mjs` 也会按 flavor 检查。
+
+### 需按你的 Waffo 合同核对（不确定的协议细节）
+
+以下细节**公开文档没有写清，本实现是尽力而为、不是已验证事实**，上线前必须按你自己的合同 / 联调结果核对：
+
+- **签名串**：Acquiring 的签名 canonical 未公开。`WAFFO_ACQUIRING_SIGN_MODE` 做成可配置项：`pancake`（默认）复用 Pancake 的 `METHOD\nPATH\nTS\nBASE64(SHA256(BODY))` 并带 `X-Merchant-Id` / `X-Timestamp` / `X-Signature` 头；`raw` 改为对原始 body 直接签名。具体字段、头名、大小写以合同为准。
+- **9 个字段的精确名称 / 嵌套结构 / 必填子字段**：`merchantInfo` / `userInfo` / `paymentInfo` 的内部结构是合同约定的 JSON，这里只做透传，不校验子字段。
+- **`orderRequestedAt` 的格式**（ISO 8601 还是其它）与 `orderCurrency` 的取值域。
+- **响应结构**：文档提到 `data.orderAction` 是 JSON 字符串，内含 `webUrl` / `deeplinkUrl`；适配器已兼容这几种包装并优先返回 `url`。**如果网关只返回订单号**，`CheckoutResult` 会带 `orderId`，但本站 `POST /api/checkout` 目前只对 `url` / `approvalUrl` 做跳转（否则 502）——这种合同需要另接跳转逻辑。
+- **webhook 回传的归属信息**：`plan` / `userId` 目前只编码在 `merchantOrderId` 前缀里；`normalizeAcquiringEvent()` 读的是通知里的 `metadata`。若你的合同通知不回传这些字段，订单无法归属到用户/套餐，需要在合同允许的自定义字段里携带并相应调整归一化逻辑。
+- **RSA 密钥**：请求签名用商户私钥、webhook 验签用 Waffo 公钥，二者是否同一对、如何分发，以合同为准。
+
+**静态自检不证明能真实扣款**：配置齐全后仍必须按 `docs/waffo-launch-checklist.md` 做一笔 test 付款，确认签名、字段与响应都和你的合同一致。
 
 ## 6. 上线自检清单
 

@@ -14,11 +14,11 @@
 
 任一断言或类型检查失败，该 case 即失败；`--all` 会跑完全部 case 再汇总失败列表。
 
-## 覆盖维度（16 个 case）
+## 覆盖维度（17 个 case）
 
 | 维度 | 覆盖 |
 |---|---|
-| 支付商 | `waffo` / `stripe` / `creem` / `paypal` / `none`（5/5） |
+| 支付商 | `waffo` / `stripe` / `creem` / `paypal` / `lemonsqueezy` / `none`（6/6） |
 | 视觉风格 | midnight, candy, aurora, paper, mono, sunset, ocean, slate, emerald, sand（10/10） |
 | 部署目标 | `vercel` / `cloudflare` / `selfhost`（3/3） |
 | 功能模块 | rag on/off、dashboard on/off、multitenancy on/off、全功能组合 |
@@ -52,7 +52,7 @@ node scripts/verify-matrix.mjs --case default-waffo-midnight --build --publish
 - 必需存在：`package.json`、`tsconfig.json`、`.env.example`、`README.md`、`LICENSE`、`shipkit.config.json`、`design.md`、**`AGENTS.md`**、`CLAUDE.md`、`ai/doc-spec.json`、`ai/README.md`、`ai/rules/README.md`、`ai/rules/core.md`、`.cursor/rules/core.mdc`、`scripts/lib/ai-docs.mjs`、`scripts/ai-docs.mjs`、`scripts/ai-setup.mjs`
 - **旧的小写 `agents.md` 不得出现**（大小写不敏感文件系统会与 `AGENTS.md` 冲突）
 - 站点专属端点**不得**出现在客户 ZIP：`payments/self-check`、`llms.txt`、`llms-full.txt`、`openapi.json`、`api/mcp`、`agent-ready/page.tsx`、`lib/content/agent-ready.ts`（`SITE_ONLY_FILES`）
-- 支付适配器只保留选中的那一个；`payment=none` 时四个全剪且生成 `lib/payments/none.ts`
+- 支付适配器只保留选中的那一个；`payment=none` 时五个全剪且生成 `lib/payments/none.ts`
 - `rag` / `dashboard` 未选时对应文件必须消失；未选的 12 个 `skills/*.md` 必须消失
 - **两套后台**：`app/account/page.tsx` / `app/admin/users/page.tsx` 与勾选状态严格一致；共享层（`lib/console.ts`、`lib/content/console.ts`）在且仅在至少一个后台被选时存在
 - **无死链**：`account` 被剪时 `Nav.tsx`、`app/login/page.tsx`、`app/auth/callback/route.ts` 不得再含 `/account` 字面；只留 `account` 时 `app/account/layout.tsx` 不得再含指向 `/admin` 的常量
@@ -68,7 +68,8 @@ node scripts/verify-matrix.mjs --case default-waffo-midnight --build --publish
 
 1. 在 `scripts/verify-matrix.mjs` 的 `CASES` 追加 `{ id, config }`（`c({...})` 基于 `BASE` 覆盖）；
 2. 把同一个 `id` 加进 `.github/workflows/generated-matrix.yml` 的 `matrix.case`；
-3. 本地跑 `node scripts/verify-matrix.mjs --case <id>` 通过后再提交。
+3. 同步更新 `scripts/verify-matrix.mjs` 里的 `CASES.length` 断言与顶部注释，以及 README / CI / `llms*.txt` / `openapi.json` / `/api/mcp` / compare 里的用例数（当前 **17**）与支付商数（当前 **6**）。新网关还要加进 `PAYMENT_FILES`、`prune.ts` 的 `PAYMENT_FILES` / `PAYMENT_LABELS` 与 `schema.ts` 的 zod 枚举；
+4. 本地跑 `node scripts/verify-matrix.mjs --case <id>` 通过后再提交。
 
 ## 诚实边界
 

@@ -76,7 +76,9 @@ export interface PaymentProvider {
   createCheckout(p: CheckoutParams): Promise<CheckoutResult>;
   /**
    * Verify the raw webhook body + headers and return normalised events.
-   * Returns [] when the signature is invalid (caller should 400).
+   * THROW when the signature is missing/invalid or the body cannot be parsed —
+   * the caller turns that into HTTP 400. Return [] ONLY for a valid, verified
+   * event that needs no provisioning (caller acknowledges with HTTP 200).
    */
   verifyWebhook(
     rawBody: string,

@@ -23,6 +23,7 @@ const PAYMENT_FILES: Record<string, string> = {
   creem: "lib/payments/creem.ts",
   paypal: "lib/payments/paypal.ts",
   waffo: "lib/payments/waffo.ts",
+  lemonsqueezy: "lib/payments/lemonsqueezy.ts",
 };
 
 // Skill id → markdown file shipped in the template's `skills/` folder.
@@ -173,6 +174,41 @@ const SITE_ONLY_FILES = [
   // a customer project would be wrong branding AND break `tsc`.
   "app/styles/page.tsx",
   "components/StylePlayground.tsx",
+
+  // ── ShipKit-site operational features (mail / support / auth recovery) ──
+  // These are real, working routes in THIS repository's own runtime, but they
+  // are deliberately NOT part of the customer starter. Keeping them out of
+  // every ZIP means: (1) no new required-file assertions or matrix cases are
+  // needed, (2) customer builds never import a module that could be pruned,
+  // and (3) no dead links — customerNav / customerFooter / customerLoginLinks
+  // / pruneTicketsNav strip the corresponding nav, footer, login and admin
+  // entries. See AGENTS.md "Known gaps".
+  // 五语文案与模板字典
+  "lib/content/messaging.ts",
+  // 事务邮件
+  "lib/mail/types.ts",
+  "lib/mail/config.ts",
+  "lib/mail/index.ts",
+  "lib/mail/templates.ts",
+  "app/api/mail/self-check/route.ts",
+  // 工单 / 客服
+  "lib/tickets.ts",
+  "app/api/support/tickets/route.ts",
+  "app/api/support/tickets/[id]/route.ts",
+  "app/support/page.tsx",
+  "components/SupportForm.tsx",
+  "app/admin/tickets/page.tsx",
+  "components/TicketStatusSelect.tsx",
+  // 密码重置 / 邮箱验证
+  "lib/local-auth-tokens.ts",
+  "app/api/auth/password-reset/route.ts",
+  "app/api/auth/verify-email/route.ts",
+  "app/forgot-password/page.tsx",
+  "app/reset-password/page.tsx",
+  "app/verify-email/page.tsx",
+  "components/AuthFlow.tsx",
+  // 对应 Supabase migration（代码不随包交付，表也不应凭空出现在客户包里）
+  "supabase/migrations/0010_support_tickets.sql",
 ];
 
 // ShipKit's OWN marketing site.
@@ -241,7 +277,7 @@ export function computeSkip(config: BuilderConfig): Set<string> {
   // generations of the product that was just paid for.
   for (const f of GENERATOR_FILES) skip.add(f);
 
-  // Payment adapters: keep only the selected gateway (or skip all four + stub).
+  // Payment adapters: keep only the selected gateway (or skip all five + stub).
   if (config.payment === "none") {
     for (const f of Object.values(PAYMENT_FILES)) skip.add(f);
   } else {
@@ -305,6 +341,7 @@ const PAYMENT_LABELS: Record<PaymentProvider, string> = {
   creem: "Creem",
   paypal: "PayPal",
   waffo: "Waffo",
+  lemonsqueezy: "Lemon Squeezy",
   none: "None",
 };
 
@@ -804,6 +841,19 @@ export function pruneWorkspacesLink(source: string): string {
   return source
     .replace(/\s*\{ href: WORKSPACES_HREF, label: c\["account\.nav\.workspaces"\] \},/, "")
     .replace(/const WORKSPACES_HREF = "\/account\/workspaces";\n/, "");
+}
+
+/**
+ * /admin/tickets is a ShipKit-site-only page (support tickets are an
+ * operational feature of this product site, not part of the customer's
+ * starter). Strip its nav entry in EVERY generated build, or the customer's
+ * admin console would link to a route that does not exist in the ZIP.
+ */
+export function pruneTicketsNav(source: string): string {
+  return source.replace(
+    /\s*\{ href: "\/admin\/tickets", label: c\["admin\.nav\.tickets"\] \},/,
+    "",
+  );
 }
 
 /**

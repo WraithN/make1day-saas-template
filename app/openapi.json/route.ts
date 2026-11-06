@@ -34,10 +34,13 @@ export function GET() {
     tags: [
       { name: "Generator", description: "Build and download a customized project" },
       { name: "License", description: "Offline HMAC license keys" },
-      { name: "Payments", description: "Waffo Pancake checkout + webhooks" },
+      { name: "Payments", description: "Pluggable checkout + webhooks (Waffo Pancake active by default; Stripe / Creem / PayPal / Lemon Squeezy also available)" },
       { name: "RAG", description: "Hybrid BM25 + embeddings retrieval" },
       { name: "AI", description: "Multi-provider chat" },
       { name: "Analytics", description: "First-party, consent-gated statistics" },
+      { name: "Mail", description: "Transactional email configuration (ShipKit site)" },
+      { name: "Support", description: "Support tickets / contact form" },
+      { name: "Auth recovery", description: "Password reset + email verification" },
       {
         name: "MCP",
         description: "Model Context Protocol tools for agent-driven scaffolding",
@@ -241,6 +244,151 @@ export function GET() {
           tags: ["Payments"],
           summary: "Read-only integration readiness (never returns secrets)",
           responses: { "200": json(200, "Configuration state", ref("SelfCheck")) },
+        },
+      },
+      "/api/mail/self-check": {
+        get: {
+          tags: ["Mail"],
+          summary: "Mail provider configuration state (no secret values)",
+          description:
+            "Reports MAIL_PROVIDER, implemented/ready/degraded flags, the NAMES of missing env vars and booleans for MAIL_FROM / MAIL_REPLY_TO / operator inbox. Never returns an API key, webhook URL or token. smtp is reported as NOT implemented; none is reported as degraded.",
+          responses: {
+            "200": json(200, "Mail configuration state", ref("MailSelfCheck")),
+          },
+        },
+      },
+      "/api/support/tickets": {
+        post: {
+          tags: ["Support"],
+          summary: "Create a support ticket and send two notification emails",
+          description:
+            "Public. Zod-validated (email, subject 3-200, message 10-5000), honeypot field `company`, and a per-IP/visitor throttle (5 / minute, in-memory). A signed-in Supabase user is associated when present. The row is written FIRST, then two best-effort five-language emails (requester acknowledgement + operator notice) are sent — a mail outage never loses the ticket. Response includes mailDelivered flags.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["email", "subject", "message"],
+                  properties: {
+                    email: { type: "string", format: "email" },
+                    subject: { type: "string", minLength: 3, maxLength: 200 },
+                    message: { type: "string", minLength: 10, maxLength: 5000 },
+                    company: { type: "string", description: "Honeypot — leave empty" },
+                    lang: { type: "string", enum: ["en", "zh", "ja", "fr", "de"] },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": json(200, "Ticket created", ref("TicketCreatedResponse")),
+            "400": err("Invalid body"),
+            "429": err("Rate limited"),
+            "500": err("Storage error"),
+          },
+        },
+        get: {
+          tags: ["Support"],
+          summary: "List support tickets",
+          description:
+            "Operator (local operator session OR Supabase admin/staff role) sees ALL tickets; a signed-in user sees only rows whose user_id matches; anonymous requests get 401.",
+          security: [{ supabaseSession: [] }, { operatorSession: [] }],
+          responses: {
+            "200": json(200, "Ticket list", { type: "object", properties: { tickets: { type: "array", items: ref("Ticket") }, operator: { type: "boolean" } } }),
+            "401": err("Not authenticated"),
+            "500": err("Storage error"),
+          },
+        },
+      },
+      "/api/support/tickets/{id}": {
+        patch: {
+          tags: ["Support"],
+          summary: "Change a ticket status (operator only)",
+          description:
+            "Only open / answered / closed. The operator guard is the same one used by the /admin console; a non-operator receives 403 regardless of whether the id exists.",
+          parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+          security: [{ operatorSession: [] }, { supabaseSession: [] }],
+          requestBody: {
+            required: true,
+            content: { "application/json": { schema: { type: "object", required: ["status"], properties: { status: { type: "string", enum: ["open", "answered", "closed"] } } } } },
+          },
+          responses: {
+            "200": json(200, "Updated ticket", { type: "object", properties: { ok: { type: "boolean" }, ticket: ref("Ticket") } }),
+            "400": err("Invalid status or id"),
+            "403": err("Operator only"),
+            "404": err("Ticket not found"),
+            "500": err("Storage error"),
+          },
+        },
+      },
+      "/api/auth/password-reset": {
+        post: {
+          tags: ["Auth recovery"],
+          summary: "Request or confirm a password reset",
+          description:
+            "action=request ALWAYS returns the same {ok:true} body (anti-enumeration) and never reveals whether the address exists. action=confirm consumes a one-time, expiring token (Supabase: updateUser on the recovery session). Supabase path uses resetPasswordForEmail / updateUser; local SQLite path stores tokens only as SHA-256 hashes and scrypt password hashes. Rate-limited per IP.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  oneOf: [
+                    { type: "object", required: ["action", "email"], properties: { action: { type: "string", const: "request" }, email: { type: "string", format: "email" }, lang: { type: "string" } } },
+                    { type: "object", required: ["action", "password"], properties: { action: { type: "string", const: "confirm" }, token: { type: "string" }, password: { type: "string", minLength: 8, maxLength: 200 }, lang: { type: "string" } } },
+                  ],
+                },
+              },
+            },
+          },
+          responses: {
+            "200": json(200, "Generic success / password updated", { type: "object", properties: { ok: { type: "boolean" } } }),
+            "400": err("Invalid body or invalid/expired token"),
+            "429": err("Rate limited"),
+          },
+        },
+      },
+      "/api/auth/verify-email": {
+        post: {
+          tags: ["Auth recovery"],
+          summary: "Send or confirm an email verification",
+          description:
+            "action=send ALWAYS returns the same generic success (anti-enumeration). action=confirm consumes a one-time token (local) or calls Supabase verifyOtp with token_hash (Supabase resend / verifyOtp). Rate-limited per IP.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["action"],
+                  properties: {
+                    action: { type: "string", enum: ["send", "confirm"] },
+                    email: { type: "string", format: "email" },
+                    token: { type: "string" },
+                    tokenHash: { type: "string" },
+                    lang: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": json(200, "Generic success / verified", { type: "object", properties: { ok: { type: "boolean" } } }),
+            "400": err("Invalid body or invalid/expired token"),
+            "429": err("Rate limited"),
+          },
+        },
+        get: {
+          tags: ["Auth recovery"],
+          summary: "Confirm a verification token from an email link, then redirect",
+          description:
+            "Accepts ?token= (local raw token) or ?token_hash= (Supabase). Consumes the one-time token and redirects to /verify-email?status=ok|invalid — the token never appears in the final URL.",
+          parameters: [
+            { name: "token", in: "query", schema: { type: "string" } },
+            { name: "token_hash", in: "query", schema: { type: "string" } },
+            { name: "lang", in: "query", schema: { type: "string" } },
+          ],
+          responses: { "302": { description: "Redirect to /verify-email with a status flag" } },
         },
       },
       "/api/rag/ingest": {
@@ -486,7 +634,7 @@ export function GET() {
               maxItems: 5,
               items: { type: "string", enum: ["email", "google", "github", "apple", "microsoft"] },
             },
-            payment: { type: "string", enum: ["none", "stripe", "creem", "paypal", "waffo"] },
+            payment: { type: "string", enum: ["none", "stripe", "creem", "paypal", "waffo", "lemonsqueezy"] },
             ai: {
               type: "array",
               maxItems: 3,
@@ -564,6 +712,44 @@ export function GET() {
             license: { type: "object", additionalProperties: true },
             missing: { type: "array", items: { type: "string" } },
             ready: { type: "boolean" },
+          },
+        },
+        MailSelfCheck: {
+          type: "object",
+          description: "Configuration state only — no secret values.",
+          properties: {
+            provider: { type: "string", enum: ["resend", "webhook", "smtp", "none"] },
+            implemented: { type: "boolean", description: "false for smtp (no nodemailer dependency)" },
+            ready: { type: "boolean" },
+            degraded: { type: "boolean" },
+            warnings: { type: "array", items: { type: "string" } },
+            requiredEnvVars: { type: "array", items: { type: "string" } },
+            missingEnvVars: { type: "array", items: { type: "string" } },
+            flags: { type: "object", additionalProperties: true },
+          },
+        },
+        Ticket: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            email: { type: "string" },
+            subject: { type: "string" },
+            message: { type: "string" },
+            status: { type: "string", enum: ["open", "answered", "closed"] },
+            userId: { type: ["string", "null"] },
+            createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
+          },
+        },
+        TicketCreatedResponse: {
+          type: "object",
+          properties: {
+            ok: { type: "boolean" },
+            ticketId: { type: ["string", "null"] },
+            mailDelivered: {
+              type: "object",
+              properties: { user: { type: "boolean" }, operator: { type: "boolean" } },
+            },
           },
         },
         RagIngestResponse: {

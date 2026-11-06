@@ -4,6 +4,7 @@ import { stripeProvider } from "./stripe";
 import { creemProvider } from "./creem";
 import { paypalProvider } from "./paypal";
 import { waffoProvider } from "./waffo";
+import { lemonsqueezyProvider } from "./lemonsqueezy";
 
 let _provider: PaymentProvider | null = null;
 
@@ -19,6 +20,9 @@ export function getPaymentProvider(): PaymentProvider {
       break;
     case "waffo":
       _provider = waffoProvider;
+      break;
+    case "lemonsqueezy":
+      _provider = lemonsqueezyProvider;
       break;
     case "stripe":
     default:
@@ -39,6 +43,7 @@ const PROVIDER_LABELS: Record<string, string> = {
   creem: "Creem",
   paypal: "PayPal",
   waffo: "Waffo",
+  lemonsqueezy: "Lemon Squeezy",
 };
 export function providerLabel(name: string): string {
   return PROVIDER_LABELS[name] ?? name;

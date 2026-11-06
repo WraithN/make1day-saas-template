@@ -9,7 +9,14 @@ export const builderConfigSchema = z.object({
   auth: z
     .array(z.enum(["email", "google", "github", "apple", "microsoft"]))
     .max(5),
-  payment: z.enum(["none", "stripe", "creem", "paypal", "waffo"]),
+  payment: z.enum([
+    "none",
+    "stripe",
+    "creem",
+    "paypal",
+    "waffo",
+    "lemonsqueezy",
+  ]),
   ai: z.array(z.enum(["openai", "anthropic", "gemini"])).max(3),
   features: z
     .array(

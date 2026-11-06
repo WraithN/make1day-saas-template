@@ -198,14 +198,20 @@ CREATE INDEX IF NOT EXISTS idx_traffic_events_email
 -- The "id" column is optional: it holds the Supabase auth user id once a
 -- user has signed in through Supabase while running in local mode.
 CREATE TABLE IF NOT EXISTS profiles (
-  email        TEXT PRIMARY KEY,
-  id           TEXT,
-  role         TEXT NOT NULL DEFAULT 'member',
-  display_name TEXT,
-  full_name    TEXT,
-  company      TEXT,
-  created_at   TEXT NOT NULL,
-  updated_at   TEXT NOT NULL
+  email          TEXT PRIMARY KEY,
+  id             TEXT,
+  role           TEXT NOT NULL DEFAULT 'member',
+  display_name   TEXT,
+  full_name      TEXT,
+  company        TEXT,
+  -- Local-auth fields (used only when SUPABASE_SERVICE_ROLE_KEY is absent).
+  -- The password is a scrypt hash + salt, never plaintext. There is no local
+  -- password SIGN-IN consumer yet — see docs/email.md / AGENTS.md Known gaps.
+  password_hash  TEXT,
+  salt           TEXT,
+  email_verified INTEGER NOT NULL DEFAULT 0,
+  created_at     TEXT NOT NULL,
+  updated_at     TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
 
@@ -223,6 +229,46 @@ CREATE TABLE IF NOT EXISTS admin_sessions (
   expires_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_admin_sessions_expires ON admin_sessions(expires_at);
+
+-- Support tickets (LOCAL mirror of supabase/migrations/0010_support_tickets.sql).
+-- Column names match the Supabase table so the same queries work against both
+-- backends. user_id is NULL for anonymous submissions; email is always stored
+-- so an operator can reply even without a signed-in account.
+CREATE TABLE IF NOT EXISTS support_tickets (
+  id         TEXT PRIMARY KEY,
+  email      TEXT NOT NULL,
+  subject    TEXT NOT NULL,
+  message    TEXT NOT NULL,
+  status     TEXT NOT NULL DEFAULT 'open',  -- open | answered | closed
+  user_id    TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_support_tickets_created ON support_tickets(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_support_tickets_user ON support_tickets(user_id);
+CREATE INDEX IF NOT EXISTS idx_support_tickets_email ON support_tickets(email);
+
+-- One-time auth tokens for the LOCAL SQLite auth path. The raw token is NEVER
+-- stored: only its SHA-256 hash. The row is deleted on first use (one-time),
+-- and expires_at enforces a hard deadline. The Supabase path uses Supabase
+-- Auth's own resetPasswordForEmail / verifyOtp instead of these tables.
+CREATE TABLE IF NOT EXISTS password_resets (
+  token_hash TEXT PRIMARY KEY,
+  email      TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_password_resets_email ON password_resets(email);
+CREATE INDEX IF NOT EXISTS idx_password_resets_expires ON password_resets(expires_at);
+
+CREATE TABLE IF NOT EXISTS email_verifications (
+  token_hash TEXT PRIMARY KEY,
+  email      TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_email_verifications_email ON email_verifications(email);
+CREATE INDEX IF NOT EXISTS idx_email_verifications_expires ON email_verifications(expires_at);
 
 CREATE TABLE IF NOT EXISTS meta (
   key   TEXT PRIMARY KEY,
@@ -244,6 +290,10 @@ function migrate(database: SqliteDatabase): void {
   addColumnIfMissing(database, "profiles", "company", "text");
   addColumnIfMissing(database, "profiles", "created_at", "text");
   addColumnIfMissing(database, "profiles", "updated_at", "text");
+  // Local-auth columns added for the password-reset / email-verification flow.
+  addColumnIfMissing(database, "profiles", "password_hash", "text");
+  addColumnIfMissing(database, "profiles", "salt", "text");
+  addColumnIfMissing(database, "profiles", "email_verified", "integer not null default 0");
 }
 
 /** Add a column when the table exists but does not have it yet. */

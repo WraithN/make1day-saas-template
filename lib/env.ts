@@ -14,6 +14,39 @@ function opt(name: string, fallback = ""): string {
   return process.env[name] ?? fallback;
 }
 
+/**
+ * Waffo Acquiring: a merchant-contract value that MUST be supplied by env.
+ * We never invent one — the error names the variable and where to get it.
+ * Every protocol detail here is marked "需按你的 Waffo 合同核对" in docs/waffo.md §5.
+ */
+function acquiringContract(name: string, where: string): string {
+  const v = process.env[name];
+  if (!v || !v.trim()) {
+    throw new Error(
+      `Waffo Acquiring: missing ${name}. ${where} Copy it from your Waffo merchant contract / integration guide (waffo.com/docs) — ShipKit never invents contract fields. See docs/waffo.md §5.`,
+    );
+  }
+  return v;
+}
+
+function acquiringContractJson(
+  name: string,
+  where: string,
+): Record<string, unknown> {
+  const raw = acquiringContract(name, where);
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error("expected a JSON object");
+    }
+    return parsed as Record<string, unknown>;
+  } catch {
+    throw new Error(
+      `Waffo Acquiring: ${name} must be a JSON object string. ${where} See docs/waffo.md §5.`,
+    );
+  }
+}
+
 export const env = {
   // ── Supabase (required) ──────────────────────────────────────
   supabaseUrl: () => req("NEXT_PUBLIC_SUPABASE_URL"),
@@ -32,9 +65,10 @@ export const env = {
 
   // ── Payment provider (selects the active gateway) ────────────
   // ShipKit's own checkout defaults to Creem; flip PAYMENT_PROVIDER to "waffo"
-  // (or stripe/paypal) to switch later without code changes — all four gateways
-  // share the same unified PaymentProvider interface. Generated projects pick
-  // their own gateway in the Builder; the default there mirrors this value.
+  // (or stripe/paypal/lemonsqueezy) to switch later without code changes — all
+  // five gateways share the same unified PaymentProvider interface. Generated
+  // projects pick their own gateway in the Builder; the default there mirrors
+  // this value.
   paymentProvider: () => opt("PAYMENT_PROVIDER", "creem").toLowerCase(),
 
   // Stripe
@@ -101,6 +135,55 @@ export const env = {
   waffoPriceBuyout: () => opt("WAFFO_PRICE_ID_BUYOUT"),
   waffoPriceCare: () => opt("WAFFO_PRICE_ID_CARE"),
 
+  // ── Waffo Acquiring (WAFFO_FLAVOR=acquiring) ────────────────
+  // POST /api/v1/order/create needs merchant-contract fields. EVERY value
+  // below comes from env (JSON string / scalar); ShipKit invents none of them.
+  // Missing → acquiringContract() throws a named, actionable error. The exact
+  // field names/shapes are 需按你的 Waffo 合同核对 (docs/waffo.md §5).
+  waffoAcquiringMerchantInfo: () =>
+    acquiringContractJson(
+      "WAFFO_ACQUIRING_MERCHANT_INFO",
+      "The merchantInfo object for the create-order payload.",
+    ),
+  waffoAcquiringUserInfo: () =>
+    acquiringContractJson(
+      "WAFFO_ACQUIRING_USER_INFO",
+      "The userInfo object for the create-order payload.",
+    ),
+  waffoAcquiringPaymentInfo: () =>
+    acquiringContractJson(
+      "WAFFO_ACQUIRING_PAYMENT_INFO",
+      "The paymentInfo object for the create-order payload.",
+    ),
+  waffoAcquiringCurrency: () =>
+    acquiringContract(
+      "WAFFO_ACQUIRING_ORDER_CURRENCY",
+      "The orderCurrency code agreed in your contract (e.g. USD).",
+    ),
+  waffoAcquiringOrderDescription: () =>
+    acquiringContract(
+      "WAFFO_ACQUIRING_ORDER_DESCRIPTION",
+      "The orderDescription text agreed in your contract.",
+    ),
+  // The exact RSA signing string for Acquiring is NOT specified in the public
+  // docs, so it is configurable instead of a hard-coded guess. "pancake"
+  // (default) reuses Pancake's METHOD\nPATH\nTS\nSHA256(BODY) canonical;
+  // "raw" signs the raw request body. 需按你的 Waffo 合同核对 (§5).
+  waffoAcquiringSignMode: () =>
+    opt("WAFFO_ACQUIRING_SIGN_MODE", "pancake").toLowerCase(),
+
+  // ── Lemon Squeezy ───────────────────────────────────────────
+  lemonsqueezyApiKey: () => req("LEMONSQUEEZY_API_KEY"),
+  lemonsqueezyWebhookSecret: () => req("LEMONSQUEEZY_WEBHOOK_SECRET"),
+  lemonsqueezyStoreId: () => req("LEMONSQUEEZY_STORE_ID"),
+  lemonsqueezyVariantBuyout: () => opt("LEMONSQUEEZY_VARIANT_ID_BUYOUT"),
+  lemonsqueezyVariantCare: () => opt("LEMONSQUEEZY_VARIANT_ID_CARE"),
+  lemonsqueezyApiBase: () =>
+    opt("LEMONSQUEEZY_API_BASE", "https://api.lemonsqueezy.com/v1").replace(
+      /\/+$/,
+      "",
+    ),
+
   // ── AI providers ─────────────────────────────────────────────
   // Default provider used by /api/ai when none is requested.
   aiProvider: () => opt("AI_PROVIDER", "openai").toLowerCase(),
@@ -156,6 +239,30 @@ export const env = {
 
   // ── Site ─────────────────────────────────────────────────────
   siteUrl: () => opt("NEXT_PUBLIC_SITE_URL", "http://localhost:3000"),
+
+  // ── Transactional email (lib/mail/*) ─────────────────────────
+  // resend  → POST https://api.resend.com/emails (REST, zero dependencies)
+  // webhook → POST to MAIL_WEBHOOK_URL (custom HTTP mailer, see docs/email.md)
+  // smtp    → RESERVED / NOT IMPLEMENTED. Installing nodemailer +
+  //           @types/nodemailer is left to the operator; sendMail throws a
+  //           clear MailError instead of pretending SMTP works.
+  // none    → safe no-op: logs and returns, never throws into the caller.
+  mailProvider: () => opt("MAIL_PROVIDER", "none").trim().toLowerCase(),
+  resendApiKey: () => opt("RESEND_API_KEY"),
+  mailFrom: () => opt("MAIL_FROM"),
+  mailFromName: () => opt("MAIL_FROM_NAME", "Support"),
+  mailReplyTo: () => opt("MAIL_REPLY_TO"),
+  mailWebhookUrl: () => opt("MAIL_WEBHOOK_URL"),
+  mailWebhookToken: () => opt("MAIL_WEBHOOK_TOKEN"),
+  // Operator inbox for "new support ticket" notifications. Falls back to the
+  // public contact address so an operator is never silently left out.
+  mailOperatorEmail: () =>
+    opt("MAIL_OPERATOR_EMAIL") || opt("NEXT_PUBLIC_CONTACT_EMAIL", "hello@shipkit.dev"),
+  // Lifetime of password-reset / email-verification links (hours).
+  mailTokenTtlHours: () => {
+    const n = Number(opt("MAIL_TOKEN_TTL_HOURS", "24"));
+    return Number.isFinite(n) && n > 0 ? Math.floor(n) : 24;
+  },
 
   // ── Sales / 1:1 custom work ──────────────────────────────────
   // Booking link is optional: when empty, the pricing CTA falls back to mailto.
@@ -256,6 +363,13 @@ export function priceForPlan(plan: PricePlan): string | null {
         isBuyout ? env.waffoPriceBuyout() : env.waffoPriceCare(),
         isBuyout ? env.waffoPricePro() : env.waffoPriceScale(),
       );
+    case "lemonsqueezy":
+      // Variant ids serve the same role as price ids for this gateway.
+      return (
+        (isBuyout
+          ? env.lemonsqueezyVariantBuyout()
+          : env.lemonsqueezyVariantCare()) || null
+      );
     case "stripe":
     default:
       return valueOrFallback(
@@ -263,4 +377,77 @@ export function priceForPlan(plan: PricePlan): string | null {
         isBuyout ? env.stripePricePro() : env.stripePriceScale(),
       );
   }
+}
+
+/** Env vars required for Waffo Acquiring create-order (config self-check only). */
+export const WAFFO_ACQUIRING_REQUIRED_VARS = [
+  "WAFFO_ACQUIRING_MERCHANT_INFO",
+  "WAFFO_ACQUIRING_USER_INFO",
+  "WAFFO_ACQUIRING_PAYMENT_INFO",
+  "WAFFO_ACQUIRING_ORDER_CURRENCY",
+  "WAFFO_ACQUIRING_ORDER_DESCRIPTION",
+  "WAFFO_PRIVATE_KEY",
+  "WAFFO_WEBHOOK_PUBLIC_KEY",
+] as const;
+
+/** Names of missing Waffo Acquiring env vars — never throws, reads no secrets. */
+export function waffoAcquiringMissing(): string[] {
+  return WAFFO_ACQUIRING_REQUIRED_VARS.filter((n) => !process.env[n]?.trim());
+}
+
+/** Minimal required env vars per gateway, for /api/payments/self-check. */
+export function paymentProviderRequiredVars(provider: string): string[] {
+  switch (provider) {
+    case "stripe":
+      return ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"];
+    case "creem":
+      return ["CREEM_API_KEY", "CREEM_WEBHOOK_SECRET"];
+    case "paypal":
+      return [
+        "PAYPAL_CLIENT_ID",
+        "PAYPAL_CLIENT_SECRET",
+        "PAYPAL_WEBHOOK_ID",
+      ];
+    case "lemonsqueezy":
+      return [
+        "LEMONSQUEEZY_API_KEY",
+        "LEMONSQUEEZY_WEBHOOK_SECRET",
+        "LEMONSQUEEZY_STORE_ID",
+      ];
+    default:
+      return [];
+  }
+}
+
+/** Names of missing required env vars for a gateway — never reads secrets. */
+export function paymentProviderMissingVars(provider: string): string[] {
+  return paymentProviderRequiredVars(provider).filter(
+    (n) => !process.env[n]?.trim(),
+  );
+}
+
+/** Env vars required by each mail provider (for GET /api/mail/self-check). */
+export function mailRequiredVars(provider: string): string[] {
+  switch (provider) {
+    case "resend":
+      return ["RESEND_API_KEY", "MAIL_FROM"];
+    case "webhook":
+      return ["MAIL_WEBHOOK_URL", "MAIL_FROM"];
+    case "smtp":
+      // Reserved value: nodemailer is NOT a dependency of this repo. Listed so
+      // the self-check can explain exactly what an operator would have to add.
+      return ["nodemailer + @types/nodemailer (install manually)", "MAIL_FROM"];
+    case "none":
+      return [];
+    default:
+      return [];
+  }
+}
+
+/** Names of missing required env vars for a mail provider — no secret values. */
+export function mailMissingVars(provider: string): string[] {
+  return mailRequiredVars(provider).filter((n) => {
+    if (n.includes(" ")) return true; // the manual-install note is always "missing"
+    return !process.env[n]?.trim();
+  });
 }

@@ -89,6 +89,13 @@ export default function LoginPage() {
           </form>
         )}
 
+        <a
+          href="/forgot-password"
+          className="mt-4 block text-center text-sm text-accent underline underline-offset-2 hover:text-ink"
+        >
+          {t("login.forgot")}
+        </a>
+
         {providers.length > 0 && (
           <>
             <div className="my-5 flex items-center gap-3 text-xs text-muted">

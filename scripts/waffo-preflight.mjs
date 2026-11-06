@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Waffo Pancake go-live preflight — STATIC configuration check only.
+ * Waffo (Pancake / Acquiring) go-live preflight — STATIC configuration check
+ * only. Flavor-aware: WAFFO_FLAVOR decides which variable set is checked.
  *
  *   node scripts/waffo-preflight.mjs
  *   node scripts/waffo-preflight.mjs --strict              # WARN also fails
@@ -75,103 +76,178 @@ const fail = (g, l, d) => add("fail", g, l, d);
 // ── 1. Protocol ────────────────────────────────────────────────────────────
 const provider = get("PAYMENT_PROVIDER") || "waffo";
 if (provider.toLowerCase() !== "waffo") {
-  fail("协议", "PAYMENT_PROVIDER", `${provider} — 本检查只针对 Waffo Pancake`);
+  fail("协议", "PAYMENT_PROVIDER", `${provider} — 本检查只针对 Waffo（Pancake / Acquiring）`);
 } else {
   ok("协议", "PAYMENT_PROVIDER", "waffo");
 }
 
-const flavor = get("WAFFO_FLAVOR") || "pancake";
-if (flavor.toLowerCase() !== "pancake") {
-  fail(
+const flavor = (get("WAFFO_FLAVOR") || "pancake").toLowerCase();
+const isAcquiring = flavor === "acquiring";
+if (!["pancake", "acquiring"].includes(flavor)) {
+  fail("协议", "WAFFO_FLAVOR", `${flavor} — 只允许 pancake | acquiring`);
+} else {
+  ok(
     "协议",
     "WAFFO_FLAVOR",
-    `${flavor} — Acquiring 的下单 payload 依赖商户合同，见 docs/waffo.md 第 5 节`,
+    flavor === "acquiring"
+      ? "acquiring (waffo.com/docs — 需按你的 Waffo 合同核对，见 docs/waffo.md 第 5 节)"
+      : "pancake (docs.waffo.ai)",
   );
-} else {
-  ok("协议", "WAFFO_FLAVOR", "pancake (docs.waffo.ai)");
 }
 
-const environment = get("WAFFO_ENVIRONMENT") || "test";
-if (!["test", "prod"].includes(environment.toLowerCase())) {
-  fail("协议", "WAFFO_ENVIRONMENT", `只允许 test | prod，当前 ${environment}`);
-} else {
-  ok("协议", "WAFFO_ENVIRONMENT", environment);
+// WAFFO_ENVIRONMENT is a Pancake-only concept.
+if (!isAcquiring) {
+  const environment = get("WAFFO_ENVIRONMENT") || "test";
+  if (!["test", "prod"].includes(environment.toLowerCase())) {
+    fail("协议", "WAFFO_ENVIRONMENT", `只允许 test | prod，当前 ${environment}`);
+  } else {
+    ok("协议", "WAFFO_ENVIRONMENT", environment);
+  }
 }
 
-// ── 2. Authentication (the two modes are officially mutually exclusive) ────
-const slug = get("WAFFO_STORE_SLUG");
-const merchantId = get("WAFFO_MERCHANT_ID");
-const privateKey = get("WAFFO_PRIVATE_KEY");
-const hasSlug = !!slug && !PLACEHOLDER.test(slug);
-const hasSigned =
-  !!merchantId &&
-  !PLACEHOLDER.test(merchantId) &&
-  !!privateKey &&
-  !PLACEHOLDER.test(privateKey);
+// ── 2. Authentication ──────────────────────────────────────────────────────
+if (!isAcquiring) {
+  // Pancake: the two modes are officially mutually exclusive.
+  const slug = get("WAFFO_STORE_SLUG");
+  const merchantId = get("WAFFO_MERCHANT_ID");
+  const privateKey = get("WAFFO_PRIVATE_KEY");
+  const hasSlug = !!slug && !PLACEHOLDER.test(slug);
+  const hasSigned =
+    !!merchantId &&
+    !PLACEHOLDER.test(merchantId) &&
+    !!privateKey &&
+    !PLACEHOLDER.test(privateKey);
 
-if (hasSlug && hasSigned) {
-  fail(
-    "鉴权",
-    "Store-Slug / API-Key",
-    "两套鉴权同时配置了；官方明确互斥，请删掉其中一套",
-  );
-} else if (!hasSlug && !hasSigned) {
-  fail(
-    "鉴权",
-    "Store-Slug / API-Key",
-    "需要 WAFFO_STORE_SLUG，或 WAFFO_MERCHANT_ID + WAFFO_PRIVATE_KEY",
-  );
-} else if (hasSlug) {
-  ok("鉴权", "WAFFO_STORE_SLUG", mask(slug));
-} else if (!isPem(privateKey, "PRIVATE KEY", "RSA PRIVATE KEY")) {
-  fail("鉴权", "WAFFO_PRIVATE_KEY", "不是合法 PEM（需 BEGIN/END PRIVATE KEY；单行用 \\n 转义）");
+  if (hasSlug && hasSigned) {
+    fail("鉴权", "Store-Slug / API-Key", "两套鉴权同时配置了；官方明确互斥，请删掉其中一套");
+  } else if (!hasSlug && !hasSigned) {
+    fail("鉴权", "Store-Slug / API-Key", "需要 WAFFO_STORE_SLUG，或 WAFFO_MERCHANT_ID + WAFFO_PRIVATE_KEY");
+  } else if (hasSlug) {
+    ok("鉴权", "WAFFO_STORE_SLUG", mask(slug));
+  } else if (!isPem(privateKey, "PRIVATE KEY", "RSA PRIVATE KEY")) {
+    fail("鉴权", "WAFFO_PRIVATE_KEY", "不是合法 PEM（需 BEGIN/END PRIVATE KEY；单行用 \\n 转义）");
+  } else {
+    ok("鉴权", "RSA API-Key", `merchant=${mask(merchantId)}, key=${mask(privateKey)}`);
+  }
 } else {
-  ok("鉴权", "RSA API-Key", `merchant=${mask(merchantId)}, key=${mask(privateKey)}`);
+  // Acquiring: RSA private key signs the create-order request.
+  const privateKey = get("WAFFO_PRIVATE_KEY");
+  if (!filled("WAFFO_PRIVATE_KEY")) {
+    fail("鉴权", "WAFFO_PRIVATE_KEY", "Acquiring 下单请求签名必需（PEM）；见 docs/waffo.md 第 5 节");
+  } else if (!isPem(privateKey, "PRIVATE KEY", "RSA PRIVATE KEY")) {
+    fail("鉴权", "WAFFO_PRIVATE_KEY", "不是合法 PEM（需 BEGIN/END PRIVATE KEY；单行用 \\n 转义）");
+  } else {
+    ok("鉴权", "WAFFO_PRIVATE_KEY", mask(privateKey));
+  }
+  const signMode = (get("WAFFO_ACQUIRING_SIGN_MODE") || "pancake").toLowerCase();
+  if (!["pancake", "raw"].includes(signMode)) {
+    fail("协议", "WAFFO_ACQUIRING_SIGN_MODE", `只允许 pancake | raw，当前 ${signMode}`);
+  } else {
+    ok("协议", "WAFFO_ACQUIRING_SIGN_MODE", `${signMode} — 签名串需按你的 Waffo 合同核对（docs/waffo.md 第 5 节）`);
+  }
 }
 
 // ── 3. Endpoints ───────────────────────────────────────────────────────────
-const apiBase = get("WAFFO_API_BASE");
-if (apiBase && apiBase.replace(/\/+$/, "") !== "https://api.waffo.ai") {
-  fail("端点", "WAFFO_API_BASE", `${apiBase} — Pancake 是 https://api.waffo.ai`);
+if (!isAcquiring) {
+  const apiBase = get("WAFFO_API_BASE");
+  if (apiBase && apiBase.replace(/\/+$/, "") !== "https://api.waffo.ai") {
+    fail("端点", "WAFFO_API_BASE", `${apiBase} — Pancake 是 https://api.waffo.ai`);
+  } else {
+    ok("端点", "WAFFO_API_BASE", apiBase || "default: https://api.waffo.ai");
+  }
+  const checkoutPath = get("WAFFO_CHECKOUT_PATH");
+  if (checkoutPath && checkoutPath !== "/v1/actions/checkout/create-session") {
+    fail("端点", "WAFFO_CHECKOUT_PATH", `${checkoutPath} — 疑似旧版假想端点`);
+  } else {
+    ok("端点", "WAFFO_CHECKOUT_PATH", checkoutPath || "default: /v1/actions/checkout/create-session");
+  }
 } else {
-  ok("端点", "WAFFO_API_BASE", apiBase || "default: https://api.waffo.ai");
+  const apiBase = get("WAFFO_API_BASE");
+  if (apiBase && apiBase.replace(/\/+$/, "") !== "https://waffo.com") {
+    warn("端点", "WAFFO_API_BASE", `${apiBase} — Acquiring 默认 https://waffo.com；需按你的 Waffo 合同核对`);
+  } else {
+    ok("端点", "WAFFO_API_BASE", apiBase || "default: https://waffo.com");
+  }
+  const checkoutPath = get("WAFFO_CHECKOUT_PATH");
+  if (checkoutPath && checkoutPath !== "/api/v1/order/create") {
+    warn("端点", "WAFFO_CHECKOUT_PATH", `${checkoutPath} — Acquiring 默认 /api/v1/order/create；需按你的 Waffo 合同核对`);
+  } else {
+    ok("端点", "WAFFO_CHECKOUT_PATH", checkoutPath || "default: /api/v1/order/create");
+  }
 }
-const checkoutPath = get("WAFFO_CHECKOUT_PATH");
-if (checkoutPath && checkoutPath !== "/v1/actions/checkout/create-session") {
-  fail("端点", "WAFFO_CHECKOUT_PATH", `${checkoutPath} — 疑似旧版假想端点`);
-} else {
-  ok("端点", "WAFFO_CHECKOUT_PATH", checkoutPath || "default: /v1/actions/checkout/create-session");
-}
-ok("端点", "Webhook", "POST <site>/api/webhook（所有支付商共用，需在 test + prod 后台注册）");
+ok("端点", "Webhook", "POST <site>/api/webhook（单一入口，所有支付商共用）");
 
-// ── 4. Products ────────────────────────────────────────────────────────────
-for (const [name, label] of [
-  ["WAFFO_PRICE_ID_BUYOUT", "一次性 Buyout 产品"],
-  ["WAFFO_PRICE_ID_CARE", "月订阅 Care 产品"],
-]) {
-  if (!filled(name)) fail("产品", name, `未填或仍是占位符（${label}）`);
-  else ok("产品", name, mask(get(name)));
-}
-if (
-  filled("WAFFO_PRICE_ID_BUYOUT") &&
-  filled("WAFFO_PRICE_ID_CARE") &&
-  get("WAFFO_PRICE_ID_BUYOUT") === get("WAFFO_PRICE_ID_CARE")
-) {
-  fail("产品", "产品 ID 重复", "Buyout 与 Care 不能指向同一个产品（会被按错误周期扣款）");
+// ── 4. Products (Pancake) / contract fields (Acquiring) ───────────────────
+if (!isAcquiring) {
+  for (const [name, label] of [
+    ["WAFFO_PRICE_ID_BUYOUT", "一次性 Buyout 产品"],
+    ["WAFFO_PRICE_ID_CARE", "月订阅 Care 产品"],
+  ]) {
+    if (!filled(name)) fail("产品", name, `未填或仍是占位符（${label}）`);
+    else ok("产品", name, mask(get(name)));
+  }
+  if (
+    filled("WAFFO_PRICE_ID_BUYOUT") &&
+    filled("WAFFO_PRICE_ID_CARE") &&
+    get("WAFFO_PRICE_ID_BUYOUT") === get("WAFFO_PRICE_ID_CARE")
+  ) {
+    fail("产品", "产品 ID 重复", "Buyout 与 Care 不能指向同一个产品（会被按错误周期扣款）");
+  }
+} else {
+  // Acquiring create-order payload: EVERY contract field must come from env.
+  // ShipKit never invents one — see docs/waffo.md §5.
+  for (const name of [
+    "WAFFO_ACQUIRING_MERCHANT_INFO",
+    "WAFFO_ACQUIRING_USER_INFO",
+    "WAFFO_ACQUIRING_PAYMENT_INFO",
+  ]) {
+    const v = get(name);
+    if (!filled(name)) {
+      fail("合同字段", name, "未填或仍是占位符；从 Waffo 合同复制该对象的 JSON 字符串（docs/waffo.md 第 5 节）");
+    } else {
+      try {
+        const parsed = JSON.parse(v);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("not object");
+        ok("合同字段", name, mask(v));
+      } catch {
+        fail("合同字段", name, "不是合法的 JSON 对象字符串；需是合同里的 merchantInfo/userInfo/paymentInfo 对象");
+      }
+    }
+  }
+  for (const [name, label] of [
+    ["WAFFO_ACQUIRING_ORDER_CURRENCY", "orderCurrency"],
+    ["WAFFO_ACQUIRING_ORDER_DESCRIPTION", "orderDescription"],
+  ]) {
+    if (!filled(name)) fail("合同字段", name, `未填或仍是占位符（${label}，需按你的 Waffo 合同核对）`);
+    else ok("合同字段", name, mask(get(name)));
+  }
+  ok("合同字段", "协议细节", "字段名 / 签名串 / 响应结构需按你的 Waffo 合同核对（docs/waffo.md 第 5 节）；静态自检不证明能真实扣款");
 }
 
 // ── 5. Webhook public keys ─────────────────────────────────────────────────
-for (const name of [
-  "WAFFO_WEBHOOK_PUBLIC_KEY_TEST",
-  "WAFFO_WEBHOOK_PUBLIC_KEY_PROD",
-]) {
-  const v = get(name);
-  if (!filled(name)) {
-    fail("验签公钥", name, "未填或仍是占位符；test/prod 两套都必须配置");
+if (!isAcquiring) {
+  for (const name of [
+    "WAFFO_WEBHOOK_PUBLIC_KEY_TEST",
+    "WAFFO_WEBHOOK_PUBLIC_KEY_PROD",
+  ]) {
+    const v = get(name);
+    if (!filled(name)) {
+      fail("验签公钥", name, "未填或仍是占位符；test/prod 两套都必须配置");
+    } else if (!isPem(v, "PUBLIC KEY")) {
+      fail("验签公钥", name, "不是 BEGIN PUBLIC KEY 的 PEM；单行用 \\n 转义");
+    } else {
+      ok("验签公钥", name, mask(v));
+    }
+  }
+} else {
+  // Acquiring uses ONE Waffo public key (RSA-SHA256 over the raw body).
+  const v = get("WAFFO_WEBHOOK_PUBLIC_KEY");
+  if (!filled("WAFFO_WEBHOOK_PUBLIC_KEY")) {
+    fail("验签公钥", "WAFFO_WEBHOOK_PUBLIC_KEY", "Acquiring 验签必需（单公钥）；见 docs/waffo.md 第 5 节");
   } else if (!isPem(v, "PUBLIC KEY")) {
-    fail("验签公钥", name, "不是 BEGIN PUBLIC KEY 的 PEM；单行用 \\n 转义");
+    fail("验签公钥", "WAFFO_WEBHOOK_PUBLIC_KEY", "不是 BEGIN PUBLIC KEY 的 PEM；单行用 \\n 转义");
   } else {
-    ok("验签公钥", name, mask(v));
+    ok("验签公钥", "WAFFO_WEBHOOK_PUBLIC_KEY", mask(v));
   }
 }
 
@@ -236,10 +312,11 @@ for (const name of ["ADMIN_USER", "ADMIN_PASSWORD"]) {
 for (const name of [
   "WAFFO_WEBHOOK_SECRET",
   "WAFFO_API_KEY",
-  "WAFFO_WEBHOOK_PUBLIC_KEY",
+  // For Acquiring, WAFFO_WEBHOOK_PUBLIC_KEY is REQUIRED, not deprecated.
+  ...(isAcquiring ? [] : ["WAFFO_WEBHOOK_PUBLIC_KEY"]),
 ]) {
   if (get(name)) {
-    warn("废弃变量", name, "Pancake 不读取该变量；建议删除以免误导（见 docs/waffo.md 第 7 节）");
+    warn("废弃变量", name, "该 flavor 不读取该变量；建议删除以免误导（见 docs/waffo.md 第 7 节）");
   }
 }
 

@@ -16,6 +16,7 @@ const PROVIDER_LABELS: Record<string, string> = {
   creem: "Creem",
   paypal: "PayPal",
   waffo: "Waffo",
+  lemonsqueezy: "Lemon Squeezy",
 };
 const PROVIDER = PROVIDER_LABELS[PROVIDER_KEY] ?? PROVIDER_KEY;
 
@@ -26,7 +27,9 @@ const GATEWAY_PROTOCOL =
   PROVIDER_KEY === "waffo"
     ? `IMPORTANT: "Waffo" is two incompatible products. default is Pancake
 (docs.waffo.ai, MoR for digital products); waffo.com/docs is Acquiring
-(SE-Asia acquiring, RSA X-SIGNATURE, contract-specific create-order payload).
+(SE-Asia acquiring, RSA X-SIGNATURE). Its create-order call IS implemented but
+its contract fields come from WAFFO_ACQUIRING_* env vars and its signing string
+/ response shape are 需按你的 Waffo 合同核对 (docs/waffo.md §5).
 
 Pancake checkout:
   POST https://api.waffo.ai/v1/actions/checkout/create-session
@@ -92,7 +95,7 @@ POST /api/generate accepts this JSON (all fields required except licenseKey):
   {
     "appName": string (1-60 chars, slugified into package name),
     "auth": ("email"|"google"|"github"|"apple"|"microsoft")[] (max 5),
-    "payment": "none"|"stripe"|"creem"|"paypal"|"waffo",
+    "payment": "none"|"stripe"|"creem"|"paypal"|"waffo"|"lemonsqueezy",
     "ai": ("openai"|"anthropic"|"gemini")[] (max 3),
     "features": ("landing"|"dashboard"|"rag"|"multitenancy"|"account"|"admin")[] (max 6),
     "deploy": "vercel"|"selfhost"|"cloudflare",
@@ -121,6 +124,14 @@ Pruning is REAL, not a manifest flag:
 - Site-only endpoints are always excluded: payments/self-check, llms.txt,
   llms-full.txt, openapi.json, api/mcp, agent-ready page and its content module.
   The site-only /agent-ready footer link is stripped from Footer.tsx too.
+- ShipKit-site operational features are also pruned from EVERY customer ZIP:
+  all of lib/mail/*, lib/content/messaging.ts (five-language mail/UI copy),
+  lib/tickets.ts, the /support page + form, the /admin/tickets console, the
+  auth-recovery pages/APIs (forgot/reset/verify), lib/local-auth-tokens.ts and
+  supabase/migrations/0010_support_tickets.sql. customerNav / customerFooter /
+  customerLoginLinks / pruneTicketsNav strip their nav, footer, login and admin
+  links so no dead link survives. The generated starter therefore has NO
+  built-in support form, password-reset page or transactional mail of its own.
 - Site-only npm scripts are removed; ai:docs / ai:setup are ADDED instead.
 
 Every ZIP contains: .env.example (with LICENSE_GATE=off), README.md,
@@ -230,8 +241,9 @@ Webhook (single route for every gateway): POST /api/webhook
   access twice). Dedup key: eventType + eventId (the gateway may retry up to 4x).
   Persistence failures return 500 so the gateway retries.
 
-Generated projects can instead select stripe / creem / paypal / waffo / none in
-the Builder; the adapter interface is NormalizedSubEvent + CheckoutParams.
+Generated projects can instead select stripe / creem / paypal / waffo /
+lemonsqueezy / none in the Builder; the adapter interface is NormalizedSubEvent
++ CheckoutParams. Each build ships ONLY the selected adapter.
 
 ## 7. License gate (protects this site's download endpoint)
 
@@ -262,6 +274,13 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
 | POST | /api/checkout | Create a Waffo checkout session {plan:"buyout"\|"care"} | Supabase session |
 | POST | /api/webhook | Verify + normalize payment events, issue keys | RSA signature |
 | GET | /api/payments/self-check | Read-only config readiness (no secrets) | public |
+| GET | /api/mail/self-check | Mail provider config state (no secrets) | public |
+| POST | /api/support/tickets | Create a ticket (zod + honeypot + throttle); sends 2 mails | public |
+| GET | /api/support/tickets | List tickets | Supabase session (own) / operator (all) / 401 otherwise |
+| PATCH | /api/support/tickets/{id} | Change status open\|answered\|closed | Operator only |
+| POST | /api/auth/password-reset | action=request (generic success) \| action=confirm | public (rate-limited) |
+| POST | /api/auth/verify-email | action=send \| action=confirm | public (rate-limited) |
+| GET | /api/auth/verify-email | Confirm a token from an email link, then redirect | public |
 | POST | /api/rag/ingest | Chunk, embed and index a document | Supabase session / operator |
 | GET | /api/rag/ingest | List indexed documents | Supabase session / operator |
 | POST | /api/rag/query | Hybrid retrieval + cited answer | Supabase session + subscription |
@@ -293,13 +312,18 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
 
 ## 10. Content, i18n and documentation
 
-- Marketing pages: /, /builder, /pricing, /faq, /compare, /agent-ready,
-  /blog, /rag (demo), /license (noindex), /privacy, /terms.
+- Marketing pages: /, /builder, /pricing, /support, /faq, /compare,
+  /agent-ready, /blog, /rag (demo), /license (noindex), /privacy, /terms.
+- Auth-recovery pages (noindex, absent from sitemap): /forgot-password,
+  /reset-password, /verify-email.
 - Private consoles (noindex, disallowed in robots.txt, absent from sitemap):
   /account, /account/billing, /account/licenses, /account/settings,
-  /admin, /admin/users, /admin/licenses, /admin/stats, /admin/system.
+  /admin, /admin/users, /admin/licenses, /admin/stats, /admin/system,
+  /admin/tickets.
 - Languages: English, 中文, 日本語, Français (?lang= or the language switcher).
-- Docs in the repository: docs/waffo.md (protocol reference),
+- Docs in the repository: docs/email.md (transactional mail, SPF / DKIM /
+  DMARC / subdomain isolation / anti-spam checklist, Resend domain
+  verification, and what is NOT implemented), docs/waffo.md (protocol reference),
   docs/waffo-launch-checklist.md (go-live runbook),
   docs/payments.md + .zh/.ja/.fr (gateway setup),
   docs/competitive-analysis.md (2026 competitor review),
@@ -316,18 +340,25 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
 - Static preflight: "node scripts/waffo-preflight.mjs --strict" (no network,
   never prints secrets). Live readiness: GET /api/payments/self-check.
 - Generated-template CI: .github/workflows/generated-matrix.yml + 
-  "node scripts/verify-matrix.mjs --all". 16 cases cover all 5 gateways, all
+  "node scripts/verify-matrix.mjs --all". 17 cases cover all 6 gateways, all
   10 styles, all 3 deploy targets, RAG/dashboard/skills on-off, AND both
   consoles on / off / each alone; each case downloads a real ZIP, asserts
   AGENTS.md / scoped rules / Cursor rules / CLAUDE.md / 12 skills / ai:docs
   scripts / console pruning / no dead console links, then runs tsc --noEmit
   inside the extracted project.
-- Supabase migrations: 0001_init.sql, 0002_rag.sql, 0003_licenses.sql.
+- Supabase migrations: 0001_init.sql, 0002_rag.sql, 0003_licenses.sql,
+  0004_profiles_rbac.sql, 0005_orders.sql, 0006_observability.sql,
+  0007_orgs.sql, 0008_traffic_funnel.sql, 0009_ai_usage.sql,
+  0010_support_tickets.sql (support tickets + RLS, ShipKit-site-only).
+  The local SQLite mirror of 0010 plus \`password_resets\` /
+  \`email_verifications\` (local auth only) live in lib/sqlite.ts SCHEMA.
 
 ## 12. Honest limitations
 
-- Waffo "acquiring" flavor verifies webhooks but its create-order payload is
-  contract-specific and NOT implemented; Pancake is complete.
+- Waffo "acquiring" checkout IS implemented, but all merchant-contract fields
+  come from WAFFO_ACQUIRING_* env vars (ShipKit invents none) and the signing
+  string / response shape / webhook attribution are 需按你的 Waffo 合同核对 —
+  see docs/waffo.md §5. Pancake is complete.
 - AI chat streams token-by-token (OpenAI / Anthropic / Gemini) as incremental text/plain chunks and enforces a per-user daily quota (AI_MESSAGES_PER_DAY, default 50, HTTP 429 ai_quota_exceeded when exhausted). The 429 body's resetAt is the NEXT 00:00 UTC and Retry-After the real seconds remaining; X-AI-Quota-* headers report the counter. RAG ingest/query require a signed-in user with an active subscription. Runtime regressions are checked by scripts/smoke-ai-stream.cjs and scripts/smoke-ai-quota*.cjs.
 - /admin and /api/stats are open unless ADMIN_USER / ADMIN_PASSWORD are set;
   ADMIN_EMAILS adds an optional signed-in role check. /account is session-gated
@@ -337,7 +368,7 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
 - PayPal creates subscription checkouts only; Creem field names are unverified.
 - Cloudflare deploy output still contains Node-runtime routes.
 - Generated projects ship brand-free home/pricing pages and an MIT LICENSE, but /privacy and /terms are placeholders the customer must replace.
-- Waffo acquiring checkout is unimplemented; Cloudflare builds still contain Node-runtime routes; PayPal has no billing portal.
+- Lemon Squeezy checkout / webhook / portal are implemented against its public REST docs; the exact custom-data echo location, subscription-id vs customer-id for the portal, and status/event names are 需按你的 Lemon Squeezy 账户核对. Cloudflare builds still contain Node-runtime routes; PayPal has no billing portal.
 - The build matrix runs tsc --noEmit, not next build, on generated projects;
   no live pass-rate page or artifact-size dashboard exists.
 - /api/mcp is stateless JSON-RPC: no sampling, prompts, subscriptions or SSE
@@ -349,6 +380,38 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
   style in the manifest updates design.md/AGENTS.md but a real palette switch
   requires a fresh ZIP from the Builder.
 
+### 12A. Mail, support and auth recovery — honest scope
+
+- Transactional mail implements \`resend\` (Resend REST), \`webhook\` (custom HTTP
+  mailer) and \`none\` (safe logged no-op). **\`MAIL_PROVIDER=smtp\` is NOT
+  implemented** — there is no nodemailer dependency in this repo; installing
+  nodemailer + @types/nodemailer and adding a dynamic-import adapter is left to
+  the operator (docs/email.md). \`MAIL_PROVIDER=none\` is a DEGRADED state:
+  verification / reset / ticket emails are logged but not delivered.
+- The code only SENDS. SPF / DKIM / DMARC, a dedicated sending subdomain,
+  reverse DNS, suppression lists, bounce/complaint handling and warm-up are
+  DNS / provider-side work, not application code, and decide inbox placement.
+  Resend's endpoint/field names and Supabase Auth's redirect + email-template
+  details (token_hash for verifyOtp) are 需按服务商文档核对. There is no retry
+  queue, no signature verification on the outbound webhook call and no email
+  preview UI.
+- Support tickets: the POST throttle is in-memory and per-instance (a
+  multi-instance deployment needs a shared store). GET returns only a signed-in
+  user's own tickets; anonymous submissions are NOT later claimable by email in
+  the API (the Supabase RLS policy does match the email claim, but the route
+  scopes by user id). There is no operator reply / thread UI — status changes
+  and the two notification emails are the whole workflow.
+- Local auth recovery is real but NOT equivalent to Supabase Auth: one-time,
+  expiring tokens are stored only as SHA-256 hashes and new passwords as scrypt
+  hashes, but there is no local password SIGN-IN consumer for those hashes, no
+  MFA, no OAuth, no session rotation / refresh and no email-confirmation-gated
+  login. Supabase Auth remains the recommended production path.
+- These three areas are ShipKit-site-only (pruned from every customer ZIP), so
+  the downloaded starter has no built-in support form, password-reset page or
+  transactional mail of its own. The 17-case build matrix is unchanged: no new
+  cases and no new required-file assertions were needed; the new site-only
+  paths are asserted ABSENT by scripts/verify-matrix.mjs instead.
+
 ## 13. Differentiation vs other starters
 
 Compared with ShipFast (~$199), Divjoy (~$199), VibeReady ($149-399),
@@ -357,7 +420,7 @@ only one in this set that BOTH prunes unselected modules out of the downloaded
 source AND generates a root AGENTS.md, a style-specific design.md, scoped rules
 and 12 skills — all rebuildable with npm run ai:docs — at a $99 launch price,
 with llms.txt/llms-full.txt, an OpenAPI 3.1 contract, an MCP scaffold_project
-tool, an agent-ready landing page, selectable user/admin consoles and a public 16-case build matrix.
+tool, an agent-ready landing page, selectable user/admin consoles and a public 17-case build matrix.
 Deep B2B multi-tenancy/IaC remains the stronger choice at Makerkit,
 Supastarter or VibeReady. Full reasoning: docs/competitive-analysis.md.
 `;

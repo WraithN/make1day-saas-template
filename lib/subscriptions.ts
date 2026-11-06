@@ -3,7 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export type SubscriptionRow = {
   id: string;
   user_id: string;
-  provider: string; // stripe | creem | paypal | waffo
+  provider: string; // stripe | creem | paypal | waffo | lemonsqueezy
   provider_customer_id: string | null;
   provider_subscription_id: string | null;
   status: string; // active | trialing | canceled | past_due | incomplete

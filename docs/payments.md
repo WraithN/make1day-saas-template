@@ -116,7 +116,7 @@ Waffo operates **two incompatible products** — pick the one your account uses.
 | Flavor | Docs | Checkout | Webhook |
 |---|---|---|---|
 | `pancake` (default) | docs.waffo.ai | `POST https://api.waffo.ai/v1/actions/checkout/create-session` | `X-Waffo-Signature: t=<ms>,v1=<base64>` |
-| `acquiring` | waffo.com/docs | `POST /api/v1/order/create` (contract-specific payload) | `X-SIGNATURE` (base64 RSA) |
+| `acquiring` | waffo.com/docs | `POST /api/v1/order/create` (implemented; contract fields from `WAFFO_ACQUIRING_*` env vars) | `X-SIGNATURE` (base64 RSA) |
 
 **Pancake setup**
 
@@ -156,13 +156,52 @@ verified with RSA-SHA256 over `${t}.${rawBody}` (45-minute tolerance);
 sends `subscription.activated` for the same first payment.
 
 `WAFFO_WEBHOOK_SECRET` (legacy HMAC) is **not used** — both Waffo products use
-RSA. Acquiring's webhook works, but its checkout needs the contract-specific
-`merchantInfo/userInfo/paymentInfo` payload. Full protocol reference:
-`docs/waffo.md`.
+RSA. **Acquiring checkout is implemented**: all `merchantInfo` / `userInfo` /
+`paymentInfo` / order fields come from `WAFFO_ACQUIRING_*` env vars (ShipKit
+invents none), ids are generated at runtime, and the signing string / response
+shape are **需按你的 Waffo 合同核对**. Full protocol reference: `docs/waffo.md` §5.
 
 ---
 
-## 5. No payments
+## 5. Lemon Squeezy (MoR for digital products)
+
+Lemon Squeezy is a Merchant of Record with hosted checkouts and a customer
+portal. The adapter uses its JSON:API REST endpoints.
+
+1. Create two **variants** — a one-time Buyout variant and a recurring Care
+   variant — and set `LEMONSQUEEZY_VARIANT_ID_BUYOUT` /
+   `LEMONSQUEEZY_VARIANT_ID_CARE`.
+2. Set `LEMONSQUEEZY_API_KEY`, `LEMONSQUEEZY_WEBHOOK_SECRET` and
+   `LEMONSQUEEZY_STORE_ID` (used in `relationships.store`).
+3. Register the single webhook `POST https://<domain>/api/webhook`. The adapter
+   verifies `x-signature` as hex HMAC-SHA256 over the raw body with a
+   **timing-safe** comparison (`node:crypto.timingSafeEqual`).
+4. `GET /api/payments/self-check` reports any missing `LEMONSQUEEZY_*` vars.
+
+```bash
+PAYMENT_PROVIDER=lemonsqueezy
+LEMONSQUEEZY_API_KEY=xxx
+LEMONSQUEEZY_WEBHOOK_SECRET=xxx
+LEMONSQUEEZY_STORE_ID=12345
+LEMONSQUEEZY_VARIANT_ID_BUYOUT=12345
+LEMONSQUEEZY_VARIANT_ID_CARE=12345
+```
+
+`POST /v1/checkouts` sends `checkout_data.custom` with `userId` / `plan`; the
+webhook normalises `data.attributes` (`customer_id`, `user_email`, `status`,
+`renews_at`, `product_id` / `variant_id`, `urls.customer_portal`) into a
+`NormalizedSubEvent`. The portal is best-effort: `GET /v1/subscriptions/{id}`
+→ `data.attributes.urls.customer_portal`; a miss returns `null` and the UI
+falls back to "contact support".
+
+> 需按你的 Lemon Squeezy 账户核对: where `custom` data is echoed on webhook
+> payloads, whether `{id}` is a customer id or a subscription id, and the exact
+> status / event names. These are best-effort mappings against the public REST
+> docs, not a verified end-to-end integration.
+
+---
+
+## 6. No payments
 
 Select this to skip monetization entirely. The generated app has no checkout,
 no webhook, and no billing UI — useful for internal tools, waitlists, or
@@ -204,6 +243,9 @@ no online checkout.
   as one-time / recurring in the Creem dashboard.
 - PayPal: this adapter creates subscription checkouts only — use Waffo or Stripe for
   one-time Buyout billing.
+- Lemon Squeezy: `LEMONSQUEEZY_VARIANT_ID_BUYOUT` (one-time variant) and
+  `LEMONSQUEEZY_VARIANT_ID_CARE` (recurring variant); the same `priceForPlan()`
+  mapping picks the variant id for checkout and resolves the plan on webhooks.
 - Custom 1:1: set `NEXT_PUBLIC_BOOKING_URL` and `NEXT_PUBLIC_CONTACT_EMAIL`.
   The CTA opens the booking link, or a prefilled email when no link is set.
   Quotes are always manual.
@@ -262,6 +304,10 @@ without operator involvement. The flow is provider-agnostic through the
 - **Stripe** — real, via `stripe.billingPortal.sessions.create({ customer })`.
 - **Creem** — best-effort via `POST /customers/{id}/portal-sessions`; wrapped in
   try/catch so a mismatched endpoint degrades to the fallback below.
+- **Lemon Squeezy** — best-effort `GET /v1/subscriptions/{id}` →
+  `data.attributes.urls.customer_portal`; returns `null` on a miss so the UI
+  falls back to the path below. 需按你的 Lemon Squeezy 账户核对 whether `{id}`
+  is a customer or subscription id.
 - **PayPal / Waffo** — no self-serve portal exposed; the API returns
   `422 reason: unsupported_provider` and the UI shows a "contact support" path.
 
@@ -285,12 +331,16 @@ touches card data. After the buyer finishes, they are returned to
   for the Builder's default project. To switch to Waffo later, set
   `PAYMENT_PROVIDER=waffo` (with `WAFFO_FLAVOR=pancake`); the single
   `getPaymentProvider()` / `verifyWebhook` abstraction means **no code change** —
-  only an env flip. The Waffo `acquiring` flavor is supported for webhooks only.
+  only an env flip. `PAYMENT_PROVIDER=lemonsqueezy` is also supported (JSON:API
+  checkout + timing-safe HMAC webhook + customer portal). Waffo `acquiring`
+  checkout is implemented via `WAFFO_ACQUIRING_*` contract env vars — see
+  `docs/waffo.md` §5.
 - `app/admin/system` shows the active provider label and a one-line switch note.
 - There is exactly **one** webhook route: `POST https://<domain>/api/webhook`.
   Do not register `/api/webhooks/<provider>` — those paths do not exist.
-- Webhooks are verified with **RSA public keys**, not HMAC. Missing keys cause
-  HTTP 400; no unsigned body is ever accepted.
+- Webhooks are verified with each gateway's own scheme (Waffo: **RSA public
+  keys**; Lemon Squeezy / Creem / Stripe: **HMAC**). Missing keys cause HTTP
+  400; no unsigned body is ever accepted.
 - Events are deduplicated on `(eventType, eventId)` before any entitlement is
   granted. A paid event issues an offline `SK1.…` license key; retries never
   issue a second one.
