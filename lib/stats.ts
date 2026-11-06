@@ -1,12 +1,11 @@
-import { promises as fs } from "fs";
-import path from "path";
+import { all, get, run } from "@/lib/sqlite";
 import { logger } from "@/lib/logger";
 
 // A tiny, privacy-friendly, first-party pageview counter for the marketing
 // site. It stores an aggregate map of path -> count. In production (a service
 // role key configured) the count lives in the `pageviews` table so it survives
-// serverless instances / restarts. Without Supabase it falls back to a local
-// JSON file under `.data/` (dev only — not durable on ephemeral FS).
+// serverless instances / restarts. Without Supabase it falls back to the local
+// SQLite database (.data/shipkit.db) — dev only, not durable on ephemeral FS.
 
 export type Stats = {
   total: number;
@@ -14,10 +13,9 @@ export type Stats = {
   updatedAt: string;
 };
 
-const DATA_DIR = path.join(process.cwd(), ".data");
-const FILE = path.join(DATA_DIR, "site-stats.json");
-
 const EMPTY: Stats = { total: 0, pages: {}, updatedAt: new Date(0).toISOString() };
+
+type PageviewRow = { path: string; count: number; updated_at: string };
 
 function hasServiceRole(): boolean {
   return !!(
@@ -26,24 +24,33 @@ function hasServiceRole(): boolean {
   );
 }
 
-// ── Local JSON fallback (dev / no Supabase) ──────────────────
-async function readLocal(): Promise<Stats> {
-  try {
-    const raw = await fs.readFile(FILE, "utf8");
-    const parsed = JSON.parse(raw) as Stats;
-    return {
-      total: parsed.total ?? 0,
-      pages: parsed.pages ?? {},
-      updatedAt: parsed.updatedAt ?? new Date(0).toISOString(),
-    };
-  } catch {
-    return { ...EMPTY, pages: {} };
+// ── Local SQLite (dev / no Supabase) ─────────────────────────
+
+function readLocal(): Stats {
+  const rows = all<PageviewRow>(
+    "SELECT path, count, updated_at FROM pageviews ORDER BY path",
+  );
+  const pages: Record<string, number> = {};
+  let total = 0;
+  for (const r of rows) {
+    const n = Number(r.count) || 0;
+    pages[r.path] = n;
+    total += n;
   }
+  return {
+    total,
+    pages,
+    updatedAt: rows[0]?.updated_at ?? new Date(0).toISOString(),
+  };
 }
 
-async function writeLocal(stats: Stats): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(FILE, JSON.stringify(stats), "utf8");
+function writeLocal(pathKey: string): void {
+  run(
+    `INSERT INTO pageviews (path, count, updated_at) VALUES (?, 1, ?)
+     ON CONFLICT(path) DO UPDATE SET count = count + 1, updated_at = excluded.updated_at`,
+    pathKey,
+    new Date().toISOString(),
+  );
 }
 
 // ── Supabase-backed (production) ────────────────────────────
@@ -94,11 +101,7 @@ export async function recordPageview(p: string): Promise<void> {
     if (hasServiceRole()) {
       await writeSupabase(pathKey);
     } else {
-      const stats = await readLocal();
-      stats.total += 1;
-      stats.pages[pathKey] = (stats.pages[pathKey] ?? 0) + 1;
-      stats.updatedAt = new Date().toISOString();
-      await writeLocal(stats);
+      writeLocal(pathKey);
     }
   } catch (err) {
     logger.warn("recordPageview failed", { path: pathKey, err: (err as Error).message });
@@ -109,9 +112,14 @@ export async function recordPageview(p: string): Promise<void> {
 /** Return the current aggregate stats (sorted pages). */
 export async function getStats(): Promise<Stats> {
   try {
-    return hasServiceRole() ? await readSupabase() : await readLocal();
+    return hasServiceRole() ? await readSupabase() : readLocal();
   } catch (err) {
     logger.warn("getStats failed", { err: (err as Error).message });
     return { ...EMPTY, pages: {} };
   }
+}
+
+/** Whether the counter is backed by Supabase (vs the local SQLite file). */
+export function statsAreDurable(): boolean {
+  return hasServiceRole();
 }

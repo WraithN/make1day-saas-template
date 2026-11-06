@@ -1,7 +1,6 @@
 import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto";
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import { env, isLicenseGateEnabled } from "@/lib/env";
+import { all, get, run, tx } from "@/lib/sqlite";
 
 // ───────────────────────────────────────────────────────────────
 // License gate for POST /api/generate.
@@ -13,9 +12,9 @@ import { env, isLicenseGateEnabled } from "@/lib/env";
 //      record matching their email (auto-claim on login).
 //   3. A small anonymous free quota per IP per UTC day (conversion funnel).
 //
-// Records are written to Supabase when configured, otherwise to `.data/`.
-// The KEY itself never depends on either store, so a read-only filesystem
-// cannot lock out paying customers.
+// Records are written to Supabase when configured, otherwise to the local
+// SQLite database under `.data/`. The KEY itself never depends on either
+// store, so a read-only filesystem cannot lock out paying customers.
 // ───────────────────────────────────────────────────────────────
 
 export const LICENSE_COOKIE = "sk_license";
@@ -104,47 +103,35 @@ export function verifyLicenseKey(key: string): LicensePayload | null {
   }
 }
 
-// ── Store: Supabase when configured, local JSON otherwise ──────────────────
+// ── Store: Supabase when configured, local SQLite otherwise ────────────────
+//
+// The local store is a single SQLite database (.data/shipkit.db) instead of a
+// pile of JSON files: transactions keep the free-quota counter correct under
+// concurrent requests, and the admin console can query it directly.
 
-type StoreData = {
-  licenses: LicenseRecord[];
-  events: Record<string, string>;
-  quota: Record<string, { day: string; used: number }>;
+type LicenseRow = {
+  jti: string;
+  key: string;
+  email: string | null;
+  plan: string;
+  order_id: string | null;
+  created_at: string;
+  expires_at: string | null;
 };
 
-const DATA_DIR = path.join(process.cwd(), ".data");
-const FILE = path.join(DATA_DIR, "license-store.json");
-
-async function readStore(): Promise<StoreData> {
-  try {
-    const parsed = JSON.parse(await fs.readFile(FILE, "utf8")) as StoreData;
-    return {
-      licenses: parsed.licenses ?? [],
-      events: parsed.events ?? {},
-      quota: parsed.quota ?? {},
-    };
-  } catch {
-    return { licenses: [], events: {}, quota: {} };
-  }
-}
-
-async function writeStore(data: StoreData): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(FILE, JSON.stringify(data), "utf8");
-}
-
-// Serialise read-modify-write so concurrent requests cannot lose a license.
-const globals = globalThis as unknown as { __skLicenseQueue?: Promise<unknown> };
-async function withStore<T>(fn: (data: StoreData) => T | Promise<T>): Promise<T> {
-  const prev = globals.__skLicenseQueue ?? Promise.resolve();
-  const run = prev.then(async () => {
-    const data = await readStore();
-    const result = await fn(data);
-    await writeStore(data);
-    return result;
-  });
-  globals.__skLicenseQueue = run.catch(() => undefined);
-  return run;
+function rowToLicense(r: LicenseRow): LicenseRecord {
+  // The column is free-form text (the legacy JSON store could hold anything);
+  // the record type only knows the two shipped plans.
+  const plan: LicenseRecord["plan"] = r.plan === "care" ? "care" : "buyout";
+  return {
+    jti: r.jti,
+    key: r.key,
+    email: r.email ?? undefined,
+    plan,
+    orderId: r.order_id ?? undefined,
+    createdAt: r.created_at,
+    expiresAt: r.expires_at ?? null,
+  };
 }
 
 async function adminClient(): Promise<any | null> {
@@ -209,9 +196,17 @@ export async function issueLicense(params: {
     if (!error) return record;
     console.warn("license insert fell back to local store:", error.message);
   }
-  await withStore((data) => {
-    data.licenses.push(record);
-  });
+  run(
+    `INSERT OR IGNORE INTO licenses (jti, key, email, plan, order_id, created_at, expires_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    record.jti,
+    record.key,
+    record.email ?? null,
+    record.plan,
+    record.orderId ?? null,
+    record.createdAt,
+    record.expiresAt ?? null,
+  );
   return record;
 }
 
@@ -242,15 +237,15 @@ export async function findLicenseByEmail(
       } as LicenseRecord;
     }
   }
-  return withStore((data) => {
-    const found = [...data.licenses]
-      .reverse()
-      .find((l) => l.email?.toLowerCase() === normalized);
-    if (!found) return null;
-    if (found.expiresAt && Date.parse(found.expiresAt) < Date.now()) return null;
-    const payload = verifyLicenseKey(found.key);
-    return payload ? found : null;
-  });
+  const row = get<LicenseRow>(
+    "SELECT * FROM licenses WHERE email = ? ORDER BY created_at DESC LIMIT 1",
+    normalized,
+  );
+  if (!row) return null;
+  const found = rowToLicense(row);
+  if (found.expiresAt && Date.parse(found.expiresAt) < Date.now()) return null;
+  const payload = verifyLicenseKey(found.key);
+  return payload ? found : null;
 }
 
 /** Admin view: recently issued keys (Basic-Auth-protected /admin only). */
@@ -274,7 +269,9 @@ export async function listLicenses(): Promise<LicenseRecord[]> {
       }));
     }
   }
-  return withStore((data) => [...data.licenses].reverse().slice(0, 50));
+  return all<LicenseRow>(
+    "SELECT * FROM licenses ORDER BY created_at DESC LIMIT 50",
+  ).map(rowToLicense);
 }
 
 /** Idempotency for webhook retries. Returns true when the event is NEW. */
@@ -292,11 +289,15 @@ export async function recordWebhookEvent(
     if (String(error.code) === "23505") return false; // unique violation
     console.warn("webhook event store fell back to local:", error.message);
   }
-  return withStore((data) => {
-    if (data.events[id]) return false;
-    data.events[id] = new Date().toISOString();
-    return true;
-  });
+  const changes = run(
+    `INSERT OR IGNORE INTO webhook_events (id, event_type, event_id, created_at)
+     VALUES (?, ?, ?, ?)`,
+    id,
+    eventType,
+    eventId,
+    new Date().toISOString(),
+  );
+  return changes > 0;
 }
 
 // ── Free quota ─────────────────────────────────────────────────────────────
@@ -314,18 +315,25 @@ async function consumeFreeQuota(
   if (limit <= 0) return { allowed: false, remaining: 0 };
   const day = new Date().toISOString().slice(0, 10);
   const key = clientIp(req);
-  return withStore((data) => {
-    const entry = data.quota[key];
-    const used = entry?.day === day ? entry.used : 0;
+  return tx(() => {
+    const row = get<{ day: string; used: number }>(
+      "SELECT day, used FROM quota WHERE ip_key = ?",
+      key,
+    );
+    const used = row?.day === day ? Number(row.used) : 0;
     if (used >= limit) return { allowed: false, remaining: 0 };
-    data.quota[key] = { day, used: used + 1 };
-    // Keep the file from growing unbounded (30-day retention).
+    run(
+      `INSERT INTO quota (ip_key, day, used) VALUES (?, ?, 1)
+       ON CONFLICT(ip_key) DO UPDATE SET used = ?, day = excluded.day`,
+      key,
+      day,
+      used + 1,
+    );
+    // Keep the table from growing unbounded (30-day retention).
     const cutoff = new Date(Date.now() - 30 * 24 * 3600 * 1000)
       .toISOString()
       .slice(0, 10);
-    for (const [k, v] of Object.entries(data.quota)) {
-      if (v.day < cutoff) delete data.quota[k];
-    }
+    run("DELETE FROM quota WHERE day < ?", cutoff);
     return { allowed: true, remaining: limit - used - 1 };
   });
 }
