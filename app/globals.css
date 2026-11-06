@@ -105,6 +105,12 @@ pre {
 }
 
 @layer components {
+  /* Landing-page font stack mandated by the ShipKit brand spec:
+     PingFang SC / Microsoft YaHei first, then system + Inter fallback. */
+  .sk-font {
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system,
+      BlinkMacSystemFont, Inter, sans-serif;
+  }
   .wrap {
     @apply mx-auto w-full max-w-6xl px-4 sm:px-5;
   }

@@ -1,0 +1,74 @@
+import Link from "next/link";
+import { Trans } from "@/lib/i18n";
+import type { Lang } from "@/lib/i18n-core";
+
+// The unique engineering value: ShipKit exports reusable design assets (CSS
+// tokens + a design.md spec), not a locked-in hardcoded theme. The right column
+// shows the actual exported artifact — not a screenshot of a UI.
+export function ThemePreviewSection({ lang }: { lang: Lang }) {
+  return (
+    <section className="sk-font wrap py-14 sm:py-20">
+      <div className="grid items-start gap-8 lg:grid-cols-2">
+        <div>
+          <p className="eyebrow mb-3">
+            <Trans k="theme.eyebrow" lang={lang} />
+          </p>
+          <h2 className="max-w-xl text-[18px] font-medium text-[#f0f0f0]">
+            <Trans k="theme.title" lang={lang} />
+          </h2>
+          <p className="mt-3 max-w-xl text-[14px] leading-relaxed text-[#949494]">
+            <Trans k="theme.body" lang={lang} />
+          </p>
+
+          <dl className="mt-6 space-y-4">
+            <div className="border-l-2 border-l-accent/60 pl-3">
+              <dt className="text-[14px] font-medium text-[#f0f0f0]">
+                <Trans k="theme.tokenTitle" lang={lang} />
+              </dt>
+              <dd className="mt-1 text-[14px] leading-relaxed text-[#949494]">
+                <Trans k="theme.tokenBody" lang={lang} />
+              </dd>
+            </div>
+            <div className="border-l-2 border-l-accent/60 pl-3">
+              <dt className="text-[14px] font-medium text-[#f0f0f0]">
+                <Trans k="theme.designmdTitle" lang={lang} />
+              </dt>
+              <dd className="mt-1 text-[14px] leading-relaxed text-[#949494]">
+                <Trans k="theme.designmdBody" lang={lang} />
+              </dd>
+            </div>
+          </dl>
+
+          <Link
+            href="/builder"
+            className="btn-ghost mt-6 inline-flex text-[16px]"
+          >
+            <Trans k="theme.cta" lang={lang} />
+          </Link>
+        </div>
+
+        <div className="space-y-3">
+          <div className="card font-mono text-[12px] leading-relaxed text-[#949494]">
+            <p className="mb-2 text-[11px] uppercase tracking-wider text-[#666666]">
+              :root — design tokens
+            </p>
+            <pre className="whitespace-pre-wrap">
+              {"--bg: 10 11 15;\n--surface: 17 19 25;\n--accent: 94 234 212;\n--ink: 242 244 247;\n--line: 35 38 47;"}
+            </pre>
+          </div>
+          <div className="card">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-[#666666]">
+              design.md
+            </p>
+            <p className="mt-2 text-[14px] text-[#c4c4c4]">
+              <Trans k="theme.previewCaption" lang={lang} />
+            </p>
+            <p className="mt-2 text-[12px] leading-relaxed text-[#949494]">
+              # Tokens · # Spacing · # Type scale · # Component conventions
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

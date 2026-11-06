@@ -19,7 +19,12 @@ export type Plan = {
   features: string[]; // dict keys, translated with t() below
   priceId: string | null; // resolved for the active provider (server-side)
   ctaKey: string;
+  /** Restrained emphasis (e.g. the Buyout plan). No neon glow. */
   highlight?: boolean;
+  /** De-emphasise a plan (e.g. the Free plan) as a quiet entry point. */
+  muted?: boolean;
+  /** Small accent caption under the feature list (e.g. what Care actually sells). */
+  note?: string;
 };
 
 export function PricingCards({ plans }: { plans: Plan[] }) {
@@ -49,26 +54,45 @@ export function PricingCards({ plans }: { plans: Plan[] }) {
   }
 
   return (
-    <div className="grid gap-4 sm:gap-5 lg:grid-cols-3">
+    <div className="grid items-start gap-4 sm:gap-5 lg:grid-cols-3">
       {plans.map((plan) => (
         <div
           key={plan.id}
           className={`card flex flex-col ${
             plan.highlight
-              ? "border-accent/60 shadow-[0_0_40px_rgba(94,234,212,.12)]"
-              : ""
+              ? "relative border-accent ring-1 ring-accent/30"
+              : plan.muted
+                ? "border-line opacity-90"
+                : "border-line"
           }`}
         >
+          {plan.highlight && (
+            <span className="absolute -top-px left-6 -translate-y-1/2 rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-bg">
+              {t("pricing.popular")}
+            </span>
+          )}
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">{plan.name}</h3>
-            {plan.highlight && (
-              <span className="rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-bg">
-                {t("pricing.popular")}
+            <h3
+              className={`text-lg font-semibold ${
+                plan.muted ? "text-ink-soft" : "text-ink"
+              }`}
+            >
+              {plan.name}
+            </h3>
+            {plan.launch && (
+              <span className="rounded-full border border-accent/50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-accent">
+                {t("pricing.launch")}
               </span>
             )}
           </div>
           <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <span className="text-3xl font-bold">{plan.price}</span>
+            <span
+              className={`text-3xl font-bold ${
+                plan.muted ? "text-ink-soft" : "text-ink"
+              }`}
+            >
+              {plan.price}
+            </span>
             <span className="text-sm text-muted">
               {plan.forever
                 ? t("pricing.forever")
@@ -82,18 +106,16 @@ export function PricingCards({ plans }: { plans: Plan[] }) {
               <s className="text-sm text-muted">{plan.originalPrice}</s>
             )}
           </div>
-          {plan.launch && (
-            <div className="mt-2">
-              <span className="rounded-full border border-accent/50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-accent">
-                {t("pricing.launch")}
-              </span>
-            </div>
-          )}
           <ul className="mt-5 flex-1 space-y-2 text-sm text-ink-soft">
             {plan.features.map((f) => (
               <li key={f}>· {t(f)}</li>
             ))}
           </ul>
+          {plan.note && (
+            <p className="mt-4 border-t border-line pt-3 text-[12px] leading-relaxed text-accent">
+              {t(plan.note)}
+            </p>
+          )}
           <div className="mt-6">
             {plan.priceId ? (
               <button
