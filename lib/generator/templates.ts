@@ -239,7 +239,7 @@ export function buildReadme(c: BuilderConfig): string {
     }
     lines.push(``);
     lines.push(`Both are Server Components with a shared console shell in \`components/console/\``);
-    lines.push(`and four-language copy in \`lib/content/console.ts\`. \`/account\` is gated by the`);
+    lines.push(`and five-language copy in \`lib/content/console.ts\`. \`/account\` is gated by the`);
     lines.push(`Supabase session in \`middleware.ts\`; \`/admin\` uses HTTP Basic Auth plus the`);
     lines.push(`optional \`ADMIN_EMAILS\` role allowlist. Set \`ADMIN_USER\` / \`ADMIN_PASSWORD\``);
     lines.push(`before deploying — without them \`/admin\` is public.`);

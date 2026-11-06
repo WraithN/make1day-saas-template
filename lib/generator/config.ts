@@ -165,7 +165,7 @@ export const SKILL_OPTIONS: { id: SkillId; label: string; note: string }[] = [
   },
   {
     id: "i18n",
-    label: "i18n (4 languages)",
+    label: "i18n (5 languages)",
     note: "Dictionary, Trans/vars, SSR lang, hreflang",
   },
   {

@@ -36,21 +36,25 @@
 页面都是 `force-dynamic` 的 Server Component，`layout.tsx` 统一输出 `noindex` metadata。
 `robots.ts` 显式 disallow `/account`、`/admin`，sitemap 不收录。
 
-## 3. 权限模型（真 RBAC + 会话校验）
+## 3. 权限模型（运营者登录 + 真 RBAC）
 
-角色持久化在 `profiles.role`，取值 `admin | staff | member`（由 `supabase/migrations/0004_profiles_rbac.sql` 创建）。
-`/admin` 不再只是 Basic Auth + 邮件白名单，而是**基于角色的访问控制**：
+`/admin` 有**两条互不依赖**的入口，都是会话校验：
 
-| 区域 | 第一层（会话） | 第二层（RBAC 角色） | 未配置 Supabase 时 |
+| 入口 | 凭据 | 服务端记录 | 权限 |
 |---|---|---|---|
-| `/account`（含 `/dashboard`） | `middleware.ts` 用 `supabase.auth.getUser()` 校验会话；demo 模式用 `sk_demo` cookie | — | 跳过 gating（方便模板预览），UI 显示「未登录」 |
-| `/admin` | 必须已登录——`getUser()` 返回空则 307 跳转 `/login?redirect=/admin` | 登录用户的 `profiles.role` 须为 `admin` 或 `staff`，或命中 `ADMIN_EMAILS` 种子；否则返回 **403** | 跳过角色 gating（仍受 Basic Auth 约束，见下） |
+| 运营者账号 | `ADMIN_USER` / `ADMIN_PASSWORD` | 首次使用时播种进 `admin_users`（只存 scrypt 哈希 + 随机盐，明文不落库），换取不透明会话 cookie `sk_admin_session`（HttpOnly / SameSite=Lax / 7 天） | **完整管理员**——它就是这个部署的所有者 |
+| Supabase 角色 | 已登录用户的 `profiles.role` | Supabase 会话 | `admin` / `staff` 可进；`staff` 只读用户目录；`member` 不可进 |
+
+未登录时 `/admin` 直接渲染登录屏，**不返回任何后台数据**；深链接带 `?next=`
+回跳参数，登录后跳回原页面。
 
 要点：
 
+- 运营者会话存在本地库的 `admin_sessions` 表，服务端可随时吊销、可自动过期；登出会真删会话行，不是只清 cookie。登录失败按 IP 限流（8 次/分钟）。
+- Edge 中间件只能校验 cookie **是否存在**（`node:sqlite` 是 Node-only），权威校验放在 Node 侧：`app/admin/layout.tsx` 与各 API 路由。
 - 角色读取走 SECURITY DEFINER 函数 `is_staff_or_admin()`，配合 RLS：`profiles` 仅 admin/staff 可读全部行；本人可改 `display_name / full_name / company`，但 RLS 的 WITH CHECK **禁止自改 `role`**（防自提权）。
 - `ADMIN_EMAILS` 种子邮箱在访问 `/admin` 时由 `ensureSeedAdmins()` 幂等提升为 `role='admin'`（需 `SUPABASE_SERVICE_ROLE_KEY`）。既是首登兼容，又让「白名单」成为真实持久化角色，而非仅运行时判断。
-- Basic Auth（`ADMIN_USER` / `ADMIN_PASSWORD`）保留为**可选第二因素**，叠在 RBAC 之上；未配置时该层不生效。
+- 运营者账号等价于 `role='admin'`：`getAdminSnapshot()` 的 `identityKind` 区分 `operator` 与 `supabase`，用户页据此给出不同提示，不再把运营者误判成只读员工。
 - `/admin/system` 只输出「已配置 / 未配置」标志与数量，从不打印邮箱列表、密钥或完整 env 值。
 - 授权码只在登录用户自己的 `/account/licenses` 和管理员 `/admin/licenses` 展示，不进日志、统计或 JSON-LD。
 
@@ -65,8 +69,8 @@
 - 字段：`provider`、`provider_order_id`（与 `provider` 联合唯一）、`customer_email`、
   `plan`、`amount numeric(12,2)`、`currency`、`status`、`created_at`。
 - 写入：webhook 落地后由 `app/api/webhook/route.ts` 调 `recordOrder()`，按
-  `provider + provider_order_id` **幂等 upsert**；Supabase 不可用时回退到
-  `.data/orders.json`（带串行写入队列，避免并发撕裂）。
+  `provider + provider_order_id` **幂等 upsert**；Supabase 不可用时回退到本地
+  SQLite 库（`.data/shipkit.db`，`node:sqlite` 内置模块，无需原生依赖）。
 - 读取：`listOrders()` 取最近 100 条给 `/admin/orders`。
 
 四种支付商（Stripe / Creem / PayPal / Waffo）的 `verifyWebhook` 在归一化事件
@@ -92,7 +96,7 @@
 - 放行 → 渲染付费内容；未放行 → 显示「用套餐解锁」CTA（指向 `/pricing`）；
 - `LICENSE_GATE` 关闭时显示提示条（内联样式，不依赖 `components/console/ConsoleUI`，
   因此两套后台被剪枝时 /premium 仍可独立存活）；
-- 四语文案在 `lib/i18n-core.ts` 的 `premium.*` 键下。
+- 五语文案在 `lib/i18n-core.ts` 的 `premium.*` 键下。
 
 > 此页是「模板里也要有付费墙样例」的落地：克隆出的客户工程直接带一个能跑的内容
 > 付费墙，配合任意支付商即可上线。
@@ -119,11 +123,14 @@
 - **统计 durable**：`lib/stats.ts` 在配置 `SUPABASE_SERVICE_ROLE_KEY` 时把
   pageview 计数写入 `pageviews` 表（原子自增 RPC `increment_pageview`，
   `supabase/migrations/0006_observability.sql`），serverless / 多实例下不再丢失；
-  未配置时回退到 `.data/site-stats.json`（仅本地开发，非持久）。
-- **后台不再默认开放**：`/admin` 与 `/api/stats` 共用 `lib/admin-guard.ts`——
-  生产环境若未设置 `ADMIN_USER` / `ADMIN_PASSWORD`，直接返回 **503**（关闭），
-  而非公开可读；开发环境仍允许访问但 UI 显示醒目警告。`/admin` 在已配置时先过
-  Basic Auth，再叠加 RBAC 角色校验。
+  未配置时回退到本地 SQLite 库（`.data/shipkit.db`，仅本地开发，非持久）。
+- **会话级事件**：`lib/traffic.ts` 记录 `view / cta / checkout / conversion`
+  四类事件，带访客与会话 id（30 分钟无活动断新会话），据此算出跳出率、CTR、
+  转化率与嵌套漏斗。访客 id 是不透明随机 token（HttpOnly first-party cookie），
+  不存 IP / UA；referrer 只保留域名；访客同意 Cookie 后才记录。
+- **后台不再默认开放**：`/admin` 与 `/api/stats` 都要求运营者会话。`ADMIN_USER` /
+  `ADMIN_PASSWORD` 存在时播种出运营者账号（页内登录，不走 HTTP Basic Auth），
+  未配置且没有 Supabase 管理员时，生产返回 **503**（关闭），开发环境给出明确提示。
 
 ## 4. 数据边界（不虚构功能）
 
@@ -131,7 +138,7 @@
 - 订阅：买断是离线授权码，可能没有 `subscriptions` 行，账单页会提示去授权页查看。
 - 用户后台**资料可编辑**：登录用户经 `/api/profile` PATCH 自己的 `display_name / full_name / company`（`ProfileForm` 客户端岛提交，service 层清洗长度并受 RLS 锁定）；`role` 字段不在此接口接受，只走管理员端点。
 - 角色管理：仅 `admin` 可经 `/api/admin/users` PATCH 他人 `role`（service role 直写，受 `canManageRoles` 校验；且禁止改自己）；`staff` 只读用户目录。
-- `.data/*.json` 与内存 RAG 索引在 serverless 环境不持久；授权与 webhook 幂等生产应执行 `supabase/migrations/0003_licenses.sql`。
+- 本地 SQLite 文件与内存 RAG 索引在 serverless 环境不持久；授权与 webhook 幂等生产应执行 `supabase/migrations/0003_licenses.sql`。
 
 ## 5. Builder / 剪枝
 
@@ -172,18 +179,18 @@
 
 ```bash
 ADMIN_USER=admin
-ADMIN_PASSWORD=<强密码>
+ADMIN_PASSWORD=<强密码>                          # 播种运营者账号，密码只存 scrypt 哈希
 ADMIN_EMAILS=you@example.com,ops@example.com   # 种子管理员邮箱，首次访问 /admin 时自动提升为 role=admin（需 SUPABASE_SERVICE_ROLE_KEY）
 SUPABASE_SERVICE_ROLE_KEY=<service role>        # 用于完整用户目录 + 角色提升/管理
 ```
 
 角色提升发生在访问受保护后台时（`ensureSeedAdmins()` 幂等），无需手动跑 SQL；但 `0004_profiles_rbac.sql` 必须在部署后执行。
-未配置 Supabase 时 `/admin` 仍按设计保持开放（跳过 gating），一旦配置即按 RBAC 收紧。检查顺序：
+检查顺序：
 
 1. `npm run waffo:preflight -- --strict`（含 Admin 变量）
 2. 部署后执行 `supabase/migrations/0004_profiles_rbac.sql`
-3. 用 admin 邮箱登录后访问 `/admin/system`，确认角色显示为 Admin、Basic Auth 显示「开启」
-4. 用一个 `member` 角色账号访问 `/admin`，应返回 **403**
+3. 打开 `/admin`，用 `ADMIN_USER` / `ADMIN_PASSWORD` 在页内登录，确认右上角显示「当前登录 <用户名> · 管理员」
+4. 用一个 `member` 角色账号访问 `/admin`，应被拒（无法进入）
 5. 用 admin 在 `/admin/users` 将某邮箱改为 `staff` / `admin`，该账号随后即可进入 /admin
 6. 用白名单账号访问 `/account/settings`，确认资料编辑可保存
 

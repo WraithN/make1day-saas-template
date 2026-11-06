@@ -14,7 +14,7 @@ export function GET(_req: NextRequest) {
 
 ## What it is
 - A configurable starter: pick auth, payments, AI providers, features, visual style and deploy target in the Builder, then download a clean, buildable Next.js project. Both consoles are selectable features: checking \`account\` ships /account, checking \`admin\` ships /admin; unchecking either prunes its whole route tree from the ZIP.
-- Consoles: /account (user) shows profile, subscription, issued license keys and preferences; it is gated by the Supabase session. /admin (operator) shows users, licenses, traffic and runtime status; it uses HTTP Basic Auth plus an optional ADMIN_EMAILS allowlist. Both are four-language, read-only starters — no profile mutation endpoint and no org/RBAC table.
+- Consoles: /account (user) shows profile, subscription, issued license keys and preferences; it is gated by the Supabase session. /admin (operator) shows users, licenses, traffic and runtime status; it uses an in-page operator sign-in plus an optional Supabase admin/staff role. Both are five-language, read-only starters — no profile mutation endpoint and no org/RBAC table.
 - Tech stack: Next.js 15 + TypeScript + Tailwind, Supabase (auth + Postgres), Waffo as the default payment gateway (Stripe / Creem / PayPal also available), multi-provider AI chat (OpenAI / Anthropic / Gemini).
 - RAG retrieval is **hybrid**: Okapi BM25 (Latin words + CJK unigrams/bigrams) fused with dense embeddings via **Reciprocal Rank Fusion** (RRF, k=60). In-memory vectors by default; optional pgvector persistence. Without an embedding key it degrades to BM25-only, and answers carry inline [n] citations.
 - Every generated ZIP is **agent-native**: a root \`AGENTS.md\` (repo conventions, pruned modules, commands, scoped-rule index, definition of done), a style-specific \`design.md\`, \`ai/rules/*.md\` scoped rules with globs, \`.cursor/rules/*.mdc\` for Cursor, \`CLAUDE.md\` for Claude Code, and up to 12 \`skills/*.md\` playbooks. \`npm run ai:docs\` rebuilds all of them from \`shipkit.config.json\` after a config change.
@@ -37,7 +37,7 @@ export function GET(_req: NextRequest) {
 ## Key pages
 - [Home](${SITE}/): overview and feature list.
 - [Builder](${SITE}/builder): configure and download your scaffold (with AGENTS.md + design.md + scoped rules + 12 skills).
-- [Agent-ready](${SITE}/agent-ready): the four-language guide to the machine-readable stack and what lands inside every ZIP.
+- [Agent-ready](${SITE}/agent-ready): the five-language guide to the machine-readable stack and what lands inside every ZIP.
 - [Pricing](${SITE}/pricing): plans, subscription rules and the 1:1 custom service.
 - [Blog](${SITE}/blog): guides on building, billing and launching a SaaS with Next.js.
 - [FAQ](${SITE}/faq): how to build a SaaS with Next.js, auth, billing, AI, deployment, licensing.
@@ -51,7 +51,7 @@ export function GET(_req: NextRequest) {
 - [llms-full.txt](${SITE}/llms-full.txt): long-form facts — full BuilderConfig enum, pruning rules, hybrid RAG parameters, Pancake protocol, license-gate order, HTTP API summary and honest limitations.
 - [OpenAPI 3.1 contract](${SITE}/openapi.json): request/response schemas for every public API route, including POST /api/generate, its 402 paywall, the MCP JSON-RPC endpoint and the BuilderConfig JSON Schema.
 - [MCP endpoint](${SITE}/api/mcp): stateless JSON-RPC 2.0 with tools get_product_info, get_builder_config, scaffold_project and get_agent_delivery. scaffold_project returns a validated BuilderConfig plus the exact /api/generate POST body; includeZip=true returns the ZIP as base64 behind the same license gate. A stdio bridge (scripts/mcp-server.mjs) connects Cursor and Claude Code. See docs/mcp.md.
-- [Agent-ready guide](${SITE}/agent-ready): four-language explanation of the discovery stack, the recommended agent read order and the agent-native files inside each ZIP.
+- [Agent-ready guide](${SITE}/agent-ready): five-language explanation of the discovery stack, the recommended agent read order and the agent-native files inside each ZIP.
 - [Builder](${SITE}/builder) and /agent-ready are crawlable; robots.txt explicitly allows them, the machine-readable routes and /api/mcp for AI crawlers.
 - /sitemap.xml lists indexable pages, localized ?lang= variants and the machine-readable endpoints. /api/payments/self-check reports live configuration readiness without secrets.
 - Generated-template build matrix: 16 cases in .github/workflows/generated-matrix.yml, each downloading a real ZIP and asserting AGENTS.md, scoped rules, Cursor rules, 12 skills, ai:docs and both consoles' pruning / dead-link rewrites before running tsc --noEmit inside it (docs/build-matrix.md).

@@ -162,5 +162,5 @@ curl -fsS https://<你的域名>/api/payments/self-check | jq
 
 - `/api/payments/self-check` 与 preflight 都只检查**配置状态**，不能证明 Waffo 后台真的能扣款；必须真实跑一笔。
 - `.data/*.json` 兜底与 RAG 内存索引在 serverless 上不持久；生产请依赖 Supabase 迁移。
-- `/admin` 未设密码时仍可访问，Basic Auth 只是最低限度保护。
+- `/admin` 未设 `ADMIN_USER` / `ADMIN_PASSWORD` 且没有 Supabase 管理员时，生产环境直接返回 503（关闭），开发环境仅显示醒目警告。
 - 本清单没有覆盖 Acquiring、多币种、税费配置与退款人工流程，这些属于商户后台运营范畴。

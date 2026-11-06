@@ -299,7 +299,7 @@ The starter is meant to be evaluated **by AI agents**, not only by humans:
 | `GET /llms-full.txt` | Long-form facts: full `BuilderConfig` enum, pruning rules, hybrid-RAG parameters, Pancake protocol, license-gate order, API summary and honest limitations |
 | `GET /openapi.json` | OpenAPI 3.1 contract for all public routes, including the `402` paywall on `POST /api/generate` and the MCP endpoint |
 | `POST /api/mcp` | MCP JSON-RPC 2.0: `get_product_info`, `get_builder_config`, `scaffold_project`, `get_agent_delivery`. `includeZip=true` is license-gated. Stdio bridge: `scripts/mcp-server.mjs` |
-| `GET /agent-ready` | Four-language landing page explaining the discovery stack and the generated contract |
+| `GET /agent-ready` | Five-language landing page explaining the discovery stack and the generated contract |
 | `robots.ts` / `sitemap.ts` | Explicit AI-crawler allowlist, crawlable `/builder` and `/agent-ready`, machine-readable endpoints in the sitemap |
 | `docs/agent-discovery.md`, `docs/mcp.md`, `docs/agent-native.md`, `docs/consoles.md` | Design notes, MCP reference, Agent-Native Delivery spec, and the user/admin console architecture |
 

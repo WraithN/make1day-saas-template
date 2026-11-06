@@ -10,8 +10,8 @@
 | `/llms-full.txt` | text/plain | coding agent、选型 agent | **长版事实表**：BuilderConfig 完整枚举、剪枝规则、RAG 算法参数、支付协议、license gate 顺序、API 汇总、已知限制 |
 | `/openapi.json` | OpenAPI 3.1 JSON | 工具型 agent、集成脚本 | 11 个路径 / 16 个操作的请求/响应 schema、错误码、安全方案、`BuilderConfig` 完整 JSON Schema |
 | `/api/mcp` | JSON-RPC 2.0 / MCP | coding agent | `get_product_info`、`get_builder_config`、`scaffold_project`、`get_agent_delivery`；`includeZip` 与网站同一 license gate；`scripts/mcp-server.mjs` 提供 stdio 桥接 |
-| `/agent-ready` | HTML + TechArticle JSON-LD | 人 + agent | 四语落地页：四层发现面、建议抓取顺序、每个 ZIP 内的 agent 契约、诚实边界 |
-| `/sitemap.xml` | XML | 搜索引擎 | 可索引页面 + 四种语言 `?lang=` 变体 + 三个机器可读端点 + `/agent-ready` |
+| `/agent-ready` | HTML + TechArticle JSON-LD | 人 + agent | 五语落地页：四层发现面、建议抓取顺序、每个 ZIP 内的 agent 契约、诚实边界 |
+| `/sitemap.xml` | XML | 搜索引擎 | 可索引页面 + 五种语言 `?lang=` 变体 + 三个机器可读端点 + `/agent-ready` |
 | `/robots.txt` | text/plain | 所有爬虫 | 默认规则；对 GPTBot / ClaudeBot / PerplexityBot / Google-Extended / Applebot-Extended / CCBot / Bytespider 显式放行，并显式允许机器可读路由与 `/builder` |
 | 各页面 JSON-LD | JSON-LD | 搜索/答案引擎 | Organization、WebSite、FAQPage、BlogPosting、OfferCatalog |
 | `/api/payments/self-check` | JSON | 运维、部署 agent | 只读配置就绪状态，不返回密钥 |

@@ -106,7 +106,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "premium.title": "Premium playbook",
     "premium.lockedTitle": "This is paid content",
     "premium.lockedDesc":
-      "Unlock the full playbook with an active license or subscription. ShipKit's entitlement gate works with Stripe, Creem, PayPal and Waffo — the same code, any provider.",
+      "Unlock the full playbook with an active license or subscription. ShipKit's entitlement gate is provider-agnostic — the same code runs on any checkout gateway.",
     "premium.unlock": "Unlock with a plan",
     "premium.gateOffNote":
       "License gate is OFF on this build, so everyone can read this. Set LICENSE_GATE=on to enforce the paywall.",
@@ -213,7 +213,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "pricing.rules.r6": "Care payments are non-refundable for the current period, but you can cancel future periods.",
     "pricing.rules.r7": "Prices are in USD; taxes may apply depending on your location.",
     "pricing.rules.r8": "Custom work is scoped in a 1:1 call and quoted separately. There is no automatic charge and no obligation to proceed.",
-    "pricing.rules.r9": "Checkout on this site is processed by Waffo; generated projects can switch gateways in the Builder.",
+    "pricing.rules.r9": "Checkout on this site is processed by {provider}; generated projects can switch gateways in the Builder.",
     "pricing.buyLicense": "Buy license",
     "pricing.subscribe": "Subscribe to Care",
     "pricing.care.label": "per month",
@@ -493,7 +493,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "premium.title": "付费实战手册",
     "premium.lockedTitle": "这是付费内容",
     "premium.lockedDesc":
-      "使用有效授权或订阅即可解锁完整手册。ShipKit 的访问网关适配 Stripe、Creem、PayPal 与 Waffo——同一套代码，任何付款方。",
+      "使用有效授权或订阅即可解锁完整手册。ShipKit 的访问网关与支付商无关——同一套代码，任何结账通道都能跑。",
     "premium.unlock": "用套餐解锁",
     "premium.gateOffNote":
       "当前构建未启用授权门槛，因此所有人可读。设置 LICENSE_GATE=on 即可强制付费墙。",
@@ -592,7 +592,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "pricing.rules.r6": "Care 当期费用不退，但可取消后续周期。",
     "pricing.rules.r7": "价格以美元计，可能依所在地产生税费。",
     "pricing.rules.r8": "定制服务通过 1V1 沟通确认范围并单独报价，不会自动扣费，沟通后也无购买义务。",
-    "pricing.rules.r9": "本站收款由 Waffo 处理；生成的项目可在 Builder 中切换支付商。",
+    "pricing.rules.r9": "本站收款由 {provider} 处理；生成的项目可在 Builder 中切换支付商。",
     "pricing.buyLicense": "购买许可",
     "pricing.subscribe": "订阅 Care",
     "pricing.care.label": "每月",
@@ -847,7 +847,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "premium.title": "プレミアム実践ガイド",
     "premium.lockedTitle": "これは有料コンテンツです",
     "premium.lockedDesc":
-      "有効なライセンスまたは購読で全体を解放します。ShipKit のアクセスゲートは Stripe・Creem・PayPal・Waffo に対応——同じコードでどの決済元でも動きます。",
+      "有効なライセンスまたは購読で全体を解放します。ShipKit のアクセスゲートは決済事業者に依存しません——同じコードでどのチェックアウトチャネルでも動きます。",
     "premium.unlock": "プランで解放",
     "premium.gateOffNote":
       "このビルドではライセンスゲートが OFF のため誰でも閲覧できます。LICENSE_GATE=on でペイウォールを強制できます。",
@@ -953,7 +953,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "pricing.rules.r6": "Care の当期分は返金できませんが、次期以降は解約できます。",
     "pricing.rules.r7": "価格は米ドル建てで、地域により税金がかかる場合があります。",
     "pricing.rules.r8": "カスタム開発は 1:1 の打ち合わせで範囲を決め個別見積もりです。自動課金はなく、依頼の義務もありません。",
-    "pricing.rules.r9": "本サイトの決済は Waffo が処理します。生成したプロジェクトは Builder で決済事業者を切り替えられます。",
+    "pricing.rules.r9": "本サイトの決済は {provider} が処理します。生成したプロジェクトは Builder で決済事業者を切り替えられます。",
     "pricing.buyLicense": "ライセンスを購入",
     "pricing.subscribe": "Care に登録",
     "pricing.care.label": "毎月",
@@ -1184,7 +1184,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "premium.title": "Guide pratique premium",
     "premium.lockedTitle": "Contenu payant",
     "premium.lockedDesc":
-      "Débloquez le guide complet avec une licence ou un abonnement actif. La porte d'accès de ShipKit fonctionne avec Stripe, Creem, PayPal et Waffo — le même code, n'importe quel fournisseur.",
+      "Débloquez le guide complet avec une licence ou un abonnement actif. La porte d'accès de ShipKit est indépendante du fournisseur — le même code fonctionne avec n'importe quel canal de paiement.",
     "premium.unlock": "Débloquer avec un forfait",
     "premium.gateOffNote":
       "La porte de licence est désactivée sur ce build, tout le monde peut donc lire. Réglez LICENSE_GATE=on pour appliquer le paywall.",
@@ -1291,7 +1291,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "pricing.rules.r6": "Les paiements Care de la période en cours ne sont pas remboursables, mais vous pouvez annuler les suivantes.",
     "pricing.rules.r7": "Les prix sont en USD ; des taxes peuvent s'appliquer selon votre pays.",
     "pricing.rules.r8": "Le sur-mesure est cadré lors d'un appel 1:1 et fait l'objet d'un devis séparé : aucun prélèvement automatique, aucune obligation.",
-    "pricing.rules.r9": "Le paiement de ce site est traité par Waffo ; les projets générés peuvent changer de prestataire dans le Builder.",
+    "pricing.rules.r9": "Le paiement de ce site est traité par {provider} ; les projets générés peuvent changer de prestataire dans le Builder.",
     "pricing.buyLicense": "Acheter la licence",
     "pricing.subscribe": "S'abonner à Care",
     "pricing.care.label": "par mois",
@@ -1545,7 +1545,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "premium.title": "Premium-Playbook",
     "premium.lockedTitle": "Dies ist kostenpflichtiger Inhalt",
     "premium.lockedDesc":
-      "Schalten Sie das vollständige Playbook mit einer aktiven Lizenz oder einem Abonnement frei. ShipKits Berechtigungs-Gate funktioniert mit Stripe, Creem, PayPal und Waffo — derselbe Code, jeder Anbieter.",
+      "Schalten Sie das vollständige Playbook mit einer aktiven Lizenz oder einem Abonnement frei. ShipKits Berechtigungs-Gate ist anbieterunabhängig — derselbe Code läuft mit jedem Checkout-Kanal.",
     "premium.unlock": "Mit einem Tarif freischalten",
     "premium.gateOffNote":
       "Das Lizenz-Gate ist in diesem Build AUS, daher kann jeder lesen. Setzen Sie LICENSE_GATE=on, um die Paywall zu erzwingen.",
@@ -1642,7 +1642,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "pricing.rules.r6": "Care-Zahlungen für die laufende Periode sind nicht erstattungsfähig, aber Sie können künftige Perioden kündigen.",
     "pricing.rules.r7": "Preise in USD; Steuern können je nach Standort anfallen.",
     "pricing.rules.r8": "Individuelle Arbeit wird in einem 1:1-Gespräch abgesteckt und separat kalkuliert. Es erfolgt keine automatische Belastung und keine Verpflichtung zur Durchführung.",
-    "pricing.rules.r9": "Das Checkout auf dieser Seite wird von Waffo verarbeitet; generierte Projekte können das Gateway im Builder wechseln.",
+    "pricing.rules.r9": "Das Checkout auf dieser Seite wird von {provider} verarbeitet; generierte Projekte können das Gateway im Builder wechseln.",
     "pricing.buyLicense": "Lizenz kaufen",
     "pricing.subscribe": "Care abonnieren",
     "pricing.care.label": "pro Monat",

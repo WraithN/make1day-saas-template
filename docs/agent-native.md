@@ -46,7 +46,7 @@ Windows/macOS 默认文件系统大小写不敏感，同时保留两个名字会
 `frontend` / `ui` / `backend` / `testing` / `seo`（原有）＋
 `auth`（Supabase/OAuth/middleware）、`payments`（单 webhook/RSA/买断 vs 订阅）、
 `database`（迁移/RLS/service role）、`rag`（BM25+embeddings+RRF）、
-`i18n`（四语字典/Trans/SSR lang）、`deploy`（env/runtime/构建顺序）、
+`i18n`（五语字典/Trans/SSR lang）、`deploy`（env/runtime/构建顺序）、
 `agents`（阅读顺序/ai:docs/DoD）。
 
 每份都有 frontmatter 的 `globs`，并映射为一条 `ai/rules/skill-<id>.md`。

@@ -16,7 +16,7 @@ rules that point at these playbooks.
 | Payments & Webhooks | `payments.md` | One webhook, raw-body RSA verify, one-time vs recurring |
 | Database & RLS | `database.md` | Migrations, service role, row level security |
 | Hybrid RAG | `rag.md` | BM25 + embeddings + RRF, ingest/query, no-key fallback |
-| i18n (4 languages) | `i18n.md` | Dictionary, `Trans` vars, SSR lang, hreflang |
+| i18n (5 languages) | `i18n.md` | Dictionary, `Trans` vars, SSR lang, hreflang |
 | Deploy & Env | `deploy.md` | Vercel / Cloudflare / self-host, runtime limits |
 | Agent Workflow | `agent-workflow.md` | Reading order, `ai:docs`, definition of done |
 

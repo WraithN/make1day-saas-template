@@ -312,7 +312,7 @@ export function GET() {
         get: {
           tags: ["Analytics"],
           summary: "First-party aggregate stats",
-          description: "Requires ADMIN_USER / ADMIN_PASSWORD Basic Auth when configured.",
+          description: "Requires an operator session (sign in at /admin) when configured.",
           security: [{ adminBasic: [] }, {}],
           responses: {
             "200": json(200, "Aggregates", { type: "object", additionalProperties: true }),

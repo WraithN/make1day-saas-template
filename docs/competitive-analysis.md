@@ -43,7 +43,7 @@ ShipKit 的 $99 处于最低付费档，但功能密度接近 $299 档——这�
 | 提交时质量门禁 / living docs | ❌ | ❌ | ❌ | 仅 MCP | ❌ | ✅ |
 | llms.txt / GEO 机器可读 | ✅ llms-full + OpenAPI 3.1 | ❌ | ❌ | 未强调 | 未强调 | ❌ |
 | 端到端 RAG | ✅ BM25 + 向量 + RRF | ❌ | ❌ | 付费模板 | ❌ | ✅ |
-| 四语 i18n | ✅ EN/ZH/JA/FR | ❌ | ❌ | ✅ | ✅ | ❌ |
+| 五语 i18n | ✅ EN/ZH/JA/FR/DE | ❌ | ❌ | ✅ | ✅ | ❌ |
 | 多租户 / RBAC | ❌（仅勾选项） | ❌ | ❌ | ✅ | ✅ | ✅ |
 | IaC / CI / Docker | ⚠️ 16 组生成矩阵 CI（每组 tsc），无 IaC/Docker | ❌ | ❌ | 基础 | 基础 | ✅ |
 | MoR 收款（无公司实体） | ✅ Waffo Pancake | ❌ Stripe 系 | ❌ | ❌ | ❌ | ❌ |

@@ -1,10 +1,51 @@
 // llms-full.txt — the LONG form of llms.txt for AI agents / answer engines.
 // Self-contained on purpose: it must not import modules that the generator
 // prunes, because this route is excluded from customer ZIPs (SITE_ONLY_FILES).
+import { env } from "@/lib/env";
+
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://shipkit.dev").replace(
   /\/+$/,
   "",
 );
+
+// Which gateway actually processes this site's checkout. The document must
+// describe the LIVE gateway, not a hardcoded brand — PAYMENT_PROVIDER decides.
+const PROVIDER_KEY = env.paymentProvider();
+const PROVIDER_LABELS: Record<string, string> = {
+  stripe: "Stripe",
+  creem: "Creem",
+  paypal: "PayPal",
+  waffo: "Waffo",
+};
+const PROVIDER = PROVIDER_LABELS[PROVIDER_KEY] ?? PROVIDER_KEY;
+
+// Gateway-specific protocol notes. Waffo's detail only applies when Waffo is
+// the active gateway; for every other provider the section stays generic
+// instead of documenting endpoints this deployment never calls.
+const GATEWAY_PROTOCOL =
+  PROVIDER_KEY === "waffo"
+    ? `IMPORTANT: "Waffo" is two incompatible products. default is Pancake
+(docs.waffo.ai, MoR for digital products); waffo.com/docs is Acquiring
+(SE-Asia acquiring, RSA X-SIGNATURE, contract-specific create-order payload).
+
+Pancake checkout:
+  POST https://api.waffo.ai/v1/actions/checkout/create-session
+  Auth A: X-Store-Slug + X-Environment (test|prod)  [public, recommended]
+  Auth B: X-Merchant-Id + X-Timestamp + X-Signature (RSA over
+          METHOD + newline + PATH + newline + TS + newline + BASE64(SHA256(BODY)))
+          The two auth modes are mutually exclusive.
+  Body: productId, productType ("onetime"|"subscription"), currency "USD",
+        buyerEmail, metadata {plan,userId,source}, successUrl
+  Response: data.checkoutUrl. In Pancake the product id IS the price id.
+
+Webhook signature (this deployment): X-Waffo-Signature: t=<epoch-ms>,v1=<base64>
+  Verify RSA-SHA256 over the RAW body prefixed with the timestamp and a dot,
+  using the platform-level Webhook Public Key for test or prod. Tolerance is
+  45 minutes because retries reuse the original signature.`
+    : `This deployment uses the ${PROVIDER} adapter. The adapter interface is
+CheckoutParams + NormalizedSubEvent; the concrete endpoints, auth headers and
+signature scheme are documented by ${PROVIDER} itself. Switch the gateway with
+PAYMENT_PROVIDER — no code change is required.`;
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +80,7 @@ pruned, buildable Next.js project pre-configured to those exact selections.
 | Care | $9/mo launch (list $19/mo) | Ongoing updates, hosting help, priority support; key expires with the period |
 | Custom 1:1 | Fixed quote after a free 30-minute call | Custom components/themes, private deployment, SSO, RAG on own data, audits |
 
-Checkout on this site is Waffo Pancake (Merchant of Record). Custom work is
+Checkout on this site is processed by ${PROVIDER} (PAYMENT_PROVIDER=${PROVIDER_KEY}). Custom work is
 scoped manually and has NO self-checkout. Subscription rules are published on
 /pricing. A paid webhook automatically issues an offline HMAC license key.
 Buyers redeem keys at /license; the same key can be pasted into the Builder.
@@ -143,11 +184,11 @@ Admin console (feature=admin, route /admin):
   /admin/licenses     issued keys, plan, email, order id
   /admin/stats        first-party pageview aggregates
   /admin/system       read-only runtime flags, no secret values
-  Guard: HTTP Basic Auth (ADMIN_USER / ADMIN_PASSWORD) plus the optional
+  Guard: in-page operator sign-in (ADMIN_USER / ADMIN_PASSWORD) plus the optional
   ADMIN_EMAILS allowlist enforced in middleware.ts. Data: getAdminSnapshot().
 
 Both use components/console/* for the shell and tables, and
-lib/content/console.ts for complete en/zh/ja/fr copy. They are read-only
+lib/content/console.ts for complete en/zh/ja/fr/de copy. They are read-only
 starters: no profile mutation endpoint, no org/RBAC table. See docs/consoles.md.
 
 ## 5. RAG (strategy B, hybrid retrieval)
@@ -167,36 +208,20 @@ starters: no profile mutation endpoint, no org/RBAC table. See docs/consoles.md.
 - Endpoints: POST /api/rag/ingest {title,text}, GET /api/rag/ingest,
   POST /api/rag/query {question,provider?}. Demo UI: /rag (noindex).
 
-## 6. Payments — Waffo Pancake (this site's gateway)
+## 6. Payments — ${PROVIDER} (this site's gateway)
 
-IMPORTANT: "Waffo" is two incompatible products. default is Pancake
-(docs.waffo.ai, MoR for digital products); waffo.com/docs is Acquiring
-(SE-Asia acquiring, RSA X-SIGNATURE, contract-specific create-order payload).
-
-Pancake checkout:
-  POST https://api.waffo.ai/v1/actions/checkout/create-session
-  Auth A: X-Store-Slug + X-Environment (test|prod)  [public, recommended]
-  Auth B: X-Merchant-Id + X-Timestamp + X-Signature (RSA over
-          METHOD + newline + PATH + newline + TS + newline + BASE64(SHA256(BODY)))
-          The two auth modes are mutually exclusive.
-  Body: productId, productType ("onetime"|"subscription"), currency "USD",
-        buyerEmail, metadata {plan,userId,source}, successUrl
-  Response: data.checkoutUrl. In Pancake the product id IS the price id.
+${GATEWAY_PROTOCOL}
 
 Webhook (single route for every gateway): POST /api/webhook
-  Header X-Waffo-Signature: t=<epoch-ms>,v1=<base64>
-  Verify RSA-SHA256 over the RAW body prefixed with the timestamp and a dot,
-  using the platform-level Webhook Public Key for test or prod. Tolerance is
-  45 minutes because retries reuse the original signature.
   Events: order.completed -> permanent key; subscription.activated -> key;
   renewed/recovered/canceling/plan_changed -> active; canceled/refund.succeeded
   -> canceled; past_due -> past_due. subscription.payment_succeeded is
   INTENTIONALLY IGNORED (it accompanies the first activation and would grant
-  access twice). Dedup key: eventType + eventId (Waffo retries up to 4x).
+  access twice). Dedup key: eventType + eventId (the gateway may retry up to 4x).
   Persistence failures return 500 so the gateway retries.
 
-Generated projects can instead select stripe / creem / paypal / none in the
-Builder; the adapter interface is NormalizedSubEvent + CheckoutParams.
+Generated projects can instead select stripe / creem / paypal / waffo / none in
+the Builder; the adapter interface is NormalizedSubEvent + CheckoutParams.
 
 ## 7. License gate (protects this site's download endpoint)
 
@@ -208,7 +233,7 @@ Authorization order for POST /api/generate:
 Key format: SK1.<base64url payload>.<base64url HMAC-SHA256>. LICENSE_SECRET is
 required in production; LICENSE_GATE=auto enables the gate only in production
 builds with a secret. Generated customer projects ship with LICENSE_GATE=off.
-Operational views: /admin/licenses (Basic Auth), GET /api/payments/self-check.
+Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-check.
 
 ## 8. HTTP API summary (full schema: ${SITE}/openapi.json)
 
@@ -226,7 +251,7 @@ Operational views: /admin/licenses (Basic Auth), GET /api/payments/self-check.
 | POST | /api/rag/query | Hybrid retrieval + cited answer | public |
 | POST | /api/ai | Multi-provider chat (plan-gated outside demo) | Supabase session |
 | POST | /api/track | Aggregate pageview (consent-gated) | public |
-| GET | /api/stats | First-party stats | Admin Basic Auth |
+| GET | /api/stats | First-party stats | Operator session |
 | POST | /api/mcp | MCP JSON-RPC 2.0 (initialize / tools/list / tools/call / resources/list / ping) | public; includeZip is license-gated |
 | GET | /api/mcp | Service + tool discovery | public |
 
@@ -241,7 +266,7 @@ Operational views: /admin/licenses (Basic Auth), GET /api/payments/self-check.
   the SAME license gate; other tools: get_product_info, get_builder_config,
   get_agent_delivery. Stateless JSON-RPC over HTTP; scripts/mcp-server.mjs
   bridges stdio for Cursor / Claude Code. Reference: docs/mcp.md.
-- ${SITE}/agent-ready — four-language landing page explaining the stack, the
+- ${SITE}/agent-ready — five-language landing page explaining the stack, the
   recommended agent read order and what lands inside every ZIP.
 - ${SITE}/sitemap.xml — indexable pages plus localized ?lang= variants.
 - ${SITE}/robots.txt — default rules + explicit AI crawler allowlist
@@ -290,8 +315,8 @@ Operational views: /admin/licenses (Basic Auth), GET /api/payments/self-check.
 - AI chat is not token-streamed and has no per-user quota.
 - /admin and /api/stats are open unless ADMIN_USER / ADMIN_PASSWORD are set;
   ADMIN_EMAILS adds an optional signed-in role check. /account is session-gated
-  but read-only (no profile mutations). Both consoles are four-language.
-  First-party stats use a local JSON file (not durable on serverless).
+  but read-only (no profile mutations). Both consoles are five-language.
+  First-party stats use a local SQLite file (not durable on serverless).
 - The Builder's "multitenancy" flag is a selection only: no org/RBAC tables.
 - PayPal creates subscription checkouts only; Creem field names are unverified.
 - Cloudflare deploy output still contains Node-runtime routes.

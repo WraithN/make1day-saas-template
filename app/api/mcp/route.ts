@@ -12,7 +12,7 @@ import { DEFAULT_CONFIG, type BuilderConfig } from "@/lib/generator/config";
 import { builderConfigSchema } from "@/lib/generator/schema";
 import { buildProjectZip } from "@/lib/generator/pack";
 import { checkEntitlement } from "@/lib/license";
-import { isLicenseGateEnabled } from "@/lib/env";
+import { env, isLicenseGateEnabled } from "@/lib/env";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,6 +20,17 @@ export const dynamic = "force-dynamic";
 const PROTOCOL_VERSION = "2025-06-18";
 const SERVER_INFO = { name: "shipkit", version: "1.0.0" };
 const MAX_ZIP_BYTES = 4_000_000;
+
+// The gateway this deployment actually checks out through. The product facts
+// must name the live one — PAYMENT_PROVIDER decides.
+const PROVIDER_LABELS: Record<string, string> = {
+  stripe: "Stripe",
+  creem: "Creem",
+  paypal: "PayPal",
+  waffo: "Waffo",
+};
+const PROVIDER_LABEL =
+  PROVIDER_LABELS[env.paymentProvider()] ?? env.paymentProvider();
 
 const TOOLS = [
   {
@@ -114,9 +125,9 @@ function productInfo() {
       "Scoped rules with globs, 12 skills, .cursor/rules/*.mdc and CLAUDE.md in every download",
       "npm run ai:docs rebuilds every AI document after a config change",
       "16-case build matrix type-checks each extracted ZIP and asserts console pruning",
-      "Selectable four-language user console (/account) and admin console (/admin) ship in every default generated project",
+      "Selectable five-language user console (/account) and admin console (/admin) ship in every default generated project",
       "llms.txt + llms-full.txt + OpenAPI 3.1 + MCP endpoint for agent discovery",
-      "Working hybrid RAG (BM25 + embeddings + RRF), four-language i18n, MoR checkout via Waffo Pancake",
+      `Working hybrid RAG (BM25 + embeddings + RRF), five-language i18n, checkout via ${PROVIDER_LABEL}`,
     ],
     knownLimitations: [
       "Waffo acquiring create-order payload is unimplemented (pancake is complete)",

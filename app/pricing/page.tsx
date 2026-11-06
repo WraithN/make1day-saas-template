@@ -73,6 +73,10 @@ export default async function PricingPage() {
   ];
 
   const site = env.siteUrl().replace(/\/$/, "");
+  // Which gateway actually processes this site's checkout. The rules text
+  // names it, so it must follow PAYMENT_PROVIDER instead of naming a brand
+  // that may not be the one enabled.
+  const provider = paymentProviderLabel();
   const offersJsonLd = {
     "@context": "https://schema.org",
     "@type": "OfferCatalog",
@@ -149,7 +153,7 @@ export default async function PricingPage() {
             <li key={r} className="flex gap-2">
               <span className="text-accent">·</span>
               <span>
-                <Trans k={r} lang={lang} />
+                <Trans k={r} lang={lang} vars={{ provider }} />
               </span>
             </li>
           ))}
@@ -160,7 +164,7 @@ export default async function PricingPage() {
         <Trans
           k="pricing.poweredBy"
           lang={lang}
-          vars={{ provider: paymentProviderLabel() }}
+          vars={{ provider }}
         />
       </p>
 

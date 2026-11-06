@@ -1,4 +1,4 @@
-// Localized FAQ content. Keyed by language; JA/FR fall back to EN via the
+// Localized FAQ content. Keyed by language; JA/FR/DE fall back to EN via the
 // rendering layer. Questions are chosen to capture long-tail search intent
 // ("how to build a SaaS with Next.js", "Next.js SaaS boilerplate with Stripe").
 
@@ -9,11 +9,11 @@ export const faqContent: Record<string, { heading: string; eyebrow: string; subt
     eyebrow: "FAQ",
     heading: "Questions indie founders actually ask",
     subtitle:
-      "Everything about using ShipKit to ship your AI SaaS — auth, Waffo checkout, AI, deployment and licensing.",
+      "Everything about using ShipKit to ship your AI SaaS — auth, checkout, AI, deployment and licensing.",
     items: [
       {
         q: "Does the starter include a user dashboard and an admin dashboard?",
-        a: "Yes — two separate consoles. /account is the signed-in user area (profile, subscription, issued license keys, settings) and /admin is the operator area (users, licenses, traffic, runtime status). Both are four-language and included in generated projects by default. In the Builder they are the `account` and `admin` features: unchecking one removes its entire route tree from the ZIP, and navigation plus post-login redirects are rewritten so no dead links remain. They are read-only starters: there is no profile editing endpoint and no org/RBAC table. Protect /admin with ADMIN_USER / ADMIN_PASSWORD (plus optional ADMIN_EMAILS) before deploying.",
+        a: "Yes — two separate consoles. /account is the signed-in user area (profile, subscription, issued license keys, settings) and /admin is the operator area (users, licenses, traffic, runtime status). Both are five-language (EN/ZH/JA/FR/DE) and included in generated projects by default. In the Builder they are the `account` and `admin` features: unchecking one removes its entire route tree from the ZIP, and navigation plus post-login redirects are rewritten so no dead links remain. They are read-only starters: there is no profile editing endpoint and no org/RBAC table. Protect /admin before deploying: ADMIN_USER / ADMIN_PASSWORD create an operator account that signs in through /admin's own form, and a Supabase user with an admin/staff role (or an ADMIN_EMAILS allowlist entry) is accepted too.",
       },
       {
         q: "Do I need a license to download the generated project?",
@@ -72,11 +72,11 @@ export const faqContent: Record<string, { heading: string; eyebrow: string; subt
   zh: {
     eyebrow: "常见问题",
     heading: "独立开发者真正会问的问题",
-    subtitle: "关于用 ShipKit 构建 AI SaaS 的一切——登录、Waffo 收款、AI、部署与授权。",
+    subtitle: "关于用 ShipKit 构建 AI SaaS 的一切——登录、收款、AI、部署与授权。",
     items: [
       {
         q: "模板里有用户后台和管理员后台吗？",
-        a: "有，而且是两套独立后台：/account 是登录用户区（资料、订阅、已签发授权码、设置），/admin 是运营区（用户、授权、流量、运行时状态）。两套都支持中英日法四语，默认随生成工程一起交付。在 Builder 里对应 `account` 与 `admin` 两个可勾选项：取消勾选会把该后台整棵路由树从 ZIP 中剪掉，并同步改写导航与登录后跳转，不会留下死链。目前是只读起步版：没有资料修改接口，也没有 org/RBAC 表。上线前务必用 ADMIN_USER / ADMIN_PASSWORD（可选 ADMIN_EMAILS）保护 /admin。",
+        a: "有，而且是两套独立后台：/account 是登录用户区（资料、订阅、已签发授权码、设置），/admin 是运营区（用户、授权、流量、运行时状态）。两套都支持中英日法德五语，默认随生成工程一起交付。在 Builder 里对应 `account` 与 `admin` 两个可勾选项：取消勾选会把该后台整棵路由树从 ZIP 中剪掉，并同步改写导航与登录后跳转，不会留下死链。目前是只读起步版：没有资料修改接口，也没有 org/RBAC 表。上线前务必保护 /admin：用 ADMIN_USER / ADMIN_PASSWORD 创建运营者账号（在 /admin 页面内登录），带 admin/staff 角色的 Supabase 用户或 ADMIN_EMAILS 白名单成员同样可以进入。",
       },
       {
         q: "下载生成的工程需要授权吗？",

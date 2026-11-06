@@ -157,7 +157,7 @@ To start, use the Book a 1:1 call button on the pricing page, or email the conta
   {
     title: "Generated template docs / 模板文档",
     text: `Every ZIP downloaded from the Builder is agent-native: it contains a root AGENTS.md, a style-locked design.md, scoped rules in ai/rules/*.md, .cursor/rules/*.mdc for Cursor, CLAUDE.md for Claude Code, and up to 12 skills/*.md playbooks.
-AGENTS.md is the root AI coding contract: the exact selected modules, which ones were pruned, repository layout, commands, scoped-rule index, server/client boundaries, the single /api/webhook payment rule, four-language i18n requirements, a style lock with concrete token values, and a definition of done.
+AGENTS.md is the root AI coding contract: the exact selected modules, which ones were pruned, repository layout, commands, scoped-rule index, server/client boundaries, the single /api/webhook payment rule, five-language i18n requirements, a style lock with concrete token values, and a definition of done.
 design.md locks the visual system for the chosen style: colour tokens with hex references, the system font stack, corner radius, surface texture rules, component vocabulary, responsive breakpoints, accessibility rules and a do/don't checklist.
 All of these documents are generated from one shared spec (ai/doc-spec.json + scripts/lib/ai-docs.mjs). Inside the downloaded project, npm run ai:docs rebuilds every document after a config change, and npm run ai:setup refreshes the Cursor and Claude Code integrations. 生成的模板会带上对应风格的 design.md 与 AGENTS.md，以及按选项生成的 scoped rules，方便直接用 AI coding 继续开发。`,
   },
