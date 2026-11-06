@@ -105,7 +105,17 @@ const ADMIN_FILES = [
   "app/admin/system/page.tsx",
   // Role-management endpoint is only meaningful with the admin console.
   "app/api/admin/users/route.ts",
+  // Operator sign-in: the in-page form, its API and the sign-out control.
+  "app/api/admin/login/route.ts",
+  "app/api/admin/logout/route.ts",
+  "components/console/AdminLoginScreen.tsx",
+  "components/console/AdminSignOutButton.tsx",
 ];
+
+// The operator credential + session layer stays in every build: the /api/stats
+// endpoint (always shipped) resolves the operator session, and the Edge
+// middleware needs the cookie name. lib/sqlite.ts is core for the same
+// reason — licenses, orders and pageviews all persist there.
 
 const CONSOLE_SHARED_FILES = [
   "components/console/ConsoleNav.tsx",

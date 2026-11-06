@@ -43,7 +43,11 @@ export function isAdminEmail(email?: string | null): boolean {
   return adminEmails().includes(email.toLowerCase());
 }
 
-/** HTTP Basic Auth is the outermost /admin guard. */
+/**
+ * True when operator credentials are configured. The /admin console is locked
+ * behind the operator sign-in (ADMIN_USER / ADMIN_PASSWORD), so this is what
+ * the "protected" badge in the console reflects.
+ */
 export function isAdminProtected(): boolean {
   return !!(env.adminUser() && env.adminPassword());
 }

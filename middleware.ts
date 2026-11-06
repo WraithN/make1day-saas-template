@@ -2,12 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { isDemoMode, DEMO_COOKIE } from "@/lib/demo";
 import { guardPremium } from "@/lib/paywall";
-import {
-  isAdminConfigured,
-  adminClosedResponse,
-  adminUnauthorizedResponse,
-  adminAuthorized,
-} from "@/lib/admin-guard";
+import { ADMIN_SESSION_COOKIE } from "@/lib/admin-cookie";
+import { adminClosedResponse } from "@/lib/admin-guard";
 
 const LANGS = ["en", "zh", "ja", "fr", "de"];
 
@@ -26,23 +22,6 @@ export async function middleware(request: NextRequest) {
   // so the rule applies to every area, including the consoles.
   const premiumRes = await guardPremium(request, pathname);
   if (premiumRes) return premiumRes;
-
-  // Two consoles, two different guards:
-  //   /account/*  — end-user area, needs a signed-in user (or demo cookie).
-  //   /admin/*    — operator area, HTTP Basic Auth + optional email allowlist.
-  const userArea =
-    pathname.startsWith("/account") || pathname.startsWith("/dashboard");
-  const adminArea = pathname.startsWith("/admin");
-
-  // Admin area: never open to the public. If credentials are not configured we
-  // CLOSE it in production (503); in dev we allow but the UI warns loudly.
-  if (adminArea) {
-    const closed = adminClosedResponse();
-    if (closed) return closed;
-    if (!adminAuthorized(request.headers.get("authorization"))) {
-      return adminUnauthorizedResponse();
-    }
-  }
 
   // Language via ?lang=xx: remember the choice in a cookie for human return
   // visits, and forward an `x-sk-lang` request header so server components
@@ -73,6 +52,33 @@ export async function middleware(request: NextRequest) {
     return res;
   };
 
+  // Two consoles, two different guards:
+  //   /account/*  — end-user area, needs a signed-in user (or demo cookie).
+  //   /admin/*    — operator area, locked behind the operator sign-in.
+  const userArea =
+    pathname.startsWith("/account") || pathname.startsWith("/dashboard");
+  const adminArea = pathname.startsWith("/admin");
+
+  // The Edge runtime cannot reach the local database, so this is only a
+  // PRESENCE check for the operator session cookie. The authoritative
+  // validation happens in app/admin/layout.tsx (Node runtime), which either
+  // renders the console or the in-page sign-in screen.
+  const operatorSession = !!request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+
+  if (adminArea && !operatorSession) {
+    const closed = adminClosedResponse();
+    if (closed) return closed;
+    // Every admin route but the console root lands on the sign-in screen, so
+    // an operator who followed a deep link still gets the form (and is sent
+    // back to where they were aiming once the session exists).
+    if (pathname !== "/admin") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin";
+      url.searchParams.set("next", pathname);
+      return withLang(NextResponse.redirect(url));
+    }
+  }
+
   const redirectToLogin = () => {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
@@ -81,7 +87,7 @@ export async function middleware(request: NextRequest) {
   };
 
   // Demo mode: allow the signed-in areas when the mock session cookie is
-  // present. Admin stays reachable (Basic Auth above still applies).
+  // present. The admin area still needs its own sign-in.
   if (isDemoMode()) {
     if (userArea && !request.cookies.get(DEMO_COOKIE)) return redirectToLogin();
     return withLang(nextRes());
@@ -92,7 +98,8 @@ export async function middleware(request: NextRequest) {
 
   // If Supabase isn't configured yet, skip auth gating instead of crashing
   // the route (e.g. when previewing the template before filling env vars).
-  // In that state the admin area stays reachable only via Basic Auth (above).
+  // In that state the admin area stays reachable only via the operator
+  // sign-in handled above.
   if (!url || !anon) {
     return withLang(nextRes());
   }
@@ -128,10 +135,17 @@ export async function middleware(request: NextRequest) {
 
   // Real RBAC for the admin area: a signed-in user must hold an admin or
   // staff role (persisted on the profiles table) OR be in the ADMIN_EMAILS
-  // seed. Members are rejected with 403; unauthenticated hits are sent to
-  // login. Basic Auth (above) remains an optional second factor.
-  if (adminArea) {
-    if (!user) return redirectToLogin();
+  // seed. Members are rejected with 403. The operator session (checked
+  // above) is an independent, parallel way in.
+  if (adminArea && !operatorSession) {
+    if (!user) {
+      // No Supabase session either — the console renders its own sign-in
+      // screen, which also accepts the operator credentials.
+      const target = request.nextUrl.clone();
+      target.pathname = "/admin";
+      target.searchParams.set("next", pathname);
+      return withLang(NextResponse.redirect(target));
+    }
     let isAdminByRole = false;
     try {
       const { data } = await supabase

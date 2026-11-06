@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 
 export type ConsoleNavItem = { href: string; label: string };
 
@@ -19,6 +20,7 @@ export function ConsoleNav({
   badgeTone = "neutral",
   backLabel,
   rightSlot,
+  action,
 }: {
   items: ConsoleNavItem[];
   eyebrow: string;
@@ -28,6 +30,8 @@ export function ConsoleNav({
   badgeTone?: "neutral" | "warning" | "success";
   backLabel: string;
   rightSlot?: { href: string; label: string } | null;
+  /** Extra control rendered next to the back link (e.g. sign out). */
+  action?: ReactNode;
 }) {
   const pathname = usePathname() ?? "";
   const tone =
@@ -59,6 +63,7 @@ export function ConsoleNav({
                 {rightSlot.label}
               </Link>
             )}
+            {action}
             <Link href="/" className="btn-ghost text-sm">
               {backLabel}
             </Link>
