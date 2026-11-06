@@ -110,6 +110,8 @@ const ADMIN_FILES = [
   "app/api/admin/logout/route.ts",
   "components/console/AdminLoginScreen.tsx",
   "components/console/AdminSignOutButton.tsx",
+  // The conversion funnel visualisation lives with the admin console.
+  "components/console/Funnel.tsx",
 ];
 
 // The operator credential + session layer stays in every build: the /api/stats

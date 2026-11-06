@@ -1,34 +1,145 @@
 import { getLang } from "@/lib/i18n-server";
 import { consoleCopy } from "@/lib/content/console";
 import { getAdminSnapshot } from "@/lib/console";
+import { getTrafficReport } from "@/lib/traffic";
 import {
   ConsoleSection,
   ConsoleTable,
   StatCard,
 } from "@/components/console/ConsoleUI";
+import { Funnel } from "@/components/console/Funnel";
 
 export const dynamic = "force-dynamic";
+
+function percent(value: number): string {
+  if (!Number.isFinite(value)) return "0%";
+  const pct = value * 100;
+  if (pct > 0 && pct < 1) return "<1%";
+  return `${Math.round(pct)}%`;
+}
 
 export default async function AdminStatsPage() {
   const lang = await getLang();
   const c = consoleCopy(lang);
   const { stats } = await getAdminSnapshot();
+  const traffic = await getTrafficReport();
+
   const topPages = Object.entries(stats.pages).sort((a, b) => b[1] - a[1]);
   const updated =
     stats.updatedAt && stats.updatedAt !== new Date(0).toISOString()
       ? new Date(stats.updatedAt).toLocaleString()
       : c["console.dash"];
 
+  // The funnel is only meaningful once at least one session was recorded.
+  const hasTraffic = traffic.sessions > 0;
+
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <StatCard label={c["admin.stats.total"]} value={stats.total} />
+      {/* ── Headline metrics ───────────────────────────────────────────── */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
-          label={c["admin.stats.topPages"]}
-          value={Object.keys(stats.pages).length}
-          hint={`${c["admin.stats.updated"]}: ${updated}`}
+          label={c["admin.stats.total"]}
+          value={traffic.pageviews || stats.total}
+          hint={c["admin.stats.window"]}
+        />
+        <StatCard
+          label={c["admin.stats.visitors"]}
+          value={traffic.visitors}
+          hint={`${c["admin.stats.sessions"]}: ${traffic.sessions}`}
+        />
+        <StatCard
+          label={c["admin.stats.bounceRate"]}
+          value={percent(traffic.bounceRate)}
+          hint={`${c["admin.stats.pagesPerSession"]}: ${traffic.pagesPerSession.toFixed(1)}`}
+        />
+        <StatCard
+          label={c["admin.stats.ctr"]}
+          value={percent(traffic.ctr)}
+          hint={`${c["admin.stats.clicks"]}: ${traffic.ctas.reduce((n, c2) => n + c2.clicks, 0)}`}
+        />
+        <StatCard
+          label={c["admin.stats.conversionRate"]}
+          value={percent(traffic.conversionRate)}
+          hint={`${c["admin.stats.funnel.conversion"]}: ${traffic.funnel.find((f) => f.key === "conversion")?.sessions ?? 0}`}
+        />
+        <StatCard
+          label={c["admin.stats.updated"]}
+          value={traffic.updatedAt ? new Date(traffic.updatedAt).toLocaleDateString() : c["console.dash"]}
+          hint={c["admin.stats.window"]}
         />
       </div>
+
+      {/* ── Funnel ───────────────────────────────────────────────────────── */}
+      <ConsoleSection
+        title={c["admin.stats.funnel"]}
+        desc={c["admin.stats.funnelSubtitle"]}
+      >
+        {hasTraffic ? (
+          <Funnel
+            steps={traffic.funnel}
+            copy={{
+              labels: {
+                visitors: c["admin.stats.funnel.visitors"],
+                engaged: c["admin.stats.funnel.engaged"],
+                cta: c["admin.stats.funnel.cta"],
+                checkout: c["admin.stats.funnel.checkout"],
+                conversion: c["admin.stats.funnel.conversion"],
+              },
+              share: c["admin.stats.funnel.share"],
+              stepRate: c["admin.stats.funnel.stepRate"],
+            }}
+          />
+        ) : (
+          <p className="py-6 text-center text-sm text-ink-soft">
+            {c["admin.stats.noEvents"]}
+          </p>
+        )}
+      </ConsoleSection>
+
+      {/* ── CTA performance ─────────────────────────────────────────────── */}
+      {traffic.ctas.length > 0 && (
+        <ConsoleSection title={c["admin.stats.ctas"]}>
+          <ConsoleTable
+            columns={[
+              c["admin.stats.ctaLabel"],
+              c["admin.stats.clicks"],
+              c["admin.stats.sessions"],
+            ]}
+            empty={c["admin.stats.noEvents"]}
+            rows={traffic.ctas.map((row) => [
+              <span key="label" className="font-mono text-xs">
+                {row.label}
+              </span>,
+              <span key="clicks" className="tabular-nums">
+                {row.clicks}
+              </span>,
+              <span key="sessions" className="tabular-nums">
+                {row.sessions}
+              </span>,
+            ])}
+          />
+        </ConsoleSection>
+      )}
+
+      {/* ── Traffic sources ─────────────────────────────────────────────── */}
+      {traffic.referrers.length > 0 && (
+        <ConsoleSection title={c["admin.stats.referrers"]}>
+          <ConsoleTable
+            columns={[c["admin.stats.source"], c["admin.stats.sessions"]]}
+            empty={c["admin.stats.noEvents"]}
+            rows={traffic.referrers.map((row) => [
+              <span key="source" className="font-mono text-xs">
+                {row.source}
+              </span>,
+              <span key="sessions" className="tabular-nums">
+                {row.sessions}
+              </span>,
+            ])}
+          />
+        </ConsoleSection>
+      )}
+
+      {/* ── Top pages ────────────────────────────────────────────────────── */}
       <ConsoleSection title={c["admin.stats.topPages"]}>
         <ConsoleTable
           columns={[c["admin.stats.page"], c["admin.stats.views"]]}
@@ -42,6 +153,9 @@ export default async function AdminStatsPage() {
             </span>,
           ])}
         />
+        <p className="mt-3 text-xs text-muted">
+          {c["admin.stats.updated"]}: {updated}
+        </p>
       </ConsoleSection>
     </div>
   );
