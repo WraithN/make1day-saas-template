@@ -30,6 +30,16 @@ function toggle<T>(list: T[], value: T): T[] {
     : [...list, value];
 }
 
+/** Save a generated ZIP to disk. */
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
   const { t } = useLanguage();
   const [config, setConfig] = useState<BuilderConfig>(() =>
@@ -38,6 +48,8 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [needLicense, setNeedLicense] = useState(false);
+  const [previewBusy, setPreviewBusy] = useState(false);
+  const [previewErr, setPreviewErr] = useState("");
 
   function set<K extends keyof BuilderConfig>(key: K, value: BuilderConfig[K]) {
     setConfig((c) => ({ ...c, [key]: value }));
@@ -85,16 +97,41 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
       }
       setNeedLicense(false);
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${slug}-shipkit.zip`;
-      a.click();
-      URL.revokeObjectURL(url);
+      downloadBlob(blob, `${slug}-shipkit.zip`);
     } catch {
       setErr("Network error");
     } finally {
       setBusy(false);
+    }
+  }
+
+  // The free preview: the file inventory of the configured build plus the
+  // design tokens. It never contains application source code — the download
+  // of the source tree is the product, and that needs a license.
+  async function downloadPreview() {
+    setPreviewBusy(true);
+    setPreviewErr("");
+    try {
+      const res = await fetch("/api/generate/preview", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(config),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        setPreviewErr(
+          j.code === "PREVIEW_LIMIT"
+            ? t("builder.previewLimit")
+            : j.error || "Preview failed",
+        );
+        return;
+      }
+      const blob = await res.blob();
+      downloadBlob(blob, `${slug}-shipkit-preview.zip`);
+    } catch {
+      setPreviewErr("Network error");
+    } finally {
+      setPreviewBusy(false);
     }
   }
 
@@ -287,6 +324,24 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
             />
           )}
           <p className="mt-3 text-xs text-muted">{t("builder.downloadNote")}</p>
+
+          {/* Free preview: no source code, just the inventory + tokens. */}
+          <div className="mt-3 border-t border-line pt-3">
+            <button
+              className="btn w-full"
+              data-cta="builder-preview"
+              onClick={downloadPreview}
+              disabled={previewBusy}
+            >
+              {previewBusy ? t("builder.previewBusy") : t("builder.preview")}
+            </button>
+            <p className="mt-2 text-[11px] text-muted">
+              {t("builder.previewNote")}
+            </p>
+            {previewErr && (
+              <p className="mt-2 text-sm text-red-400">{previewErr}</p>
+            )}
+          </div>
         </div>
       </aside>
     </div>

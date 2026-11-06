@@ -28,7 +28,7 @@ export function GET() {
       version: "1.0.0",
       summary: "Configurable Next.js SaaS starter generator, licensing and payments",
       description:
-        "ShipKit sells a configurable Next.js 15 SaaS starter. The Builder posts a selection to /api/generate and receives a pruned, buildable, agent-native ZIP containing AGENTS.md, design.md, scoped rules, Cursor rules, CLAUDE.md and up to 12 skills. An MCP endpoint lets coding agents assemble a valid configuration programmatically. Source downloads are gated by an offline license key, an active subscription / email claim, or a daily free trial. Full human/agent-readable overview: /llms-full.txt. Agent guide: /agent-ready. Go-live notes: docs/waffo-launch-checklist.md.",
+        "ShipKit sells a configurable Next.js 15 SaaS starter. The Builder posts a selection to /api/generate and receives a pruned, buildable, agent-native ZIP containing AGENTS.md, design.md, scoped rules, Cursor rules, CLAUDE.md and up to 12 skills. An MCP endpoint lets coding agents assemble a valid configuration programmatically. Source downloads are gated by an offline license key or an active subscription / email claim — the source ZIP is the product, so anonymous visitors never receive it. A source-free preview package is available without a license. Full human/agent-readable overview: /llms-full.txt. Agent guide: /agent-ready. Go-live notes: docs/waffo-launch-checklist.md.",
     },
     servers: [{ url: SITE, description: "ShipKit site" }],
     tags: [
@@ -49,7 +49,7 @@ export function GET() {
           tags: ["Generator"],
           summary: "Generate and download a customized Next.js project ZIP",
           description:
-            "Requires an entitlement. Order: offline license key (body or sk_license cookie) -> active subscription / email auto-claim -> one free trial per IP per UTC day -> 402. The gate protects this site only; generated projects ship with LICENSE_GATE=off.",
+            "Requires an entitlement. Order: offline license key (body or sk_license cookie) -> active subscription / email auto-claim -> 402. The gate protects this site only; generated projects ship with LICENSE_GATE=off.",
           security: [
             { licenseCookie: [] },
             { supabaseSession: [] },
@@ -95,6 +95,41 @@ export function GET() {
             "400": err("Invalid BuilderConfig"),
             "402": json(402, "No entitlement", ref("PaymentRequired")),
             "500": err("Packaging failed"),
+          },
+        },
+      },
+      "/api/generate/preview": {
+        post: {
+          tags: ["Generator"],
+          summary: "Download a source-free preview of the configured build",
+          description:
+            "Anonymous visitors may download a preview package that contains the FILE INVENTORY of the configured build plus the design tokens — never application source. The quota is counted per signed visitor token and per trusted network.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: ref("BuilderConfig"),
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "Preview package archive",
+              headers: {
+                "Content-Disposition": {
+                  description: 'attachment; filename="<slug>-shipkit-preview.zip"',
+                  schema: { type: "string" },
+                },
+                "X-ShipKit-Entitlement": {
+                  description: "Which rule allowed the preview (never the token itself)",
+                  schema: { type: "string" },
+                },
+              },
+              content: { "application/zip": { schema: { type: "string", format: "binary" } } },
+            },
+            "400": err("Invalid BuilderConfig"),
+            "402": json(402, "Preview limit reached", ref("PaymentRequired")),
+            "500": err("Preview packaging failed"),
           },
         },
       },

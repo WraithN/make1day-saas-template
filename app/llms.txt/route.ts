@@ -26,7 +26,7 @@ export function GET(_req: NextRequest) {
 ## Pricing & plans
 - [Pricing](${SITE}/pricing): Free demo, $99 one-time Buyout, $9/mo Care, and custom 1:1 development. See subscription rules on the page.
 - Checkout on this site is processed by **Waffo Pancake** (Merchant of Record: global payments, tax and compliance without a company entity). Generated projects can switch gateways in the Builder. Webhooks use RSA-SHA256 verification of \`X-Waffo-Signature\` over \`\${t}.\${rawBody}\`; one webhook route: \`POST /api/webhook\`.
-- Download entitlement: \`POST /api/generate\` requires an offline HMAC license key (issued automatically on a paid Waffo webhook), an active subscription / email auto-claim, or one free trial download per IP per day; otherwise HTTP 402. Buyers redeem keys at /license. This gate protects ShipKit's site only — generated customer projects ship with it disabled.
+- Download entitlement: \`POST /api/generate\` requires an offline HMAC license key (issued automatically on a paid Waffo webhook) or an active subscription / email auto-claim; otherwise HTTP 402. The source ZIP IS the product, so anonymous visitors never receive it. Buyers redeem keys at /license. Anonymous visitors may take a free source-free preview from \`POST /api/generate/preview\` (file inventory + design tokens). This gate protects ShipKit's site only — generated customer projects ship with it disabled.
 - Configuration self-check: \`GET /api/payments/self-check\` reports missing Waffo and license settings without exposing secrets.
 - Custom development is a separate service, not a self-checkout plan: it is scoped in a free 30-minute 1:1 call, quoted as a fixed price before work starts, with no automatic charge and no obligation.
 

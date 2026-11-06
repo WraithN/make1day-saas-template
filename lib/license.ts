@@ -1,16 +1,28 @@
-import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import {
+  createHash,
+  createHmac,
+  randomBytes,
+  randomUUID,
+  timingSafeEqual,
+} from "node:crypto";
+import { isIP } from "node:net";
 import { env, isLicenseGateEnabled } from "@/lib/env";
 import { all, get, run, tx } from "@/lib/sqlite";
 
 // ───────────────────────────────────────────────────────────────
 // License gate for POST /api/generate.
 //
-// Three ways to be entitled to download a ZIP:
+// Three ways to be entitled to download the FULL source ZIP:
 //   1. An offline, HMAC-signed license key (issued after a Waffo payment).
 //      Self-verifying — no DB lookup needed, works even on serverless.
 //   2. A signed-in buyer with an active subscription row, or a license
 //      record matching their email (auto-claim on login).
-//   3. A small anonymous free quota per IP per UTC day (conversion funnel).
+//   3. Gate OFF (development / a generated customer project).
+//
+// Anonymous visitors get NO full ZIP. The generator IS the product: a
+// download is the product. They can still take a free PREVIEW (the file
+// inventory + the theme tokens, never application source) — see
+// checkPreviewEntitlement and lib/generator/preview.ts.
 //
 // Records are written to Supabase when configured, otherwise to the local
 // SQLite database under `.data/`. The KEY itself never depends on either
@@ -19,6 +31,8 @@ import { all, get, run, tx } from "@/lib/sqlite";
 
 export const LICENSE_COOKIE = "sk_license";
 export const LICENSE_HEADER = "x-shipkit-license";
+/** Signed, httpOnly cookie that carries the anonymous preview identity. */
+export const TRIAL_COOKIE = "sk_trial";
 
 export type LicensePayload = {
   v: 1;
@@ -45,7 +59,7 @@ export type EntitlementReason =
   | "license-key"
   | "license-email"
   | "subscription"
-  | "free-trial"
+  | "free-preview"
   | "denied";
 
 export type Entitlement = {
@@ -300,41 +314,216 @@ export async function recordWebhookEvent(
   return changes > 0;
 }
 
-// ── Free quota ─────────────────────────────────────────────────────────────
+// ── Client network ─────────────────────────────────────────────────────────
+//
+// The old implementation hashed the FIRST x-forwarded-for value, which any
+// client can set to anything — one header rotation was enough to mint a
+// fresh free quota forever. The rules below only trust values that a PROXY
+// controls, and fall back to a shared bucket when nothing trustworthy
+// exists. The preview quota is counted TWICE (visitor token AND network),
+// so defeating one bucket is never enough on its own.
 
-function clientIp(req: Request): string {
-  const fwd = req.headers.get("x-forwarded-for") ?? "";
-  const raw = fwd.split(",")[0].trim() || req.headers.get("x-real-ip") || "local";
-  return createHash("sha256").update(raw).digest("hex").slice(0, 24);
+// A process-local fallback key, used only when LICENSE_SECRET is missing
+// (a misconfigured production install). Tokens signed with it still cannot
+// be forged from the outside; they simply stop surviving a restart.
+let fallbackTrialSecret: string | null = null;
+
+function trialSecret(): string {
+  const configured = env.licenseSecret();
+  if (configured) return configured;
+  if (!fallbackTrialSecret) fallbackTrialSecret = randomBytes(32).toString("hex");
+  return fallbackTrialSecret;
 }
 
-async function consumeFreeQuota(
-  req: Request,
-): Promise<{ allowed: boolean; remaining: number }> {
+/** Normalise a raw IP candidate (strips ports, rejects non-IPs). */
+function normalizeIp(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  let v = raw.trim().toLowerCase();
+  if (!v) return null;
+  if (v.startsWith("[")) {
+    const end = v.indexOf("]");
+    if (end > 0) v = v.slice(1, end);
+  } else if (v.includes(":") && isIP(v) === 0) {
+    const head = v.split(":")[0];
+    if (isIP(head) === 4) v = head;
+  }
+  return isIP(v) ? v : null;
+}
+
+/** True when the address is routable on the public internet. */
+function isPublicIp(ip: string): boolean {
+  if (isIP(ip) === 4) {
+    const [a, b] = ip.split(".").map(Number);
+    if (a === 0 || a === 10 || a === 127) return false;
+    if (a === 172 && b >= 16 && b <= 31) return false;
+    if (a === 192 && b === 168) return false;
+    if (a === 169 && b === 254) return false;
+    if (a === 100 && b >= 64 && b <= 127) return false; // CGNAT
+    if (a >= 224) return false; // multicast + reserved
+    return true;
+  }
+  if (isIP(ip) === 6) {
+    if (ip === "::" || ip === "::1") return false;
+    if (ip.startsWith("fc") || ip.startsWith("fd")) return false; // ULA
+    if (ip.startsWith("fe80")) return false; // link-local
+    if (ip.startsWith("::ffff:")) return isPublicIp(ip.slice(7));
+    return true;
+  }
+  return false;
+}
+
+/**
+ * The network a request came from.
+ *
+ * Trusted sources first (a platform/proxy OVERWRITES them, so a client
+ * cannot forge them in front of that platform):
+ *   1. cf-connecting-ip       — Cloudflare
+ *   2. x-vercel-forwarded-for — Vercel
+ *   3. x-real-ip              — the usual nginx convention ($remote_addr)
+ * Then x-forwarded-for, but only when the chain has more than one public
+ * hop: a proxy APPENDS the real client IP, so the tail is the honest one.
+ * A single-entry x-forwarded-for was written by the client itself and is
+ * therefore ignored — those requests share one "global" bucket.
+ */
+function clientNetwork(req: Request): string {
+  for (const header of [
+    "cf-connecting-ip",
+    "x-vercel-forwarded-for",
+    "x-real-ip",
+  ]) {
+    const ip = normalizeIp(req.headers.get(header));
+    if (ip && isPublicIp(ip)) return ip;
+  }
+  const chain = (req.headers.get("x-forwarded-for") ?? "")
+    .split(",")
+    .map((s) => normalizeIp(s))
+    .filter((s): s is string => !!s)
+    .filter(isPublicIp);
+  if (chain.length >= 2) return chain[chain.length - 1];
+  return "global";
+}
+
+// ── Anonymous preview token ────────────────────────────────────────────────
+//
+// A signed, httpOnly, first-party token. It carries no personal data — it
+// exists so the preview quota can be counted per visitor even when several
+// people share one IP, and so the quota survives a cookie-less attacker
+// resetting their browser state.
+
+const TRIAL_TOKEN_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
+
+/** Mint a new, signed preview token: the stable id plus the cookie value. */
+export function issueTrialToken(): { id: string; cookie: string } {
+  const id = randomUUID();
+  const body = b64url(
+    JSON.stringify({ id, iat: Math.floor(Date.now() / 1000) }),
+  );
+  return { id, cookie: `T1.${body}.${mac(body, trialSecret())}` };
+}
+
+/** Read + verify the preview token from the request cookies. */
+function readTrialToken(req: Request): { id: string; cookie: string } | null {
+  const raw = cookieValue(req, TRIAL_COOKIE);
+  if (!raw) return null;
+  const parts = raw.trim().split(".");
+  if (parts.length !== 3 || parts[0] !== "T1") return null;
+  const [, body, sig] = parts;
+  if (!safeEqual(mac(body, trialSecret()), sig)) return null;
+  try {
+    const payload = JSON.parse(
+      Buffer.from(body, "base64url").toString("utf8"),
+    ) as { id?: string; iat?: number };
+    if (!payload?.id) return null;
+    const age = Math.floor(Date.now() / 1000) - Number(payload.iat ?? 0);
+    if (!Number.isFinite(age) || age < 0 || age > TRIAL_TOKEN_MAX_AGE) {
+      return null;
+    }
+    return { id: payload.id, cookie: raw };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The preview identity for a request: the verified token, or a freshly
+ * minted one. The caller must persist a new token in the response cookie.
+ *
+ * `id` is the STABLE identity used for quota accounting — it is the same
+ * for the request that mints the token and for every later request that
+ * replays the cookie. `cookie` is the value to hand to the browser.
+ */
+export function ensureTrialToken(req: Request): {
+  id: string;
+  cookie: string;
+  isNew: boolean;
+} {
+  const existing = readTrialToken(req);
+  if (existing) return { id: existing.id, cookie: existing.cookie, isNew: false };
+  const fresh = issueTrialToken();
+  return { id: fresh.id, cookie: fresh.cookie, isNew: true };
+}
+
+// ── Free preview quota ─────────────────────────────────────────────────────
+
+function quotaKey(prefix: string, value: string): string {
+  const digest = createHash("sha256").update(value).digest("hex").slice(0, 24);
+  return `${prefix}:${digest}`;
+}
+
+/**
+ * Consume one anonymous preview slot.
+ *
+ * Two independent buckets must both have capacity:
+ *   • the visitor token  — survives cookie clearing only if the token is
+ *     still presented, so a cleared cookie yields a NEW token bucket;
+ *   • the network        — survives token rotation only if the request
+ *     still comes from the same trusted address.
+ * Counting both means neither "clear the cookies" nor "rotate a header" is
+ * enough on its own to keep generating previews forever.
+ */
+async function consumeFreeQuota(req: Request, token: string): Promise<{
+  allowed: boolean;
+  remaining: number;
+}> {
   const limit = env.freeGenerationsPerDay();
   if (limit <= 0) return { allowed: false, remaining: 0 };
+  const networkLimit = env.freeGenerationsPerNetworkPerDay();
   const day = new Date().toISOString().slice(0, 10);
-  const key = clientIp(req);
+  const tokenKey = quotaKey("t", token);
+  const networkKey = quotaKey("n", clientNetwork(req));
+
   return tx(() => {
-    const row = get<{ day: string; used: number }>(
-      "SELECT day, used FROM quota WHERE ip_key = ?",
-      key,
-    );
-    const used = row?.day === day ? Number(row.used) : 0;
-    if (used >= limit) return { allowed: false, remaining: 0 };
-    run(
-      `INSERT INTO quota (ip_key, day, used) VALUES (?, ?, 1)
-       ON CONFLICT(ip_key) DO UPDATE SET used = ?, day = excluded.day`,
-      key,
-      day,
-      used + 1,
-    );
+    const usedFor = (key: string): number => {
+      const row = get<{ day: string; used: number }>(
+        "SELECT day, used FROM quota WHERE ip_key = ?",
+        key,
+      );
+      return row?.day === day ? Number(row.used) : 0;
+    };
+    const tokenUsed = usedFor(tokenKey);
+    const networkUsed = usedFor(networkKey);
+    if (tokenUsed >= limit || networkUsed >= networkLimit) {
+      return { allowed: false, remaining: 0 };
+    }
+
+    const bump = (key: string, next: number) =>
+      run(
+        `INSERT INTO quota (ip_key, day, used) VALUES (?, ?, ?)
+         ON CONFLICT(ip_key) DO UPDATE SET used = ?, day = excluded.day`,
+        key,
+        day,
+        next,
+        next,
+      );
+    bump(tokenKey, tokenUsed + 1);
+    if (networkKey !== tokenKey) bump(networkKey, networkUsed + 1);
+
     // Keep the table from growing unbounded (30-day retention).
     const cutoff = new Date(Date.now() - 30 * 24 * 3600 * 1000)
       .toISOString()
       .slice(0, 10);
     run("DELETE FROM quota WHERE day < ?", cutoff);
-    return { allowed: true, remaining: limit - used - 1 };
+    return { allowed: true, remaining: Math.max(limit - tokenUsed - 1, 0) };
   });
 }
 
@@ -363,9 +552,7 @@ export function licenseKeyFromRequest(
 export async function checkEntitlement(
   req: Request,
   explicitKey?: string,
-  opts?: { allowTrial?: boolean },
 ): Promise<Entitlement> {
-  const allowTrial = opts?.allowTrial ?? true;
   if (!isLicenseGateEnabled()) {
     return { allowed: true, reason: "gate-off" };
   }
@@ -407,22 +594,36 @@ export async function checkEntitlement(
       }
     }
   } catch {
-    // Supabase not configured / session read failed → fall through to quota.
+    // Supabase not configured / session read failed → fall through.
   }
 
-  // 3. Anonymous trial quota. Used by the download gate as a conversion funnel,
-  // but deliberately EXCLUDED from content paywalls (opts.allowTrial=false) so
-  // premium content never opens to anonymous visitors.
-  if (allowTrial) {
-    const quota = await consumeFreeQuota(req);
-    if (quota.allowed) {
-      return {
-        allowed: true,
-        reason: "free-trial",
-        remaining: quota.remaining,
-      };
-    }
-  }
+  // 3. No paid entitlement. An anonymous visitor never receives the full
+  //    source ZIP — the download IS the product. They can take a free
+  //    preview instead (checkPreviewEntitlement).
+  return { allowed: false, reason: "denied", remaining: 0 };
+}
 
+/**
+ * Entitlement for the FREE PREVIEW (file inventory + theme tokens, never
+ * application source). Anonymous visitors only — a paid customer does not
+ * need this path. The quota is counted per signed visitor token AND per
+ * trusted network, so neither clearing cookies nor rotating a header is
+ * enough to keep downloading previews forever.
+ */
+export async function checkPreviewEntitlement(
+  req: Request,
+  tokenId: string,
+): Promise<Entitlement> {
+  if (!isLicenseGateEnabled()) {
+    return { allowed: true, reason: "gate-off" };
+  }
+  const quota = await consumeFreeQuota(req, tokenId);
+  if (quota.allowed) {
+    return {
+      allowed: true,
+      reason: "free-preview",
+      remaining: quota.remaining,
+    };
+  }
   return { allowed: false, reason: "denied", remaining: 0 };
 }

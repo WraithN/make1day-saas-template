@@ -122,7 +122,7 @@ const ok = verifier.verify(publicKey, v1, 'base64');
 4. 记录到 `licenses` 表，可在 `/admin/licenses` 查看并复制发给客户；
 5. 客户在 `/license` 兑换（写入 httpOnly cookie），或**用下单邮箱登录自动认领**。
 
-`POST /api/generate` 的授权顺序：离线 key → 登录态订阅/邮箱认领 → 每 IP 每天 1 次免费试用 → 否则 402。`LICENSE_SECRET` 必配；生成给客户的模板默认 `LICENSE_GATE=auto` 且没有密钥，因此**客户项目里这道锁是关闭的**。
+`POST /api/generate` 的授权顺序：离线 key → 登录态订阅/邮箱认领 → 否则 402。**匿名访客永远拿不到源码 ZIP**（下载本身就是商品），只能下载 `POST /api/generate/preview` 的无源码预览包（文件清单 + 设计令牌，额度按访客令牌 + 网络双桶计数）。`LICENSE_SECRET` 必配（否则签不出 key）；`LICENSE_GATE=auto` 在**任何生产部署**都恒开（fail-safe）；生成给客户的模板里 `lib/env.ts` 默认改成 `LICENSE_GATE=off`，因此**客户项目里这道锁是关闭的**。
 
 ## 5. Acquiring 模式（如果你的账户是这套）
 

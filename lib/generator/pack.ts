@@ -28,6 +28,11 @@ import {
   pruneWorkspacesLink,
   pruneStylesLink,
   pruneStylesSitemap,
+  pruneBuilderNav,
+  pruneBuilderCta,
+  pruneBuilderSitemap,
+  pruneBuilderRobots,
+  pruneLicenseGateDefault,
   postLoginTarget,
 } from "./prune";
 import { buildGlobalsCss, isLight } from "./themes";
@@ -65,8 +70,8 @@ const SKIP_DIRS = new Set([
 async function walk(
   absDir: string,
   relBase: string,
-  zip: JSZip,
   skip: Set<string>,
+  visit: (rel: string, abs: string) => Promise<void>,
 ): Promise<void> {
   const entries = await fs.readdir(absDir, { withFileTypes: true });
   for (const e of entries) {
@@ -82,11 +87,66 @@ async function walk(
     if (skip.has(rel)) continue;
     const stat = await fs.stat(abs);
     if (stat.isDirectory()) {
-      await walk(abs, rel, zip, skip);
+      await walk(abs, rel, skip, visit);
     } else if (stat.isFile()) {
-      zip.file(rel, await fs.readFile(abs));
+      await visit(rel, abs);
     }
   }
+}
+
+/**
+ * Every file the paid build would contain for this configuration.
+ *
+ * The free preview uses it as its inventory ("here is exactly what a
+ * license unlocks") — the list is derived from the very same pruning
+ * rules the ZIP uses, so it can never drift from reality.
+ */
+export async function listProjectFiles(
+  config: BuilderConfig,
+): Promise<string[]> {
+  const root = process.cwd();
+  const skip = computeSkip(config);
+  const files: string[] = [];
+
+  for (const item of ROOT_OK) {
+    const abs = path.join(root, item);
+    try {
+      const stat = await fs.stat(abs);
+      if (stat.isDirectory()) {
+        await walk(abs, item, skip, async (rel) => {
+          files.push(rel);
+        });
+      } else if (stat.isFile()) {
+        files.push(item);
+      }
+    } catch {
+      // optional top-level entry (e.g. public/) may not exist
+    }
+  }
+
+  // Selection-driven files that the packer writes itself.
+  files.push(
+    "package.json",
+    ".env.example",
+    "README.md",
+    "shipkit.config.json",
+    "app/globals.css",
+    "lib/payments/index.ts",
+  );
+  if (config.payment === "none") files.push("lib/payments/none.ts");
+
+  // Agent-native delivery: the exact doc set the packer ships.
+  const spec = buildAiDocSpec(config);
+  files.push("ai/doc-spec.json", ...Object.keys(buildDocSet(spec)));
+  files.push(
+    "scripts/ai-docs.mjs",
+    "scripts/ai-setup.mjs",
+    "scripts/lib/ai-docs.mjs",
+    "scripts/export-local-profiles.mjs",
+  );
+  if (config.deploy === "cloudflare") files.push("wrangler.toml");
+
+  return Array.from(new Set(files)).sort();
 }
 
 export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array> {
@@ -101,7 +161,9 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     try {
       const stat = await fs.stat(abs);
       if (stat.isDirectory()) {
-        await walk(abs, item, zip, skip);
+        await walk(abs, item, skip, async (rel, fileAbs) => {
+          zip.file(rel, await fs.readFile(fileAbs));
+        });
       } else if (stat.isFile()) {
         zip.file(item, await fs.readFile(abs));
       }
@@ -186,14 +248,12 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
 
   const rewrite = async (rel: string, fn: (src: string) => string) => {
     try {
-      // Read from the zip if the file was already added (by walk) or rewritten
-      // above — never straight from disk. Otherwise a second rewrite of the
-      // same file (e.g. app/account/layout.tsx) would re-read the pristine
-      // source and clobber the first rewrite's output.
+      // Only ever rewrite a file that is ALREADY in the archive. Falling back
+      // to the disk would silently re-add a pruned file (e.g. the account
+      // console in a build that does not ship it).
       const existing = zip.file(rel);
-      const src = existing
-        ? await existing.async("string")
-        : await fs.readFile(path.join(root, rel), "utf8");
+      if (!existing) return;
+      const src = await existing.async("string");
       zip.file(rel, fn(src));
     } catch {
       /* optional file */
@@ -204,11 +264,29 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
   // Nav entry from every generated project (pruneNav additionally retargets
   // the account link only when the user console is absent).
   await rewrite("components/Nav.tsx", (s) =>
-    pruneNav(pruneStylesLink(s), hasAccount, hasDashboard),
+    pruneNav(pruneStylesLink(pruneBuilderNav(s)), hasAccount, hasDashboard),
   );
 
-  // Drop the site-only /styles entry from the generated sitemap as well.
-  await rewrite("app/sitemap.ts", pruneStylesSitemap);
+  // The generator itself never ships, so every /builder link has to point
+  // at a route that exists in the customer project.
+  await rewrite("app/page.tsx", (s) => pruneBuilderCta(s, "/login"));
+  await rewrite("components/home/ThemePreviewSection.tsx", (s) =>
+    pruneBuilderCta(s, "/login"),
+  );
+  if (hasAccount) {
+    await rewrite("app/account/page.tsx", (s) => pruneBuilderCta(s, "/"));
+  }
+
+  // Drop the site-only /styles and /builder entries from the sitemap, and
+  // the /builder path from robots.txt.
+  await rewrite("app/sitemap.ts", (s) =>
+    pruneBuilderSitemap(pruneStylesSitemap(s)),
+  );
+  await rewrite("app/robots.ts", pruneBuilderRobots);
+
+  // The customer's project ships with the download gate OFF — it must never
+  // inherit ShipKit's own paywall (auto = ON in production).
+  await rewrite("lib/env.ts", pruneLicenseGateDefault);
   if (target !== "/account") {
     await rewrite("app/auth/demo/route.ts", (s) => pruneDemoRoute(s, target));
     for (const rel of [

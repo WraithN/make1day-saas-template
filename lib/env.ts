@@ -163,16 +163,34 @@ export const env = {
   adminEmails: () => opt("ADMIN_EMAILS"),
 
   // ── License gate (protects POST /api/generate) ──────────────
-  // HMAC secret used to sign offline license keys. Required in production.
+  // HMAC secret used to sign offline license keys. Required in production:
+  // without it no license can be issued and the paid path stays closed.
   licenseSecret: () => opt("LICENSE_SECRET"),
-  // "on" | "off" | "auto" (default). auto = on only in production builds
-  // with LICENSE_SECRET configured — generated customer projects therefore
-  // ship with the gate OFF unless they opt in.
+  // "on" | "off" | "auto" (default).
+  //   auto → ON in production, OFF in development.
+  // The generated customer project ships with this rewritten to default
+  // "off" (see lib/generator/prune.ts → pruneLicenseGateDefault), so a
+  // customer never inherits ShipKit's own paywall.
   licenseGateMode: () => opt("LICENSE_GATE", "auto").toLowerCase(),
-  // Anonymous trial downloads per IP per UTC day. Set 0 for a hard paywall.
+  // Free PREVIEW downloads per visitor per UTC day. 0 = no anonymous
+  // previews at all. Note: a preview never contains application source
+  // code — see lib/generator/preview.ts.
   freeGenerationsPerDay: () => {
     const n = Number(opt("FREE_GENERATIONS_PER_DAY", "1"));
     return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 1;
+  },
+  // Free previews per network (IP) per UTC day. A visitor can always clear
+  // cookies, so the IP bucket is the coarse brake that stops a single
+  // machine from minting unlimited preview tokens. Defaults to 20x the
+  // per-visitor limit so a shared office IP does not lock everyone out.
+  freeGenerationsPerNetworkPerDay: () => {
+    const raw = opt("FREE_GENERATIONS_PER_DAY_PER_IP", "");
+    if (raw !== "") {
+      const n = Number(raw);
+      if (Number.isFinite(n) && n >= 0) return Math.floor(n);
+    }
+    const perVisitor = env.freeGenerationsPerDay();
+    return Math.max(perVisitor * 20, perVisitor);
   },
 };
 
@@ -181,9 +199,28 @@ export function isLicenseGateEnabled(): boolean {
   const mode = env.licenseGateMode();
   if (mode === "on") return true;
   if (mode === "off") return false;
-  return (
-    process.env.NODE_ENV === "production" && !!process.env.LICENSE_SECRET
-  );
+  // "auto" is FAIL-SAFE: a production deployment always gates. A forgotten
+  // LICENSE_SECRET must never silently turn the shop into a free buffet —
+  // it only means no license can be *issued*, which is a configuration error
+  // that /api/payments/self-check reports loudly. Development stays open so
+  // the site can be worked on without a key; the generated customer project
+  // ships with an explicit "off" default instead.
+  return process.env.NODE_ENV === "production";
+}
+
+/** Human-readable reason behind the current gate state (self-check / admin). */
+export function licenseGateStatus(): {
+  mode: string;
+  enabled: boolean;
+  reason: string;
+} {
+  const mode = env.licenseGateMode();
+  if (mode === "on") return { mode, enabled: true, reason: "explicit-on" };
+  if (mode === "off") return { mode, enabled: false, reason: "explicit-off" };
+  if (process.env.NODE_ENV === "production") {
+    return { mode, enabled: true, reason: "auto-production" };
+  }
+  return { mode, enabled: false, reason: "auto-development" };
 }
 
 /**

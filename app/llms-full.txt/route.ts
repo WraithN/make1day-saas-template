@@ -233,18 +233,24 @@ the Builder; the adapter interface is NormalizedSubEvent + CheckoutParams.
 Authorization order for POST /api/generate:
   1. offline HMAC key (body licenseKey or httpOnly sk_license cookie),
   2. logged-in user with an active subscription, or email auto-claim,
-  3. one free trial per IP per UTC day (FREE_GENERATIONS_PER_DAY, 0 = hard wall),
-  4. otherwise 402.
+  3. otherwise 402 — an anonymous visitor never receives the source ZIP.
 Key format: SK1.<base64url payload>.<base64url HMAC-SHA256>. LICENSE_SECRET is
-required in production; LICENSE_GATE=auto enables the gate only in production
-builds with a secret. Generated customer projects ship with LICENSE_GATE=off.
+required in production (without it no license can be issued). LICENSE_GATE=auto
+gates every production deployment; generated customer projects ship with
+LICENSE_GATE=off.
+Anonymous visitors may still download a free PREVIEW from POST
+/api/generate/preview: the file inventory of the configured build plus the
+design tokens — never application source. The preview quota is counted per
+signed visitor token AND per trusted network (FREE_GENERATIONS_PER_DAY,
+FREE_GENERATIONS_PER_DAY_PER_IP).
 Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-check.
 
 ## 8. HTTP API summary (full schema: ${SITE}/openapi.json)
 
 | Method | Path | Purpose | Auth |
 |---|---|---|---|
-| POST | /api/generate | Build + download the ZIP | license / subscription / trial |
+| POST | /api/generate | Build + download the source ZIP | license / subscription |
+| POST | /api/generate/preview | Build + download the source-free preview | anonymous (quota) |
 | POST | /api/license | Redeem a key into an httpOnly cookie | public |
 | GET | /api/license | Key + gate status | cookie |
 | DELETE | /api/license | Clear the key cookie | public |

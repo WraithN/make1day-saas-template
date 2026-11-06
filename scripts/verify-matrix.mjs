@@ -8,7 +8,9 @@
  *   3. assert the generated files / pruning decisions,
  *   4. run `tsc --noEmit` INSIDE the generated project.
  *
- * Requires a running ShipKit dev server with the license gate OFF:
+ * Requires a running ShipKit server with the license gate OFF — the matrix
+ * downloads the FULL paid ZIP without a license, which a gated deployment
+ * correctly refuses:
  *   LICENSE_GATE=off npx next dev -p 3000
  *   node scripts/verify-matrix.mjs --all
  *   node scripts/verify-matrix.mjs --case stripe-candy
@@ -170,6 +172,24 @@ const SITE_ONLY_FILES = [
   "app/api/mcp/route.ts",
   "app/agent-ready/page.tsx",
   "lib/content/agent-ready.ts",
+];
+// The generator itself must never ship: one purchase would otherwise mean
+// unlimited generations (and resales) of the product that was just paid for.
+const GENERATOR_FILES = [
+  "lib/generator/config.ts",
+  "lib/generator/pack.ts",
+  "lib/generator/prune.ts",
+  "lib/generator/preview.ts",
+  "lib/generator/schema.ts",
+  "lib/generator/spec.ts",
+  "lib/generator/templates.ts",
+  "lib/generator/themes.ts",
+  "app/builder/page.tsx",
+  "components/Builder.tsx",
+  "app/api/generate/route.ts",
+  "app/api/generate/preview/route.ts",
+  "app/build-matrix/page.tsx",
+  "public/build-matrix.json",
 ];
 
 function assert(condition, message) {
@@ -333,6 +353,33 @@ async function verifyCase(entry, doBuild) {
   for (const rel of SITE_ONLY_FILES) {
     assert(!exists(rel), `site-only endpoint leaked into ZIP: ${rel}`);
   }
+
+  // The generator must never leak into a customer project.
+  for (const rel of GENERATOR_FILES) {
+    assert(!exists(rel), `generator leaked into ZIP: ${rel}`);
+  }
+  // …and no dead /builder link may survive in the shipped project.
+  for (const rel of [
+    "components/Nav.tsx",
+    "app/page.tsx",
+    "app/sitemap.ts",
+    "app/robots.ts",
+    "components/home/ThemePreviewSection.tsx",
+  ]) {
+    if (!exists(rel)) continue;
+    const src = await read(rel);
+    assert(
+      !src.includes("/builder"),
+      `dead /builder link survived in ${rel}`,
+    );
+  }
+  // The customer project must ship with the download gate OFF by default —
+  // it must never inherit ShipKit's own (production = ON) paywall.
+  const shippedEnv = await read("lib/env.ts");
+  assert(
+    /licenseGateMode: \(\) => opt\("LICENSE_GATE", "off"\)/.test(shippedEnv),
+    "generated project must default LICENSE_GATE to off",
+  );
 
   // Payment pruning: only the selected adapter survives.
   for (const [name, rel] of Object.entries(PAYMENT_FILES)) {

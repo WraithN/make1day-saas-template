@@ -199,8 +199,11 @@ La page tarifs vend deux offres payantes — **Buyout** (paiement unique,
 - Les événements sont dédupliqués sur `(eventType, eventId)` avant toute
   attribution ; un paiement émet une clé `SK1.…`, un retry n'en émet pas de
   seconde.
-- `POST /api/generate` exige une licence, un abonnement actif / une
-  revendication par e-mail, ou l'essai gratuit quotidien. Définissez
+- `POST /api/generate` exige une licence, un abonnement actif ou une
+  revendication par e-mail — un visiteur anonyme ne reçoit jamais le ZIP
+  source (le téléchargement EST le produit). `POST /api/generate/preview`
+  fournit un aperçu sans code source (inventaire des fichiers + tokens de
+  design), avec un quota par visiteur et par réseau. Définissez
   `LICENSE_SECRET` et appliquez `0003_licenses.sql` ; clés dans `/admin/licenses`.
 - `GET /api/payments/self-check` renvoie l'état de config sans aucun secret.
 - Une erreur de persistance renvoie 500 pour déclencher la réémission.

@@ -34,8 +34,8 @@
 | 7 | Settings → Webhooks → Endpoint URL | 固定写 `https://<你的域名>/api/webhook` | 全站**唯一**一个 webhook 路由，POST + raw body | 注册成 `/api/webhooks/waffo`（旧文档错误地址） |
 | 8 | — | `WAFFO_API_BASE` / `WAFFO_CHECKOUT_PATH` | 保持默认：`https://api.waffo.ai` + `/v1/actions/checkout/create-session` | 改成旧版假想端点 `api.waffo.com/v1/checkout/session` |
 | 9 | 站点公开地址 | `NEXT_PUBLIC_SITE_URL` | 生产必须是 `https://` 真实域名；结账 `successUrl`、canonical、sitemap、llms.txt 全依赖它 | 留 `localhost:3000`，客户付款后跳回本地 |
-| 10 | 生成随机串 `openssl rand -hex 32` | `LICENSE_SECRET` | ≥32 字符，仅服务端 | 为空 → 生产不签发 license，`/api/generate` 永远 402 |
-| 11 | — | `LICENSE_GATE` / `FREE_GENERATIONS_PER_DAY` | `auto`（生产且配了 secret 即开）/ `on` / `off`；免费额度默认每 IP 每天 1 次 | 误在**客户模板**里设 `on`（模板已强制 `off`） |
+| 10 | 生成随机串 `openssl rand -hex 32` | `LICENSE_SECRET` | ≥32 字符，仅服务端 | 为空 → 生产不签发 license，付费用户也下载不了（门禁本身不受它影响，`auto` 在生产恒开） |
+| 11 | — | `LICENSE_GATE` / `FREE_GENERATIONS_PER_DAY` | `auto`（生产恒开，fail-safe）/ `on` / `off`；匿名**预览包**额度默认每访客每天 1 次（另按网络 20 次封顶） | 误在**客户模板**里设 `on`（模板已强制 `off`）；生产设 `off` = 白送源码 |
 | 12 | 自建管理员账号 | `ADMIN_USER` / `ADMIN_PASSWORD` | 必填；否则 `/admin` 与 `/admin/licenses` 公开 | 上线忘设，已签发 license key 可被任意查看 |
 | 13 | Supabase Project Settings → API | `NEXT_PUBLIC_SUPABASE_URL`、`NEXT_PUBLIC_SUPABASE_ANON_KEY`、`SUPABASE_SERVICE_ROLE_KEY` | service role 仅服务端 | 把 service role 填进 `NEXT_PUBLIC_` |
 | 14 | Supabase SQL Editor | 执行 `supabase/migrations/0003_licenses.sql` | 建 `licenses` + `webhook_events`，RLS 开启、仅 service role 可写 | 不执行 → 落 `.data/*.json`，serverless 上重启即丢 |
@@ -104,7 +104,7 @@ curl -fsS https://<你的域名>/api/payments/self-check | jq
 8. 再跑一遍 Care（月订阅）路径：期望 `subscription.activated` 发码；**`subscription.payment_succeeded` 必须被忽略**，否则首付款会重复开通。
 9. 检查取消/退款：`subscription.canceled` / `refund.succeeded` 应把状态置 canceled；`subscription.canceling` 要保留到 `currentPeriodEnd`。
 
-> 未登录匿名下载：每 IP 每天 1 次免费试用，之后 `POST /api/generate` 返回 `402 PAYMENT_REQUIRED` 并带 `pricingUrl` / `licenseUrl`。要硬付费墙就设 `FREE_GENERATIONS_PER_DAY=0`。
+> 未登录匿名下载：`POST /api/generate` 一律返回 `402 PAYMENT_REQUIRED`（带 `pricingUrl` / `licenseUrl` / `previewAvailable`）——**匿名永远拿不到源码 ZIP，下载本身就是商品**。匿名只能下载 `POST /api/generate/preview` 的**无源码预览包**（文件清单 + 设计令牌），额度按访客令牌 + 网络双桶计数；完全不想要预览就设 `FREE_GENERATIONS_PER_DAY=0`。
 
 ---
 
@@ -132,7 +132,7 @@ curl -fsS https://<你的域名>/api/payments/self-check | jq
 | 所有事件都 400，重试 4 次后消失 | 只填了 test 公钥 | 补 `WAFFO_WEBHOOK_PUBLIC_KEY_PROD` |
 | `/api/checkout` 500，信息含 product id | `WAFFO_PRICE_ID_BUYOUT` / `_CARE` 未填或填了占位符 | 跑 preflight；Pancake 里产品 ID 就是价格 ID |
 | 下单成功但客户被按月扣款 | Buyout 绑成了订阅产品 | 后台把 Buyout 产品改成 onetime |
-| `/api/generate` 一直 402 | `LICENSE_SECRET` 未配 / 免费额度用尽 / 客户模板误开 gate | 看响应头 `X-ShipKit-Entitlement`；客户模板 `.env.example` 必须是 `LICENSE_GATE=off` |
+| `/api/generate` 一直 402 | 这是**预期行为**（匿名无授权）；付费用户也 402 则是 `LICENSE_SECRET` 未配或 key 无效 | 看响应头 `X-ShipKit-Entitlement`（付费应为 `license-key` / `subscription`）；客户模板 `.env.example` 必须是 `LICENSE_GATE=off` |
 | 付款成功但 `/admin/licenses` 没 key | webhook 未注册、验签失败、或 0003 迁移没执行导致写库失败 | `self-check` → 后台投递日志 → `/admin` → Supabase 表；写库失败时本站返回 500 让网关重试 |
 | 重复发码 | 事件去重键缺失 | 去重键是 `eventType + eventId`，确认 `webhook_events` 表存在 |
 | 付款后跳回 localhost | `NEXT_PUBLIC_SITE_URL` 未改 | 改成正式域名并重新部署（该值在构建期被注入） |

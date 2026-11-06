@@ -48,7 +48,7 @@ const TOOLS = [
   {
     name: "scaffold_project",
     description:
-      "Assemble a validated ShipKit BuilderConfig and the exact HTTP request that downloads the generated ZIP. Set includeZip=true to receive the ZIP as base64 (requires a license or the free daily trial).",
+      "Assemble a validated ShipKit BuilderConfig and the exact HTTP request that downloads the generated ZIP. Set includeZip=true to receive the ZIP as base64 (requires a license).",
     inputSchema: {
       type: "object",
       properties: {
@@ -227,7 +227,8 @@ async function handleToolCall(
         },
         licenseGate: {
           enabled: isLicenseGateEnabled(),
-          freeTrial: "1 generation per IP per day when the gate is on",
+          freePreview:
+            "A source-free preview package (file inventory + theme tokens) is available without a license via POST /api/generate/preview",
           onDenied: { status: 402, code: "PAYMENT_REQUIRED", pricingUrl: "/pricing", licenseUrl: "/license" },
           note: "Add licenseKey to the POST body if you already bought a license.",
         },
@@ -242,8 +243,12 @@ async function handleToolCall(
         return {
           error: {
             code: -32002,
-            message: "PAYMENT_REQUIRED: a license (or the free daily trial) is needed to download the ZIP",
-            data: { pricingUrl: "/pricing", licenseUrl: "/license" },
+            message: "PAYMENT_REQUIRED: a license is needed to download the full source ZIP",
+            data: {
+              pricingUrl: "/pricing",
+              licenseUrl: "/license",
+              previewUrl: "/api/generate/preview",
+            },
           },
         };
       }

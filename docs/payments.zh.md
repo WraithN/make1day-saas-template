@@ -190,8 +190,10 @@ WAFFO_WEBHOOK_PUBLIC_KEY_PROD="-----BEGIN PUBLIC KEY-----
 - 验签使用 **RSA 公钥**，不是 HMAC。公钥缺失时返回 400，绝不接收未签名请求。
 - 事件按 `(eventType, eventId)` 去重后才发授权；付款成功签发离线
   `SK1.…` license key，重试不会重复发码。
-- `POST /api/generate` 需要授权：license key、有效订阅 / 邮箱自动认领，
-  或每天 1 次免费试用。上线前设置 `LICENSE_SECRET` 并执行
+- `POST /api/generate` 需要授权：license key 或有效订阅 / 邮箱自动认领；
+  匿名访客拿不到源码 ZIP（下载本身就是商品）。匿名访客可以下载
+  `POST /api/generate/preview` 的**无源码预览包**（文件清单 + 设计令牌），
+  额度按访客令牌与网络双桶计数。上线前设置 `LICENSE_SECRET` 并执行
   `supabase/migrations/0003_licenses.sql`；已签发密钥在 `/admin/licenses`。
 - `GET /api/payments/self-check` 只返回配置缺失项，不返回任何密钥。
 - Webhook 写库失败返回 500 让网关重试，不会静默丢单。

@@ -9,7 +9,7 @@
 
 1. `POST /api/generate` 下载真实 ZIP（不是直接调内部函数，连授权/剪枝/打包都一起验）；
 2. 解压到 `.matrix-out/<case>`；
-3. 断言必需文件、站点专属端点已剪掉、支付/RAG/dashboard/skills/两套后台剪枝正确、manifest 与选项一致、模板 `LICENSE_GATE=off`、每个工程都带 `LICENSE`；
+3. 断言必需文件、站点专属端点已剪掉、**生成器本身（`lib/generator/*`、`/builder`、`/api/generate`）绝不出现在客户包里**、支付/RAG/dashboard/skills/两套后台剪枝正确、manifest 与选项一致、模板 `LICENSE_GATE=off`、每个工程都带 `LICENSE`；
 4. 在解压出的工程里执行 `tsc --noEmit -p tsconfig.json`；加 `--build` 时，部分代表用例会再跑一次真实 `next build` 并采集共享 First Load JS 与 `.next` 体积。
 
 任一断言或类型检查失败，该 case 即失败；`--all` 会跑完全部 case 再汇总失败列表。
@@ -44,7 +44,7 @@ node scripts/verify-matrix.mjs --case default-waffo-midnight --build --publish
 ```
 
 > CI 里把启动 dev server、等待就绪、执行验证放在**同一个 step**，并用 `trap` 清理进程，避免后台进程跨 step 被 runner 回收。
-> `LICENSE_GATE=off` 是必须的：否则 `/api/generate` 会返回 402。生成出来的客户项目本身也强制 `LICENSE_GATE=off`，两者互不冲突。
+> `LICENSE_GATE=off` 是必须的：矩阵要下载**完整付费 ZIP**，而门禁在生产恒开（fail-safe），不开门禁 `/api/generate` 只会返回 402。生成出来的客户项目本身也强制 `LICENSE_GATE=off`，两者互不冲突。
 
 ## 断言清单（也是回归护栏）
 

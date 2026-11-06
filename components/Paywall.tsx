@@ -7,8 +7,8 @@ import { checkEntitlement } from "@/lib/license";
 // visitors (valid license key, active subscription, matched license email, or
 // gate-off demo mode) see `children`; everyone else sees a locked CTA to
 // /pricing. The decision is made server-side, so the locked body is never
-// shipped to the client. The anonymous trial quota is deliberately excluded
-// (allowTrial:false) so premium content never opens to unpaid visitors.
+// shipped to the client. Anonymous visitors never open it — the preview
+// quota is reserved for the template generator, never for content.
 // This is the component-level counterpart to the edge interception in
 // middleware.ts (guardPremium) — use either, or both.
 export async function Paywall({
@@ -27,7 +27,7 @@ export async function Paywall({
   const req = new Request("https://local/", {
     headers: Object.fromEntries(h.entries()),
   });
-  const ent = await checkEntitlement(req, undefined, { allowTrial: false });
+  const ent = await checkEntitlement(req);
 
   if (ent.allowed) return <>{children}</>;
 

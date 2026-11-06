@@ -175,9 +175,38 @@ const SITE_ONLY_FILES = [
   "components/StylePlayground.tsx",
 ];
 
+// The generator itself.
+//
+// A customer project must NOT ship the factory: one purchase would then
+// mean unlimited generations (and resales of) the very product that was
+// bought. These files are always pruned, and the rewrites below make sure
+// no dead /builder link survives in the shipped navigation, home page,
+// account console, sitemap or robots file.
+const GENERATOR_FILES = [
+  "lib/generator/config.ts",
+  "lib/generator/pack.ts",
+  "lib/generator/prune.ts",
+  "lib/generator/preview.ts",
+  "lib/generator/schema.ts",
+  "lib/generator/spec.ts",
+  "lib/generator/templates.ts",
+  "lib/generator/themes.ts",
+  "app/builder/page.tsx",
+  "components/Builder.tsx",
+  "app/api/generate/route.ts",
+  "app/api/generate/preview/route.ts",
+  // The build-matrix page is a ShipKit-site page that reads a local
+  // snapshot file (public/build-matrix.json) which is not in the repo.
+  "app/build-matrix/page.tsx",
+  "public/build-matrix.json",
+];
+
 /** Source files that should be excluded from the generated zip. */
 export function computeSkip(config: BuilderConfig): Set<string> {
   const skip = new Set<string>(SITE_ONLY_FILES);
+  // The generator never ships: one purchase must not mean unlimited
+  // generations of the product that was just paid for.
+  for (const f of GENERATOR_FILES) skip.add(f);
 
   // Payment adapters: keep only the selected gateway (or skip all four + stub).
   if (config.payment === "none") {
@@ -670,6 +699,58 @@ export function pruneStylesLink(source: string): string {
 /** Drop the site-only /styles entry from the generated sitemap. */
 export function pruneStylesSitemap(source: string): string {
   return source.replace(/\s*\{ path: "\/styles", priority: 0\.7 \},/, "");
+}
+
+// ── Generator removal ──────────────────────────────────────────────────────
+//
+// The generator is pruned from every customer project (see GENERATOR_FILES),
+// so every link that pointed at /builder has to be rewritten to a route that
+// really exists — a dead link in the shipped navigation is a bug report
+// waiting to happen.
+
+/** Remove the /builder entry from the generated navigation. */
+export function pruneBuilderNav(source: string): string {
+  return source.replace(
+    /\s*\{ href: "\/builder", label: t\("nav\.builder"\) \},/,
+    "",
+  );
+}
+
+/** Retarget a /builder call-to-action to a route that exists. */
+export function pruneBuilderCta(source: string, target: string): string {
+  return source.replace(/href="\/builder"/g, `href="${target}"`);
+}
+
+/** Drop the site-only /builder entry from the generated sitemap. */
+export function pruneBuilderSitemap(source: string): string {
+  return source.replace(/\s*\{ path: "\/builder", priority: 0\.9 \},/, "");
+}
+
+/** Drop the site-only /builder path from the generated robots file. */
+export function pruneBuilderRobots(source: string): string {
+  return source
+    .replace(/\s*"\/builder",/g, "")
+    // The comment above it explains why /builder is listed — it goes too.
+    .replace(/\n[^\n]*\/\/ \/builder is the product's main conversion page[^\n]*/, "");
+}
+
+/**
+ * The generated project ships with the download gate OFF.
+ *
+ * ShipKit's own deployment runs in "auto" (production = ON, fail-safe). A
+ * customer must never inherit that paywall, so the default flips to "off"
+ * inside the shipped lib/env.ts — the customer can still opt in with
+ * LICENSE_GATE=on + LICENSE_SECRET.
+ */
+export function pruneLicenseGateDefault(source: string): string {
+  return source.replace(
+    /\/\/ "on" \| "off" \| "auto" \(default\)\.[\s\S]*?licenseGateMode: \(\) => opt\("LICENSE_GATE", "auto"\)\.toLowerCase\(\),/,
+    `// "on" | "off" | "auto" (default: off).
+  // This project ships with the download gate OFF. Flip it to "on" only if
+  // you also sell this template from your own site — and set LICENSE_SECRET
+  // to a long random string first.
+  licenseGateMode: () => opt("LICENSE_GATE", "off").toLowerCase(),`,
+  );
 }
 
 /**

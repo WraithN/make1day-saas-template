@@ -17,7 +17,7 @@ export const faqContent: Record<string, { heading: string; eyebrow: string; subt
       },
       {
         q: "Do I need a license to download the generated project?",
-        a: "One trial ZIP per day is free. A Buyout license ($99) or an active Care plan unlocks unlimited downloads: the key is issued automatically after checkout — redeem it at /license, or sign in with the email you paid with to claim it automatically. The gate protects ShipKit's site only; the project you download ships with it disabled.",
+        a: "The full source ZIP requires a license — a Buyout license ($99) or an active Care plan: the key is issued automatically after checkout, redeem it at /license, or sign in with the email you paid with to claim it automatically. Without a license you can still download a free preview: the complete file inventory of your build plus the design tokens (no source code). The gate protects ShipKit's site only; the project you download ships with it disabled.",
       },
       {
         q: "What is a Next.js SaaS boilerplate?",
@@ -80,7 +80,7 @@ export const faqContent: Record<string, { heading: string; eyebrow: string; subt
       },
       {
         q: "下载生成的工程需要授权吗？",
-        a: "每天可免费下载 1 次试用 ZIP。买断授权（$99）或有效的 Care 订阅可不限次下载：付款后系统自动签发密钥，在 /license 兑换即可，也可用下单邮箱登录自动认领。这道门槛只保护 ShipKit 本站，你下载到的工程里默认是关闭的。",
+        a: "完整源码 ZIP 需要授权：买断授权（$99）或有效的 Care 订阅——付款后系统自动签发密钥，在 /license 兑换即可，也可用下单邮箱登录自动认领。没有授权也能下载免费预览：你所选构建的完整文件清单 + 设计令牌（不含源码）。这道门槛只保护 ShipKit 本站，你下载到的工程里默认是关闭的。",
       },
       {
         q: "什么是 Next.js SaaS 模板？",

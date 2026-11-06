@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { buildProjectZip } from "@/lib/generator/pack";
 import { slugify, type BuilderConfig } from "@/lib/generator/config";
-import { checkEntitlement } from "@/lib/license";
+import { checkEntitlement, ensureTrialToken, TRIAL_COOKIE } from "@/lib/license";
 import { builderConfigSchema } from "@/lib/generator/schema";
 import { recordTrafficEvent } from "@/lib/traffic";
 import { resolveIdentity } from "@/lib/visitor-id";
@@ -26,20 +26,45 @@ export async function POST(req: Request) {
     );
   }
 
-  // ── License gate: without this, anyone could POST and take the full ZIP ──
-  // Generated customer projects ship with the gate OFF (no LICENSE_SECRET),
-  // so this only protects ShipKit's own deployed site.
+  // ── License gate ────────────────────────────────────────────────────────
+  // The generator IS the product: downloading the source tree means owning
+  // it. Only a paid entitlement (offline license key, active subscription
+  // or a license claimed by email) unlocks the full ZIP. An anonymous
+  // visitor gets 402 and may take a free PREVIEW instead — the inventory
+  // of the build plus the design tokens, never application source.
+  //
+  // Generated customer projects ship with the gate OFF (their lib/env.ts
+  // defaults to LICENSE_GATE=off), so this only protects ShipKit's own
+  // deployed site.
   const entitlement = await checkEntitlement(req, parsed.data.licenseKey);
   if (!entitlement.allowed) {
-    return NextResponse.json(
+    const trial = ensureTrialToken(req);
+    const res = NextResponse.json(
       {
         error: "license_required",
         code: "PAYMENT_REQUIRED",
         pricingUrl: "/pricing",
         licenseUrl: "/license",
+        // A free, source-free preview is always offered next to the paywall.
+        previewAvailable: true,
+        previewUrl: "/api/generate/preview",
+        previewRemaining:
+          typeof entitlement.remaining === "number"
+            ? entitlement.remaining
+            : undefined,
       },
       { status: 402 },
     );
+    if (trial.isNew) {
+      res.cookies.set(TRIAL_COOKIE, trial.cookie, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 30 * 24 * 60 * 60,
+      });
+    }
+    return res;
   }
 
   const { licenseKey: _licenseKey, ...config } = parsed.data;

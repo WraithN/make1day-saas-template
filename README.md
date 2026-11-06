@@ -210,11 +210,16 @@ gateway with `PAYMENT_PROVIDER` (`waffo` | `stripe` | `creem` | `paypal`).
 6. **Go-live runbook**: copy `.env.waffo-pancake.example` → `.env.local`, replace every `REPLACE_ME_*`, then run `node scripts/waffo-preflight.mjs --strict` (static, no network, never prints secrets). [`docs/waffo-launch-checklist.md`](docs/waffo-launch-checklist.md) has the dashboard field mapping, test-card drill, test→prod switch and troubleshooting table.
 
 **License gate** — a paid webhook issues an offline `SK1.…` key (`LICENSE_SECRET`).
-`POST /api/generate` accepts that key (or the `sk_license` cookie), an active
-subscription / email auto-claim, or one free trial per IP per day; otherwise 402.
+`POST /api/generate` accepts that key (or the `sk_license` cookie) or an active
+subscription / email auto-claim; otherwise 402. The download *is* the product, so
+an anonymous visitor never receives the source ZIP — they may only take a
+source-free preview (file inventory + design tokens) from
+`POST /api/generate/preview`. The gate is fail-safe: `LICENSE_GATE=auto` gates
+every production deployment, whether or not `LICENSE_SECRET` is set.
 Run `supabase/migrations/0003_licenses.sql` for durable records, view keys at
 `/admin/licenses`, and issue one manually with `scripts/issue-license.mjs`.
-Generated customer projects have the gate OFF by default.
+Generated customer projects have the gate OFF by default, and never ship the
+generator itself — one purchase is one build, not a factory.
 
 **Stripe** — set `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and
 `STRIPE_PRICE_ID_BUYOUT` / `STRIPE_PRICE_ID_CARE`. Buyout uses

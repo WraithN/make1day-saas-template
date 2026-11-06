@@ -233,9 +233,10 @@ engine is part of the core so any project can switch it on via env alone.
 - `PREMIUM_ROUTES` — comma-separated route prefixes to intercept (e.g.
   `/premium,/courses`). Defaults to `/premium`. Set to an empty string to
   disable edge interception.
-- `LICENSE_GATE` — the gate that activates interception. `auto` (default) turns
-  it on only in production with `LICENSE_SECRET` set; generated projects ship
-  with `LICENSE_GATE=off` unless they opt in.
+- `LICENSE_GATE` — the gate that activates interception. `auto` (default)
+  turns it on in **every production deployment** (fail-safe: a missing
+  `LICENSE_SECRET` never opens the gate); generated projects ship with
+  `LICENSE_GATE=off` unless they opt in.
 
 **Builder feature `premium`:** selecting it ships the runnable `/premium` sample
 page (`app/premium/page.tsx`) and the reusable `components/Paywall.tsx`. The
@@ -245,12 +246,12 @@ routes by setting `PREMIUM_ROUTES`.
 
 **Entitlement (shared with the download gate):** valid offline `SK1.…` license
 key, an active subscription, a license email match on a signed-in buyer, or
-gate-off demo mode. See `lib/license.ts` `checkEntitlement()`. The component
-`<Paywall>` passes `allowTrial:false`, so the anonymous free-download quota is
-**excluded** from content paywalls — premium content never opens to unpaid
-visitors. The edge interception only redirects visitors with no entitlement
-signal at all (no license key, no Supabase session), so it never blocks a
-signed-in user who might hold a subscription.
+gate-off demo mode. See `lib/license.ts` `checkEntitlement()`. There is no
+anonymous allowance for content: the free preview quota belongs to the
+template generator and is **never** spent on premium content. The edge
+interception only redirects visitors with no entitlement signal at all (no
+license key, no Supabase session), so it never blocks a signed-in user who
+might hold a subscription.
 
 ## Customer billing portal (self-serve subscription management)
 
@@ -293,9 +294,12 @@ touches card data. After the buyer finishes, they are returned to
 - Events are deduplicated on `(eventType, eventId)` before any entitlement is
   granted. A paid event issues an offline `SK1.…` license key; retries never
   issue a second one.
-- `POST /api/generate` requires a license, an active subscription/email claim,
-  or the daily free trial. Set `LICENSE_SECRET` and run
-  `supabase/migrations/0003_licenses.sql`; inspect keys at `/admin/licenses`.
+- `POST /api/generate` requires a license or an active subscription/email
+  claim — an anonymous visitor never receives the source ZIP (the download IS
+  the product). `POST /api/generate/preview` hands out a source-free preview
+  (file inventory + design tokens) under a per-visitor + per-network quota.
+  Set `LICENSE_SECRET` and run `supabase/migrations/0003_licenses.sql`; inspect
+  keys at `/admin/licenses`.
 - `GET /api/payments/self-check` reports configuration gaps without secrets.
 - Webhook persistence errors return HTTP 500 so the gateway retries — a paid
   order is never silently dropped.

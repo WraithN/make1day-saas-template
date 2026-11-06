@@ -99,7 +99,7 @@ export default async function AccountOverviewPage() {
               },
               {
                 key: c["account.entitlement"],
-                value: snap.license || snap.active ? c["console.active"] : "Free trial",
+                value: snap.license || snap.active ? c["console.active"] : c["console.previewOnly"],
               },
             ]}
           />

@@ -178,7 +178,7 @@ for (const name of [
 // ── 6. License gate ────────────────────────────────────────────────────────
 const secret = get("LICENSE_SECRET");
 if (!filled("LICENSE_SECRET")) {
-  fail("授权", "LICENSE_SECRET", "未配置；生产将无法签发 license，/api/generate 会一直 402");
+  fail("授权", "LICENSE_SECRET", "未配置；生产将无法签发 license，付费用户也拿不到源码 ZIP（门禁本身 fail-safe，生产恒开）");
 } else if (secret.length < 32) {
   fail("授权", "LICENSE_SECRET", "长度不足 32；用 openssl rand -hex 32");
 } else {
@@ -189,6 +189,8 @@ if (!["on", "off", "auto"].includes(gate)) {
   fail("授权", "LICENSE_GATE", `只允许 on | off | auto，当前 ${gate}`);
 } else if (gate === "off") {
   warn("授权", "LICENSE_GATE", "off — 本站下载门槛被关闭（客户模板里这是正确值，本站生产不是）");
+} else if (gate === "auto") {
+  ok("授权", "LICENSE_GATE", "auto — 生产环境恒开门禁（fail-safe），开发环境关闭");
 } else {
   ok("授权", "LICENSE_GATE", gate);
 }
@@ -196,7 +198,7 @@ const freeRaw = get("FREE_GENERATIONS_PER_DAY") || "1";
 if (!/^\d+$/.test(freeRaw)) {
   fail("授权", "FREE_GENERATIONS_PER_DAY", `必须是非负整数，当前 ${freeRaw}`);
 } else {
-  ok("授权", "FREE_GENERATIONS_PER_DAY", `${freeRaw} 次 / IP / 天`);
+  ok("授权", "FREE_GENERATIONS_PER_DAY", `${freeRaw} 次 / 访客 / 天（仅无源码预览包）`);
 }
 
 // ── 7. Site / persistence / admin ──────────────────────────────────────────

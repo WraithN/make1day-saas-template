@@ -29,7 +29,7 @@ const TEXT: Record<
     success: "License redeemed — you can download now.",
     active: "Active license",
     manage: "Redeem a different key",
-    note: "One free trial download per day is included. Keys are stored in an httpOnly cookie on this device.",
+    note: "No license yet? The free preview shows the file inventory and the design tokens — no source code. Keys are stored in an httpOnly cookie on this device.",
   },
   zh: {
     title: "解锁下载",
@@ -41,7 +41,7 @@ const TEXT: Record<
     success: "授权成功，现在可以下载了。",
     active: "当前授权有效",
     manage: "更换密钥",
-    note: "每天提供 1 次免费试用下载。密钥保存在本机的 httpOnly Cookie 中。",
+    note: "还没有授权？免费预览会给你文件清单和设计令牌，不含源码。密钥保存在本机的 httpOnly Cookie 中。",
   },
   ja: {
     title: "ダウンロードを解除",
@@ -53,7 +53,7 @@ const TEXT: Record<
     success: "登録完了。ダウンロードできます。",
     active: "ライセンス有効",
     manage: "別のキーを登録",
-    note: "1 日 1 回の無料お試しダウンロードがあります。キーは httpOnly Cookie に保存されます。",
+    note: "ライセンスがまだの場合は無料プレビュー（ファイル一覧とデザイントークン、ソースコードなし）を利用できます。キーは httpOnly Cookie に保存されます。",
   },
   fr: {
     title: "Débloquer les téléchargements",
@@ -65,7 +65,7 @@ const TEXT: Record<
     success: "Licence activée — téléchargement disponible.",
     active: "Licence active",
     manage: "Changer de clé",
-    note: "Un téléchargement d'essai gratuit par jour est inclus. La clé est stockée dans un cookie httpOnly.",
+    note: "Pas encore de licence ? L'aperçu gratuit montre l'inventaire des fichiers et les tokens de design — sans code source. La clé est stockée dans un cookie httpOnly.",
   },
   de: {
     title: "Downloads freischalten",
@@ -77,7 +77,7 @@ const TEXT: Record<
     success: "Lizenz eingelöst — Sie können jetzt herunterladen.",
     active: "Aktive Lizenz",
     manage: "Anderen Schlüssel einlösen",
-    note: "Ein kostenloser Test-Download pro Tag ist enthalten. Schlüssel werden in einem httpOnly-Cookie auf diesem Gerät gespeichert.",
+    note: "Noch keine Lizenz? Die kostenlose Vorschau zeigt die Dateiliste und die Design-Tokens — ohne Quellcode. Schlüssel werden in einem httpOnly-Cookie auf diesem Gerät gespeichert.",
   },
 };
 

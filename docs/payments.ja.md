@@ -195,8 +195,11 @@ WAFFO_WEBHOOK_PUBLIC_KEY_PROD="-----BEGIN PUBLIC KEY-----
 - 検証は **RSA 公開鍵**（HMAC ではない）。未設定なら 400、未署名は受理しません。
 - イベントは `(eventType, eventId)` で重複排除後に権限付与。支払い完了で
   オフライン `SK1.…` ライセンスキーを発行し、再送では二重発行しません。
-- `POST /api/generate` はライセンス / 有効サブスク / メール自動認領 /
-  1 日 1 回の無料枠のいずれかが必要。`LICENSE_SECRET` と
+- `POST /api/generate` はライセンス / 有効サブスク / メール自動認領の
+  いずれかが必要。匿名ユーザーにはソース ZIP を決して渡さない（ダウンロード
+  自体が商品）。匿名の場合は `POST /api/generate/preview` の**ソースなしの
+  プレビュー**（ファイル一覧 + デザイントークン）を、閲覧者トークンと
+  ネットワークの二重カウントでダウンロードできる。`LICENSE_SECRET` と
   `supabase/migrations/0003_licenses.sql` を設定、鍵は `/admin/licenses`。
 - `GET /api/payments/self-check` は秘密情報を返さず設定不足のみ表示。
 - 永続化失敗時は 500 を返し再送させます。
