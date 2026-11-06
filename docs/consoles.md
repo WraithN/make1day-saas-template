@@ -30,7 +30,7 @@
 - `components/console/ConsoleNav.tsx` — 客户端 tab 导航（高亮当前路由）
 - `components/console/ConsoleUI.tsx` — 卡片 / 统计块 / 键值表 / 数据表 / 提示条
 - `lib/console.ts` — 服务端数据聚合与权限判定
-- `lib/content/console.ts` — 完整 en / zh / ja / fr 四语文案
+- `lib/content/console.ts` — 完整 en / zh / ja / fr / de 五语文案
 - `components/console/SignOutButton.tsx` — 仅用户后台使用（不依赖 demo dashboard 的 `SignOut`）
 
 页面都是 `force-dynamic` 的 Server Component，`layout.tsx` 统一输出 `noindex` metadata。

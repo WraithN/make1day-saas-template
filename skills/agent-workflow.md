@@ -29,7 +29,7 @@ npm run ai:setup   # refresh .cursor/rules/*.mdc and CLAUDE.md
 ## 4. Definition of done
 - [ ] `npx tsc --noEmit` clean
 - [ ] `npm run build` succeeds
-- [ ] New copy added to **all four** locales
+- [ ] New copy added to **all five** locales
 - [ ] UI checked at 375 / 768 / 1280px in both themes
 - [ ] No secrets in client code or logs
 - [ ] `design.md` updated if a token changed

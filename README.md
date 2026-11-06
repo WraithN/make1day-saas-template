@@ -18,7 +18,7 @@ drop in your own keys.
 | One real AI feature — **multi-provider** (OpenAI, OpenRouter, DeepSeek, Groq, Anthropic, Gemini), plan-gated | ✅ |
 | Database (Supabase Postgres + RLS) — provider-agnostic `subscriptions` table | ✅ |
 | Dashboard (plan status + provider + live AI demo) | ✅ |
-| **User console `/account`** — overview, billing, my licenses, settings; four languages, session-gated | ✅ |
+| **User console `/account`** — overview, billing, my licenses, settings; five languages, session-gated | ✅ |
 | **Admin console `/admin`** — users, issued licenses, traffic, runtime status; Basic Auth + optional `ADMIN_EMAILS` | ✅ |
 | **Selectable, prunable consoles in generated ZIPs** — `account` / `admin` Builder features with dead-link rewrites | ✅ |
 | 1-click deploy (Vercel-ready) | ✅ |
@@ -30,7 +30,7 @@ drop in your own keys.
 | **Generated-template build matrix** — 16 GitHub Actions cases, each downloading a real ZIP and type-checking the extracted project | ✅ |
 | **Agent-Native Delivery** — root `AGENTS.md`, style-locked `design.md`, scoped rules, 12 skills, `.cursor/rules/*.mdc`, `CLAUDE.md`, deterministic `npm run ai:docs` | ✅ |
 | **MCP `scaffold_project`** — stateless JSON-RPC 2.0 endpoint + stdio bridge for Cursor / Claude Code, license-gated ZIP option | ✅ |
-| **`/agent-ready` landing page** — four-language guide to the machine-readable stack | ✅ |
+| **`/agent-ready` landing page** — five-language guide to the machine-readable stack | ✅ |
 | Observability — structured JSON logger (`lib/logger.ts`), route + global error boundaries, `/api/health` | ✅ |
 | Multi-tenancy — real org/workspace scaffolding: `organizations` + `memberships` tables, workspace switcher, per-tenant data scoping (`lib/org.ts`) | ✅ |
 | Customer billing portal — self-serve subscription management (Stripe + Creem real; PayPal/Waffo fall back to contact-support) | ✅ |
@@ -90,7 +90,7 @@ project** — they are the same source tree, not a second copy:
 | `/account` | signed-in users | overview, billing, my licenses, settings | Supabase session (`middleware.ts`) |
 | `/admin` | operators | overview, users, licenses, traffic, system | HTTP Basic Auth + optional `ADMIN_EMAILS` |
 
-Both are four-language Server Components sharing `components/console/*`,
+Both are five-language Server Components sharing `components/console/*`,
 `lib/console.ts` (data) and `lib/content/console.ts` (copy). They are `noindex`,
 disallowed in `robots.txt` and absent from the sitemap. In the Builder the
 `account` and `admin` features prune their route trees independently; Nav,
@@ -231,7 +231,7 @@ subscription checkouts only: use Waffo or Stripe for one-time Buyout billing.
 > Note: `/api/webhook` is the **single** webhook URL for every provider (the
 > route reads `PAYMENT_PROVIDER` to pick the verifier). Verification failures
 > return 400 and persistence failures return 500 so the gateway retries.
-> See `docs/payments*.md` for the four-language setup guides,
+> See `docs/payments*.md` for the five-language setup guides,
 > `docs/waffo-launch-checklist.md` for the Pancake go-live runbook, and
 > `docs/competitive-analysis.md` for the 2026 competitor / differentiation review.
 
@@ -341,7 +341,7 @@ shipkit/
 │  └─ ...                            # Nav, Footer, DemoConsole, PricingCards, ChatDemo, SignOut
 ├─ lib/
 │  ├─ console.ts                     # server-side snapshots + admin authorization
-│  ├─ content/console.ts             # four-language copy for both consoles
+│  ├─ content/console.ts             # five-language copy for both consoles
 │  ├─ env.ts                         # typed env access
 │  ├─ supabase/{server,client,admin}.ts
 │  ├─ payments/                      # PaymentProvider interface + stripe/creem/paypal/waffo

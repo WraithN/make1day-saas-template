@@ -50,7 +50,7 @@ will 404 every route. Stop dev → delete `.next` → build → start.
 4. **Payments verify on the raw body.** Waffo Pancake uses RSA-SHA256 over
    `${t}.${rawBody}`; the single webhook is `POST /api/webhook`. `buyout` is
    one-time, `care` is monthly. Never trust an unsigned event.
-5. **Four complete locales.** Any new copy needs en / zh / ja / fr. `?lang=`
+5. **Five complete locales.** Any new copy needs en / zh / ja / fr / de. `?lang=`
    must stay in canonical and hreflang URLs.
 6. **Be honest in machine-readable docs.** `llms-full.txt`, `openapi.json`,
    `/compare`, `/faq` and README's Known gaps must list real limitations, not
@@ -63,7 +63,7 @@ will 404 every route. Stop dev → delete `.next` → build → start.
 - [ ] clean `npx next build` (dev server stopped, `.next` removed)
 - [ ] `verify-matrix --all` passes (ZIP extracted + type-checked per case)
 - [ ] new machine-readable facts added to `llms.txt` / `llms-full.txt` / `openapi.json`
-- [ ] all four locales updated
+- [ ] all five locales updated
 - [ ] no secrets in client code or logs
 - [ ] Known gaps updated when a limitation is added or fixed
 

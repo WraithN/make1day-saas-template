@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   dict,
   LANGS,
@@ -34,6 +34,7 @@ export function LanguageProvider({
   initialLang?: Lang;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [lang, setLangState] = useState<Lang>(initialLang);
 
   // Restore saved language on mount (user's explicit choice wins over cookie).
@@ -72,6 +73,10 @@ export function LanguageProvider({
     if (typeof document !== "undefined") {
       document.cookie = `${I18N_STORAGE_KEY}=${l}; path=/; max-age=31536000; samesite=lax`;
     }
+    // Re-render server components (e.g. /account and /admin, which read the
+    // language from the cookie at request time) so their copy follows the
+    // switch instead of waiting for a full navigation.
+    router.refresh();
   };
 
   const t = (k: string) => dict[lang]?.[k] ?? dict.en[k] ?? k;

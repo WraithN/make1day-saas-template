@@ -15,7 +15,7 @@ ShipKit project. ShipKit is built SEO-first — keep it that way.
 - For localized pages, render canonical + hreflang **manually in `<head>`**
   (Next strips `?lang=` from metadata alternates). See `components/SeoLinks.tsx`.
 
-## Multilingual (4 langs: en/zh/ja/fr)
+## Multilingual (5 langs: en/zh/ja/fr/de)
 - Server content uses `lib/i18n-server` (`getLang`, `tr`).
 - Client content uses `useLanguage` + `<Trans k=... />`.
 - Language is carried by `?lang=` (crawler-friendly) and the `sk_lang` cookie (return visits).

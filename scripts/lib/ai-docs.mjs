@@ -112,7 +112,7 @@ const RULES_META = [
     globs: ["lib/i18n*.ts", "lib/i18n*.tsx", "components/**/*.tsx"],
     always: true,
     body: [
-      "All four locales (en, zh, ja, fr) are complete. Never add an en-only key.",
+      "All five locales (en, zh, ja, fr, de) are complete. Never add an en-only key.",
       "Dynamic values use {var} placeholders + interpolate(), never string concatenation of raw HTML.",
       "Highlight markup uses {{g}}...{{/g}}; no JSX in dictionary values.",
       "?lang= seeds sk_lang and is forwarded as x-sk-lang for Server Components. Do not 308-redirect it.",
@@ -141,7 +141,7 @@ const RULES_META = [
       "All /account reads go through lib/console.ts; guard every Supabase / license read so an unconfigured env renders an empty state instead of throwing.",
       "The console is read-only: never add a profile mutation endpoint without an RLS policy and a server-side identity check.",
       "Never expose another user's license key. getMyLicenses() filters by the signed-in email.",
-      "Copy lives in lib/content/console.ts with all four locales complete — no en-only strings.",
+      "Copy lives in lib/content/console.ts with all five locales complete — no en-only strings.",
       "middleware.ts gates /account (and /dashboard) with supabase.auth.getUser(); demo mode uses the sk_demo cookie.",
     ],
   },
@@ -306,7 +306,7 @@ function buildAgents(spec, rules) {
   L.push("2. **Server/client boundary.** Never import a server-only module into a `\"use client\"` file; keep route handlers on `runtime = \"nodejs\"`.");
   L.push("3. **Env access goes through `lib/env.ts`.** Clients are lazy; never scatter `process.env` reads or expose a secret with a `NEXT_PUBLIC_` prefix.");
   L.push("4. **Design is locked.** Follow `design.md`: CSS tokens only, system fonts, no backdrop-blur/text transforms, 44px tap targets, mobile-first.");
-  L.push("5. **i18n.** Every user-facing string goes into `lib/i18n-core.ts` for **all four** languages (en / zh / ja / fr).");
+  L.push("5. **i18n.** Every user-facing string goes into `lib/i18n-core.ts` for **all five** languages (en / zh / ja / fr / de).");
   L.push("6. **Payments.** Exactly one webhook route `POST /api/webhook`, dispatched by `PAYMENT_PROVIDER`. Verify the raw body, never skip verification, never log a secret. Buyout is ONE-TIME; Care is recurring.");
   L.push("7. **Don't reintroduce pruned code.** If a provider, feature or skill is missing, it was excluded on purpose.");
   L.push("8. **Verify before claiming done.** Run `npx tsc --noEmit` and `npm run build`; report failures instead of hiding them.");
@@ -354,7 +354,7 @@ function buildAgents(spec, rules) {
       hasAccount ? "`/account` (user console: overview, billing, licenses, settings)" : "",
       hasAdmin ? "`/admin` (operator console: users, licenses, traffic, system)" : "",
     ].filter(Boolean).join(" and ");
-    L.push(`- **Consoles:** ${names}. Both are Server Components using components/console/* and lib/console.ts, with four-language copy in lib/content/console.ts.`);
+    L.push(`- **Consoles:** ${names}. Both are Server Components using components/console/* and lib/console.ts, with five-language copy in lib/content/console.ts.`);
     L.push("- `/account` is gated by the Supabase session; `/admin` by HTTP Basic Auth plus the optional `ADMIN_EMAILS` allowlist. They are read-only starters — no profile mutations, no RBAC table.");
   } else {
     L.push("- **Consoles:** neither the user nor the admin console is included. `components/console/*`, `lib/console.ts` and `lib/content/console.ts` were pruned; do not import them.");
@@ -365,7 +365,7 @@ function buildAgents(spec, rules) {
   L.push("");
   L.push("- [ ] `npx tsc --noEmit` clean");
   L.push("- [ ] `npm run build` succeeds");
-  L.push("- [ ] New copy translated in all four languages");
+  L.push("- [ ] New copy translated in all five languages");
   L.push("- [ ] UI verified on mobile + desktop, dark + light");
   L.push("- [ ] No secrets in client code or logs");
   L.push("- [ ] `npm run ai:docs` re-run if any Builder selection changed");
@@ -570,7 +570,7 @@ function buildClaude(spec, rules) {
   L.push("## Before you finish");
   L.push("");
   L.push("- `npx tsc --noEmit` and `npm run build` must both pass.");
-  L.push("- New copy needs all four locales (en / zh / ja / fr).");
+  L.push("- New copy needs all five locales (en / zh / ja / fr / de).");
   L.push("- If you changed `shipkit.config.json`, run `npm run ai:docs`.");
   L.push("");
   return L.join("\n");

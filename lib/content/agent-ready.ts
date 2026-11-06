@@ -1,4 +1,4 @@
-// Four-language copy for /agent-ready. This page explains how AI agents and
+// Five-language copy for /agent-ready. This page explains how AI agents and
 // answer engines discover what ShipKit actually is — and how the downloaded
 // project keeps an AI coding agent on the rails afterwards.
 
@@ -214,9 +214,57 @@ const FR: AgentReadyCopy = {
   ctaSecondary: "Voir les faits complets",
 };
 
+const DE: AgentReadyCopy = {
+  eyebrow: "AGENT-NATIVE LIEFERUNG · GEO",
+  title: "Von Agents lesbar. Von Coding-Agents nutzbar.",
+  lede: "Die meisten Starter sind nur für Menschen lesbar. ShipKit veröffentlicht maschinenlesbare Fakten für Answer-Engines, ein MCP-Tool für Agents, die handeln wollen, und ein generiertes Projekt, das mit einem eigenen KI-Coding-Vertrag ausgeliefert wird.",
+  stackTitle: "Der Discovery-Stack",
+  stackSub: "Vier Ebenen, jede beantwortet eine andere Frage.",
+  stack: [
+    { name: "Kurze Fakten", path: "/llms.txt", audience: "Answer-Engines", desc: "Was ShipKit ist, was es kostet, welche Seiten und Docs zählen. Die 30-Sekunden-Lektüre." },
+    { name: "Volle Fakten", path: "/llms-full.txt", audience: "Selektions-Agents", desc: "Jede BuilderConfig-Enum, Pruning-Regel, RAG-Parameter, Zahlungsprotokoll, Lizenz-Gate-Reihenfolge und bekannte Limitierungen." },
+    { name: "Ausführbarer Vertrag", path: "/openapi.json", audience: "Werkzeug-Agents", desc: "OpenAPI 3.1 mit Request/Response-Schemas, Fehlercodes und der 402-Lizenz-Antwort von /api/generate." },
+    { name: "MCP-Endpoint", path: "/api/mcp", audience: "Coding-Agents", desc: "JSON-RPC-2.0-Tools: get_product_info, get_builder_config, scaffold_project und get_agent_delivery. Eine stdio-Brücke für Cursor und Claude Code ist enthalten." },
+  ],
+  stepsTitle: "Wie ein Agent diese Seite lesen sollte",
+  steps: [
+    "GET /llms.txt — entscheiden, ob sich das weitere Lesen lohnt.",
+    "GET /llms-full.txt — die exakten Optionen, Preise und ehrlichen Limitierungen abrufen.",
+    "GET /openapi.json — den HTTP-Vertrag und das 402-Gate kennenlernen.",
+    "Aufruf /api/mcp → scaffold_project — eine validierte BuilderConfig zusammenstellen.",
+    "POST /api/generate, entpacken, dann AGENTS.md + design.md lesen, bevor eine Zeile Code geschrieben wird.",
+  ],
+  codeTitle: "Ein Aufruf, um ein Projekt zusammenzustellen",
+  codeHint: "scaffold_project liefert den exakten POST-Body für /api/generate. Mit includeZip=true wird das ZIP als base64 zurückgegeben, hinter demselben Lizenz-Gate.",
+  deliveryTitle: "Was in jedem ZIP landet",
+  deliverySub: "Der Vertrag reist mit dem Code. Config ändern → npm run ai:docs → alles wird neu gebaut.",
+  delivery: [
+    { file: "AGENTS.md", desc: "Root-Vertrag: Auswahl, Befehle, Grenzen, Index der Scoped-Rules, Definition von fertig." },
+    { file: "design.md", desc: "Stilfestes visuelles System, generiert für die gewählte Palette." },
+    { file: "ai/rules/*.md", desc: "Scoped Rules mit Globs — core, style, api, auth, payments, database, rag, i18n, deploy, plus eine pro Skill." },
+    { file: ".cursor/rules/*.mdc + CLAUDE.md", desc: "Native Cursor-Regeln und ein Claude-Code-Einstiegspunkt, die den Vertrag importieren." },
+    { file: "skills/*.md", desc: "12 fokussierte Playbooks (frontend, UI, backend, testing, SEO, auth, payments, database, RAG, i18n, deploy, agent workflow)." },
+    { file: "npm run ai:docs / ai:setup", desc: "Deterministische Regenerierung aus shipkit.config.json + dem vollständigen Katalog in ai/doc-spec.json — keine zweite Kopie, die abweichen kann." },
+  ],
+  limitsTitle: "Ehrliche Grenzen",
+  limits: [
+    "Der MCP-Endpoint ist zustandsloses JSON-RPC über HTTP — kein Sampling, keine Prompts, keine Subscriptions oder SSE-Streaming.",
+    "scaffold_project liefert standardmäßig Konfigurations-JSON; includeZip=true wird vom selben Lizenz-Check wie die Website abgesichert.",
+    "Die Build-Matrix prüft 14 generierte ZIPs mit tsc, nicht mit next build, und veröffentlicht keine Live-Erfolgsrate.",
+    "Das Multi-Tenancy-Builder-Flag liefert weiterhin keine org/RBAC-Tabellen; der KI-Chat wird nicht gestreamt und hat kein Kontingent.",
+    "Generierte Projekte behalten das ShipKit-Branding und liefern noch keine LICENSE-Datei mit.",
+    "npm run ai:docs regeneriert Dokumente, nicht app/globals.css — für einen anderen Stil ist ein frisches ZIP aus dem Builder nötig.",
+  ],
+  ctaTitle: "Beginnen Sie mit einem echten Download",
+  ctaText: "Wählen Sie Ihre Module, generieren Sie ein ZIP und sehen Sie den mitgelieferten Agent-Vertrag.",
+  ctaPrimary: "Builder öffnen",
+  ctaSecondary: "Vollständige Fakten lesen",
+};
+
 export const AGENT_READY: Record<Lang, AgentReadyCopy> = {
   en: EN,
   zh: ZH,
   ja: JA,
   fr: FR,
+  de: DE,
 };

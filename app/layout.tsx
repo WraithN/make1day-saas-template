@@ -77,7 +77,7 @@ const SITE_JSONLD = {
   "@type": "WebSite",
   name: "ShipKit",
   url: SITE_URL,
-  inLanguage: ["en", "zh", "ja", "fr"],
+  inLanguage: ["en", "zh", "ja", "fr", "de"],
 };
 
 // Sets the theme class before paint to avoid a light/dark flash.

@@ -67,6 +67,18 @@ const TEXT: Record<
     manage: "Changer de clé",
     note: "Un téléchargement d'essai gratuit par jour est inclus. La clé est stockée dans un cookie httpOnly.",
   },
+  de: {
+    title: "Downloads freischalten",
+    body: "Für die Generierung des vollständigen Source-ZIP ist eine Lizenz erforderlich. Kaufen Sie einmalig (99 $) und fügen Sie den erhaltenen Schlüssel ein — oder melden Sie sich mit der E-Mail an, die Sie beim Kauf verwendet haben, um automatisch freizuschalten.",
+    placeholder: "Lizenzschlüssel einfügen (SK1.…)",
+    redeem: "Lizenz einlösen",
+    buying: "Lizenz erhalten",
+    invalid: "Dieser Schlüssel ist ungültig oder abgelaufen.",
+    success: "Lizenz eingelöst — Sie können jetzt herunterladen.",
+    active: "Aktive Lizenz",
+    manage: "Anderen Schlüssel einlösen",
+    note: "Ein kostenloser Test-Download pro Tag ist enthalten. Schlüssel werden in einem httpOnly-Cookie auf diesem Gerät gespeichert.",
+  },
 };
 
 type Status = {

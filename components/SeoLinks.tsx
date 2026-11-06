@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useLanguage } from "@/lib/i18n";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://shipkit.dev";
-const LANGS = ["en", "zh", "ja", "fr"];
+const LANGS = ["en", "zh", "ja", "fr", "de"];
 
 // Renders the correct canonical + hreflang for the *current* page (not just
 // home), so every indexable route is self-canonical in each language. Crawlers

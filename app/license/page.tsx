@@ -30,6 +30,11 @@ const HEAD: Record<Lang, { eyebrow: string; title: string; body: string }> = {
     title: "Activer votre licence ShipKit",
     body: "Après le paiement, vous recevez une clé de licence. Activez-la ici une fois pour débloquer les téléchargements sur cet appareil. Vous pouvez aussi vous connecter avec l'e-mail de paiement : la licence est alors reconnue automatiquement.",
   },
+  de: {
+    eyebrow: "LIZENZ",
+    title: "Aktivieren Sie Ihre ShipKit-Lizenz",
+    body: "Nach dem Kauf erhalten Sie einen Lizenzschlüssel. Lösen Sie ihn hier einmal ein, um Downloads im Builder auf diesem Gerät freizuschalten. Sie können sich auch einfach mit der E-Mail anmelden, mit der Sie bezahlt haben — Lizenzen werden automatisch abgerufen.",
+  },
 };
 
 export default async function LicensePage() {

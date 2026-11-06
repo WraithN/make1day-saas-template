@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { POSTS } from "@/lib/content/blog";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://shipkit.dev";
-const LANGS = ["en", "zh", "ja", "fr"];
+const LANGS = ["en", "zh", "ja", "fr", "de"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

@@ -9,7 +9,7 @@ import {
   adminAuthorized,
 } from "@/lib/admin-guard";
 
-const LANGS = ["en", "zh", "ja", "fr"];
+const LANGS = ["en", "zh", "ja", "fr", "de"];
 
 function adminAllowlist(): string[] {
   return (process.env.ADMIN_EMAILS ?? "")

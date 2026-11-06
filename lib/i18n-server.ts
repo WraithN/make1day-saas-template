@@ -7,7 +7,7 @@ import { dict, applyMarkup, type Lang } from "./i18n-core";
 
 export type { Lang } from "./i18n-core";
 
-const LANGS: Lang[] = ["en", "zh", "ja", "fr"];
+const LANGS: Lang[] = ["en", "zh", "ja", "fr", "de"];
 
 export function isLang(v: string | null | undefined): v is Lang {
   return !!v && (LANGS as string[]).includes(v);

@@ -34,7 +34,7 @@ project. Follow these rules so generated code matches the existing source.
 
 ## i18n
 - Add new strings to `lib/i18n-core.ts` dict under a namespaced key (e.g. `feature.x`).
-- Provide **all four** locales (`en`, `zh`, `ja`, `fr`); none of them fall back to English.
+- Provide **all five** locales (`en`, `zh`, `ja`, `fr`, `de`); none of them fall back to English.
 - Never concatenate translated fragments; use the `{{g}}…{{/g}}` markup for highlight spans.
 
 ## Do / Don't
