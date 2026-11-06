@@ -19,7 +19,7 @@ drop in your own keys.
 | Database (Supabase Postgres + RLS) — provider-agnostic `subscriptions` table | ✅ |
 | Dashboard (plan status + provider + live AI demo) | ✅ |
 | **User console `/account`** — overview, billing, my licenses, settings; five languages, session-gated | ✅ |
-| **Admin console `/admin`** — users, issued licenses, traffic, runtime status; Basic Auth + optional `ADMIN_EMAILS` | ✅ |
+| **Admin console `/admin`** — users, issued licenses, traffic, runtime status; in-page operator sign-in (`ADMIN_USER` / `ADMIN_PASSWORD`) + optional `ADMIN_EMAILS` | ✅ |
 | **Selectable, prunable consoles in generated ZIPs** — `account` / `admin` Builder features with dead-link rewrites | ✅ |
 | 1-click deploy (Vercel-ready) | ✅ |
 | **License gate** — offline HMAC keys, active subscription / email auto-claim, source-free anonymous preview, `/admin/licenses` | ✅ |
@@ -36,7 +36,7 @@ drop in your own keys.
 | Customer billing portal — self-serve subscription management (Stripe + Creem real; PayPal/Waffo fall back to contact-support) | ✅ |
 | Profile mutation — `/api/profile` PATCH (display name / full name / company) + `ProfileForm` | ✅ |
 | Org/RBAC tables — `profiles.role` RBAC + `organizations`/`memberships` tenancy | ✅ |
-| True token streaming / per-user rate limits | ⚠️ not implemented |
+| True token streaming (OpenAI / Anthropic / Gemini) + per-user daily quota (`AI_MESSAGES_PER_DAY`, 429 on exhaustion) | ✅ |
 
 ### RAG module (strategy B — hybrid retrieval)
 `POST /api/rag/ingest` (`{ title, text }`) splits, embeds and indexes a document;
@@ -97,7 +97,7 @@ project** — they are the same source tree, not a second copy:
 | Route | Audience | Pages | Guard |
 | --- | --- | --- | --- |
 | `/account` | signed-in users | overview, billing, my licenses, settings | Supabase session (`middleware.ts`) |
-| `/admin` | operators | overview, users, licenses, traffic, system | HTTP Basic Auth + optional `ADMIN_EMAILS` |
+| `/admin` | operators | overview, users, licenses, traffic, system | In-page operator sign-in (`ADMIN_USER` / `ADMIN_PASSWORD`) + optional `ADMIN_EMAILS` |
 
 Both are five-language Server Components sharing `components/console/*`,
 `lib/console.ts` (data) and `lib/content/console.ts` (copy). They are `noindex`,
