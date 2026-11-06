@@ -18,7 +18,7 @@
 | `/account/licenses` | 登录用户 | 按邮箱过滤的授权码、到期时间、订单号 | `getMyLicenses()` |
 | `/account/settings` | 登录用户 | 资料编辑（display name / full name / company）+ 语言 / 主题 / 会话 / 退出登录 | `ProfileForm` + `SignOutButton` |
 | `/admin` | 运营者 | KPI：已签发授权、浏览量、已知账户 | `getAdminSnapshot()` |
-| `/admin/users` | 运营者 | 用户列表 + 角色列（admin/staff/member），管理员可改他人角色 | `profiles` + `UserRoleSelect` |
+| `/admin/users` | 运营者 | 用户列表 + 角色列（admin/staff/member），管理员可改他人角色 | Supabase Auth + `profiles`，或本地 SQLite `profiles` 表 + `UserRoleSelect` |
 | `/admin/licenses` | 运营者 | 全部已签发授权码 | `listLicenses()` |
 | `/admin/orders` | 运营者 | 订单流水：客户、支付商、套餐、金额、状态、订单号 | `getAdminSnapshot().orders` ← `lib/orders.ts` |
 | `/admin/access` | 运营者 | 付费查看聚合：付费邮箱用户数、已签发授权数、订阅记录数、最近授权明细 | `getAdminSnapshot().access` |
@@ -53,7 +53,7 @@
 - 运营者会话存在本地库的 `admin_sessions` 表，服务端可随时吊销、可自动过期；登出会真删会话行，不是只清 cookie。登录失败按 IP 限流（8 次/分钟）。
 - Edge 中间件只能校验 cookie **是否存在**（`node:sqlite` 是 Node-only），权威校验放在 Node 侧：`app/admin/layout.tsx` 与各 API 路由。
 - 角色读取走 SECURITY DEFINER 函数 `is_staff_or_admin()`，配合 RLS：`profiles` 仅 admin/staff 可读全部行；本人可改 `display_name / full_name / company`，但 RLS 的 WITH CHECK **禁止自改 `role`**（防自提权）。
-- `ADMIN_EMAILS` 种子邮箱在访问 `/admin` 时由 `ensureSeedAdmins()` 幂等提升为 `role='admin'`（需 `SUPABASE_SERVICE_ROLE_KEY`）。既是首登兼容，又让「白名单」成为真实持久化角色，而非仅运行时判断。
+- `ADMIN_EMAILS` 种子邮箱在访问 `/admin` 时由 `ensureSeedAdmins()` 幂等提升为 `role='admin'`。既是首登兼容，又让「白名单」成为真实持久化角色，而非仅运行时判断。
 - 运营者账号等价于 `role='admin'`：`getAdminSnapshot()` 的 `identityKind` 区分 `operator` 与 `supabase`，用户页据此给出不同提示，不再把运营者误判成只读员工。
 - `/admin/system` 只输出「已配置 / 未配置」标志与数量，从不打印邮箱列表、密钥或完整 env 值。
 - 授权码只在登录用户自己的 `/account/licenses` 和管理员 `/admin/licenses` 展示，不进日志、统计或 JSON-LD。
@@ -132,12 +132,54 @@
   `ADMIN_PASSWORD` 存在时播种出运营者账号（页内登录，不走 HTTP Basic Auth），
   未配置且没有 Supabase 管理员时，生产返回 **503**（关闭），开发环境给出明确提示。
 
+## 3.8 用户目录与角色：本地 SQLite ↔ Supabase 双后端
+
+用户目录与角色**不再依赖** `SUPABASE_SERVICE_ROLE_KEY` 才能工作。整套后台沿用
+授权 / 订单 / 统计那一套「配了 service role 就用 Supabase，否则用本地 SQLite」的约定：
+
+| 部署形态 | 用户目录来源 | 角色来源 | 角色可写 |
+|---|---|---|---|
+| 配了 `SUPABASE_SERVICE_ROLE_KEY` | Supabase Auth 完整列表 | Supabase `profiles` 表 | 是（service role 直写，绕过 RLS） |
+| 未配置（本地开发 / 自托管） | 本地 SQLite `profiles` 表 + 已签发授权 + 订单 + 运营者账号 | 本地 SQLite `profiles` 表 | **是**（真实写入 `.data/shipkit.db`） |
+
+实现要点：
+
+- `lib/sqlite.ts` 的 `SCHEMA` 新增 `profiles` 表，列名与
+  `supabase/migrations/0004_profiles_rbac.sql` 对齐（`email` 为主键，另有
+  `role / display_name / full_name / company / created_at / updated_at`），
+  并用 `addColumnIfMissing()` 给既有库补列。
+- `lib/local-profiles.ts` 是本地账户存储层（Node-only，经动态 import 引入，
+  避免把 `node:sqlite` 拖进不该出现的构建路径）。
+- `lib/rbac.ts` 的 `getRolesByEmail()` / `setUserRole()` / `ensureSeedAdmins()` /
+  `resolveAdminRole()` 按 service role 有无自动切换后端，**业务代码零改动**。
+- `/admin/users` 的「来源」列改为**逐行标注**：本地账户 / Supabase 账户 /
+  授权密钥 / 付费订单 / 运营者账号 / 订阅，每行都说清自己是什么，不再整列一个标签。
+- 运营者账号（`ADMIN_USER`，用户名而非邮箱）也会出现在目录首行，角色固定为
+  `admin` 且**不可改**——API 侧对「改自己」与「改运营者账号」都做了拦截。
+
+### 从本地切到 Supabase
+
+```bash
+# 1. 导出本地账户与角色（JSON 或 SQL）
+npm run export:profiles            # JSON 到标准输出
+node scripts/export-local-profiles.mjs --sql
+
+# 2. 在 Supabase 建好 Auth 用户后，把导出的行写进 profiles 表
+#    （Supabase 的 profiles 以 auth user id 为主键，脚本会提示哪些账号还缺 id）
+
+# 3. 配置 SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SUPABASE_* 并重启
+#    之后后台自动改用 Supabase，无需改任何业务代码
+```
+
 ## 4. 数据边界（不虚构功能）
 
-- 用户列表：配置 `SUPABASE_SERVICE_ROLE_KEY` 时从 `profiles` 读取角色映射（`getRolesByEmail()`）；否则只从 `licenses` 与 `subscriptions` 推导，页面明确标注「不完整」。
+- 用户列表：配置 `SUPABASE_SERVICE_ROLE_KEY` 时读取 Supabase Auth 完整目录；
+  未配置时读取本地 SQLite `profiles` 表，并合并已签发授权、订单与运营者账号。
+  只有在本地库也打不开时（Node < 22.5 或 `.data/` 不可写）才退化为「由授权 / 订阅推导」，
+  页面会明确标注「不完整」。
 - 订阅：买断是离线授权码，可能没有 `subscriptions` 行，账单页会提示去授权页查看。
 - 用户后台**资料可编辑**：登录用户经 `/api/profile` PATCH 自己的 `display_name / full_name / company`（`ProfileForm` 客户端岛提交，service 层清洗长度并受 RLS 锁定）；`role` 字段不在此接口接受，只走管理员端点。
-- 角色管理：仅 `admin` 可经 `/api/admin/users` PATCH 他人 `role`（service role 直写，受 `canManageRoles` 校验；且禁止改自己）；`staff` 只读用户目录。
+- 角色管理：仅 `admin` 可经 `/api/admin/users` PATCH 他人 `role`（受 `canManageRoles` 校验；且禁止改自己、禁止改运营者账号）；`staff` 只读用户目录。写入目标随部署形态变化：Supabase `profiles` 表或本地 SQLite `profiles` 表。
 - 本地 SQLite 文件与内存 RAG 索引在 serverless 环境不持久；授权与 webhook 幂等生产应执行 `supabase/migrations/0003_licenses.sql`。
 
 ## 5. Builder / 剪枝
@@ -180,9 +222,14 @@
 ```bash
 ADMIN_USER=admin
 ADMIN_PASSWORD=<强密码>                          # 播种运营者账号，密码只存 scrypt 哈希
-ADMIN_EMAILS=you@example.com,ops@example.com   # 种子管理员邮箱，首次访问 /admin 时自动提升为 role=admin（需 SUPABASE_SERVICE_ROLE_KEY）
-SUPABASE_SERVICE_ROLE_KEY=<service role>        # 用于完整用户目录 + 角色提升/管理
+ADMIN_EMAILS=you@example.com,ops@example.com   # 种子管理员邮箱，首次访问 /admin 时自动提升为 role=admin
+SUPABASE_SERVICE_ROLE_KEY=<service role>        # 配了它：用户目录与角色改由 Supabase 提供；不配则用本地 SQLite
 ```
+
+未配置 `SUPABASE_SERVICE_ROLE_KEY` 时，后台照常可用：账户与角色存在本地
+`.data/shipkit.db`（`profiles` 表），角色列可正常修改。配置该变量后，后台会
+**自动切换**到 Supabase Auth + `profiles` 表，业务代码无需改动；切换前用
+`npm run export:profiles` 把本地角色导出即可。
 
 角色提升发生在访问受保护后台时（`ensureSeedAdmins()` 幂等），无需手动跑 SQL；但 `0004_profiles_rbac.sql` 必须在部署后执行。
 检查顺序：
@@ -197,9 +244,10 @@ SUPABASE_SERVICE_ROLE_KEY=<service role>        # 用于完整用户目录 + 角
 ## 7. 相关文件
 
 `app/account/**`、`app/admin/**`、`app/premium/page.tsx`、`components/console/**`、
-`lib/console.ts`、`lib/orders.ts`、`lib/content/console.ts`、`lib/rbac.ts`、`middleware.ts`、
+`lib/console.ts`、`lib/orders.ts`、`lib/content/console.ts`、`lib/rbac.ts`、
+`lib/local-profiles.ts`、`lib/sqlite.ts`、`middleware.ts`、
 `app/api/profile/route.ts`、`app/api/admin/users/route.ts`、`app/api/webhook/route.ts`、
 `supabase/migrations/0004_profiles_rbac.sql`、`supabase/migrations/0005_orders.sql`、
 `lib/generator/{config,schema,prune,pack,templates}.ts`、
-`scripts/lib/ai-docs.mjs`、`scripts/verify-matrix.mjs`、
+`scripts/export-local-profiles.mjs`、`scripts/lib/ai-docs.mjs`、`scripts/verify-matrix.mjs`、
 `.github/workflows/generated-matrix.yml`。

@@ -148,8 +148,26 @@ export type ConsoleUser = {
   email: string;
   createdAt?: string | null;
   plan?: string | null;
-  origin: "supabase" | "license" | "subscription";
+  /**
+   * Where this row came from. The local install has no auth directory, so
+   * every row says what it actually is:
+   *   local       — an account in the local SQLite profile store
+   *   license     — a buyer with an issued license key
+   *   order       — a buyer with a paid order
+   *   operator    — the local operator account (ADMIN_USER)
+   *   supabase    — a row from the Supabase auth directory
+   *   subscription — a row from the Supabase subscriptions table
+   */
+  origin:
+    | "supabase"
+    | "local"
+    | "license"
+    | "order"
+    | "operator"
+    | "subscription";
   role?: Role | null;
+  /** The operator account is a username, not an e-mail address. */
+  isOperator?: boolean;
 };
 
 export type AccessGrant = {
@@ -171,7 +189,18 @@ export type AdminSnapshot = {
   orders: OrderRecord[];
   access: AccessSummary;
   users: ConsoleUser[];
-  userSource: "supabase" | "derived";
+  /**
+   * Where the user directory came from:
+   *   "supabase" — the full Supabase auth list (service-role key configured)
+   *   "local"    — the local SQLite account store plus licenses / orders
+   *   "derived"  — no local store available; only licenses / subscriptions
+   */
+  userSource: "supabase" | "local" | "derived";
+  /**
+   * Where a role change is persisted. "none" means neither store is
+   * reachable, so the role column has to stay read-only.
+   */
+  roleStore: "supabase" | "local" | "none";
   stats: Awaited<ReturnType<typeof getStats>>;
   protected: boolean;
   roleAllowlist: string[];
@@ -206,6 +235,21 @@ async function currentOperatorName(): Promise<string | null> {
   }
 }
 
+/**
+ * The local account store, or null when it cannot be loaded (Node < 22.5
+ * without `node:sqlite`, or a read-only filesystem). Dynamic import for the
+ * same reason as the operator session layer above.
+ */
+async function localProfileStore(): Promise<
+  typeof import("@/lib/local-profiles") | null
+> {
+  try {
+    return await import("@/lib/local-profiles");
+  } catch {
+    return null;
+  }
+}
+
 async function readSubscriptions(): Promise<ConsoleUser[]> {
   if (!usesServiceRole()) return [];
   try {
@@ -230,9 +274,12 @@ async function readSubscriptions(): Promise<ConsoleUser[]> {
   }
 }
 
-async function readUserDirectory(rolesByEmail: Record<string, Role>): Promise<{
+async function readUserDirectory(
+  rolesByEmail: Record<string, Role>,
+  operator: string | null,
+): Promise<{
   users: ConsoleUser[];
-  source: "supabase" | "derived";
+  source: "supabase" | "local" | "derived";
 }> {
   if (usesServiceRole()) {
     try {
@@ -255,10 +302,87 @@ async function readUserDirectory(rolesByEmail: Record<string, Role>): Promise<{
         return { users, source: "supabase" };
       }
     } catch {
-      // fall through to derived list
+      // fall through to the local list
     }
   }
 
+  // ── Local install ──
+  // The local SQLite store is a REAL account store: accounts, roles and the
+  // operator credential all live there. Buyers and orders are folded in so a
+  // fresh install has something to show even before anyone signs up.
+  const store = await localProfileStore();
+  if (store) {
+    const licenses = await listLicenses().catch(() => [] as LicenseRecord[]);
+    const orders = await listOrders().catch(() => [] as OrderRecord[]);
+
+    const byEmail = new Map<string, ConsoleUser>();
+    const upsert = (row: ConsoleUser) => {
+      const key = row.email.trim().toLowerCase();
+      if (!key) return;
+      const existing = byEmail.get(key);
+      if (!existing) {
+        byEmail.set(key, row);
+        return;
+      }
+      // Keep the richest origin (local account beats license / order) and
+      // fill in whatever the other row knew.
+      byEmail.set(key, {
+        ...existing,
+        origin: existing.origin === "local" ? "local" : row.origin,
+        plan: existing.plan ?? row.plan ?? null,
+        createdAt: existing.createdAt ?? row.createdAt ?? null,
+        role: existing.role ?? row.role ?? null,
+      });
+    };
+
+    for (const p of store.listLocalProfiles()) {
+      upsert({
+        email: p.email,
+        createdAt: p.createdAt,
+        plan: null,
+        origin: "local",
+        role: rolesByEmail[p.email.toLowerCase()] ?? p.role,
+      });
+    }
+    for (const l of licenses) {
+      if (!l.email) continue;
+      upsert({
+        email: l.email,
+        createdAt: l.createdAt,
+        plan: l.plan,
+        origin: "license",
+        role: rolesByEmail[l.email.toLowerCase()] ?? null,
+      });
+    }
+    for (const o of orders) {
+      if (!o.email) continue;
+      upsert({
+        email: o.email,
+        createdAt: o.createdAt,
+        plan: o.plan ?? null,
+        origin: "order",
+        role: rolesByEmail[o.email.toLowerCase()] ?? null,
+      });
+    }
+
+    const users = [...byEmail.values()].sort((a, b) =>
+      (b.createdAt ?? "").localeCompare(a.createdAt ?? ""),
+    );
+    if (operator) {
+      // The operator account is identified by a username, so it leads the list.
+      users.unshift({
+        email: operator,
+        createdAt: null,
+        plan: null,
+        origin: "operator",
+        role: "admin",
+        isOperator: true,
+      });
+    }
+    return { users, source: "local" };
+  }
+
+  // ── Fallback: no local store (old Node / read-only filesystem) ──
   const licenses = await listLicenses().catch(() => [] as LicenseRecord[]);
   const subs = await readSubscriptions();
   const seen = new Set<string>();
@@ -304,7 +428,6 @@ export async function getAdminSnapshot(): Promise<AdminSnapshot> {
   const rolesByEmail = await getRolesByEmail().catch(
     () => ({}) as Record<string, Role>,
   );
-  const { users, source } = await readUserDirectory(rolesByEmail);
 
   let adminEmail: string | null = null;
   let currentRole: Role | null = null;
@@ -330,12 +453,23 @@ export async function getAdminSnapshot(): Promise<AdminSnapshot> {
     }
   }
 
+  const { users, source } = await readUserDirectory(rolesByEmail, operator);
+
+  // Where a role change would be persisted. "none" keeps the role column
+  // read-only instead of failing with a 500 on click.
+  const roleStore: AdminSnapshot["roleStore"] = usesServiceRole()
+    ? "supabase"
+    : source === "local"
+      ? "local"
+      : "none";
+
   return {
     licenses,
     orders,
     access,
     users,
     userSource: source,
+    roleStore,
     stats,
     protected: isAdminProtected(),
     roleAllowlist: adminEmails(),

@@ -64,6 +64,15 @@ export default async function AdminSystemPage() {
                 : c["admin.system.persistenceFile"],
             },
             {
+              key: c["admin.system.userDirectory"],
+              value:
+                snap.userSource === "supabase"
+                  ? c["admin.system.userDirectorySupabase"]
+                  : snap.userSource === "local"
+                    ? c["admin.system.userDirectoryLocal"]
+                    : c["admin.system.none"],
+            },
+            {
               key: c["admin.system.analytics"],
               value: c["admin.system.persistenceFile"],
             },

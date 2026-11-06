@@ -133,6 +133,17 @@ export function buildEnvExample(c: BuilderConfig): string {
   lines.push(`# requires a signed-in user whose email is in this list (on top of Basic Auth).`);
   lines.push(`# ADMIN_EMAILS=you@example.com,ops@example.com`);
   lines.push(``);
+  lines.push(`# ── Local database (the fallback store) ──────────────────────`);
+  lines.push(`# Licenses, orders, pageviews, traffic events, operator accounts,`);
+  lines.push(`# sessions AND the user directory with roles live in one local SQLite`);
+  lines.push(`# database (Node's built-in \`node:sqlite\` — no native dependency).`);
+  lines.push(`# The file is created on first use; SQLITE_PATH relocates it.`);
+  lines.push(`# SQLITE_PATH=.data/shipkit.db`);
+  lines.push(`# Without SUPABASE_SERVICE_ROLE_KEY the admin console reads and writes`);
+  lines.push(`# accounts + roles here. Set the service-role key above to move them`);
+  lines.push(`# to Supabase Auth + the \`profiles\` table — no code change. Migrate`);
+  lines.push(`# the local roles first: npm run export:profiles`);
+  lines.push(``);
   lines.push(`# ── Demo / mock login ───────────────────────────────────────`);
   lines.push(`# Kept OFF. Once Supabase is configured demo mode is disabled anyway.`);
   lines.push(`NEXT_PUBLIC_ENABLE_DEMO=false`);

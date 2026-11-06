@@ -248,6 +248,10 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     "scripts/lib/ai-docs.mjs",
     "scripts/ai-docs.mjs",
     "scripts/ai-setup.mjs",
+    // Local → Supabase migration helper for the account / role store. The
+    // admin console tells the operator to run `npm run export:profiles`, so
+    // the script has to exist in the generated project too.
+    "scripts/export-local-profiles.mjs",
   ]) {
     zip.file(rel, await fs.readFile(path.join(root, rel), "utf8"));
   }

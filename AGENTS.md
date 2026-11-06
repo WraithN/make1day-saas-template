@@ -70,8 +70,10 @@ will 404 every route. Stop dev → delete `.next` → build → start.
 ## 5. Known gaps (do not "fix" by claiming they work)
 
 Waffo `acquiring` checkout payload is unimplemented; AI chat is not streamed
-and has no quota; the `multitenancy` Builder flag ships no org/RBAC tables;
-`/admin` is open without `ADMIN_USER`/`ADMIN_PASSWORD`; `.data/*.json` and the
-RAG memory index are not durable on serverless; Cloudflare output still has
-Node-runtime routes; generated ZIPs retain ShipKit branding; no `LICENSE` file;
-the build matrix runs `tsc`, not `next build`.
+and has no quota; the local SQLite store (accounts, roles, licenses, orders,
+traffic) and the in-memory RAG index are not durable on serverless — a
+production deployment should configure Supabase; Cloudflare output still has
+Node-runtime routes; generated ZIPs retain ShipKit branding; the local user
+directory is an account + role list, not a full auth provider (no password
+reset, no e-mail verification) — Supabase Auth takes over once
+`SUPABASE_SERVICE_ROLE_KEY` is configured.

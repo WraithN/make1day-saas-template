@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "waffo:preflight": "node scripts/waffo-preflight.mjs",
     "verify:matrix": "node scripts/verify-matrix.mjs --all",
+    "export:profiles": "node scripts/export-local-profiles.mjs",
     "rag:bench": "node scripts/rag-bench.mjs",
     "rebrand": "node scripts/rebrand.mjs"
   },

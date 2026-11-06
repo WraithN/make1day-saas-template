@@ -1,6 +1,6 @@
 import { getLang } from "@/lib/i18n-server";
 import { consoleCopy } from "@/lib/content/console";
-import { getAdminSnapshot } from "@/lib/console";
+import { getAdminSnapshot, type ConsoleUser } from "@/lib/console";
 import {
   ConsoleSection,
   ConsoleTable,
@@ -14,10 +14,13 @@ export default async function AdminUsersPage() {
   const lang = await getLang();
   const c = consoleCopy(lang);
   const snap = await getAdminSnapshot();
+
   const sourceLabel =
     snap.userSource === "supabase"
       ? c["admin.users.sourceSupabase"]
-      : c["admin.users.sourceDerived"];
+      : snap.userSource === "local"
+        ? c["admin.users.sourceLocal"]
+        : c["admin.users.sourceDerived"];
 
   const roleOptions: RoleOption[] = [
     { value: "admin", label: c["role.admin"] },
@@ -25,12 +28,30 @@ export default async function AdminUsersPage() {
     { value: "member", label: c["role.member"] },
   ];
 
-  const currentEmail = (snap.adminEmail ?? "").toLowerCase();
+  const currentIdentity = (snap.adminEmail ?? "").toLowerCase();
 
-  // Changing a role writes to Supabase through the service-role key, so the
-  // dropdown stays read-only when that key is missing — otherwise the click
-  // would fail with a 500 instead of explaining itself.
-  const canEditRoles = snap.canManage && snap.serviceRole;
+  // A role change is written to Supabase `profiles` when a service-role key
+  // is configured, otherwise to the local SQLite mirror. Only when neither
+  // store is reachable does the column have to stay read-only — otherwise the
+  // click would fail with a 500 instead of explaining itself.
+  const canEditRoles = snap.canManage && snap.roleStore !== "none";
+
+  const originLabel = (u: ConsoleUser): string => {
+    switch (u.origin) {
+      case "supabase":
+        return c["admin.users.originSupabase"];
+      case "local":
+        return c["admin.users.originLocal"];
+      case "license":
+        return c["admin.users.originLicense"];
+      case "order":
+        return c["admin.users.originOrder"];
+      case "operator":
+        return c["admin.users.originOperator"];
+      default:
+        return c["admin.users.originSubscription"];
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -38,6 +59,9 @@ export default async function AdminUsersPage() {
         title={c["admin.users.title"]}
         desc={c["admin.users.subtitle"]}
       >
+        <p className="text-xs text-muted">
+          {c["admin.users.source"]}: {sourceLabel}
+        </p>
         <ConsoleTable
           columns={[
             c["console.email"],
@@ -48,7 +72,11 @@ export default async function AdminUsersPage() {
           ]}
           empty={c["admin.users.none"]}
           rows={snap.users.map((u) => {
-            const isSelf = u.email.toLowerCase() === currentEmail;
+            // The operator account is the visitor's own row — its role is
+            // fixed by the credential, so it must never be editable.
+            const isSelf =
+              u.isOperator === true ||
+              u.email.toLowerCase() === currentIdentity;
             const editable = canEditRoles && !isSelf;
             return [
               <span key="email" className="font-mono text-xs">
@@ -61,7 +89,7 @@ export default async function AdminUsersPage() {
                 ? new Date(u.createdAt).toLocaleDateString()
                 : c["console.dash"],
               u.plan ?? c["console.dash"],
-              sourceLabel,
+              originLabel(u),
               <UserRoleSelect
                 key="role"
                 target={{ email: u.email }}
@@ -76,6 +104,9 @@ export default async function AdminUsersPage() {
         />
       </ConsoleSection>
 
+      {snap.userSource === "local" && (
+        <Notice>{c["admin.users.localNote"]}</Notice>
+      )}
       {snap.userSource === "derived" && (
         <Notice tone="warning">{c["admin.users.derivedNote"]}</Notice>
       )}
@@ -88,8 +119,11 @@ export default async function AdminUsersPage() {
       {snap.identityKind === "supabase" && snap.canManage && (
         <Notice>{c["admin.users.promoteNote"]}</Notice>
       )}
-      {snap.canManage && !snap.serviceRole && (
+      {snap.canManage && snap.roleStore === "none" && (
         <Notice tone="warning">{c["admin.users.roleWriteNote"]}</Notice>
+      )}
+      {snap.userSource === "local" && (
+        <Notice>{c["admin.users.migrateNote"]}</Notice>
       )}
     </div>
   );

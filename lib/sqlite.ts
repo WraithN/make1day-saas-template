@@ -175,6 +175,28 @@ CREATE INDEX IF NOT EXISTS idx_traffic_events_kind
 CREATE INDEX IF NOT EXISTS idx_traffic_events_email
   ON traffic_events(email);
 
+-- Accounts + roles, the LOCAL mirror of the Supabase "profiles" table.
+--
+-- Supabase keys a profile by the auth.users uuid; locally there is no auth
+-- directory, so the email is the primary key. The column names mirror the
+-- Supabase table (see supabase/migrations/0004_profiles_rbac.sql) so the
+-- same SQL works against both stores and the migration script can move rows
+-- across without renaming anything.
+--
+-- The "id" column is optional: it holds the Supabase auth user id once a
+-- user has signed in through Supabase while running in local mode.
+CREATE TABLE IF NOT EXISTS profiles (
+  email        TEXT PRIMARY KEY,
+  id           TEXT,
+  role         TEXT NOT NULL DEFAULT 'member',
+  display_name TEXT,
+  full_name    TEXT,
+  company      TEXT,
+  created_at   TEXT NOT NULL,
+  updated_at   TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
+
 CREATE TABLE IF NOT EXISTS admin_users (
   username      TEXT PRIMARY KEY,
   password_hash TEXT NOT NULL,
@@ -203,6 +225,13 @@ function migrate(database: SqliteDatabase): void {
   // exists, so a column added in a later version would be missing on every
   // existing install. Add it here instead.
   addColumnIfMissing(database, "traffic_events", "email", "text");
+  addColumnIfMissing(database, "profiles", "id", "text");
+  addColumnIfMissing(database, "profiles", "role", "text not null default 'member'");
+  addColumnIfMissing(database, "profiles", "display_name", "text");
+  addColumnIfMissing(database, "profiles", "full_name", "text");
+  addColumnIfMissing(database, "profiles", "company", "text");
+  addColumnIfMissing(database, "profiles", "created_at", "text");
+  addColumnIfMissing(database, "profiles", "updated_at", "text");
 }
 
 /** Add a column when the table exists but does not have it yet. */

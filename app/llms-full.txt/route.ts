@@ -179,8 +179,13 @@ User console (feature=account, route /account):
 
 Admin console (feature=admin, route /admin):
   /admin              KPIs — licenses, pageviews, known accounts
-  /admin/users        Supabase Auth directory (service role) OR a derived
-                      buyer/subscriber list labelled as incomplete
+  /admin/users        the account directory with the role column
+                      (admin/staff/member). Source: Supabase Auth + the
+                      profiles table when SUPABASE_SERVICE_ROLE_KEY is set,
+                      otherwise the local SQLite mirror (accounts, roles,
+                      licenses, orders, operator account) in
+                      .data/shipkit.db — roles are editable in both. Each row
+                      says where it came from.
   /admin/licenses     issued keys, plan, email, order id
   /admin/stats        first-party pageview aggregates
   /admin/system       read-only runtime flags, no secret values

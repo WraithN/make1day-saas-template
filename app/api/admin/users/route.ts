@@ -11,17 +11,26 @@ const VALID: Role[] = ["admin", "staff", "member"];
  * PATCH /api/admin/users  { target: {userId?|email?}, role }
  *
  * Change another user's role. Only a full admin may do this; the caller's
- * role is resolved from their profile (or the ADMIN_EMAILS seed). Writes go
- * through the service-role key, bypassing RLS. Returns 403 for staff / members.
+ * role is resolved from their profile (or the ADMIN_EMAILS seed).
+ *
+ * Where the change lands depends on the deployment:
+ *   * SUPABASE_SERVICE_ROLE_KEY configured → the Supabase `profiles` table
+ *     (written through the service-role key, bypassing RLS).
+ *   * key absent → the local SQLite mirror of `profiles`, so a local install
+ *     can really assign roles.
+ * Returns 403 for staff / members.
  *
  * The operator account (ADMIN_USER / ADMIN_PASSWORD) counts as a full admin
  * too — it is the credential the /admin console itself is locked behind.
  */
 export async function PATCH(request: Request) {
   const operator = await currentOperator();
-  // The Supabase identity of the caller, when they are not the operator.
+  // The identity of the caller, used for the "do not change your own role"
+  // guard. The operator counts: its own row is read-only for the same reason.
   let caller: { id: string; email?: string } | null = null;
-  if (!operator) {
+  if (operator) {
+    caller = { id: `operator:${operator}`, email: operator };
+  } else {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -53,9 +62,13 @@ export async function PATCH(request: Request) {
   }
 
   // An admin cannot demote themselves into a non-admin lockout by accident.
+  // The operator's own row is protected the same way.
+  const targetEmail = target.email?.trim().toLowerCase();
+  const callerEmail = caller.email?.trim().toLowerCase();
   if (
     caller &&
-    (target.userId === caller.id || target.email === caller.email)
+    (target.userId === caller.id ||
+      (!!targetEmail && targetEmail === callerEmail))
   ) {
     return NextResponse.json(
       { error: "Use your profile settings to review your own role" },

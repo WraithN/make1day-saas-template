@@ -318,6 +318,7 @@ async function verifyCase(entry, doBuild) {
     "scripts/lib/ai-docs.mjs",
     "scripts/ai-docs.mjs",
     "scripts/ai-setup.mjs",
+    "scripts/export-local-profiles.mjs",
   ]) {
     assert(exists(rel), `missing ${rel}`);
   }
