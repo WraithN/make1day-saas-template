@@ -273,6 +273,7 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
           </div>
           <button
             className="btn-solid mt-5 w-full"
+            data-cta="builder-generate"
             onClick={generate}
             disabled={busy}
           >

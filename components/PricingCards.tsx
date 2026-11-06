@@ -120,13 +120,14 @@ export function PricingCards({ plans }: { plans: Plan[] }) {
             {plan.priceId ? (
               <button
                 className="btn-solid w-full"
+                data-cta={`pricing-${plan.id}`}
                 onClick={() => checkout(plan)}
                 disabled={busyId === plan.id}
               >
                 {busyId === plan.id ? t("login.sending") : t(plan.ctaKey)}
               </button>
             ) : (
-              <Link href="/login" className="btn-solid w-full">
+              <Link href="/login" className="btn-solid w-full" data-cta={`pricing-${plan.id}`}>
                 {t(plan.ctaKey)}
               </Link>
             )}

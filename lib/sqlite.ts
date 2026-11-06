@@ -149,6 +149,32 @@ CREATE TABLE IF NOT EXISTS pageviews (
   updated_at TEXT NOT NULL
 );
 
+-- Session-level traffic events. The pageviews table above only counts hits
+-- per path, which cannot answer "how many visitors bounced?" or "what is the
+-- conversion rate?". These rows carry a visitor id + a session id so the
+-- funnel can be reconstructed.
+CREATE TABLE IF NOT EXISTS traffic_events (
+  id         TEXT PRIMARY KEY,
+  visitor_id TEXT NOT NULL,
+  session_id TEXT NOT NULL,
+  kind       TEXT NOT NULL,      -- view | cta | checkout | conversion
+  path       TEXT,
+  label      TEXT,               -- CTA name / conversion kind
+  referrer   TEXT,
+  email      TEXT,               -- for attributing a paid order to a session
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_traffic_events_created
+  ON traffic_events(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_traffic_events_session
+  ON traffic_events(session_id);
+CREATE INDEX IF NOT EXISTS idx_traffic_events_visitor
+  ON traffic_events(visitor_id);
+CREATE INDEX IF NOT EXISTS idx_traffic_events_kind
+  ON traffic_events(kind);
+CREATE INDEX IF NOT EXISTS idx_traffic_events_email
+  ON traffic_events(email);
+
 CREATE TABLE IF NOT EXISTS admin_users (
   username      TEXT PRIMARY KEY,
   password_hash TEXT NOT NULL,
@@ -172,6 +198,30 @@ CREATE TABLE IF NOT EXISTS meta (
 
 function migrate(database: SqliteDatabase): void {
   database.exec(SCHEMA);
+
+  // `CREATE TABLE IF NOT EXISTS` never adds a column to a table that already
+  // exists, so a column added in a later version would be missing on every
+  // existing install. Add it here instead.
+  addColumnIfMissing(database, "traffic_events", "email", "text");
+}
+
+/** Add a column when the table exists but does not have it yet. */
+function addColumnIfMissing(
+  database: SqliteDatabase,
+  table: string,
+  column: string,
+  type: string,
+): void {
+  try {
+    const cols = database.prepare(`PRAGMA table_info(${table})`).all() as {
+      name?: string;
+    }[];
+    if (!cols.length) return;
+    if (cols.some((c) => c.name === column)) return;
+    database.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);
+  } catch {
+    /* the table does not exist yet — SCHEMA will create it next boot */
+  }
 }
 
 // ── Tiny query helpers ─────────────────────────────────────────────────────

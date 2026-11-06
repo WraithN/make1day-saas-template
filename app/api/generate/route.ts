@@ -4,6 +4,8 @@ import { buildProjectZip } from "@/lib/generator/pack";
 import { slugify, type BuilderConfig } from "@/lib/generator/config";
 import { checkEntitlement } from "@/lib/license";
 import { builderConfigSchema } from "@/lib/generator/schema";
+import { recordTrafficEvent } from "@/lib/traffic";
+import { resolveIdentity } from "@/lib/visitor-id";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -46,6 +48,20 @@ export async function POST(req: Request) {
 
   try {
     const zip = await buildProjectZip(typedConfig);
+
+    // Funnel step "conversion": a successfully downloaded template is the
+    // strongest conversion signal on the site. Recorded server-side so it
+    // cannot be blocked or spoofed by the client.
+    const identity = resolveIdentity(req.headers.get("cookie"));
+    await recordTrafficEvent({
+      visitorId: identity.visitorId,
+      sessionId: identity.sessionId,
+      kind: "conversion",
+      path: "/builder",
+      label: "download",
+      createdAt: new Date().toISOString(),
+    }).catch(() => {});
+
     return new NextResponse(new Blob([zip as BlobPart]), {
       status: 200,
       headers: {

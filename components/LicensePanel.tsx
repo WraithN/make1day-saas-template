@@ -168,7 +168,7 @@ export function LicensePanel({
       </div>
       {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
       <div className="mt-4 flex flex-wrap items-center gap-3 text-xs">
-        <a className="btn" href="/pricing">{s.buying}</a>
+        <a className="btn" href="/pricing" data-cta="license-buy">{s.buying}</a>
         <a className="text-accent hover:underline" href="/license">{s.note}</a>
       </div>
     </div>

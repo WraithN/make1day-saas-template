@@ -39,7 +39,7 @@ export async function Paywall({
       <p className="mt-3 text-sm leading-relaxed text-ink-soft">
         {lockedDesc ?? t("premium.lockedDesc")}
       </p>
-      <a href="/pricing" className="btn-solid mt-5 inline-block">
+      <a href="/pricing" className="btn-solid mt-5 inline-block" data-cta="paywall-unlock">
         {t("premium.unlock")}
       </a>
       <p className="mt-4 text-xs text-ink-soft">{t("premium.gateOnNote")}</p>

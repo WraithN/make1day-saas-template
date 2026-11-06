@@ -86,11 +86,20 @@ export function Nav() {
           <LanguageSwitcher />
           <ThemeToggle />
           {links.map((l) => (
-            <Link key={l.href} href={l.href} className="hover:text-ink">
+            <Link
+              key={l.href}
+              href={l.href}
+              data-cta={`nav-${l.href.replace("/", "")}`}
+              className="hover:text-ink"
+            >
               {l.label}
             </Link>
           ))}
-          <Link href={account.href} className={accountClass(account.solid)}>
+          <Link
+            href={account.href}
+            data-cta={account.solid ? "nav-account" : "nav-login"}
+            className={accountClass(account.solid)}
+          >
             {account.label}
           </Link>
         </div>
@@ -127,6 +136,7 @@ export function Nav() {
               <Link
                 key={l.href}
                 href={l.href}
+                data-cta={`nav-${l.href.replace("/", "")}`}
                 onClick={() => setOpen(false)}
                 className="flex min-h-[44px] items-center rounded-lg px-3 text-ink-soft transition-colors hover:bg-surface hover:text-ink"
               >
@@ -136,6 +146,7 @@ export function Nav() {
             <div className="mt-2">
               <Link
                 href={account.href}
+                data-cta={account.solid ? "nav-account" : "nav-login"}
                 onClick={() => setOpen(false)}
                 className={accountClass(account.solid)}
               >

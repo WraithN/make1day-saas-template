@@ -144,12 +144,14 @@ export default async function HomePage() {
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               href="/login"
+              data-cta="home-create"
               className="btn-solid w-full text-[16px] sm:w-auto"
             >
               <Trans k="cta.create" lang={lang} />
             </Link>
             <Link
               href="/pricing"
+              data-cta="home-pricing"
               className="btn-ghost w-full text-[16px] sm:w-auto"
             >
               <Trans k="cta.compare" lang={lang} />

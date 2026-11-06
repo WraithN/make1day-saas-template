@@ -4,6 +4,10 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getPaymentProvider } from "@/lib/payments";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
+import { recordTrafficEvent } from "@/lib/traffic";
+import { resolveIdentity } from "@/lib/visitor-id";
+
+export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   const supabase = await createSupabaseServerClient();
@@ -38,6 +42,20 @@ export async function POST(req: Request) {
         { status: 502 },
       );
     }
+
+    // Funnel step "checkout started". The email is stored so the payment
+    // webhook can attribute the eventual conversion back to this session.
+    const identity = resolveIdentity(req.headers.get("cookie"));
+    await recordTrafficEvent({
+      visitorId: identity.visitorId,
+      sessionId: identity.sessionId,
+      kind: "checkout",
+      path: "/pricing",
+      label: parsed.data.plan,
+      email: user.email ?? null,
+      createdAt: new Date().toISOString(),
+    });
+
     return NextResponse.json({ url });
   } catch (e) {
     logger.error("checkout failed", {

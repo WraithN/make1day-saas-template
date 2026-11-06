@@ -8,6 +8,7 @@ import {
   type LicenseRecord,
 } from "@/lib/license";
 import { recordOrder } from "@/lib/orders";
+import { recordConversion } from "@/lib/traffic";
 import { logger } from "@/lib/logger";
 import type { NormalizedSubEvent } from "@/lib/payments/types";
 
@@ -151,6 +152,17 @@ export async function POST(req: Request) {
           status: e.status === "active" ? "active" : e.status,
         }).catch((err) =>
           logger.warn("order record skipped", { err: (err as Error).message }),
+        );
+      }
+
+      // Funnel step "conversion". The webhook has no visitor cookie, so the
+      // session is recovered from the checkout we recorded for this email.
+      // Only a real paid event counts — a trial or a failed charge does not.
+      if (e.grantsAccess && e.email) {
+        await recordConversion(e.email, e.plan ?? "purchase").catch((err) =>
+          logger.warn("conversion record skipped", {
+            err: (err as Error).message,
+          }),
         );
       }
     }
