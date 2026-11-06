@@ -65,7 +65,7 @@ const CASES = [
       style: "sunset",
       auth: ["email", "google", "github", "apple", "microsoft"],
       ai: ["openai", "anthropic", "gemini"],
-      features: ["landing", "dashboard", "rag", "multitenancy", "account", "admin"],
+      features: ["landing", "dashboard", "rag", "multitenancy", "account", "admin", "premium"],
       skills: ALL_SKILLS,
     }),
   },
@@ -372,6 +372,23 @@ async function verifyCase(entry, doBuild) {
   assert(
     exists("lib/content/console.ts") === (hasAccount || hasAdmin),
     "shared console copy must survive iff at least one console is selected",
+  );
+
+  // Paid-content (paywall) feature: sample page + reusable component must be
+  // pruned exactly when the feature is unchecked. The interception engine
+  // (lib/paywall.ts) is core and always ships.
+  const hasPremium = config.features.includes("premium");
+  assert(
+    exists("app/premium/page.tsx") === hasPremium,
+    "premium sample page must be pruned exactly when premium is unchecked",
+  );
+  assert(
+    exists("components/Paywall.tsx") === hasPremium,
+    "Paywall component must be pruned exactly when premium is unchecked",
+  );
+  assert(
+    exists("lib/paywall.ts"),
+    "paywall interception engine must always ship (core, never pruned)",
   );
   if (hasAccount && !hasAdmin) {
     const accountLayout = await read("app/account/layout.tsx");

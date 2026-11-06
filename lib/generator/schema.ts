@@ -20,9 +20,10 @@ export const builderConfigSchema = z.object({
         "multitenancy",
         "account",
         "admin",
+        "premium",
       ]),
     )
-    .max(6),
+    .max(7),
   deploy: z.enum(["vercel", "selfhost", "cloudflare"]),
   style: z.enum([
     "midnight",

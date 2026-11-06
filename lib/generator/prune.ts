@@ -114,6 +114,16 @@ const CONSOLE_SHARED_FILES = [
   "lib/console.ts",
 ];
 
+// Paid-content (paywall) feature: the runnable /premium sample page and the
+// reusable <Paywall> component. The interception ENGINE (lib/paywall.ts) and
+// its middleware hook are part of the core and are never pruned, so any
+// generated project can still enable a content paywall via PREMIUM_ROUTES
+// even without this feature — this only controls the sample page + component.
+const PREMIUM_FILES = [
+  "app/premium/page.tsx",
+  "components/Paywall.tsx",
+];
+
 // ShipKit-site-only endpoints that must never ship in a customer project.
 // Reasons:
 //  1. self-check statically imports lib/payments/waffo.ts, which IS pruned for
@@ -180,6 +190,12 @@ export function computeSkip(config: BuilderConfig): Set<string> {
   if (!hasAdmin) for (const f of ADMIN_FILES) skip.add(f);
   if (!hasAccount && !hasAdmin) {
     for (const f of CONSOLE_SHARED_FILES) skip.add(f);
+  }
+
+  // Paid content: drop the sample page + reusable component when the feature
+  // isn't selected. lib/paywall.ts (the interception engine) stays.
+  if (!config.features.includes("premium")) {
+    for (const f of PREMIUM_FILES) skip.add(f);
   }
 
   return skip;

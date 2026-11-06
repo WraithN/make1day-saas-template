@@ -11,7 +11,8 @@ export type Feature =
   | "rag"
   | "multitenancy"
   | "account"
-  | "admin";
+  | "admin"
+  | "premium";
 export type DeployTarget = "vercel" | "selfhost" | "cloudflare";
 export type StyleId =
   | "midnight"
@@ -78,6 +79,11 @@ export const FEATURE_OPTIONS: { id: Feature; label: string; note: string }[] = [
     label: "Admin console",
     note: "Users · licenses · traffic · system",
   },
+  {
+    id: "premium",
+    label: "Paid content (paywall)",
+    note: "Edge-gated /premium route + reusable <Paywall> component",
+  },
 ];
 
 export const PAYMENT_OPTIONS: {
@@ -85,9 +91,9 @@ export const PAYMENT_OPTIONS: {
   label: string;
   note: string;
 }[] = [
-  { id: "waffo", label: "Waffo", note: "Default · MoR, one-time + recurring" },
+  { id: "waffo", label: "Waffo", note: "MoR, one-time + recurring" },
   { id: "stripe", label: "Stripe", note: "Most mature — production ready" },
-  { id: "creem", label: "Creem", note: "Stripe-like, indie-friendly" },
+  { id: "creem", label: "Creem", note: "Indie-friendly (default)" },
   { id: "paypal", label: "PayPal", note: "Subscriptions + webhooks" },
   { id: "none", label: "No payments", note: "Skip monetization for now" },
 ];
@@ -177,9 +183,9 @@ export const SKILL_OPTIONS: { id: SkillId; label: string; note: string }[] = [
 export const DEFAULT_CONFIG: BuilderConfig = {
   appName: "my-saas",
   auth: ["google", "github"],
-  payment: "waffo",
+  payment: "creem",
   ai: ["openai"],
-  features: ["landing", "dashboard", "account", "admin"],
+  features: ["landing", "dashboard", "account", "admin", "premium"],
   deploy: "vercel",
   style: "midnight",
   skills: [

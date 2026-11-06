@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { isDemoMode, DEMO_COOKIE } from "@/lib/demo";
+import { guardPremium } from "@/lib/paywall";
 
 const LANGS = ["en", "zh", "ja", "fr"];
 
@@ -13,6 +14,12 @@ function adminAllowlist(): string[] {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Content paywall interception (edge): hard-redirect premium routes to
+  // /pricing for unentitled visitors while the license gate is ON. Runs first
+  // so the rule applies to every area, including the consoles.
+  const premiumRes = await guardPremium(request, pathname);
+  if (premiumRes) return premiumRes;
 
   // Two consoles, two different guards:
   //   /account/*  — end-user area, needs a signed-in user (or demo cookie).

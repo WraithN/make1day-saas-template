@@ -23,6 +23,7 @@ drop in your own keys.
 | **Selectable, prunable consoles in generated ZIPs** — `account` / `admin` Builder features with dead-link rewrites | ✅ |
 | 1-click deploy (Vercel-ready) | ✅ |
 | **License gate** — offline HMAC keys, email auto-claim, per-IP trial quota, `/admin/licenses` | ✅ |
+| **Content paywall** — edge-gated premium routes (`middleware.ts` → `lib/paywall.ts`) + reusable `<Paywall>` component, `PREMIUM_ROUTES` config, `premium` Builder feature | ✅ |
 | **Waffo Pancake** — real MoR checkout + RSA webhook verification, config self-check | ✅ |
 | **Hybrid RAG** — chunking, BM25 (EN + CJK) + embeddings fused with RRF, cited answers, `/rag` demo UI, optional pgvector | ✅ |
 | **Agent discovery / GEO** — `llms.txt`, `llms-full.txt`, OpenAPI 3.1 `openapi.json`, AI-bot robots allowlist, machine-readable sitemap entries | ✅ |

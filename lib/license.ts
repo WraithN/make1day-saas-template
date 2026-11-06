@@ -355,7 +355,9 @@ export function licenseKeyFromRequest(
 export async function checkEntitlement(
   req: Request,
   explicitKey?: string,
+  opts?: { allowTrial?: boolean },
 ): Promise<Entitlement> {
+  const allowTrial = opts?.allowTrial ?? true;
   if (!isLicenseGateEnabled()) {
     return { allowed: true, reason: "gate-off" };
   }
@@ -400,14 +402,18 @@ export async function checkEntitlement(
     // Supabase not configured / session read failed → fall through to quota.
   }
 
-  // 3. Anonymous trial quota.
-  const quota = await consumeFreeQuota(req);
-  if (quota.allowed) {
-    return {
-      allowed: true,
-      reason: "free-trial",
-      remaining: quota.remaining,
-    };
+  // 3. Anonymous trial quota. Used by the download gate as a conversion funnel,
+  // but deliberately EXCLUDED from content paywalls (opts.allowTrial=false) so
+  // premium content never opens to anonymous visitors.
+  if (allowTrial) {
+    const quota = await consumeFreeQuota(req);
+    if (quota.allowed) {
+      return {
+        allowed: true,
+        reason: "free-trial",
+        remaining: quota.remaining,
+      };
+    }
   }
 
   return { allowed: false, reason: "denied", remaining: 0 };

@@ -210,6 +210,48 @@ no online checkout.
 
 ---
 
+## Content paywall (paid access)
+
+ShipKit ships a **provider-agnostic content paywall**: the same entitlement check
+that gates `POST /api/generate` also gates premium site content. This is a
+**Builder feature** (`premium`) in generated projects, and the interception
+engine is part of the core so any project can switch it on via env alone.
+
+**Two layers, one check:**
+
+1. **Edge interception** (`middleware.ts` → `lib/paywall.ts` `guardPremium`).
+   While `LICENSE_GATE` is ON, any request to a premium route by an unentitled
+   visitor is hard-redirected to `/pricing?from=<path>`. The locked body is
+   never served.
+2. **Component gating** (`components/Paywall`). Wrap any premium content or
+   section on any page; the decision is made server-side, so the locked body is
+   never sent to the client. Useful for inline premium blocks that aren't their
+   own route.
+
+**Configuration:**
+
+- `PREMIUM_ROUTES` — comma-separated route prefixes to intercept (e.g.
+  `/premium,/courses`). Defaults to `/premium`. Set to an empty string to
+  disable edge interception.
+- `LICENSE_GATE` — the gate that activates interception. `auto` (default) turns
+  it on only in production with `LICENSE_SECRET` set; generated projects ship
+  with `LICENSE_GATE=off` unless they opt in.
+
+**Builder feature `premium`:** selecting it ships the runnable `/premium` sample
+page (`app/premium/page.tsx`) and the reusable `components/Paywall.tsx`. The
+interception engine (`lib/paywall.ts`) and its middleware hook are always
+present, so even a project that didn't pick the feature can protect premium
+routes by setting `PREMIUM_ROUTES`.
+
+**Entitlement (shared with the download gate):** valid offline `SK1.…` license
+key, an active subscription, a license email match on a signed-in buyer, or
+gate-off demo mode. See `lib/license.ts` `checkEntitlement()`. The component
+`<Paywall>` passes `allowTrial:false`, so the anonymous free-download quota is
+**excluded** from content paywalls — premium content never opens to unpaid
+visitors. The edge interception only redirects visitors with no entitlement
+signal at all (no license key, no Supabase session), so it never blocks a
+signed-in user who might hold a subscription.
+
 ## Implementation notes (current code)
 
 - **Creem is the default gateway** (`PAYMENT_PROVIDER=creem`), for this site and
