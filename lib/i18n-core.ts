@@ -56,6 +56,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "nav.logout": "Log out",
     "nav.dashboard": "Dashboard",
     "nav.account": "My account",
+    "nav.admin": "Admin console",
     "nav.menu": "Open menu",
     "rag.title": "Document Q&A with citations",
     "rag.subtitle":
@@ -443,6 +444,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "nav.logout": "退出登录",
     "nav.dashboard": "控制台",
     "nav.account": "我的账户",
+    "nav.admin": "管理员后台",
     "nav.menu": "打开菜单",
     "rag.title": "带引用的文档问答",
     "rag.subtitle":
@@ -820,6 +822,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "nav.logout": "ログアウト",
     "nav.dashboard": "ダッシュボード",
     "nav.account": "マイアカウント",
+    "nav.admin": "管理コンソール",
     "nav.menu": "メニューを開く",
     "nav.builder": "ビルダー",
     "nav.styles": "スタイル",
@@ -1157,6 +1160,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "nav.logout": "Se déconnecter",
     "nav.dashboard": "Tableau de bord",
     "nav.account": "Mon compte",
+    "nav.admin": "Console admin",
     "nav.menu": "Ouvrir le menu",
     "nav.builder": "Générateur",
     "nav.styles": "Styles",
@@ -1495,6 +1499,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "nav.logout": "Abmelden",
     "nav.dashboard": "Dashboard",
     "nav.account": "Mein Konto",
+    "nav.admin": "Admin-Konsole",
     "nav.menu": "Menü öffnen",
     "rag.title": "Dokumenten-Fragen mit Quellen",
     "rag.subtitle":

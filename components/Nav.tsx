@@ -90,6 +90,9 @@ export function Nav() {
               {l.label}
             </Link>
           ))}
+          <Link href="/admin" className="hover:text-ink">
+            {t("nav.admin")}
+          </Link>
           <Link href={account.href} className={accountClass(account.solid)}>
             {account.label}
           </Link>
@@ -133,6 +136,13 @@ export function Nav() {
                 {l.label}
               </Link>
             ))}
+            <Link
+              href="/admin"
+              onClick={() => setOpen(false)}
+              className="flex min-h-[44px] items-center rounded-lg px-3 text-ink-soft transition-colors hover:bg-surface hover:text-ink"
+            >
+              {t("nav.admin")}
+            </Link>
             <div className="mt-2">
               <Link
                 href={account.href}
