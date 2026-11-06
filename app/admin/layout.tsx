@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { getLang } from "@/lib/i18n-server";
 import { consoleCopy } from "@/lib/content/console";
 import { getAdminSnapshot } from "@/lib/console";
+import { roleKey } from "@/lib/rbac";
 import { ConsoleNav } from "@/components/console/ConsoleNav";
 import { Notice } from "@/components/console/ConsoleUI";
 import { AdminLoginScreen } from "@/components/console/AdminLoginScreen";
@@ -83,8 +84,12 @@ export default async function AdminLayout({
 
   // Cheap read for the protection badge; pages call getAdminSnapshot() again
   // for their own data. All reads are local / Supabase, never a paid API.
-  const { protected: guarded } = await getAdminSnapshot();
+  const snap = await getAdminSnapshot();
+  const guarded = snap.protected;
   const identity = await operatorIdentity();
+  // Show the effective role next to the name — "signed in as admin" alone
+  // left it ambiguous whether that was a full admin or a staff member.
+  const roleLabel = snap.currentRole ? c[roleKey(snap.currentRole)] : null;
 
   const items = [
     { href: "/admin", label: c["admin.nav.overview"] },
@@ -105,7 +110,7 @@ export default async function AdminLayout({
         subtitle={c["admin.subtitle"]}
         badge={
           identity
-            ? `${c["console.signedInAs"]} ${identity}`
+            ? `${c["console.signedInAs"]} ${identity}${roleLabel ? ` · ${roleLabel}` : ""}`
             : guarded
               ? c["console.protected"]
               : c["console.unprotected"]

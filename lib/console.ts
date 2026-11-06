@@ -4,6 +4,8 @@
 // (lib/license.ts, lib/stats.ts, lib/subscriptions.ts, lib/env.ts). It must
 // never import a payment adapter or a ShipKit-site-only endpoint, otherwise
 // pruning a gateway out of a downloaded template would break `tsc`.
+// The operator session layer is reached through a DYNAMIC import, so the
+// SQLite-backed store is only loaded on pages that actually read it.
 
 import { env, isLicenseGateEnabled } from "@/lib/env";
 import {
@@ -178,7 +180,31 @@ export type AdminSnapshot = {
   adminEmail: string | null;
   currentRole: Role | null;
   canManage: boolean;
+  /**
+   * Where the current visitor's authority comes from:
+   *   "operator" — the local operator account (ADMIN_USER / ADMIN_PASSWORD),
+   *                i.e. the credential the console itself is locked behind;
+   *   "supabase" — a signed-in Supabase user with a role on their profile.
+   * The console shows different guidance for each, so it must not guess.
+   */
+  identityKind: "operator" | "supabase" | null;
 };
+
+/**
+ * The signed-in operator account (local credential store), or null.
+ *
+ * Loaded through a dynamic import so the SQLite-backed session layer is only
+ * pulled in on pages that actually need it — the account console imports this
+ * module too and must stay free of the admin store.
+ */
+async function currentOperatorName(): Promise<string | null> {
+  try {
+    const { currentOperator } = await import("@/lib/admin-session");
+    return await currentOperator();
+  } catch {
+    return null;
+  }
+}
 
 async function readSubscriptions(): Promise<ConsoleUser[]> {
   if (!usesServiceRole()) return [];
@@ -282,14 +308,26 @@ export async function getAdminSnapshot(): Promise<AdminSnapshot> {
 
   let adminEmail: string | null = null;
   let currentRole: Role | null = null;
-  try {
-    if (hasSupabase()) {
+  let identityKind: "operator" | "supabase" | null = null;
+
+  // The operator account is the credential the /admin console is locked
+  // behind, so it IS the site owner: full authority, even though it has no
+  // Supabase profile. Resolving the role from Supabase alone made every
+  // operator look like a read-only staff member.
+  const operator = await currentOperatorName();
+  if (operator) {
+    adminEmail = operator;
+    currentRole = "admin";
+    identityKind = "operator";
+  } else if (hasSupabase()) {
+    try {
       const user = await getCurrentUser();
       adminEmail = user?.email ?? null;
       currentRole = await resolveAdminRole(user?.email, user?.id);
+      identityKind = "supabase";
+    } catch {
+      /* ignore */
     }
-  } catch {
-    /* ignore */
   }
 
   return {
@@ -306,6 +344,7 @@ export async function getAdminSnapshot(): Promise<AdminSnapshot> {
     adminEmail,
     currentRole,
     canManage: canManageRoles(currentRole),
+    identityKind,
   };
 }
 

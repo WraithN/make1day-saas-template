@@ -1,4 +1,4 @@
-// Four-language copy for the two consoles: /account (end users) and /admin
+// Five-language copy for the two consoles: /account (end users) and /admin
 // (operators). Kept in a dedicated content module, like lib/content/faq.ts and
 // lib/content/agent-ready.ts, so the big site dictionary stays focused on
 // marketing pages. Every locale is complete — no en-only fallback strings.
@@ -116,6 +116,8 @@ const en = {
   "admin.users.you": "you",
   "admin.users.changeRole": "Change role",
   "admin.users.readonlyNote": "You are signed in as staff — this directory is read-only. Only an admin can change roles.",
+  "admin.users.operatorNote": "You are signed in as the operator account (ADMIN_USER). It owns this deployment, so you have full admin rights here.",
+  "admin.users.roleWriteNote": "Changing a role writes to Supabase and needs SUPABASE_SERVICE_ROLE_KEY. Until that key is set, the role column stays read-only.",
   "admin.users.promoteNote": "Only an admin can change roles. The ADMIN_EMAILS seed is promoted to admin automatically on first admin load.",
   "admin.system.roleAdmin": "can manage roles",
 
@@ -151,7 +153,7 @@ const en = {
   "admin.licenses.subtitle": "Keys are created automatically by /api/webhook when a paid event arrives. Send a key to the buyer, or ask them to sign in with the same email to auto-claim it.",
   "admin.licenses.none": "No licenses issued yet",
   "admin.orders.title": "Orders",
-  "admin.orders.subtitle": "Every paid checkout is normalised into one provider-agnostic ledger (Stripe / Creem / PayPal / Waffo). Amounts and status are written by /api/webhook.",
+  "admin.orders.subtitle": "Every paid checkout is normalised into one provider-agnostic ledger. Amounts and status are written by /api/webhook.",
   "admin.orders.customer": "Customer",
   "admin.orders.provider": "Provider",
   "admin.orders.amount": "Amount",
@@ -348,6 +350,8 @@ const zh: ConsoleCopy = {
   "admin.users.you": "你",
   "admin.users.changeRole": "修改角色",
   "admin.users.readonlyNote": "你以员工身份登录——此用户目录为只读。只有管理员可修改角色。",
+  "admin.users.operatorNote": "你以运营者账号（ADMIN_USER）登录——它就是这个部署的所有者，在这里拥有完整管理员权限。",
+  "admin.users.roleWriteNote": "修改角色会写入 Supabase，需要 SUPABASE_SERVICE_ROLE_KEY。未配置前角色列只读。",
   "admin.users.promoteNote": "只有管理员可修改角色。ADMIN_EMAILS 种子邮箱在首次进入后台时自动提升为管理员。",
   "admin.system.roleAdmin": "可管理角色",
 
@@ -383,7 +387,7 @@ const zh: ConsoleCopy = {
   "admin.licenses.subtitle": "付费事件到达 /api/webhook 时自动签发。可把授权码发给买家，或让买家使用同一邮箱登录自动认领。",
   "admin.licenses.none": "还没有签发授权",
   "admin.orders.title": "订单",
-  "admin.orders.subtitle": "每笔成功结账都归一化进同一张与网关无关的账本（Stripe / Creem / PayPal / Waffo）。金额与状态由 /api/webhook 写入。",
+  "admin.orders.subtitle": "每笔成功结账都归一化进同一张与网关无关的账本。金额与状态由 /api/webhook 写入。",
   "admin.orders.customer": "客户",
   "admin.orders.provider": "付款方",
   "admin.orders.amount": "金额",
@@ -578,6 +582,8 @@ const ja: ConsoleCopy = {
   "admin.users.you": "あなた",
   "admin.users.changeRole": "ロール変更",
   "admin.users.readonlyNote": "スタッフとしてログイン中のため、この一覧は読み取り専用です。ロール変更は管理者のみ可能です。",
+  "admin.users.operatorNote": "運営者アカウント（ADMIN_USER）でログインしています——このデプロイの所有者として、ここでは完全な管理者権限を持ちます。",
+  "admin.users.roleWriteNote": "ロール変更は Supabase への書き込みが必要で、SUPABASE_SERVICE_ROLE_KEY が要ります。未設定の間はロール列は読み取り専用です。",
   "admin.users.promoteNote": "ロール変更は管理者のみ可能。ADMIN_EMAILS のシードは初回管理アクセス時に自動で管理者へ昇格します。",
   "admin.system.roleAdmin": "ロール管理可",
 
@@ -613,7 +619,7 @@ const ja: ConsoleCopy = {
   "admin.licenses.subtitle": "有料イベントが /api/webhook に届くと自動発行されます。購入者へキーを送るか、同じメールでのログインで自動認領させてください。",
   "admin.licenses.none": "ライセンスはまだありません",
   "admin.orders.title": "注文",
-  "admin.orders.subtitle": "有料チェックアウトはすべて、ゲートウェイ非依存の 1 つの帳簿に正規化されます（Stripe / Creem / PayPal / Waffo）。金額とステータスは /api/webhook が書き込みます。",
+  "admin.orders.subtitle": "有料チェックアウトはすべて、ゲートウェイ非依存の 1 つの帳簿に正規化されます。金額とステータスは /api/webhook が書き込みます。",
   "admin.orders.customer": "顧客",
   "admin.orders.provider": "決済元",
   "admin.orders.amount": "金額",
@@ -808,6 +814,8 @@ const fr: ConsoleCopy = {
   "admin.users.you": "vous",
   "admin.users.changeRole": "Changer le rôle",
   "admin.users.readonlyNote": "Vous êtes connecté en tant que staff — ce répertoire est en lecture seule. Seul un admin peut changer les rôles.",
+  "admin.users.operatorNote": "Vous êtes connecté avec le compte opérateur (ADMIN_USER). Il possède ce déploiement : vous avez ici les pleins pouvoirs d'admin.",
+  "admin.users.roleWriteNote": "La modification d'un rôle écrit dans Supabase et exige SUPABASE_SERVICE_ROLE_KEY. Sans cette clé, la colonne de rôle reste en lecture seule.",
   "admin.users.promoteNote": "Seul un admin peut changer les rôles. Les e-mails ADMIN_EMAILS sont promus admin automatiquement au premier accès admin.",
   "admin.system.roleAdmin": "peut gérer les rôles",
 
@@ -843,7 +851,7 @@ const fr: ConsoleCopy = {
   "admin.licenses.subtitle": "Les clés sont créées automatiquement par /api/webhook lors d'un événement payant. Envoyez la clé à l'acheteur ou demandez-lui de se connecter avec le même e-mail.",
   "admin.licenses.none": "Aucune licence émise",
   "admin.orders.title": "Commandes",
-  "admin.orders.subtitle": "Chaque paiement est normalisé dans un seul registre indépendant du fournisseur (Stripe / Creem / PayPal / Waffo). Montants et statut sont écrits par /api/webhook.",
+  "admin.orders.subtitle": "Chaque paiement est normalisé dans un seul registre indépendant du fournisseur. Montants et statut sont écrits par /api/webhook.",
   "admin.orders.customer": "Client",
   "admin.orders.provider": "Fournisseur",
   "admin.orders.amount": "Montant",
@@ -1038,6 +1046,8 @@ const de: ConsoleCopy = {
   "admin.users.you": "Sie",
   "admin.users.changeRole": "Rolle ändern",
   "admin.users.readonlyNote": "Sie sind als Staff angemeldet — dieses Verzeichnis ist schreibgeschützt. Nur ein Admin kann Rollen ändern.",
+  "admin.users.operatorNote": "Sie sind mit dem Operator-Konto (ADMIN_USER) angemeldet — es besitzt dieses Deployment, hier haben Sie volle Admin-Rechte.",
+  "admin.users.roleWriteNote": "Eine Rollenänderung schreibt in Supabase und benötigt SUPABASE_SERVICE_ROLE_KEY. Ohne diesen Schlüssel bleibt die Rollenspalte schreibgeschützt.",
   "admin.users.promoteNote": "Nur ein Admin kann Rollen ändern. Der ADMIN_EMAILS-Seed wird beim ersten Admin-Laden automatisch zum Admin befördert.",
   "admin.system.roleAdmin": "kann Rollen verwalten",
 
@@ -1073,7 +1083,7 @@ const de: ConsoleCopy = {
   "admin.licenses.subtitle": "Schlüssel werden automatisch von /api/webhook erstellt, wenn ein bezahltes Event eintrifft. Senden Sie den Schlüssel an den Käufer, oder lassen Sie ihn sich mit derselben E-Mail anmelden, um ihn automatisch abzurufen.",
   "admin.licenses.none": "Noch keine Lizenzen ausgestellt",
   "admin.orders.title": "Bestellungen",
-  "admin.orders.subtitle": "Jedes bezahlte Checkout wird in ein anbieterunabhängiges Ledger normalisiert (Stripe / Creem / PayPal / Waffo). Beträge und Status werden von /api/webhook geschrieben.",
+  "admin.orders.subtitle": "Jedes bezahlte Checkout wird in ein anbieterunabhängiges Ledger normalisiert. Beträge und Status werden von /api/webhook geschrieben.",
   "admin.orders.customer": "Kunde",
   "admin.orders.provider": "Anbieter",
   "admin.orders.amount": "Betrag",

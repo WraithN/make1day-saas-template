@@ -27,6 +27,11 @@ export default async function AdminUsersPage() {
 
   const currentEmail = (snap.adminEmail ?? "").toLowerCase();
 
+  // Changing a role writes to Supabase through the service-role key, so the
+  // dropdown stays read-only when that key is missing — otherwise the click
+  // would fail with a 500 instead of explaining itself.
+  const canEditRoles = snap.canManage && snap.serviceRole;
+
   return (
     <div className="space-y-6">
       <ConsoleSection
@@ -44,7 +49,7 @@ export default async function AdminUsersPage() {
           empty={c["admin.users.none"]}
           rows={snap.users.map((u) => {
             const isSelf = u.email.toLowerCase() === currentEmail;
-            const editable = snap.canManage && !isSelf;
+            const editable = canEditRoles && !isSelf;
             return [
               <span key="email" className="font-mono text-xs">
                 {u.email}
@@ -74,11 +79,17 @@ export default async function AdminUsersPage() {
       {snap.userSource === "derived" && (
         <Notice tone="warning">{c["admin.users.derivedNote"]}</Notice>
       )}
-      {!snap.canManage && (
+      {snap.identityKind === "operator" && (
+        <Notice>{c["admin.users.operatorNote"]}</Notice>
+      )}
+      {snap.identityKind === "supabase" && !snap.canManage && (
         <Notice tone="warning">{c["admin.users.readonlyNote"]}</Notice>
       )}
-      {snap.canManage && (
+      {snap.identityKind === "supabase" && snap.canManage && (
         <Notice>{c["admin.users.promoteNote"]}</Notice>
+      )}
+      {snap.canManage && !snap.serviceRole && (
+        <Notice tone="warning">{c["admin.users.roleWriteNote"]}</Notice>
       )}
     </div>
   );
