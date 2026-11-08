@@ -32,11 +32,12 @@ export function buildEnvExample(c: BuilderConfig): string {
   lines.push(`NEXT_PUBLIC_OAUTH_PROVIDERS=${oauth}`);
   lines.push(``);
 
-  if (c.payment !== "none") {
+  const payments = c.payment.filter((p) => p !== "none");
+  if (payments.length) {
     lines.push(`# ── Payment provider ─────────────────────────────────────────`);
-    lines.push(`PAYMENT_PROVIDER=${c.payment}`);
+    lines.push(`PAYMENT_PROVIDER=${payments.join(",")}`);
     lines.push(``);
-    if (c.payment === "stripe") {
+    if (payments.includes("stripe")) {
       lines.push(`STRIPE_SECRET_KEY=sk_test_xxx`);
       lines.push(`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_xxx`);
       lines.push(`STRIPE_WEBHOOK_SECRET=whsec_xxx`);
@@ -46,21 +47,24 @@ export function buildEnvExample(c: BuilderConfig): string {
       lines.push(`# Legacy fallbacks (PRO -> Buyout, SCALE -> Care).`);
       lines.push(`# STRIPE_PRICE_ID_PRO=price_xxx`);
       lines.push(`# STRIPE_PRICE_ID_SCALE=price_xxx`);
-    } else if (c.payment === "creem") {
+    }
+    if (payments.includes("creem")) {
       lines.push(`CREEM_API_KEY=creem_xxx`);
       lines.push(`CREEM_WEBHOOK_SECRET=whsec_xxx`);
       lines.push(`CREEM_ENV=test                      # test | live`);
       lines.push(`# PRO slot = one-time Buyout, SCALE slot = recurring Care.`);
       lines.push(`CREEM_PRICE_ID_PRO=prod_xxx`);
       lines.push(`CREEM_PRICE_ID_SCALE=prod_xxx`);
-    } else if (c.payment === "paypal") {
+    }
+    if (payments.includes("paypal")) {
       lines.push(`PAYPAL_CLIENT_ID=xxx`);
       lines.push(`PAYPAL_CLIENT_SECRET=xxx`);
       lines.push(`PAYPAL_WEBHOOK_ID=WH-xxx`);
       lines.push(`PAYPAL_ENV=sandbox                  # sandbox | live`);
       lines.push(`PAYPAL_PLAN_ID_PRO=P-xxx`);
       lines.push(`PAYPAL_PLAN_ID_SCALE=P-xxx`);
-    } else if (c.payment === "waffo") {
+    }
+    if (payments.includes("waffo")) {
       // Waffo Pancake (MoR). The adapter also supports the separate
       // "acquiring" product via WAFFO_FLAVOR — see docs/waffo.md.
       lines.push(`WAFFO_FLAVOR=pancake                # pancake | acquiring`);
@@ -80,6 +84,14 @@ export function buildEnvExample(c: BuilderConfig): string {
       lines.push(`# Legacy fallbacks (PRO -> Buyout, SCALE -> Care).`);
       lines.push(`# WAFFO_PRICE_ID_PRO=xxx`);
       lines.push(`# WAFFO_PRICE_ID_SCALE=xxx`);
+    }
+    if (payments.includes("lemonsqueezy")) {
+      lines.push(`LEMONSQUEEZY_API_KEY=xxx`);
+      lines.push(`LEMONSQUEEZY_WEBHOOK_SECRET=whsec_xxx`);
+      lines.push(`LEMONSQUEEZY_STORE_ID=xxx`);
+      lines.push(`# Variant ids serve the same role as price ids for this gateway.`);
+      lines.push(`LEMONSQUEEZY_VARIANT_ID_BUYOUT=xxx`);
+      lines.push(`LEMONSQUEEZY_VARIANT_ID_CARE=xxx`);
     }
     lines.push(``);
   }
@@ -101,6 +113,32 @@ export function buildEnvExample(c: BuilderConfig): string {
     if (c.ai.includes("gemini")) {
       lines.push(`GEMINI_API_KEY=xxx`);
       lines.push(`GEMINI_MODEL=gemini-1.5-flash`);
+    }
+    if (c.ai.includes("mistral")) {
+      lines.push(`MISTRAL_API_KEY=xxx`);
+      lines.push(`MISTRAL_BASE_URL=https://api.mistral.ai/v1`);
+      lines.push(`MISTRAL_MODEL=mistral-large-latest`);
+    }
+    if (c.ai.includes("cohere")) {
+      lines.push(`COHERE_API_KEY=xxx`);
+      lines.push(`COHERE_BASE_URL=https://api.cohere.ai/v2`);
+      lines.push(`COHERE_MODEL=command-r-plus`);
+    }
+    if (c.ai.includes("xai")) {
+      lines.push(`XAI_API_KEY=xxx`);
+      lines.push(`XAI_BASE_URL=https://api.x.ai/v1`);
+      lines.push(`XAI_MODEL=grok-2-latest`);
+    }
+    if (c.ai.includes("perplexity")) {
+      lines.push(`PERPLEXITY_API_KEY=xxx`);
+      lines.push(`PERPLEXITY_BASE_URL=https://api.perplexity.ai`);
+      lines.push(`PERPLEXITY_MODEL=sonar`);
+    }
+    if (c.ai.includes("ollama")) {
+      lines.push(`# Local Ollama — no key required by default.`);
+      lines.push(`OLLAMA_API_KEY=`);
+      lines.push(`OLLAMA_BASE_URL=http://localhost:11434/v1`);
+      lines.push(`OLLAMA_MODEL=llama3.1`);
     }
     lines.push(``);
   }
@@ -162,7 +200,7 @@ export function buildEnvExample(c: BuilderConfig): string {
 export function buildReadme(c: BuilderConfig): string {
   const app = slugify(c.appName);
   const title = c.appName.trim() || "My SaaS";
-  const prov = c.payment === "none" ? "none" : c.payment;
+  const prov = c.payment.filter((p) => p !== "none").join(", ") || "none";
   const aiList = c.ai.length ? c.ai.join(", ") : "none";
 
   const lines: string[] = [];

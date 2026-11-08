@@ -164,7 +164,8 @@ function activeRules(spec) {
   const c = spec.config;
   return RULES_META.filter((r) => {
     if (r.always === true) return true;
-    if (r.always === "payment") return c.payment !== "none";
+    if (r.always === "payment")
+      return c.payment.length > 0 && !c.payment.includes("none");
     if (r.always === "rag") return c.features.includes("rag");
     if (r.always === "account") return c.features.includes("account");
     if (r.always === "admin") return c.features.includes("admin");
@@ -241,7 +242,19 @@ function buildAgents(spec, rules) {
   L.push("| --- | --- |");
   L.push(`| Package | \`${spec.slug}\` |`);
   L.push(`| Auth | ${list(spec.labels.auth)} |`);
-  L.push(`| Payments | ${spec.labels.payment.label} (\`${c.payment}\`) |`);
+  const paymentLabels = c.payment
+    .filter((p) => p !== "none")
+    .map(
+      (id) =>
+        (spec.labels.payment.find((l) => l.id === id) || { label: id })
+          .label,
+    );
+  const paymentCell = paymentLabels.length
+    ? `${paymentLabels.join(", ")} (\`${c.payment
+        .filter((p) => p !== "none")
+        .join(", ")}\`)`
+    : "none";
+  L.push(`| Payments | ${paymentCell} |`);
   L.push(`| AI providers | ${list(spec.labels.ai)} |`);
   L.push(`| Features | ${list(spec.labels.features)} |`);
   L.push(`| Visual style | **${s.name}** (\`${c.style}\`, ${s.scheme}) |`);
@@ -325,14 +338,21 @@ function buildAgents(spec, rules) {
   L.push("");
   L.push("## 8. Module notes for this build");
   L.push("");
-  if (c.payment === "none") {
+  if (c.payment.length === 0 || c.payment.includes("none")) {
     L.push("- **Payments:** disabled. `lib/payments/none.ts` throws a clear error on checkout; do not add a gateway without updating `lib/payments/index.ts`.");
-  } else if (c.payment === "waffo") {
-    L.push("- **Payments (Waffo Pancake):** `WAFFO_FLAVOR=pancake`, `WAFFO_ENVIRONMENT`, `WAFFO_STORE_SLUG` **or** `WAFFO_MERCHANT_ID`+`WAFFO_PRIVATE_KEY`, `WAFFO_WEBHOOK_PUBLIC_KEY_TEST/PROD`, `WAFFO_PRICE_ID_BUYOUT` (one-time) / `_CARE` (subscription). Webhook is RSA-SHA256 over `\\${t}.\\${rawBody}`. `acquiring` is a different, incompatible product; its create-order IS implemented but every contract field comes from `WAFFO_ACQUIRING_*` env vars and the signing/response shape is 需按你的 Waffo 合同核对 (docs/waffo.md §5).");
-  } else if (c.payment === "stripe") {
-    L.push("- **Payments (Stripe):** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_BUYOUT` (one-time `mode: \"payment\"`), `STRIPE_PRICE_ID_CARE` (`mode: \"subscription\"`).");
   } else {
-    L.push(`- **Payments (${spec.labels.payment.label}):** see \`lib/payments/${c.payment}.ts\`. The single webhook URL is \`/api/webhook\`.`);
+    for (const pid of c.payment.filter((p) => p !== "none")) {
+      const pLabel =
+        (spec.labels.payment.find((l) => l.id === pid) || { label: pid })
+          .label;
+      if (pid === "waffo") {
+        L.push("- **Payments (Waffo Pancake):** `WAFFO_FLAVOR=pancake`, `WAFFO_ENVIRONMENT`, `WAFFO_STORE_SLUG` **or** `WAFFO_MERCHANT_ID`+`WAFFO_PRIVATE_KEY`, `WAFFO_WEBHOOK_PUBLIC_KEY_TEST/PROD`, `WAFFO_PRICE_ID_BUYOUT` (one-time) / `_CARE` (subscription). Webhook is RSA-SHA256 over `\\${t}.\\${rawBody}`. `acquiring` is a different, incompatible product; its create-order IS implemented but every contract field comes from `WAFFO_ACQUIRING_*` env vars and the signing/response shape is 需按你的 Waffo 合同核对 (docs/waffo.md §5).");
+      } else if (pid === "stripe") {
+        L.push("- **Payments (Stripe):** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_BUYOUT` (one-time `mode: \"payment\"`), `STRIPE_PRICE_ID_CARE` (`mode: \"subscription\"`).");
+      } else {
+        L.push(`- **Payments (${pLabel}):** see \`lib/payments/${pid}.ts\`. The single webhook URL is \`/api/webhook\`.`);
+      }
+    }
   }
   L.push(`- **Auth:** ${list(spec.labels.auth)}. OAuth buttons come from \`NEXT_PUBLIC_OAUTH_PROVIDERS\` and must also be enabled in Supabase.`);
   L.push(`- **AI:** ${list(spec.labels.ai)}. \`lib/ai/index.ts\` exposes \`chat()\` / \`streamChat()\` plus \`streamChatChunks()\` (async generator). \`/api/ai\` streams token-by-token and enforces a per-user daily quota (\`AI_MESSAGES_PER_DAY\`, default 50, HTTP 429 when exhausted).`);
@@ -609,10 +629,7 @@ export function deriveSpec(base, overrideConfig) {
     style: cat.styles?.[config.style] ?? base.style,
     labels: {
       auth: pickMany(cat.auth, config.auth),
-      payment: pick(cat.payment, config.payment) ?? {
-        id: config.payment,
-        label: config.payment,
-      },
+      payment: pickMany(cat.payment, config.payment),
       deploy: pick(cat.deploy, config.deploy) ?? {
         id: config.deploy,
         label: config.deploy,

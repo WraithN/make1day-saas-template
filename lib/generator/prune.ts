@@ -260,6 +260,9 @@ const SITE_MARKETING_FILES = [
   // customer ZIPs, and keep its companion countdown component too — it imports
   // nothing customer-specific, but ships no value without the page.
   "app/black-friday/page.tsx",
+  // The BF pricing ladder (three tiers + share-to-unlock MGM) is site-only
+  // too — it renders the promo and imports nothing customer-specific.
+  "components/BlackFridayPlans.tsx",
   "components/BlackFridayCountdown.tsx",
   "components/LicensePanel.tsx",
   // Home-page-only marketing sections. The customer home page is generated
@@ -310,12 +313,13 @@ export function computeSkip(config: BuilderConfig): Set<string> {
   // generations of the product that was just paid for.
   for (const f of GENERATOR_FILES) skip.add(f);
 
-  // Payment adapters: keep only the selected gateway (or skip all five + stub).
-  if (config.payment === "none") {
+  // Payment adapters: keep only the selected gateways (skip the rest + none).
+  const enabledPayments: string[] = config.payment.filter((p) => p !== "none");
+  if (enabledPayments.length === 0) {
     for (const f of Object.values(PAYMENT_FILES)) skip.add(f);
   } else {
     for (const [id, f] of Object.entries(PAYMENT_FILES)) {
-      if (id !== config.payment) skip.add(f);
+      if (!enabledPayments.includes(id)) skip.add(f);
     }
   }
 
@@ -401,9 +405,11 @@ export const noneProvider: PaymentProvider = {
 `;
 }
 
-/** Tailored lib/payments/index.ts that wires up only the selected gateway. */
-export function buildPaymentIndex(payment: PaymentProvider): string {
-  if (payment === "none") {
+/** Tailored lib/payments/index.ts that wires up only the selected gateways. */
+export function buildPaymentIndex(payment: PaymentProvider[]): string {
+  const effective = payment.filter((p) => p !== "none");
+
+  if (effective.length === 0) {
     return `import { env } from "@/lib/env";
 import type { PaymentProvider } from "./types";
 import { noneProvider } from "./none";
@@ -431,26 +437,42 @@ export type { PaymentProvider } from "./types";
 `;
   }
 
-  const label = PAYMENT_LABELS[payment];
+  const imports = effective
+    .map((p) => `import { ${p}Provider } from "./${p}";`)
+    .join("\n");
+  const instances = effective.map((p) => `${p}Provider`).join(", ");
+  const labels = effective
+    .map((p) => `  ${p}: ${JSON.stringify(PAYMENT_LABELS[p])},`)
+    .join("\n");
+
   return `import { env } from "@/lib/env";
 import type { PaymentProvider } from "./types";
-import { ${payment}Provider } from "./${payment}";
+${imports}
 
-let _provider: PaymentProvider | null = null;
+let _providers: PaymentProvider[] | null = null;
 
-/** Return the active payment provider based on the generated build. */
-export function getPaymentProvider(): PaymentProvider {
-  if (_provider) return _provider;
-  _provider = ${payment}Provider;
-  return _provider;
+/** All payment providers enabled in this build. */
+export function getPaymentProviders(): PaymentProvider[] {
+  if (_providers) return _providers;
+  const list: PaymentProvider[] = [${instances}];
+  _providers = list;
+  return _providers;
 }
 
-/** Label of the active provider, for UI copy. */
+/** The primary (first) payment provider used for checkout. */
+export function getPaymentProvider(): PaymentProvider {
+  const list = getPaymentProviders();
+  return list[0];
+}
+
+/** Label of the primary provider, for UI copy. */
 export function paymentProviderLabel(): string {
   return getPaymentProvider().label;
 }
 
-const PROVIDER_LABELS: Record<string, string> = { ${payment}: "${label}" };
+const PROVIDER_LABELS: Record<string, string> = {
+${labels}
+};
 export function providerLabel(name: string): string {
   return PROVIDER_LABELS[name] ?? name;
 }
@@ -468,6 +490,11 @@ const AI_LABELS: Record<string, string> = {
   groq: "Groq",
   anthropic: "Anthropic",
   gemini: "Google Gemini",
+  mistral: "Mistral",
+  cohere: "Cohere",
+  xai: "xAI Grok",
+  perplexity: "Perplexity",
+  ollama: "Ollama",
 };
 
 /** The `return { ... }` body (6-space indented) for an AI provider branch. */
@@ -505,6 +532,16 @@ function aiReturnBody(id: string): string {
       return `      return { kind: "anthropic", apiKey: env.anthropicApiKey(), model: env.anthropicModel() };`;
     case "gemini":
       return `      return { kind: "gemini", apiKey: env.geminiApiKey(), model: env.geminiModel() };`;
+    case "mistral":
+      return `      return { kind: "openai-compatible", apiKey: env.mistralApiKey(), baseURL: env.mistralBaseUrl(), model: env.mistralModel() };`;
+    case "cohere":
+      return `      return { kind: "openai-compatible", apiKey: env.cohereApiKey(), baseURL: env.cohereBaseUrl(), model: env.cohereModel() };`;
+    case "xai":
+      return `      return { kind: "openai-compatible", apiKey: env.xaiApiKey(), baseURL: env.xaiBaseUrl(), model: env.xaiModel() };`;
+    case "perplexity":
+      return `      return { kind: "openai-compatible", apiKey: env.perplexityApiKey(), baseURL: env.perplexityBaseUrl(), model: env.perplexityModel() };`;
+    case "ollama":
+      return `      return { kind: "openai-compatible", apiKey: env.ollamaApiKey(), baseURL: env.ollamaBaseUrl(), model: env.ollamaModel() };`;
     default:
       return `      return { kind: "openai-compatible", apiKey: env.openaiApiKey(), baseURL: env.openaiBaseUrl(), model: env.openaiModel() };`;
   }
@@ -529,6 +566,13 @@ export function buildAiProviders(selected: AiProvider[]): string {
     cases.push(`      case "gemini":`);
     cases.push(aiReturnBody("gemini"));
   }
+  // Additional OpenAI-compatible AIGC providers (each selected independently).
+  for (const id of ["mistral", "cohere", "xai", "perplexity", "ollama"] as const) {
+    if (selected.includes(id)) {
+      cases.push(`      case "${id}":`);
+      cases.push(aiReturnBody(id));
+    }
+  }
 
   // default → the primary selected provider (keeps chat() from throwing).
   const primary = openaiSel ? "openai" : selected[0] ?? "openai";
@@ -545,7 +589,12 @@ export type AiProviderKey =
   | "deepseek"
   | "groq"
   | "anthropic"
-  | "gemini";
+  | "gemini"
+  | "mistral"
+  | "cohere"
+  | "xai"
+  | "perplexity"
+  | "ollama";
 
 export type ProviderConfig =
   | { kind: "openai-compatible"; apiKey: string; baseURL: string; model: string }

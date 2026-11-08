@@ -33,6 +33,7 @@ const TEXTURE_RULES: Record<string, string> = {
   grid: "A faint 28px linear-gradient grid at ~10% accent alpha. Apply to hero / empty-state surfaces only, never behind body copy.",
   dots: "A 20px radial-gradient dot field at ~10% accent alpha. Decorative surfaces only; keep text on a solid `surface` card.",
   glow: "Two large soft radial gradients (accent + accent2, 8–10% alpha) anchored to the top and bottom corners. No grain, no blur layers over text.",
+  pixel: "A 16px checkerboard of accent at ~10% alpha, offset on the second layer. Decorative surfaces only — never behind body copy.",
   none: "No decorative texture. Use flat solid surfaces and spacing to create hierarchy — this style is intentionally quiet.",
 };
 
@@ -90,7 +91,7 @@ export interface AiDocSpec {
   font: { sans: string; mono: string };
   labels: {
     auth: { id: string; label: string }[];
-    payment: { id: string; label: string };
+    payment: { id: string; label: string }[];
     deploy: { id: string; label: string };
     ai: { id: string; label: string }[];
     features: { id: string; label: string }[];
@@ -168,10 +169,7 @@ export function buildAiDocSpec(c: BuilderConfig): AiDocSpec {
     font: { sans: FONT_STACK, mono: FONT_MONO },
     labels: {
       auth: pickMany(catalog.auth, c.auth),
-      payment: pick(catalog.payment, c.payment) ?? {
-        id: c.payment,
-        label: c.payment,
-      },
+      payment: pickMany(catalog.payment, c.payment),
       deploy: pick(catalog.deploy, c.deploy) ?? { id: c.deploy, label: c.deploy },
       ai: pickMany(catalog.ai, c.ai),
       features: pickMany(catalog.features, c.features),

@@ -9,15 +9,36 @@ export const builderConfigSchema = z.object({
   auth: z
     .array(z.enum(["email", "google", "github", "apple", "microsoft"]))
     .max(5),
-  payment: z.enum([
-    "none",
-    "stripe",
-    "creem",
-    "paypal",
-    "waffo",
-    "lemonsqueezy",
-  ]),
-  ai: z.array(z.enum(["openai", "anthropic", "gemini"])).max(3),
+  payment: z
+    .array(
+      z.enum([
+        "none",
+        "stripe",
+        "creem",
+        "paypal",
+        "waffo",
+        "lemonsqueezy",
+      ]),
+    )
+    .max(6)
+    .refine(
+      (arr) => !(arr.includes("none") && arr.length > 1),
+      "When 'none' is selected, no other payment provider may be selected",
+    ),
+  ai: z
+    .array(
+      z.enum([
+        "openai",
+        "anthropic",
+        "gemini",
+        "mistral",
+        "cohere",
+        "xai",
+        "perplexity",
+        "ollama",
+      ]),
+    )
+    .max(8),
   features: z
     .array(
       z.enum([
@@ -44,6 +65,11 @@ export const builderConfigSchema = z.object({
     "slate",
     "candy",
     "sand",
+    "y2k",
+    "pixel",
+    "neon",
+    "glass",
+    "retro",
   ]),
   skills: z
     .array(
