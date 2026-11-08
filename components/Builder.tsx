@@ -59,10 +59,11 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
   const included = useMemo(() => {
     const items: string[] = [];
     if (config.auth.length) items.push(`Auth: ${config.auth.join(", ")}`);
+    const payments = config.payment;
     items.push(
-      config.payment === "none"
+      payments.length === 0 || payments.includes("none")
         ? "Payments: none"
-        : `Payments: ${config.payment}`,
+        : `Payments: ${payments.join(", ")}`,
     );
     items.push(
       config.ai.length ? `AI: ${config.ai.join(", ")}` : "AI: none",
@@ -73,6 +74,21 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
     items.push(`Skills: ${config.skills.join(", ")}`);
     return items;
   }, [config]);
+
+  // Payment is multi-select; "none" is mutually exclusive with real gateways.
+  function togglePayment(id: PaymentProvider) {
+    if (id === "none") {
+      set("payment", config.payment.includes("none") ? [] : ["none"]);
+    } else {
+      const next = config.payment.filter((p) => p !== "none");
+      set(
+        "payment",
+        next.includes(id)
+          ? next.filter((p) => p !== id)
+          : [...next, id],
+      );
+    }
+  }
 
   async function generate() {
     setBusy(true);
@@ -167,15 +183,16 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
         </Section>
 
         <Section eyebrow={t("builder.s03")} title={t("builder.s03title")}>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="flex flex-wrap gap-2">
             {PAYMENT_OPTIONS.map((o) => (
-              <RadioCard
+              <Chip
                 key={o.id}
-                active={config.payment === o.id}
-                title={o.label}
-                note={t(`builder.pay.${o.id}.note`)}
-                onClick={() => set("payment", o.id as PaymentProvider)}
-              />
+                active={config.payment.includes(o.id)}
+                sub={t(`builder.pay.${o.id}.note`)}
+                onClick={() => togglePayment(o.id)}
+              >
+                {o.label}
+              </Chip>
             ))}
           </div>
         </Section>

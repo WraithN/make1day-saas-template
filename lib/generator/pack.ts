@@ -151,7 +151,8 @@ export async function listProjectFiles(
     "app/globals.css",
     "lib/payments/index.ts",
   );
-  if (config.payment === "none") files.push("lib/payments/none.ts");
+  if (config.payment.includes("none") || config.payment.length === 0)
+    files.push("lib/payments/none.ts");
 
   // Agent-native delivery: the exact doc set the packer ships.
   const spec = buildAiDocSpec(config);
@@ -239,7 +240,7 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
 
   // ── Payment: wire up ONLY the selected gateway ──
   zip.file("lib/payments/index.ts", buildPaymentIndex(config.payment));
-  if (config.payment === "none") {
+  if (config.payment.includes("none") || config.payment.length === 0) {
     zip.file("lib/payments/none.ts", buildPaymentNoneStub());
   }
 

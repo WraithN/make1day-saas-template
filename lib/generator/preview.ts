@@ -148,7 +148,11 @@ function moduleSummary(c: BuilderConfig): string[] {
   lines.push(`- **App name:** ${c.appName}`);
   lines.push(`- **Authentication:** ${c.auth.join(", ") || "none"}`);
   lines.push(
-    `- **Payments:** ${c.payment === "none" ? "none" : title(c.payment)}`,
+    `- **Payments:** ${
+      c.payment.length && !c.payment.includes("none")
+        ? c.payment.map((p) => title(p)).join(", ")
+        : "none"
+    }`,
   );
   lines.push(`- **AI providers:** ${c.ai.map((a) => title(a)).join(", ") || "none"}`);
   lines.push(

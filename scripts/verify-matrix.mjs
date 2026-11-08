@@ -38,7 +38,7 @@ const OUT_ROOT = path.join(ROOT, ".matrix-out");
 const BASE = {
   appName: "matrix-app",
   auth: ["email"],
-  payment: "waffo",
+  payment: ["waffo"],
   ai: ["openai"],
   features: ["landing", "dashboard", "account", "admin"],
   deploy: "vercel",
@@ -51,16 +51,16 @@ const ALL_SKILLS = [
   "payments", "database", "rag", "i18n", "deploy", "agents",
 ];
 
-// 18 representative combinations: all 6 payment choices, all 11 styles,
+// 18 representative combinations: all 6 payment choices, all 16 styles,
 // all 3 deploy targets, RAG on/off, dashboard on/off, both consoles on/off
 // and each console alone, multitenancy on/off, skills empty/full,
 // auth/AI provider variations.
 const CASES = [
   { id: "default-waffo-midnight", config: c({}) },
-  { id: "stripe-candy", config: c({ payment: "stripe", style: "candy" }) },
-  { id: "creem-aurora", config: c({ payment: "creem", style: "aurora" }) },
-  { id: "paypal-paper", config: c({ payment: "paypal", style: "paper" }) },
-  { id: "none-mono", config: c({ payment: "none", style: "mono" }) },
+  { id: "stripe-candy", config: c({ payment: ["stripe"], style: "candy" }) },
+  { id: "creem-aurora", config: c({ payment: ["creem"], style: "aurora" }) },
+  { id: "paypal-paper", config: c({ payment: ["paypal"], style: "paper" }) },
+  { id: "none-mono", config: c({ payment: ["none"], style: "mono" }) },
   {
     id: "waffo-sunset-full",
     config: c({
@@ -85,7 +85,7 @@ const CASES = [
   {
     id: "stripe-candy-rag",
     config: c({
-      payment: "stripe",
+      payment: ["stripe"],
       style: "candy",
       features: ["landing", "dashboard", "rag"],
       skills: ["seo"],
@@ -94,14 +94,14 @@ const CASES = [
   {
     id: "none-slate-multitenancy",
     config: c({
-      payment: "none",
+      payment: ["none"],
       style: "slate",
       features: ["landing", "dashboard", "multitenancy"],
     }),
   },
   {
     id: "creem-mono-all-skills",
-    config: c({ payment: "creem", style: "mono", skills: ALL_SKILLS }),
+    config: c({ payment: ["creem"], style: "mono", skills: ALL_SKILLS }),
   },
   {
     // Only the user console: /admin must be pruned AND its shortcut in the
@@ -119,7 +119,7 @@ const CASES = [
     // Lemon Squeezy gateway: the selected adapter must ship and every other
     // case must assert lemonsqueezy.ts is pruned.
     id: "lemonsqueezy-slate",
-    config: c({ payment: "lemonsqueezy", style: "slate" }),
+    config: c({ payment: ["lemonsqueezy"], style: "slate" }),
   },
   {
     // Hand-drawn style: the ZIP must carry the extra ink-outline CSS and the
@@ -574,17 +574,18 @@ async function verifyCase(entry, doBuild) {
     "generated project must default LICENSE_GATE to off",
   );
 
-  // Payment pruning: only the selected adapter survives.
+  // Payment pruning: only the selected adapters survive.
+  const enabledPayments = config.payment.filter((p) => p !== "none");
   for (const [name, rel] of Object.entries(PAYMENT_FILES)) {
-    if (config.payment === "none" || name !== config.payment) {
+    if (!enabledPayments.includes(name)) {
       assert(!exists(rel), `unselected adapter shipped: ${rel}`);
     } else {
       assert(exists(rel), `selected adapter missing: ${rel}`);
     }
   }
   assert(
-    exists("lib/payments/none.ts") === (config.payment === "none"),
-    "none.ts stub must exist only for payment=none",
+    exists("lib/payments/none.ts") === (config.payment.includes("none") || config.payment.length === 0),
+    "none.ts stub must exist only when payments are disabled",
   );
 
   // Feature / skill pruning.
@@ -705,8 +706,9 @@ async function verifyCase(entry, doBuild) {
   const cursorFiles = [...files].filter((f) => /^\.cursor\/rules\/[^/]+\.mdc$/.test(f));
   // 7 always-on module rules + payments (when enabled) + rag / account / admin
   // (when selected) + exactly one rule per selected skill.
+  const hasPayments = config.payment.length > 0 && !config.payment.includes("none");
   const expectedRules =
-    7 + (config.payment !== "none" ? 1 : 0) +
+    7 + (hasPayments ? 1 : 0) +
     (config.features.includes("rag") ? 1 : 0) +
     (hasAccount ? 1 : 0) + (hasAdmin ? 1 : 0) + config.skills.length;
   assert(
@@ -724,8 +726,8 @@ async function verifyCase(entry, doBuild) {
   assert(docSpec.labels?.skills?.length === config.skills.length, "doc-spec skill count mismatch");
   assert(docSpec.catalog?.skills?.length === 12, "doc-spec catalogue must contain all 12 skills");
   assert(
-    Object.keys(docSpec.catalog?.styles ?? {}).length === 11,
-    "doc-spec catalogue must contain all 11 palettes",
+    Object.keys(docSpec.catalog?.styles ?? {}).length === 16,
+    "doc-spec catalogue must contain all 16 palettes",
   );
   const skillsIndex = await read("skills/README.md");
   assert(
@@ -737,7 +739,10 @@ async function verifyCase(entry, doBuild) {
   // buildConfigJson wraps the selections under `config`.
   const picks = manifest.config ?? manifest;
   assert(picks.style === config.style, "manifest.config.style mismatch");
-  assert(picks.payment === config.payment, "manifest.config.payment mismatch");
+  assert(
+    JSON.stringify(picks.payment) === JSON.stringify(config.payment),
+    "manifest.config.payment mismatch",
+  );
   assert(picks.deploy === config.deploy, "manifest.config.deploy mismatch");
 
   const pkg = JSON.parse(await read("package.json"));

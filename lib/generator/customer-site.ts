@@ -203,7 +203,7 @@ const FEATURE_LABELS: Record<string, string> = {
 function stackRows(config: BuilderConfig): string {
   const rows: [string, string][] = [
     ["app.stack.auth", config.auth.length ? config.auth.join(", ") : "—"],
-    ["app.stack.payments", config.payment === "none" ? "Disabled" : config.payment],
+    ["app.stack.payments", config.payment.length && !config.payment.includes("none") ? config.payment.join(", ") : "Disabled"],
     ["app.stack.ai", config.ai.length ? config.ai.join(", ") : "—"],
     [
       "app.stack.features",
@@ -284,7 +284,7 @@ export default async function HomePage() {
  * the amounts are yours to change.
  */
 export function buildCustomerPricing(config: BuilderConfig): string {
-  const hasPayments = config.payment !== "none";
+  const hasPayments = config.payment.length > 0 && !config.payment.includes("none");
   const priceImport = hasPayments
     ? 'import { priceForPlan } from "@/lib/env";\n'
     : "";

@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { deliverLicenseKey } from "@/lib/license-delivery";
-import { getPaymentProvider } from "@/lib/payments";
+import { getPaymentProviders } from "@/lib/payments";
 import { env } from "@/lib/env";
 import {
   issueLicense,
@@ -12,7 +12,7 @@ import {
 import { recordOrder } from "@/lib/orders";
 import { recordConversion } from "@/lib/traffic";
 import { logger } from "@/lib/logger";
-import type { NormalizedSubEvent } from "@/lib/payments/types";
+import type { NormalizedSubEvent, PaymentProvider } from "@/lib/payments/types";
 
 export const runtime = "nodejs";
 
@@ -96,7 +96,7 @@ async function grantLicense(
 }
 
 export async function POST(req: Request) {
-  const provider = getPaymentProvider();
+  const providers = getPaymentProviders();
   const rawBody = await req.text();
 
   const headers: Record<string, string | undefined> = {};
@@ -105,23 +105,33 @@ export async function POST(req: Request) {
   });
 
   // Signature verification happens BEFORE any business logic (Waffo docs).
-  let events: NormalizedSubEvent[];
-  try {
-    events = await provider.verifyWebhook(rawBody, headers);
-  } catch (err) {
-    logger.error("webhook verification failed", {
-      provider: provider.name,
-      err: (err as Error).message,
-    });
-    return NextResponse.json({ error: "Webhook verification failed" }, { status: 400 });
+  // A gateway only verifies its own signatures, so try each enabled provider
+  // until one accepts the payload; the rest throw and we move on.
+  let provider: PaymentProvider | undefined;
+  let events: NormalizedSubEvent[] | undefined;
+  for (const candidate of providers) {
+    if (candidate.name === "none") continue;
+    try {
+      events = await candidate.verifyWebhook(rawBody, headers);
+      provider = candidate;
+      break;
+    } catch {
+      // not this provider's payload — try the next enabled gateway
+    }
+  }
+  if (!provider || !events) {
+    return NextResponse.json(
+      { error: "Webhook verification failed" },
+      { status: 400 },
+    );
   }
 
   const okBody = () =>
-    env.waffoFlavor() === "acquiring" && provider.name === "waffo"
+    env.waffoFlavor() === "acquiring" && provider!.name === "waffo"
       ? { message: "success" }
       : { received: true };
 
-  if (!events || events.length === 0) {
+  if (events.length === 0) {
     return NextResponse.json({ ...okBody(), ignored: true });
   }
 

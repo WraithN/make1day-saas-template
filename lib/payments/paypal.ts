@@ -1,4 +1,4 @@
-import { env, priceForPlan, priceForPlanBf } from "@/lib/env";
+import { env, priceForPlan, priceForPlanBf, priceForPlanMgm } from "@/lib/env";
 import type {
   CheckoutParams,
   CheckoutResult,
@@ -48,8 +48,8 @@ async function paypalFetch(path: string, init?: RequestInit): Promise<any> {
 
 function planFromPaypalPlan(planId: string | null | undefined): "buyout" | "care" | undefined {
   if (!planId) return undefined;
-  if (planId === priceForPlan("buyout") || planId === priceForPlanBf("buyout")) return "buyout";
-  if (planId === priceForPlan("care") || planId === priceForPlanBf("care")) return "care";
+  if (planId === priceForPlan("buyout") || planId === priceForPlanBf("buyout") || planId === priceForPlanMgm("buyout")) return "buyout";
+  if (planId === priceForPlan("care") || planId === priceForPlanBf("care") || planId === priceForPlanMgm("care")) return "care";
   return undefined;
 }
 
