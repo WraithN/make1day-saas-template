@@ -1,4 +1,4 @@
--- marketit — AI chat usage quota (per user, per UTC day)
+-- make1day — AI chat usage quota (per user, per UTC day)
 -- Run AFTER 0008_traffic_funnel.sql.
 --
 -- The AI endpoint only checked "is the caller logged in and subscribed".
@@ -7,7 +7,7 @@
 -- many AI calls each user has made on the current UTC day; the budget itself
 -- is configured with AI_MESSAGES_PER_DAY (default 50).
 --
--- Storage mirrors the rest of marketit: this table is the Supabase half of the
+-- Storage mirrors the rest of make1day: this table is the Supabase half of the
 -- dual backend. Without SUPABASE_SERVICE_ROLE_KEY, lib/ai-usage.ts uses the
 -- local SQLite database instead (lib/sqlite.ts → ai_usage).
 --

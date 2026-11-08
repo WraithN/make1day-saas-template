@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { env, priceForPlan } from "@/lib/env";
+import { env, priceForPlan, priceForPlanBf } from "@/lib/env";
 import type {
   CheckoutParams,
   CheckoutResult,
@@ -97,8 +97,8 @@ function planFromCustom(
   if (raw === "scale") return "care";
   const v = String(variantId ?? "");
   if (!v) return undefined;
-  if (v === priceForPlan("buyout")) return "buyout";
-  if (v === priceForPlan("care")) return "care";
+  if (v === priceForPlan("buyout") || v === priceForPlanBf("buyout")) return "buyout";
+  if (v === priceForPlan("care") || v === priceForPlanBf("care")) return "care";
   return undefined;
 }
 
@@ -109,7 +109,9 @@ export const lemonsqueezyProvider: PaymentProvider = {
   async createCheckout(p: CheckoutParams): Promise<CheckoutResult> {
     // Variant ids play the same role as price ids here; we reuse priceForPlan()
     // so createCheckout and webhook plan resolution share one mapping.
-    const variantId = priceForPlan(p.plan);
+    const variantId = p.blackFriday
+      ? priceForPlanBf(p.plan) ?? priceForPlan(p.plan)
+      : priceForPlan(p.plan);
     if (!variantId) {
       throw new Error(
         `No Lemon Squeezy variant configured for plan "${p.plan}". Set LEMONSQUEEZY_VARIANT_ID_BUYOUT / LEMONSQUEEZY_VARIANT_ID_CARE.`,

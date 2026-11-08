@@ -3,7 +3,7 @@
 // prunes, because this route is excluded from customer ZIPs (SITE_ONLY_FILES).
 import { env } from "@/lib/env";
 
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://marketit.dev").replace(
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com").replace(
   /\/+$/,
   "",
 );
@@ -53,7 +53,7 @@ PAYMENT_PROVIDER — no code change is required.`;
 export const dynamic = "force-dynamic";
 
 export function GET() {
-  const body = `# marketit — full machine-readable reference
+  const body = `# make1day — full machine-readable reference
 
 > Canonical site: ${SITE}
 > Short overview: ${SITE}/llms.txt
@@ -61,16 +61,16 @@ export function GET() {
 > Generated: runtime route, reflects this deployment's configuration.
 > Audience: LLM crawlers, coding agents, procurement/evaluation bots.
 
-## 1. What marketit is
+## 1. What make1day is
 
-marketit is a configurable Next.js 15 SaaS starter AND a project generator. A user
+make1day is a configurable Next.js 15 SaaS starter AND a project generator. A user
 selects auth, payment gateway, AI providers, features, deploy target, visual
 style and skill playbooks in the Builder; the server returns a ZIP containing a
 pruned, buildable Next.js project pre-configured to those exact selections.
 
 - Stack: Next.js 15 App Router, React 19, TypeScript, Tailwind CSS, Supabase
   (auth + Postgres + RLS), pluggable payments, multi-provider AI chat.
-- Author / publisher (company name): marketit. Canonical domain is set by NEXT_PUBLIC_SITE_URL before launch; no repository URL is published yet.
+- Author / publisher (company name): make1day. Canonical domain is set by NEXT_PUBLIC_SITE_URL before launch; no repository URL is published yet.
 - This site sells the starter. The downloaded project is a separate codebase
   and does NOT include this site's license gate or machine-readable endpoints.
 
@@ -79,8 +79,8 @@ pruned, buildable Next.js project pre-configured to those exact selections.
 | Plan | Price | What the buyer gets |
 |---|---|---|
 | Free demo | $0 | Browse the site, configure any build and download a source-free preview (file inventory + design tokens, never source code). Full source ZIP is 402 without entitlement |
-| Buyout | $99 launch (list $199), one-time | Full source, permanent offline license key, unlimited downloads |
-| Care | $9/mo launch (list $19/mo) | Ongoing updates, hosting help, priority support; key expires with the period |
+| Buyout | $99 one-time | Full source, permanent offline license key, 12 months free updates then Care, license for your own products (no resale/redistribution as template) |
+| Care | $9/mo | Upstream patches, security & dependency updates, official components, priority support; key expires with the period |
 | Custom 1:1 | Fixed quote after a free 30-minute call | Custom components/themes, private deployment, SSO, RAG on own data, audits |
 
 Checkout on this site is processed by ${PROVIDER} (PAYMENT_PROVIDER=${PROVIDER_KEY}). Custom work is
@@ -128,7 +128,7 @@ Pruning is REAL, not a manifest flag:
 - Site-only endpoints are always excluded: payments/self-check, llms.txt,
   llms-full.txt, openapi.json, api/mcp, agent-ready page and its content module.
   The site-only /agent-ready footer link is stripped from Footer.tsx too.
-- marketit-site operational features are also pruned from EVERY customer ZIP:
+- make1day-site operational features are also pruned from EVERY customer ZIP:
   all of lib/mail/*, lib/content/messaging.ts (five-language mail/UI copy),
   lib/tickets.ts, the /support page + form, the /admin/tickets console, the
   auth-recovery pages/APIs (forgot/reset/verify), lib/local-auth-tokens.ts and
@@ -328,7 +328,7 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
   BreadcrumbList (every blog post).
 - Per-page canonical + hreflang for en / zh / ja / fr / de; dynamic OG image.
 - Company attribution: every article and every FAQ answer is published under
-  the Organisation name "marketit", which is also the author/publisher
+  the Organisation name "make1day", which is also the author/publisher
   in BlogPosting and publisher of the CollectionPage. No personal bylines and
   no repository URL are published.
 
@@ -391,7 +391,7 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
 - Supabase migrations: 0001_init.sql, 0002_rag.sql, 0003_licenses.sql,
   0004_profiles_rbac.sql, 0005_orders.sql, 0006_observability.sql,
   0007_orgs.sql, 0008_traffic_funnel.sql, 0009_ai_usage.sql,
-  0010_support_tickets.sql (support tickets + RLS, marketit-site-only),
+  0010_support_tickets.sql (support tickets + RLS, make1day-site-only),
   0011_delivery_and_governance.sql (mail_outbox, rate_limits, consent_events,
   delivery_events, error_events, RLS + atomic consume_rate_limit() RPC).
   The local SQLite mirror of these tables plus \`password_resets\` /
@@ -409,7 +409,7 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
   a host cron — those are deployment steps, not code. Real sandbox payments
   for every gateway remain on the operator's pre-launch checklist.
 - Waffo "acquiring" checkout IS implemented, but all merchant-contract fields
-  come from WAFFO_ACQUIRING_* env vars (marketit invents none) and the signing
+  come from WAFFO_ACQUIRING_* env vars (make1day invents none) and the signing
   string / response shape / webhook attribution are 需按你的 Waffo 合同核对 —
   see docs/waffo.md §5. Pancake is complete.
 - AI chat streams token-by-token (OpenAI / Anthropic / Gemini) as incremental text/plain chunks and enforces a per-user daily quota (AI_MESSAGES_PER_DAY, default 50, HTTP 429 ai_quota_exceeded when exhausted). The 429 body's resetAt is the NEXT 00:00 UTC and Retry-After the real seconds remaining; X-AI-Quota-* headers report the counter. RAG ingest/query require a signed-in user with an active subscription. Runtime regressions are checked by scripts/smoke-ai-stream.cjs and scripts/smoke-ai-quota*.cjs.
@@ -474,7 +474,7 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
   hashes, but there is no local password SIGN-IN consumer for those hashes, no
   MFA, no OAuth, no session rotation / refresh and no email-confirmation-gated
   login. Supabase Auth remains the recommended production path.
-- These three areas are marketit-site-only (pruned from every customer ZIP), so
+- These three areas are make1day-site-only (pruned from every customer ZIP), so
   the downloaded starter has no built-in support form, password-reset page or
   transactional mail of its own. The 18-case build matrix is unchanged: no new
   cases and no new required-file assertions were needed; the new site-only
@@ -483,7 +483,7 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
 ## 13. Differentiation vs other starters
 
 Compared with ShipFast (~$199), Divjoy (~$199), VibeReady ($149-399),
-Makerkit (~$299), Supastarter ($299-1,499) and Open SaaS ($0): marketit is the
+Makerkit (~$299), Supastarter ($299-1,499) and Open SaaS ($0): make1day is the
 only one in this set that BOTH prunes unselected modules out of the downloaded
 source AND generates a root AGENTS.md, a style-specific design.md, scoped rules
 and 12 skills — all rebuildable with npm run ai:docs — at a $99 launch price,

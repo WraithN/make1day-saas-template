@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Premium — paid content demo",
   description:
-    "A runnable content paywall sample. marketit's entitlement gate works with any payment provider.",
+    "A runnable content paywall sample. make1day's entitlement gate works with any payment provider.",
   robots: { index: false, follow: false },
 };
 

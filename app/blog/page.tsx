@@ -3,11 +3,11 @@ import Link from "next/link";
 import { getLang, tr } from "@/lib/i18n-server";
 import { getAllPosts, postField } from "@/lib/content/blog";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://marketit.dev";
-const COMPANY = "marketit";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com";
+const COMPANY = "make1day";
 
 export const metadata: Metadata = {
-  title: "Blog — marketit AI SaaS starter guides",
+  title: "Blog — make1day AI SaaS starter guides",
   description:
     "Practical, verified guides on building, billing and launching an AI SaaS with Next.js: subscription webhooks, payment gateways, white-label source delivery, the 2026 AI boilerplate checklist and agent-readable docs.",
   keywords: [

@@ -1,10 +1,10 @@
 ---
 name: auth-security
-description: Work on Supabase Auth, OAuth providers, sessions and middleware route protection in a marketit project without breaking the server/client boundary.
+description: Work on Supabase Auth, OAuth providers, sessions and middleware route protection in a make1day project without breaking the server/client boundary.
 globs: app/login/**, app/auth/**, middleware.ts, lib/supabase/**, lib/demo.ts
 ---
 
-# Skill: Auth & Security (marketit)
+# Skill: Auth & Security (make1day)
 
 Use this skill for sign-in, session handling, protected routes and demo mode.
 

@@ -26,7 +26,6 @@ export default async function PricingPage() {
       id: "buyout",
       name: "Buyout",
       price: `$${BUYOUT_PRICE}`,
-      originalPrice: "$199",
       launch: true,
       period: "",
       once: true,
@@ -35,6 +34,7 @@ export default async function PricingPage() {
         "pricing.buyout.f2",
         "pricing.buyout.f3",
         "pricing.buyout.f4",
+        "pricing.buyout.f5",
       ],
       ctaKey: "pricing.buyLicense",
       priceId: priceForPlan("buyout") || null,
@@ -44,7 +44,6 @@ export default async function PricingPage() {
       id: "care",
       name: "Care",
       price: `$${CARE_PRICE}`,
-      originalPrice: "$19",
       period: "",
       monthly: true,
       features: [
@@ -70,6 +69,7 @@ export default async function PricingPage() {
     "pricing.rules.r7",
     "pricing.rules.r8",
     "pricing.rules.r9",
+    "pricing.rules.r10",
   ];
 
   const site = env.siteUrl().replace(/\/$/, "");
@@ -80,7 +80,7 @@ export default async function PricingPage() {
   const offersJsonLd = {
     "@context": "https://schema.org",
     "@type": "OfferCatalog",
-    name: "marketit plans",
+    name: "make1day plans",
     itemListElement: [
       {
         "@type": "Offer",

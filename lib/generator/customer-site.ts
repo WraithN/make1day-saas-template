@@ -1,13 +1,13 @@
 // Customer-owned site pages for the generated ZIP.
 //
-// marketit's own marketing pages (home, pricing, blog, compare, faq, license)
+// make1day's own marketing pages (home, pricing, blog, compare, faq, license)
 // describe SHIPKIT — its $99 source license, its competitors, its SEO posts.
 // Shipping them inside a customer's starter meant the customer's own site
 // was silently advertising our product instead of theirs. This module builds
 // a neutral, brand-free starter home + pricing page from the BuilderConfig,
 // and rewires the shared chrome (metadata / nav / footer / sitemap / robots).
 //
-// These are ZIP-only outputs: the on-disk marketit site is untouched.
+// These are ZIP-only outputs: the on-disk make1day site is untouched.
 
 import type { BuilderConfig } from "./config";
 
@@ -173,7 +173,7 @@ const APP_COPY: Record<Lang, Record<string, string>> = {
 
 /**
  * Inject the neutral `app.*` keys into each locale block of the shipped
- * lib/i18n-core.ts. The keys are ZIP-only: marketit's own on-disk dictionary
+ * lib/i18n-core.ts. The keys are ZIP-only: make1day's own on-disk dictionary
  * never gains them, and the generated pages resolve them through tr()/t().
  */
 export function injectAppCopy(source: string): string {
@@ -416,7 +416,7 @@ ${rows}
 `;
 }
 
-/** Robots file with no marketit-specific endpoints. */
+/** Robots file with no make1day-specific endpoints. */
 export function buildCustomerRobots(): string {
   return `import type { MetadataRoute } from "next";
 
@@ -439,7 +439,7 @@ export default function robots(): MetadataRoute.Robots {
 
 // ── Shared chrome rewrites ────────────────────────────────────────────────
 
-/** Replace the marketit metadata + JSON-LD blocks with the customer's brand. */
+/** Replace the make1day metadata + JSON-LD blocks with the customer's brand. */
 export function neutralizeRootLayout(source: string, appName: string): string {
   const safe = JSON.stringify(appName);
   const metadata = `export const metadata: Metadata = {
@@ -481,22 +481,22 @@ export function neutralizeRootLayout(source: string, appName: string): string {
     (m) => `${m}\nconst APP_NAME = ${safe};`,
   );
   // Never hard-code our own domain as the fallback in a customer's repo.
-  out = out.replaceAll("https://marketit.dev", "http://localhost:3000");
+  out = out.replaceAll("https://make1day.com", "http://localhost:3000");
   return out;
 }
 
-/** Drop the marketit-only links from the generated navigation. */
+/** Drop the make1day-only links from the generated navigation. */
 export function customerNav(source: string): string {
   return source
     .replace(/\s*\{ href: "\/blog", label: t\("nav\.blog"\) \},/, "")
     .replace(/\s*\{ href: "\/styles", label: t\("nav\.styles"\) \},/, "")
     .replace(/\s*\{ href: "\/builder", label: t\("nav\.builder"\) \},/, "")
-    // /support is a marketit-site-only page. Strip its nav item so the
+    // /support is a make1day-site-only page. Strip its nav item so the
     // generated project never links to a route that is absent from the ZIP.
     .replace(/\s*\{ href: "\/support", label: t\("nav\.support"\) \},/, "");
 }
 
-/** Replace the marketit wordmark in Nav with the app name. */
+/** Replace the make1day wordmark in Nav with the app name. */
 export function customerNavBrand(source: string, appName: string): string {
   const safe = JSON.stringify(appName);
   return source
@@ -512,14 +512,14 @@ export function customerFooter(source: string, appName: string): string {
   return source
     .replace(/\s*<Link href="\/blog"[\s\S]*?<\/Link>/, "")
     .replace(/\s*<Link href="\/agent-ready"[\s\S]*?<\/Link>/, "")
-    // /support is marketit-site-only — remove its footer link too.
+    // /support is make1day-site-only — remove its footer link too.
     .replace(/\s*<Link href="\/support"[\s\S]*?<\/Link>/, "")
     .replace(/\s*<a\s+href="https:\/\/github\.com\/uncorne\/shipkit"[\s\S]*?<\/a>/, "")
     // Matches the single-brand footer line (product — tagline). The site no
-    // longer repeats the company name twice, so the old "…<span>marketit</span>."
+    // longer repeats the company name twice, so the old "…<span>make1day</span>."
     // anchor is gone; stop at the wrapper's closing </div> instead.
     .replace(
-      /<span className="font-semibold text-ink">marketit<\/span>[\s\S]*?<\/div>/,
+      /<span className="font-semibold text-ink">make1day<\/span>[\s\S]*?<\/div>/,
       `<span className="font-semibold text-ink">{APP_NAME}</span> — <span>{tr(lang, "app.footer.note")}</span></div>`,
     )
     .replace(
@@ -534,7 +534,7 @@ export function customerLicenseLinks(source: string): string {
 }
 
 /**
- * /forgot-password (and the whole auth-recovery flow) is marketit-site-only.
+ * /forgot-password (and the whole auth-recovery flow) is make1day-site-only.
  * The login page ships in every build, so strip its "forgot password" anchor
  * or the generated project would link to a route that is absent from the ZIP.
  */
@@ -542,9 +542,9 @@ export function customerLoginLinks(source: string): string {
   return source.replace(/\s*<a\s+href="\/forgot-password"[\s\S]*?<\/a>/, "");
 }
 
-/** Remove the hard-coded marketit domain fallback from the SEO helper. */
+/** Remove the hard-coded make1day domain fallback from the SEO helper. */
 export function customerSeoLinks(source: string): string {
-  return source.replaceAll("https://marketit.dev", "http://localhost:3000");
+  return source.replaceAll("https://make1day.com", "http://localhost:3000");
 }
 
 /**
@@ -571,13 +571,13 @@ export function neutralizeBrand(source: string, appName: string): string {
   // becomes `<brand>.dev` and still points at us. Legacy names are kept here
   // so an older template re-generated through this builder is cleaned too.
   out = out
-    .replaceAll("https://marketit.dev", "http://localhost:3000")
-    .replaceAll("marketit.dev", `${slug}.example`)
+    .replaceAll("https://make1day.com", "http://localhost:3000")
+    .replaceAll("make1day.com", `${slug}.example`)
     .replaceAll("uncorne/shipkit", `${slug}/app`)
     .replaceAll("ShipYourProduct", appName)
     .replaceAll("ShipKit", appName)
     .replaceAll("Uncorne", appName)
-    .replaceAll("marketit", appName);
+    .replaceAll("make1day", appName);
   KEEP.forEach((literal, i) => {
     out = out.split(`@@WIRE${i}@@`).join(literal);
   });
@@ -585,7 +585,7 @@ export function neutralizeBrand(source: string, appName: string): string {
 }
 
 /**
- * Legal page template for generated projects. marketit's own privacy/terms
+ * Legal page template for generated projects. make1day's own privacy/terms
  * describe OUR company and OUR data processing — shipping them would be both
  * wrong branding and legally misleading. Instead we ship a structured,
  * config-driven template: entity and contact come from the customer's env,

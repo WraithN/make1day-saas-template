@@ -12,7 +12,7 @@ import { PageviewTracker } from "@/components/PageviewTracker";
 // Deploy-time domain placeholder. Keep this literal stable: the generator's
 // customerSeoLinks()/neutralizeBrand() rewrites exactly this string to
 // localhost in customer ZIPs. Replace it with the real domain via env at launch.
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://marketit.dev";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com";
 
 /** Explicit mobile viewport + OS theme color (status bar / browser chrome). */
 export const viewport: Viewport = {
@@ -28,12 +28,12 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "marketit — Ship your AI SaaS MVP in days, not months",
-    template: "%s · marketit",
+    default: "make1day — Ship your AI SaaS MVP in days, not months",
+    template: "%s · make1day",
   },
   description:
-    "marketit is a configurable AI SaaS starter: auth, subscriptions, a real AI feature, an admin console and a build generator. Pick your stack, download the source, launch.",
-  applicationName: "marketit",
+    "make1day is a configurable AI SaaS starter: auth, subscriptions, a real AI feature, an admin console and a build generator. Pick your stack, download the source, launch.",
+  applicationName: "make1day",
   keywords: [
     "AI SaaS starter",
     "Next.js SaaS boilerplate",
@@ -41,20 +41,20 @@ export const metadata: Metadata = {
     "Stripe Supabase starter",
     "AI MVP",
   ],
-  authors: [{ name: "marketit" }],
-  creator: "marketit",
+  authors: [{ name: "make1day" }],
+  creator: "make1day",
   openGraph: {
     type: "website",
     url: SITE_URL,
-    siteName: "marketit",
-    title: "marketit — Ship your AI SaaS MVP in days, not months",
+    siteName: "make1day",
+    title: "make1day — Ship your AI SaaS MVP in days, not months",
     description:
       "A production-grade AI SaaS starter: auth, billing, DB, admin and one real AI feature. Pick your stack, download, launch.",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "marketit — Ship your AI SaaS MVP in days, not months",
+    title: "make1day — Ship your AI SaaS MVP in days, not months",
     description:
       "A production-grade AI SaaS starter. Pick your stack, download a buildable Next.js project, launch.",
   },
@@ -68,16 +68,16 @@ export const metadata: Metadata = {
 const ORG_JSONLD = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "marketit",
+  name: "make1day",
   url: SITE_URL,
   description:
-    "marketit publishes a configurable, white-labelled AI SaaS starter and the generator that produces each customer build.",
+    "make1day publishes a configurable, white-labelled AI SaaS starter and the generator that produces each customer build.",
 };
 
 const SITE_JSONLD = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "marketit",
+  name: "make1day",
   url: SITE_URL,
   inLanguage: ["en", "zh", "ja", "fr", "de"],
 };

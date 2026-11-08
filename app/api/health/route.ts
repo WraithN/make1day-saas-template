@@ -33,7 +33,7 @@ export async function GET() {
     {
       ok,
       status: ok ? "ok" : "degraded",
-      service: "marketit",
+      service: "make1day",
       version: process.env.npm_package_version ?? "0.0.0",
       region: process.env.VERCEL_REGION ?? process.env.DEPLOYMENT_ID ?? "local",
       checks,

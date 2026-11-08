@@ -1,4 +1,4 @@
-import { env, priceForPlan } from "@/lib/env";
+import { env, priceForPlan, priceForPlanBf } from "@/lib/env";
 import type {
   CheckoutParams,
   CheckoutResult,
@@ -48,8 +48,8 @@ async function paypalFetch(path: string, init?: RequestInit): Promise<any> {
 
 function planFromPaypalPlan(planId: string | null | undefined): "buyout" | "care" | undefined {
   if (!planId) return undefined;
-  if (planId === priceForPlan("buyout")) return "buyout";
-  if (planId === priceForPlan("care")) return "care";
+  if (planId === priceForPlan("buyout") || planId === priceForPlanBf("buyout")) return "buyout";
+  if (planId === priceForPlan("care") || planId === priceForPlanBf("care")) return "care";
   return undefined;
 }
 
@@ -75,7 +75,9 @@ export const paypalProvider: PaymentProvider = {
   label: "PayPal",
 
   async createCheckout(p: CheckoutParams): Promise<CheckoutResult> {
-    const planId = priceForPlan(p.plan);
+    const planId = p.blackFriday
+      ? priceForPlanBf(p.plan) ?? priceForPlan(p.plan)
+      : priceForPlan(p.plan);
     if (!planId) throw new Error(`No PayPal plan configured for plan "${p.plan}"`);
     const data = await paypalFetch("/v1/billing/subscriptions", {
       method: "POST",

@@ -1,6 +1,6 @@
-// Module-aware pruning for the marketit template generator.
+// Module-aware pruning for the make1day template generator.
 //
-// marketit ships a single source tree, but the builder lets users pick which
+// make1day ships a single source tree, but the builder lets users pick which
 // pieces they actually want. This module turns those picks into two things:
 //   1. a `skip` set of source files that are NOT copied into the zip, and
 //   2. tailored replacements for files that must be rewritten to stay valid
@@ -150,7 +150,7 @@ const MULTI_FILES = [
   "lib/org.ts",
 ];
 
-// marketit-site-only endpoints that must never ship in a customer project.
+// make1day-site-only endpoints that must never ship in a customer project.
 // Reasons:
 //  1. self-check statically imports lib/payments/waffo.ts, which IS pruned for
 //     every other payment choice — leaving it in the zip would break `tsc`;
@@ -164,7 +164,7 @@ const SITE_ONLY_FILES = [
   "app/llms.txt/route.ts",
   "app/llms-full.txt/route.ts",
   "app/openapi.json/route.ts",
-  // MCP endpoint and the agent-ready landing page describe marketit itself,
+  // MCP endpoint and the agent-ready landing page describe make1day itself,
   // not the customer's product. Their imports would also break pruned builds.
   "app/api/mcp/route.ts",
   // GEO: ?format=md rewrite target and the agent-card descriptor describe
@@ -173,13 +173,13 @@ const SITE_ONLY_FILES = [
   "app/.well-known/agent-card.json/route.ts",
   "app/agent-ready/page.tsx",
   "lib/content/agent-ready.ts",
-  // Style Playground is a marketit-site marketing page. It imports the site's
+  // Style Playground is a make1day-site marketing page. It imports the site's
   // own generator (lib/generator/themes) which never ships, so leaving it in
   // a customer project would be wrong branding AND break `tsc`.
   "app/styles/page.tsx",
   "components/StylePlayground.tsx",
 
-  // ── marketit-site operational features (mail / support / auth recovery) ──
+  // ── make1day-site operational features (mail / support / auth recovery) ──
   // These are real, working routes in THIS repository's own runtime, but they
   // are deliberately NOT part of the customer starter. Keeping them out of
   // every ZIP means: (1) no new required-file assertions or matrix cases are
@@ -213,7 +213,7 @@ const SITE_ONLY_FILES = [
   "components/AuthFlow.tsx",
   // 对应 Supabase migration（代码不随包交付，表也不应凭空出现在客户包里）
   "supabase/migrations/0010_support_tickets.sql",
-  // ── marketit-site delivery + governance (added 2026-11-08) ──
+  // ── make1day-site delivery + governance (added 2026-11-08) ──
   // The generator is the product: paid-order delivery, mail retry, data
   // export / retention and the agent-card are operator-side capabilities.
   // lib/csrf.ts, lib/http-guard.ts and lib/rate-limit.ts are DELIBERATELY NOT
@@ -231,10 +231,10 @@ const SITE_ONLY_FILES = [
   "components/LicenseClaimForm.tsx",
 ];
 
-// marketit's OWN marketing site.
+// make1day's OWN marketing site.
 //
 // A customer who downloads a starter must not go live advertising our
-// product: the $99 source license, the "marketit vs Makerkit" comparison, our
+// product: the $99 source license, the "make1day vs Makerkit" comparison, our
 // nine SEO posts, their Markdown variants, an FAQ about OUR download gate, and a license-redemption
 // page for OUR builder. Those pages are replaced by brand-free customer pages
 // (see lib/generator/customer-site.ts), and their content/components are
@@ -255,6 +255,12 @@ const SITE_MARKETING_FILES = [
   "components/CompareContent.tsx",
   "components/FaqContent.tsx",
   "components/CustomService.tsx",
+  // Black Friday is a make1day-owned marketing page (promo pricing + countdown),
+  // not part of the white-label product a customer generates. Keep it out of
+  // customer ZIPs, and keep its companion countdown component too — it imports
+  // nothing customer-specific, but ships no value without the page.
+  "app/black-friday/page.tsx",
+  "components/BlackFridayCountdown.tsx",
   "components/LicensePanel.tsx",
   // Home-page-only marketing sections. The customer home page is generated
   // from their own BuilderConfig and imports none of these.
@@ -289,7 +295,7 @@ const GENERATOR_FILES = [
   "components/Builder.tsx",
   "app/api/generate/route.ts",
   "app/api/generate/preview/route.ts",
-  // The build-matrix page is a marketit-site page that reads a local
+  // The build-matrix page is a make1day-site page that reads a local
   // snapshot file (public/build-matrix.json) which is not in the repo.
   "app/build-matrix/page.tsx",
   "public/build-matrix.json",
@@ -298,7 +304,7 @@ const GENERATOR_FILES = [
 /** Source files that should be excluded from the generated zip. */
 export function computeSkip(config: BuilderConfig): Set<string> {
   const skip = new Set<string>(SITE_ONLY_FILES);
-  // marketit's marketing site must never appear in a customer's project.
+  // make1day's marketing site must never appear in a customer's project.
   for (const f of SITE_MARKETING_FILES) skip.add(f);
   // The generator never ships: one purchase must not mean unlimited
   // generations of the product that was just paid for.
@@ -871,7 +877,7 @@ export function pruneWorkspacesLink(source: string): string {
 }
 
 /**
- * /admin/tickets is a marketit-site-only page (support tickets are an
+ * /admin/tickets is a make1day-site-only page (support tickets are an
  * operational feature of this product site, not part of the customer's
  * starter). Strip its nav entry in EVERY generated build, or the customer's
  * admin console would link to a route that does not exist in the ZIP.
@@ -890,7 +896,7 @@ export function pruneTicketsNav(source: string): string {
  * contain those literals.
  */
 /**
- * The agent-ready landing page is a marketit-site asset and is pruned from
+ * The agent-ready landing page is a make1day-site asset and is pruned from
  * customer projects. Remove its footer link too, or every generated app gets
  * a dead /agent-ready navigation item.
  */
@@ -902,7 +908,7 @@ export function pruneAgentReadyLink(source: string): string {
 }
 
 /**
- * The Style Playground (/styles) is a marketit-site marketing page. Remove its
+ * The Style Playground (/styles) is a make1day-site marketing page. Remove its
  * Nav entry from generated projects, or every customer app links to a 404.
  */
 export function pruneStylesLink(source: string): string {
@@ -953,7 +959,7 @@ export function pruneBuilderRobots(source: string): string {
 /**
  * The generated project ships with the download gate OFF.
  *
- * marketit's own deployment runs in "auto" (production = ON, fail-safe). A
+ * make1day's own deployment runs in "auto" (production = ON, fail-safe). A
  * customer must never inherit that paywall, so the default flips to "off"
  * inside the shipped lib/env.ts — the customer can still opt in with
  * LICENSE_GATE=on + LICENSE_SECRET.

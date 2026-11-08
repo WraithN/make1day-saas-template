@@ -1,4 +1,4 @@
-// Shared contract for every payment gateway marketit supports.
+// Shared contract for every payment gateway make1day supports.
 // Each provider normalises its own webhook payload into NormalizedSubEvent so
 // the rest of the app (DB upsert, dashboard) stays provider-agnostic.
 
@@ -65,6 +65,12 @@ export type CheckoutParams = {
   userId?: string;
   successUrl: string;
   cancelUrl: string;
+  /**
+   * When true, resolve the Black Friday promo price (priceForPlanBf) instead
+   * of the standard price. Only the /black-friday page starts a BF checkout;
+   * /pricing never passes this, so its prices stay untouched.
+   */
+  blackFriday?: boolean;
 };
 
 export interface PaymentProvider {

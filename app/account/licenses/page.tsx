@@ -45,6 +45,7 @@ export default async function AccountLicensesPage() {
               c["console.plan"],
               c["console.created"],
               c["console.expires"],
+              c["console.updates"],
               c["console.order"],
               c["console.key"],
             ]}
@@ -55,6 +56,9 @@ export default async function AccountLicensesPage() {
               l.expiresAt
                 ? new Date(l.expiresAt).toLocaleDateString()
                 : c["console.never"],
+              l.updatesUntil
+                ? new Date(l.updatesUntil).toLocaleDateString()
+                : c["console.dash"],
               <span key="order" className="font-mono text-xs">
                 {l.orderId ?? c["console.dash"]}
               </span>,

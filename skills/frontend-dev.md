@@ -1,11 +1,11 @@
 ---
 name: frontend-dev
-description: Build React 19 / Next.js 15 App Router features in a marketit project following its conventions (file layout, server vs client components, data flow, styling with Tailwind tokens).
+description: Build React 19 / Next.js 15 App Router features in a make1day project following its conventions (file layout, server vs client components, data flow, styling with Tailwind tokens).
 ---
 
-# Skill: Frontend Development (marketit)
+# Skill: Frontend Development (make1day)
 
-Use this skill when implementing UI, pages, or client components in a marketit
+Use this skill when implementing UI, pages, or client components in a make1day
 project. Follow these rules so generated code matches the existing source.
 
 ## Stack

@@ -1,6 +1,6 @@
 // Local SQLite persistence for the dev / self-hosted install.
 //
-// marketit ships two storage backends:
+// make1day ships two storage backends:
 //   * Supabase (Postgres) — the production path, used when a service-role key
 //     is configured. See lib/license.ts, lib/orders.ts, lib/stats.ts.
 //   * SQLite (this file) — the LOCAL path. A single file under .data/ that
@@ -67,7 +67,7 @@ function loadSqlite(): SqliteModule {
   }
 
   throw new Error(
-    "marketit's local database needs Node.js 22.5+ (built-in `node:sqlite`). " +
+    "make1day's local database needs Node.js 22.5+ (built-in `node:sqlite`). " +
       "Upgrade Node, or configure Supabase (SUPABASE_SERVICE_ROLE_KEY) to use " +
       "the hosted database instead.",
   );
@@ -111,7 +111,8 @@ CREATE TABLE IF NOT EXISTS licenses (
   plan       TEXT NOT NULL,
   order_id   TEXT,
   created_at TEXT NOT NULL,
-  expires_at TEXT
+  expires_at TEXT,
+  updates_until TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_licenses_email ON licenses(email);
 CREATE INDEX IF NOT EXISTS idx_licenses_created ON licenses(created_at DESC);
@@ -370,6 +371,8 @@ function migrate(database: SqliteDatabase): void {
   addColumnIfMissing(database, "profiles", "password_hash", "text");
   addColumnIfMissing(database, "profiles", "salt", "text");
   addColumnIfMissing(database, "profiles", "email_verified", "integer not null default 0");
+  // Buyout 12-month free-update window (task #226/#227).
+  addColumnIfMissing(database, "licenses", "updates_until", "text");
 }
 
 /** Add a column when the table exists but does not have it yet. */
@@ -495,8 +498,8 @@ function importLegacyJson(database: SqliteDatabase): void {
   }>(path.join(dir, "license-store.json"));
 
   const insertLicense = database.prepare(
-    `INSERT OR IGNORE INTO licenses (jti, key, email, plan, order_id, created_at, expires_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR IGNORE INTO licenses (jti, key, email, plan, order_id, created_at, expires_at, updates_until)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
   );
   for (const l of licenseStore?.licenses ?? []) {
     insertLicense.run(
@@ -507,6 +510,7 @@ function importLegacyJson(database: SqliteDatabase): void {
       l.orderId ?? null,
       l.createdAt,
       l.expiresAt ?? null,
+      (l as { updatesUntil?: string | null }).updatesUntil ?? null,
     );
   }
 

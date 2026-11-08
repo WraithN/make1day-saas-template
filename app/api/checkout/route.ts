@@ -27,7 +27,9 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json().catch(() => ({}));
-  const parsed = z.object({ plan: z.enum(["buyout", "care"]) }).safeParse(body);
+  const parsed = z
+    .object({ plan: z.enum(["buyout", "care"]), blackFriday: z.boolean().optional() })
+    .safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
   }
@@ -40,6 +42,7 @@ export async function POST(req: Request) {
       userId: user.id,
       successUrl: `${env.siteUrl()}/account?welcome=1`,
       cancelUrl: `${env.siteUrl()}/pricing`,
+      blackFriday: parsed.data.blackFriday ?? false,
     });
     // Normalise to a single redirect URL (Stripe/Creem/Waffo use `url`,
     // PayPal uses `approvalUrl`).

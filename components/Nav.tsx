@@ -53,11 +53,20 @@ export function Nav() {
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
+  // Black Friday nav entry is gated behind the same NEXT_PUBLIC_ flag the
+  // /black-friday page reads, so the link only appears while the promo is on
+  // (it is inlined at build time, so a rebuild is needed to toggle it).
+  const blackFridayActive =
+    process.env.NEXT_PUBLIC_BLACK_FRIDAY_ACTIVE === "true";
+
   const links = [
     { href: "/blog", label: t("nav.blog") },
     { href: "/styles", label: t("nav.styles") },
     { href: "/builder", label: t("nav.builder") },
     { href: "/support", label: t("nav.support") },
+    ...(blackFridayActive
+      ? [{ href: "/black-friday", label: t("nav.blackfriday") }]
+      : []),
     { href: "/pricing", label: t("nav.pricing") },
   ];
 
@@ -78,7 +87,7 @@ export function Nav() {
         {/* Keep this <Link> className verbatim: customerNavBrand() matches it
             structurally to swap in the customer's own app name. */}
         <Link href="/" className="shrink-0 font-semibold tracking-tight">
-          marketit
+          make1day
         </Link>
 
         {/* ── Desktop (>= md) ── */}

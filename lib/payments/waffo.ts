@@ -4,7 +4,7 @@ import {
   randomUUID,
   sign as rsaSign,
 } from "node:crypto";
-import { env, priceForPlan, waffoAcquiringMissing } from "@/lib/env";
+import { env, priceForPlan, priceForPlanBf, waffoAcquiringMissing } from "@/lib/env";
 import type {
   CheckoutParams,
   CheckoutResult,
@@ -129,7 +129,9 @@ async function createCheckoutPancake(
 ): Promise<CheckoutResult> {
   // In Pancake the "price id" IS the product id: a one-time product for the
   // Buyout license and a subscription product for Care.
-  const productId = priceForPlan(p.plan);
+  const productId = p.blackFriday
+    ? priceForPlanBf(p.plan) ?? priceForPlan(p.plan)
+    : priceForPlan(p.plan);
   if (!productId) {
     throw new Error(
       `No Waffo Pancake product configured for plan "${p.plan}". Set WAFFO_PRICE_ID_BUYOUT / WAFFO_PRICE_ID_CARE.`,
@@ -252,7 +254,7 @@ async function createCheckoutAcquiring(
   p: CheckoutParams,
 ): Promise<CheckoutResult> {
   // Random + traceable: the ids carry plan/userId so ops can match a Waffo
-  // order back to a marketit checkout without inventing contract values.
+  // order back to a make1day checkout without inventing contract values.
   const trace = `${p.plan}.${p.userId ?? "anon"}`;
   const merchantOrderId = `SK-${trace}-${randomUUID()}`;
   const paymentRequestId = randomUUID();

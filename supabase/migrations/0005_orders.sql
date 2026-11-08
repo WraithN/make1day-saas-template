@@ -1,4 +1,4 @@
--- marketit — orders (provider-agnostic purchase records)
+-- make1day — orders (provider-agnostic purchase records)
 -- Run after 0003_licenses.sql. Every gateway (Stripe / Creem / PayPal / Waffo / Lemon Squeezy)
 -- is normalised into this single table so the admin console and the generated
 -- template never need gateway-specific code to list or reconcile orders.

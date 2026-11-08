@@ -1,6 +1,6 @@
 # Zahlungen — Konfigurationshandbuch
 
-marketit enthält eine austauschbare Abrechnungsschicht. Im Schritt **Builder → 03 · Zahlungen** wählst du einen Anbieter; die generierte Anwendung liest diese Wahl aus `PAYMENT_PROVIDER` und bindet den passenden Client und Webhook-Verifizierer ein.
+make1day enthält eine austauschbare Abrechnungsschicht. Im Schritt **Builder → 03 · Zahlungen** wählst du einen Anbieter; die generierte Anwendung liest diese Wahl aus `PAYMENT_PROVIDER` und bindet den passenden Client und Webhook-Verifizierer ein.
 
 Dieses Handbuch erklärt, wie jede Option eingerichtet wird, damit die generierte Anwendung tatsächlich Zahlungen annehmen kann.
 
@@ -144,7 +144,7 @@ RSA-SHA256 über `${t}.${rawBody}` (Toleranz 45 Minuten);
 bereits die erste Zahlung begleitet. Das alte `WAFFO_WEBHOOK_SECRET` (HMAC)
 wird nicht mehr verwendet. **Die Acquiring-Auftragserstellung ist implementiert**:
 alle Felder `merchantInfo` / `userInfo` / `paymentInfo` / Auftrag stammen aus den
-`WAFFO_ACQUIRING_*`-Variablen (marketit erfindet keine Werte), IDs werden zur
+`WAFFO_ACQUIRING_*`-Variablen (make1day erfindet keine Werte), IDs werden zur
 Laufzeit erzeugt, und Signatur-String / Antwortformat sind **mit deinem Waffo-Vertrag
 abzugleichen**. Vollständige Referenz: `docs/waffo.md` §5.
 
@@ -220,7 +220,10 @@ oben genannten Variablen nachrüstbar.
 
 Die Preisseite verkauft zwei kostenpflichtige Angebote — **Buyout** (Einmalzahlung,
 99 $ Einführungspreis) und **Care** (monatlich, 9 $/Monat Einführungspreis) —
-sowie einen **individuellen 1:1-Service** ohne Online-Zahlung. Die Anzeigewerte
+sowie einen **individuellen 1:1-Service** ohne Online-Zahlung. Buyout enthält
+12 Monate kostenlose Updates; danach läuft die Aktualisierung über Care weiter.
+Die Lizenz erlaubt eigene Produkte (auch kommerziell), aber kein Weiterverkauf
+oder Redistribution des Quellcodes als Vorlage. Alle Regeln auf `/pricing`.
 sind über `NEXT_PUBLIC_PRICE_BUYOUT_DISPLAY` / `NEXT_PUBLIC_PRICE_CARE_DISPLAY`
 konfigurierbar.
 

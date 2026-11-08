@@ -2,6 +2,7 @@
 
 import { useLanguage } from "@/lib/i18n";
 import { faqContent } from "@/lib/content/faq";
+import { Markdown } from "@/lib/markdown";
 
 export function FaqContent() {
   const { lang, t } = useLanguage();
@@ -19,7 +20,7 @@ export function FaqContent() {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     inLanguage: contentLang,
-    publisher: { "@type": "Organization", name: "marketit" },
+    publisher: { "@type": "Organization", name: "make1day" },
     mainEntity: c.items.map((it) => ({
       "@type": "Question",
       name: it.q,
@@ -39,8 +40,11 @@ export function FaqContent() {
         <p className="mx-auto mt-4 max-w-2xl text-ink-soft">{c.subtitle}</p>
         <p className="mt-2 text-xs text-muted">
           {c.items.length} Q&amp;A · {t("footer.blog")}:{" "}
-          <span className="font-semibold text-ink">marketit</span>
+          <span className="font-semibold text-ink">make1day</span>
         </p>
+        {c.reviewed && (
+          <p className="mt-1 text-xs text-muted">{c.reviewed}</p>
+        )}
       </div>
 
       <div className="mx-auto mt-8 max-w-3xl space-y-3 sm:mt-12 sm:space-y-4">
@@ -55,7 +59,9 @@ export function FaqContent() {
                 +
               </span>
             </summary>
-            <p className="mt-3 text-sm leading-relaxed text-ink-soft">{it.a}</p>
+            <div className="mt-3 text-sm leading-relaxed text-ink-soft">
+              <Markdown source={it.a} />
+            </div>
           </details>
         ))}
       </div>

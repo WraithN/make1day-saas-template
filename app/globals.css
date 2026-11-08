@@ -78,12 +78,12 @@ body {
   color: rgb(var(--ink));
   font-family: var(--font-sans);
   font-weight: 400;
-  /* Crisp text: OS-native antialiasing. Forced grayscale AA,
-     optimizeLegibility or font-synthesis:none make glyphs thin and fuzzy —
-     especially at 10–12px and on Windows. */
-  -webkit-font-smoothing: auto;
+  /* Crisp text: explicit subpixel (ClearType) AA on Blink/Windows is the
+     sharpest option for CJK; `antialiased` (grayscale) makes glyphs thin and
+     fuzzy, especially at 10–12px and on Windows. */
+  -webkit-font-smoothing: subpixel-antialiased;
   -moz-osx-font-smoothing: auto;
-  text-rendering: auto;
+  text-rendering: optimizeLegibility;
   font-synthesis: weight style;
   font-kerning: normal;
   font-optical-sizing: auto;
@@ -314,10 +314,11 @@ main:has(pre) .card:hover {
   transform: none;
 }
 
-/* Gradient text would break the flat ink look; use a solid highlight shadow. */
+/* Flat ink headline: solid colour only. The old 3px offset yellow shadow
+   haloed every CJK stroke and read as blurry on bold Chinese — drop it for
+   crisp glyphs; the doodle layer (stars/arrow) and sticker carry the flavour. */
 .grad-text {
   color: rgb(var(--ink));
-  text-shadow: 3px 3px 0 var(--doodle-yellow);
 }
 
 ::selection {
@@ -444,7 +445,8 @@ main:has(pre) .card:hover {
 .doodle-headline {
   font-weight: 800;
   letter-spacing: -0.02em;
-  text-shadow: 3px 3px 0 var(--doodle-yellow);
+  /* No offset colour shadow: on bold CJK it halos every stroke and looks
+     blurry. Crisp ink only; the hand-drawn markers come from .doodle-deco. */
 }
 
 @keyframes sk-bob {

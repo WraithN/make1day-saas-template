@@ -1,6 +1,6 @@
 // SaaS visual styles for the generated template.
 //
-// Each style is just a palette of CSS custom properties. The running marketit
+// Each style is just a palette of CSS custom properties. The running make1day
 // app and the generated scaffold both consume these via Tailwind's
 // `rgb(var(--x) / <alpha-value>)` tokens, so switching a style is a single
 // `:root` swap — no duplicated component CSS.
@@ -357,7 +357,7 @@ pre {
 }
 
 /* Style-level corner radius (overrides the fixed Tailwind radii above so each
-   marketit style has its own "shape" without duplicated component CSS). */
+   make1day style has its own "shape" without duplicated component CSS). */
 .card,
 .btn-solid,
 .btn-ghost,

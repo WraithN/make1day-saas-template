@@ -1,10 +1,10 @@
 ---
 name: database
-description: Write Supabase migrations, RLS policies and server-side queries for a marketit project.
+description: Write Supabase migrations, RLS policies and server-side queries for a make1day project.
 globs: supabase/**, lib/supabase/admin.ts, .data/**
 ---
 
-# Skill: Database & RLS (marketit)
+# Skill: Database & RLS (make1day)
 
 ## Layout
 - `supabase/migrations/0001_init.sql` — profiles, subscriptions, base policies.

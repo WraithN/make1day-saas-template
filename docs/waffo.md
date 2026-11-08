@@ -1,4 +1,4 @@
-# Waffo 对接说明（marketit）
+# Waffo 对接说明（make1day）
 
 > 调研日期：2026-11-05。依据官方公开文档：
 > <https://docs.waffo.ai/llms.txt>（Pancake）、<https://waffo.com/docs/llms.txt>（Acquiring）。
@@ -53,7 +53,7 @@ X-Signature = BASE64(RSA-SHA256(canonical, privateKey))
 
 时间戳窗口：最多落后服务器 5 分钟、最多超前 1 分钟，服务器需 NTP 同步。
 
-**请求体**（marketit 实际发送）
+**请求体**（make1day 实际发送）
 
 ```json
 {
@@ -147,7 +147,7 @@ orderRequestedAt, paymentInfo, paymentRequestId, userInfo
 | `merchantOrderId` | 运行时生成：`SK-<plan>.<userId>-<randomUUID>`（crypto 随机、可追溯） |
 | `paymentRequestId` | 运行时生成：`randomUUID()` |
 
-缺任何一个合同变量时，`lib/env.ts` 会抛出**指明变量名和取值位置**的错误（去你的 Waffo 商户合同 / `waffo.com/docs` 集成指南复制，marketit 不代填）。此外还必填 `WAFFO_PRIVATE_KEY`（PEM，用于 RSA-SHA256 请求签名）与 `WAFFO_WEBHOOK_PUBLIC_KEY`（验签 webhook）。
+缺任何一个合同变量时，`lib/env.ts` 会抛出**指明变量名和取值位置**的错误（去你的 Waffo 商户合同 / `waffo.com/docs` 集成指南复制，make1day 不代填）。此外还必填 `WAFFO_PRIVATE_KEY`（PEM，用于 RSA-SHA256 请求签名）与 `WAFFO_WEBHOOK_PUBLIC_KEY`（验签 webhook）。
 
 可在 `.env.example` 的「Acquiring」段找到变量清单。`GET /api/payments/self-check` 的 `waffo.missing` 会列出所有仍缺失的 `WAFFO_ACQUIRING_*` 变量，`node scripts/waffo-preflight.mjs` 也会按 flavor 检查。
 

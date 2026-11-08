@@ -1,4 +1,4 @@
-# AGENTS.md — marketit (product site + template generator)
+# AGENTS.md — make1day (product site + template generator)
 
 > Instructions for AI coding agents working in **this repository**. Note: the
 > ZIP a customer downloads gets its **own** generated `AGENTS.md`, produced by
@@ -6,7 +6,7 @@
 
 ## 1. What lives here
 
-marketit is one codebase serving two purposes:
+make1day is one codebase serving two purposes:
 
 1. A **marketing + sales site** (Next.js 15 App Router) with a Builder UI.
 2. A **template generator**: `POST /api/generate` takes a `BuilderConfig`,
@@ -96,7 +96,7 @@ will 404 every route. Stop dev → delete `.next` → build → start.
 ## 5. Known gaps (do not "fix" by claiming they work)
 
 Waffo `acquiring` create-order IS implemented, but every merchant-contract
-field comes from a `WAFFO_ACQUIRING_*` env var (marketit invents none) and its
+field comes from a `WAFFO_ACQUIRING_*` env var (make1day invents none) and its
 signing string / response shape / webhook attribution are 需按你的 Waffo 合同核对
 (docs/waffo.md §5); Pancake is complete. Lemon Squeezy's webhook custom-data
 echo location, the portal id (customer vs subscription) and the exact
@@ -133,7 +133,7 @@ memberships + RLS) and `lib/org.ts` ship with every build, while the workspace
 UI / `/api/org` routes only ship when BOTH `multitenancy` and `account` are
 selected. Customers must run the migration and add `.eq("org_id", ...)` to
 their own domain tables themselves. Generated projects no longer contain
-marketit marketing pages (home/pricing are brand-free), but legal pages are
+make1day marketing pages (home/pricing are brand-free), but legal pages are
 placeholders the customer must replace.
 
 Transactional mail (`lib/mail/*`) implements `resend` (REST), a configurable
@@ -145,7 +145,7 @@ logged but not delivered, and `GET /api/mail/self-check` flags it. The code
 only SENDS — SPF / DKIM / DMARC, a dedicated sending subdomain, suppression
 lists and warm-up are DNS / provider-side work, not code, and decide actual
 inbox placement. These three feature areas (mail, support tickets, auth
-recovery) are **marketit-site-only**: they live in this repo's own runtime but
+recovery) are **make1day-site-only**: they live in this repo's own runtime but
 are pruned from every generated customer ZIP (`SITE_ONLY_FILES`), and the
 corresponding Nav / Footer / login / admin links are rewritten out of the
 customer package. The generated starter still has no built-in support form,
@@ -192,7 +192,7 @@ modules are site-only: **`app/blog/[slug]/md/route.ts` MUST stay in
 `SITE_MARKETING_FILES`** in both `lib/generator/prune.ts` and
 `scripts/verify-matrix.mjs`, otherwise it imports the pruned blog module and
 breaks `tsc` inside every customer ZIP. Every article and FAQ answer is
-published under the company name `marketit` (Organization author /
+published under the company name `make1day` (Organization author /
 publisher), never a personal byline. JSON-LD `inLanguage` and the
 `Content-Language` header describe the language of the BODY, not the UI
 locale — `postContentLang()` / `FaqContent.tsx` fall back to `en` explicitly

@@ -8,7 +8,7 @@
  *   3. assert the generated files / pruning decisions,
  *   4. run `tsc --noEmit` INSIDE the generated project.
  *
- * Requires a running marketit server with the license gate OFF — the matrix
+ * Requires a running make1day server with the license gate OFF — the matrix
  * downloads the FULL paid ZIP without a license, which a gated deployment
  * correctly refuses:
  *   LICENSE_GATE=off npx next dev -p 3000
@@ -187,7 +187,7 @@ const SITE_ONLY_FILES = [
   "app/.well-known/agent-card.json/route.ts",
   "app/agent-ready/page.tsx",
   "lib/content/agent-ready.ts",
-  // marketit-site operational features (mail / support / auth recovery).
+  // make1day-site operational features (mail / support / auth recovery).
   // Pruned by lib/generator/prune.ts SITE_ONLY_FILES; the absence assertions
   // below keep them out of every generated ZIP without adding matrix cases.
   "lib/content/messaging.ts",
@@ -211,7 +211,7 @@ const SITE_ONLY_FILES = [
   "app/verify-email/page.tsx",
   "components/AuthFlow.tsx",
   "supabase/migrations/0010_support_tickets.sql",
-  // marketit-site delivery + governance (added 2026-11-08).
+  // make1day-site delivery + governance (added 2026-11-08).
   // lib/csrf.ts / lib/http-guard.ts / lib/rate-limit.ts and migration 0011
   // ship in every build: customer API routes import them.
   "lib/mail/outbox.ts",
@@ -225,7 +225,7 @@ const SITE_ONLY_FILES = [
   "app/api/privacy/consent/route.ts",
   "components/LicenseClaimForm.tsx",
 ];
-// marketit's OWN marketing site. A customer going live must not be advertsing
+// make1day's OWN marketing site. A customer going live must not be advertsing
 // our $99 license, our competitors or our SEO posts. These are replaced by
 // brand-free customer pages built from their BuilderConfig.
 const SITE_MARKETING_FILES = [
@@ -469,9 +469,9 @@ async function verifyCase(entry, doBuild) {
     assert(!exists(rel), `site-only endpoint leaked into ZIP: ${rel}`);
   }
 
-  // marketit's own marketing pages/content must never reach a customer.
+  // make1day's own marketing pages/content must never reach a customer.
   for (const rel of SITE_MARKETING_FILES) {
-    assert(!exists(rel), `marketit marketing page leaked into ZIP: ${rel}`);
+    assert(!exists(rel), `make1day marketing page leaked into ZIP: ${rel}`);
   }
   // The generator must never leak into a customer project.
   for (const rel of GENERATOR_FILES) {
@@ -519,7 +519,7 @@ async function verifyCase(entry, doBuild) {
   // White-label: sweep EVERY text entry in the ZIP. The old three-page check
   // missed skills/*.md, scripts/, generated AI docs, LICENSE and metadata.
   const BRAND_LEAK = [
-    "ShipYourProduct", "Uncorne", "marketit",
+    "ShipYourProduct", "Uncorne", "make1day",
     "Makerkit", "Supastarter", "ShipFast",
   ];
   // These are wire-level identifiers, not branding — renaming them would
@@ -562,12 +562,12 @@ async function verifyCase(entry, doBuild) {
   const shippedLayout = await read("app/layout.tsx");
   assert(
     shippedLayout.includes("APP_NAME") &&
-      !shippedLayout.includes("by marketit") &&
-      !shippedLayout.includes("by marketit"),
+      !shippedLayout.includes("by make1day") &&
+      !shippedLayout.includes("by make1day"),
     "root layout metadata still describes our brand",
   );
   // The customer project must ship with the download gate OFF by default —
-  // it must never inherit marketit's own (production = ON) paywall.
+  // it must never inherit make1day's own (production = ON) paywall.
   const shippedEnv = await read("lib/env.ts");
   assert(
     /licenseGateMode: \(\) => opt\("LICENSE_GATE", "off"\)/.test(shippedEnv),

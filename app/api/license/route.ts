@@ -43,6 +43,9 @@ export async function POST(req: Request) {
     plan: payload.plan,
     email: payload.email ?? null,
     expiresAt: payload.exp ? new Date(payload.exp * 1000).toISOString() : null,
+    updatesUntil: payload.updatesUntil
+      ? new Date(payload.updatesUntil * 1000).toISOString()
+      : null,
   });
   res.cookies.set(LICENSE_COOKIE, key, {
     httpOnly: true,
@@ -65,6 +68,9 @@ export async function GET(req: Request) {
     email: payload?.email ?? null,
     expiresAt: payload?.exp
       ? new Date(payload.exp * 1000).toISOString()
+      : null,
+    updatesUntil: payload?.updatesUntil
+      ? new Date(payload.updatesUntil * 1000).toISOString()
       : null,
   });
 }

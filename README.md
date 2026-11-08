@@ -1,9 +1,9 @@
-# marketit
+# make1day
 
 > Ship your AI SaaS MVP in days, not months.
-> An AI SaaS MVP starter by **marketit** — auth, subscriptions, one real AI feature, a signed-in user console and an operator admin console. Clone it, reskin it, launch.
+> An AI SaaS MVP starter by **make1day** — auth, subscriptions, one real AI feature, a signed-in user console and an operator admin console. Clone it, reskin it, launch.
 
-This is the production-grade starter that powers the marketit demo. It is the
+This is the production-grade starter that powers the make1day demo. It is the
 template, not a client's product. Everything below is real and runnable once you
 drop in your own keys.
 
@@ -113,7 +113,7 @@ go-live checklist.
 ## Support, transactional email and account recovery
 
 These three areas are **real, working features of this repository's own site
-runtime**, and are **marketit-site-only**: they are pruned from every generated
+runtime**, and are **make1day-site-only**: they are pruned from every generated
 customer ZIP (see `SITE_ONLY_FILES`), and the corresponding Nav / Footer / login
 / admin links are rewritten out of the customer package so no dead link survives.
 
@@ -147,7 +147,7 @@ customer ZIP (see `SITE_ONLY_FILES`), and the corresponding Nav / Footer / login
 These are **not** implemented; see the code paths named here before promising
 them to a customer:
 - Waffo `acquiring` create-order IS implemented, but every merchant-contract
-  field comes from a `WAFFO_ACQUIRING_*` env var (marketit invents none) and the
+  field comes from a `WAFFO_ACQUIRING_*` env var (make1day invents none) and the
   RSA signing string / response shape / webhook attribution are
   **需按你的 Waffo 合同核对** (see `docs/waffo.md` §5). The default `pancake`
   flavor is complete. Lemon Squeezy's webhook custom-data echo location, the
@@ -161,7 +161,7 @@ them to a customer:
 - PayPal creates subscription checkouts only; Creem's portal endpoint/field names are best-effort assumptions (wrapped in try/catch so a miss degrades gracefully).
 - Cloudflare deploy output still contains Node-runtime routes and `node:crypto` / `fs` imports.
 - `MAIL_PROVIDER=smtp` is **not implemented** (no `nodemailer` dependency — add it yourself, see `docs/email.md`). `MAIL_PROVIDER=none` is degraded: mail is logged, not delivered, and `GET /api/mail/self-check` flags it. Deliverability depends on DNS (SPF / DKIM / DMARC / dedicated sending subdomain), not on this code; there is no retry queue and no outbound-webhook signature. Resend field names and Supabase Auth redirect / email-template details are **需按服务商文档核对**. The local SQLite auth recovery flow is real (hash-only one-time tokens, scrypt hashes, anti-enumeration) but has no local password sign-in consumer and no MFA / OAuth / session rotation — it is not equivalent to Supabase Auth.
-- Generated projects ship **brand-free** home and pricing pages built from the customer's `appName` and module picks; marketit's own blog / compare / faq / license redemption pages are pruned. `/privacy` and `/terms` are placeholders the customer must replace with their own legal text. `npm run rebrand -- "Your Brand"` is still available for a global rename. Mail, support tickets and auth recovery are likewise marketit-site-only and are pruned from every ZIP; the downloaded starter has no built-in support form, no password-reset page and no transactional mail of its own. The ticket POST throttle is in-memory / per-instance.
+- Generated projects ship **brand-free** home and pricing pages built from the customer's `appName` and module picks; make1day's own blog / compare / faq / license redemption pages are pruned. `/privacy` and `/terms` are placeholders the customer must replace with their own legal text. `npm run rebrand -- "Your Brand"` is still available for a global rename. Mail, support tickets and auth recovery are likewise make1day-site-only and are pruned from every ZIP; the downloaded starter has no built-in support form, no password-reset page and no transactional mail of its own. The ticket POST throttle is in-memory / per-instance.
 - Every generated project ships an MIT `LICENSE` file; edit its copyright line to your name after rebranding.
 - This site's own `/privacy` and `/terms` now mirror the real data map (`docs/legal-data-map.md`) and resolve every entity, mailbox, jurisdiction and site URL from `lib/env.ts` — no company name is hard-coded in legal copy. Still missing: an automated retention job, a consent audit log, a download log (the old "14 days if not downloaded" refund promise could not be evidenced, so all five `pricing.rules.r5` strings use a plain 14-day window), a DPA template and a data-export endpoint. The repo `LICENSE` is MIT while the site sells generated builds — read `docs/legal-data-map.md` §5 before launch.
 - The build matrix runs `tsc --noEmit` on all 18 cases; a representative subset also runs a real `next build` (pass rate + artifact sizes are published to `public/build-matrix.json` and shown on `/build-matrix`). Run `node scripts/verify-matrix.mjs --all --build --publish` to refresh it.
@@ -385,7 +385,7 @@ npm run verify:matrix                     # terminal 2, or: node scripts/verify-
 
 `.github/workflows/generated-matrix.yml` runs 18 parallel cases covering all 6
 payment gateways, all 11 styles, all 3 deploy targets and the RAG/dashboard/skills
-switches. Each case downloads a real ZIP, asserts that site-only endpoints, marketit
+switches. Each case downloads a real ZIP, asserts that site-only endpoints, make1day
 marketing pages, the generator itself and unselected modules were pruned, then
 runs `tsc --noEmit` inside the extracted project. A representative subset also
 runs a real `next build` (see Known gaps).

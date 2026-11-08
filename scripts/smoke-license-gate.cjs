@@ -15,7 +15,7 @@
  *      and a cleared cookie, must not mint another preview)
  *   4. a valid offline SK1 license key unlocks the full source ZIP
  *   5. that ZIP has brand-free home/pricing, no generator factory, no
- *      marketit marketing pages and no dead links
+ *      make1day marketing pages and no dead links
  *   6. RAG ingest/query refuse anonymous callers, demo session still works
  */
 const path = require("node:path");
@@ -260,7 +260,7 @@ async function runChecks() {
       "",
     );
     check(
-      "customer ZIP drops marketit marketing pages",
+      "customer ZIP drops make1day marketing pages",
       !names.some((n) =>
         ["app/blog/", "app/compare/", "app/faq/", "app/license/"].some((p) =>
           n.startsWith(p),
@@ -278,7 +278,7 @@ async function runChecks() {
     const pricing = await z.file("app/pricing/page.tsx").async("string");
     const sitemap = await z.file("app/sitemap.ts").async("string");
     const env = await z.file("lib/env.ts").async("string");
-    const forbidden = ["marketit", "marketit", "Makerkit", "Supastarter", "ShipFast"];
+    const forbidden = ["make1day", "make1day", "Makerkit", "Supastarter", "ShipFast"];
     check(
       "generated home + pricing are brand-free",
       ![home, pricing].some((s) => forbidden.some((w) => s.includes(w))),

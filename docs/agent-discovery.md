@@ -27,7 +27,7 @@
 2. `/llms-full.txt` → 拿到「能力 + 边界」：能选什么、哪些模块会真剪掉、RAG 用什么算法、哪些功能其实没实现。
 3. `/openapi.json` → 若要调用生成器，直接按 `BuilderConfig` schema 构造 `POST /api/generate`。
 4. `/api/mcp` → `scaffold_project` 组装并校验配置，拿到可直接 POST 的请求体；`/agent-ready` 是人类可引用的说明。
-5. `/llms.txt` 的 Editorial index → 9 篇文章与 `/faq` 的 21 条答案清单；再按 `/blog/<slug>/md` 读取纯文本全文（无需渲染 React）。全部以公司名 `marketit` 署名，Organization author / publisher 一致。
+5. `/llms.txt` 的 Editorial index → 9 篇文章与 `/faq` 的 21 条答案清单；再按 `/blog/<slug>/md` 读取纯文本全文（无需渲染 React）。全部以公司名 `make1day` 署名，Organization author / publisher 一致。
 6. `/pricing`、`/compare`、`/faq`、`/blog` → 人类可引用的出处与长尾内容。
 7. 下载 ZIP 后先读 `AGENTS.md`、`design.md` 与 `ai/rules/*.md` → 开始改代码。
 

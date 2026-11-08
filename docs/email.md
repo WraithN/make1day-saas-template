@@ -1,6 +1,6 @@
-# Transactional email — marketit
+# Transactional email — make1day
 
-This document covers **email delivery** for marketit: what the code does, what
+This document covers **email delivery** for make1day: what the code does, what
 you must configure on the DNS / provider side, and what is deliberately **not**
 implemented. Read it before promising verification, password-reset or ticket
 notification emails to a customer.
@@ -31,7 +31,7 @@ notification emails to a customer.
   exact field names and error shapes against the current Resend docs before a
   production launch (需按服务商文档核对)**.
 - The **webhook** transport's request body (`to`, `from`, `subject`, `html`,
-  `text`, `replyTo`, `template`, `lang`) is marketit's own convention — your
+  `text`, `replyTo`, `template`, `lang`) is make1day's own convention — your
   receiving service must accept it. There is no signature verification on that
   outbound call; use a private URL and `MAIL_WEBHOOK_TOKEN` as a bearer secret.
 
@@ -44,7 +44,7 @@ All are read lazily in `lib/env.ts` (missing values never break `next build`).
 | `MAIL_PROVIDER` | `resend` \| `webhook` \| `smtp`(reserved) \| `none` (default `none`) | all |
 | `RESEND_API_KEY` | Resend API key (`re_…`) | `resend` |
 | `MAIL_FROM` | Verified sender address, e.g. `no-reply@mail.example.com` | `resend`, `webhook` |
-| `MAIL_FROM_NAME` | Display name (default `marketit`) | optional |
+| `MAIL_FROM_NAME` | Display name (default `make1day`) | optional |
 | `MAIL_REPLY_TO` | Reply-to address | optional |
 | `MAIL_WEBHOOK_URL` | Your HTTP mailer endpoint | `webhook` |
 | `MAIL_WEBHOOK_TOKEN` | Bearer token sent to that endpoint | optional |
@@ -91,7 +91,7 @@ after the retention window and never deletes pending mail.
 
 ## 3. DNS configuration checklist (this is NOT code — you must do it yourself)
 
-This is the part that actually decides inbox placement. marketit cannot do it
+This is the part that actually decides inbox placement. make1day cannot do it
 from the application process; treat it as a launch runbook.
 
 ### 3.1 Dedicated sending subdomain (isolation)
@@ -189,12 +189,12 @@ from the application process; treat it as a launch runbook.
 ## 5. Custom HTTP webhook provider (alternative to Resend)
 
 Set `MAIL_PROVIDER=webhook`, `MAIL_WEBHOOK_URL=https://…`, optionally
-`MAIL_WEBHOOK_TOKEN`. marketit POSTs a JSON body:
+`MAIL_WEBHOOK_TOKEN`. make1day POSTs a JSON body:
 
 ```json
 {
   "to": "user@example.com",
-  "from": "marketit <no-reply@mail.example.com>",
+  "from": "make1day <no-reply@mail.example.com>",
   "subject": "…",
   "html": "<!doctype html>…",
   "text": "…",
@@ -205,7 +205,7 @@ Set `MAIL_PROVIDER=webhook`, `MAIL_WEBHOOK_URL=https://…`, optionally
 ```
 
 Your service is then responsible for actually sending the message **and for all
-the DNS / SPF / DKIM / DMARC work in §3**. marketit treats HTTP 2xx as accepted;
+the DNS / SPF / DKIM / DMARC work in §3**. make1day treats HTTP 2xx as accepted;
 a non-2xx is logged as `transport_error` and `delivered:false`. The caller's
 `sendMailSafely()` then queues the message in `mail_outbox` for
 `POST /api/cron/mail-outbox` to retry, so your service may still receive the

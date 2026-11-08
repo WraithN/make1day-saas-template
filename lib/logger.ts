@@ -1,6 +1,6 @@
 import { forwardToSink } from "@/lib/error-sink";
 
-// Structured, level-aware logger for marketit server runtimes.
+// Structured, level-aware logger for make1day server runtimes.
 //
 // Emits one JSON object per line (Loggly / Datadog / CloudWatch / systemd
 // friendly) and never throws into the caller. In development it also pretty-

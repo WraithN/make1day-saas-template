@@ -34,6 +34,9 @@ export const LICENSE_HEADER = "x-shipkit-license";
 /** Signed, httpOnly cookie that carries the anonymous preview identity. */
 export const TRIAL_COOKIE = "sk_trial";
 
+/** Buyout keys ship with 12 months of free source updates, then Care. */
+export const BUYOUT_UPDATE_WINDOW_SECONDS = 365 * 24 * 3600;
+
 export type LicensePayload = {
   v: 1;
   jti: string;
@@ -42,6 +45,10 @@ export type LicensePayload = {
   orderId?: string;
   iat: number; // seconds
   exp?: number; // seconds; absent = lifetime (Buyout)
+  /** Seconds; the window during which UPDATED source may be downloaded.
+   *  Buyout keys get a 12-month window at issuance; Care pushes it out to the
+   *  subscription period end. Absent = legacy key (grandfathered as lifetime). */
+  updatesUntil?: number;
 };
 
 export type LicenseRecord = {
@@ -52,6 +59,9 @@ export type LicenseRecord = {
   orderId?: string;
   createdAt: string;
   expiresAt?: string | null;
+  /** ISO timestamp; window during which updated source downloads are allowed.
+   *  Buyout = issued + 12 months; Care = current period end. null = legacy. */
+  updatesUntil?: string | null;
 };
 
 export type EntitlementReason =
@@ -60,6 +70,7 @@ export type EntitlementReason =
   | "license-email"
   | "subscription"
   | "free-preview"
+  | "update-window-expired"
   | "denied";
 
 export type Entitlement = {
@@ -135,6 +146,7 @@ type LicenseRow = {
   order_id: string | null;
   created_at: string;
   expires_at: string | null;
+  updates_until: string | null;
 };
 
 function rowToLicense(r: LicenseRow): LicenseRecord {
@@ -149,6 +161,7 @@ function rowToLicense(r: LicenseRow): LicenseRecord {
     orderId: r.order_id ?? undefined,
     createdAt: r.created_at,
     expiresAt: r.expires_at ?? null,
+    updatesUntil: r.updates_until ?? null,
   };
 }
 
@@ -181,6 +194,15 @@ export async function issueLicense(params: {
       ? Math.floor(Date.parse(params.periodEnd) / 1000)
       : now + 35 * 24 * 3600;
 
+  // Update window: Buyout = 12 months from issuance; Care = the period end.
+  const updatesUntilSec =
+    params.plan === "buyout"
+      ? now + BUYOUT_UPDATE_WINDOW_SECONDS
+      : (exp ?? undefined);
+  const updatesUntilIso = updatesUntilSec
+    ? new Date(updatesUntilSec * 1000).toISOString()
+    : null;
+
   const payload: LicensePayload = {
     v: 1,
     jti: randomUUID(),
@@ -189,6 +211,7 @@ export async function issueLicense(params: {
     orderId: params.orderId,
     iat: now,
     ...(exp ? { exp } : {}),
+    ...(updatesUntilSec ? { updatesUntil: updatesUntilSec } : {}),
   };
   const key = signLicenseKey(payload);
   const record: LicenseRecord = {
@@ -199,6 +222,7 @@ export async function issueLicense(params: {
     orderId: payload.orderId,
     createdAt: new Date().toISOString(),
     expiresAt: exp ? new Date(exp * 1000).toISOString() : null,
+    updatesUntil: updatesUntilIso,
   };
 
   const db = await adminClient();
@@ -210,13 +234,20 @@ export async function issueLicense(params: {
       plan: record.plan,
       order_id: record.orderId ?? null,
       expires_at: record.expiresAt ?? null,
+      updates_until: record.updatesUntil ?? null,
     });
-    if (!error) return record;
+    if (!error) {
+      // A Care grant extends any Buyout update window for this email.
+      if (params.plan === "care" && record.updatesUntil) {
+        await extendUpdatesForEmail(record.email, record.updatesUntil);
+      }
+      return record;
+    }
     console.warn("license insert fell back to local store:", error.message);
   }
   run(
-    `INSERT OR IGNORE INTO licenses (jti, key, email, plan, order_id, created_at, expires_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR IGNORE INTO licenses (jti, key, email, plan, order_id, created_at, expires_at, updates_until)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     record.jti,
     record.key,
     record.email ?? null,
@@ -224,8 +255,72 @@ export async function issueLicense(params: {
     record.orderId ?? null,
     record.createdAt,
     record.expiresAt ?? null,
+    record.updatesUntil ?? null,
   );
+  if (params.plan === "care" && record.updatesUntil) {
+    await extendUpdatesForEmail(record.email, record.updatesUntil);
+  }
   return record;
+}
+
+/** Look up a single license record by its key id (jti). */
+export async function getLicenseRecordByJti(
+  jti: string,
+): Promise<LicenseRecord | null> {
+  const db = await adminClient();
+  if (db) {
+    const { data } = await db
+      .from("licenses")
+      .select("*")
+      .eq("jti", jti)
+      .maybeSingle();
+    if (data) {
+      return {
+        jti: data.jti,
+        key: data.key,
+        email: data.email ?? undefined,
+        plan: data.plan,
+        orderId: data.order_id ?? undefined,
+        createdAt: data.created_at,
+        expiresAt: data.expires_at ?? null,
+        updatesUntil: data.updates_until ?? null,
+      } as LicenseRecord;
+    }
+  }
+  const row = get<LicenseRow>("SELECT * FROM licenses WHERE jti = ?", jti);
+  return row ? rowToLicense(row) : null;
+}
+
+/**
+ * When an active Care subscription is granted, push the buyer's Buyout update
+ * window out to the Care period end — so Care genuinely "continues updates".
+ * Only ever EXTENDS (never shortens) the stored window.
+ */
+export async function extendUpdatesForEmail(
+  email: string | undefined,
+  untilIso: string,
+): Promise<void> {
+  if (!email) return;
+  const normalized = email.toLowerCase();
+  const db = await adminClient();
+  if (db) {
+    const { error } = await db
+      .from("licenses")
+      .update({ updates_until: untilIso })
+      .eq("email", normalized)
+      .eq("plan", "buyout")
+      .or(`updates_until.is.null,updates_until.lt.${untilIso}`);
+    if (error) console.warn("extendUpdatesForEmail failed:", error.message);
+    return;
+  }
+  run(
+    `UPDATE licenses SET updates_until = ?
+     WHERE email = ? AND plan = 'buyout'
+       AND (updates_until IS NULL OR updates_until < ?)`,
+    untilIso,
+    normalized,
+    untilIso,
+  );
 }
 
 /** Auto-claim: a signed-in buyer whose email matches an issued license. */
@@ -252,6 +347,7 @@ export async function findLicenseByEmail(
         orderId: data.order_id ?? undefined,
         createdAt: data.created_at,
         expiresAt: data.expires_at ?? null,
+        updatesUntil: data.updates_until ?? null,
       } as LicenseRecord;
     }
   }
@@ -284,6 +380,7 @@ export async function listLicenses(): Promise<LicenseRecord[]> {
         orderId: r.order_id ?? undefined,
         createdAt: r.created_at,
         expiresAt: r.expires_at ?? null,
+        updatesUntil: r.updates_until ?? null,
       }));
     }
   }
@@ -553,6 +650,31 @@ export function licenseKeyFromRequest(
   );
 }
 
+/**
+ * Whether a Buyout key/record still permits downloading UPDATED source.
+ * The source is owned forever (exp is undefined); this only gates the
+ * 12-month free-update window. Care re-opens the window by extending the
+ * stored updates_until. Legacy keys (no updatesUntil) are grandfathered.
+ */
+async function buyoutUpdatesAllowed(p: {
+  updatesUntilSec?: number | null;
+  updatesUntilIso?: string | null;
+  email?: string;
+  jti?: string;
+}): Promise<boolean> {
+  const now = Math.floor(Date.now() / 1000);
+  let untilSec: number | null =
+    p.updatesUntilSec ??
+    (p.updatesUntilIso ? Math.floor(Date.parse(p.updatesUntilIso) / 1000) : null);
+  // The stored record may have been extended by an active Care grant.
+  if (!untilSec && p.jti) {
+    const rec = await getLicenseRecordByJti(p.jti);
+    if (rec?.updatesUntil) untilSec = Math.floor(Date.parse(rec.updatesUntil) / 1000);
+  }
+  if (!untilSec) return true; // grandfather: legacy key, no window
+  return untilSec >= now;
+}
+
 export async function checkEntitlement(
   req: Request,
   explicitKey?: string,
@@ -566,6 +688,22 @@ export async function checkEntitlement(
   if (key) {
     const payload = verifyLicenseKey(key);
     if (payload) {
+      // Buyout keys gate the 12-month free-update window here.
+      if (
+        payload.plan === "buyout" &&
+        !(await buyoutUpdatesAllowed({
+          updatesUntilSec: payload.updatesUntil ?? null,
+          email: payload.email,
+          jti: payload.jti,
+        }))
+      ) {
+        return {
+          allowed: false,
+          reason: "update-window-expired",
+          plan: "buyout",
+          email: payload.email,
+        };
+      }
       return {
         allowed: true,
         reason: "license-key",
@@ -601,6 +739,22 @@ export async function checkEntitlement(
       }
       const owned = await findLicenseByEmail(user.email);
       if (owned) {
+        // Buyout key claimed by email also gates the 12-month window.
+        if (
+          owned.plan === "buyout" &&
+          !(await buyoutUpdatesAllowed({
+            updatesUntilIso: owned.updatesUntil ?? null,
+            email: owned.email,
+            jti: owned.jti,
+          }))
+        ) {
+          return {
+            allowed: false,
+            reason: "update-window-expired",
+            plan: "buyout",
+            email: owned.email,
+          };
+        }
         return {
           allowed: true,
           reason: "license-email",

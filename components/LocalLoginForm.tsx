@@ -80,7 +80,7 @@ export function LocalLoginForm() {
 
   return (
     <form onSubmit={submit} className="mt-6 space-y-3 border-t border-line pt-5">
-      <div className="eyebrow">{s.title}</div>
+      <h2 className="text-sm font-bold text-ink">{s.title}</h2>
       <p className="text-xs text-muted">{s.body}</p>
       <input
         type="email"

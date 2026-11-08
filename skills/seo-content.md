@@ -1,12 +1,12 @@
 ---
 name: seo-content
-description: Apply marketit's technical SEO and content conventions — metadata, hreflang, sitemap/robots, llms.txt, blog structured data, and long-tail keyword targeting.
+description: Apply make1day's technical SEO and content conventions — metadata, hreflang, sitemap/robots, llms.txt, blog structured data, and long-tail keyword targeting.
 ---
 
-# Skill: SEO & Content (marketit)
+# Skill: SEO & Content (make1day)
 
 Use this skill when adding pages, blog posts, or improving discoverability in a
-marketit project. marketit is built SEO-first — keep it that way.
+make1day project. make1day is built SEO-first — keep it that way.
 
 ## Per-page metadata
 - Every route exports `metadata` (or `generateMetadata`) with `title`,
@@ -33,7 +33,7 @@ marketit project. marketit is built SEO-first — keep it that way.
 ## Blog
 - Posts live as data in `lib/content/blog.ts` (markdown body) → `app/blog/[slug]`.
 - Each post emits `BlogPosting` JSON-LD (`generateStaticParams` for static render).
-- Target long-tail intent: "how to build a SaaS with Next.js", "Next.js SaaS boilerplate with Stripe", "marketit vs <competitor>".
+- Target long-tail intent: "how to build a SaaS with Next.js", "Next.js SaaS boilerplate with Stripe", "make1day vs <competitor>".
 
 ## Structured data
 - FAQ → `FAQPage`; blog → `BlogPosting`; home → `Organization` + `WebSite`.

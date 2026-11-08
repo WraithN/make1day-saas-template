@@ -1,6 +1,6 @@
-// White-label / rebrand helper for marketit-generated projects.
+// White-label / rebrand helper for make1day-generated projects.
 //
-// Replaces the marketit product name (and legacy ShipKit / ShipYourProduct /
+// Replaces the make1day product name (and legacy ShipKit / ShipYourProduct /
 // Uncorne strings that may survive in older downloads) with your own brand
 // across every text file in a target directory. Wire-level identifiers such as
 // `shipkit.config.json`, `sk_*` cookies, `SK1.` key prefixes and the
@@ -22,7 +22,7 @@ const [, , brandArg, ownerArg, dirArg] = process.argv;
 if (!brandArg) {
   console.error(
     "Usage: node scripts/rebrand.mjs \"<Brand>\" [Owner] [dir]\n" +
-      "  Brand: new product name (replaces \"marketit\" and legacy brand words)\n" +
+      "  Brand: new product name (replaces \"make1day\" and legacy brand words)\n" +
       "  Owner: copyright holder; defaults to Brand\n" +
       "  dir:   target directory (default: current directory)",
   );
@@ -72,7 +72,7 @@ const BRAND_WORDS = [
   "ShipKit",
   "Uncorne",
 ].filter(Boolean);
-const DOMAINS = ["marketit.dev", "shipkit.dev", "uncorne.com"];
+const DOMAINS = ["make1day.com", "shipkit.dev", "uncorne.com"];
 
 function isTextFile(file) {
   if (file === "LICENSE") return true;
@@ -127,7 +127,7 @@ function walk(dir) {
   return [filesChanged, occ];
 }
 
-console.log(`Rebranding "${ROOT}"\n  marketit (+ legacy names) → ${BRAND}\n  owner → ${OWNER}\n`);
+console.log(`Rebranding "${ROOT}"\n  make1day (+ legacy names) → ${BRAND}\n  owner → ${OWNER}\n`);
 const [files, occurrences] = walk(ROOT);
 console.log(`\nDone: ${files} files, ${occurrences} replacements.`);
 console.log("Next: review changes, update LICENSE copyright line if needed, then commit.");

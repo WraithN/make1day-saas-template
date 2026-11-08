@@ -60,7 +60,7 @@
 
 ## 3.5 付费查看（Paid access）/ 订单 / 付费墙样例
 
-两类需求都来自「marketit 站 + 生成模板都要」：在后台看得到，模板里也有可运行样例。
+两类需求都来自「make1day 站 + 生成模板都要」：在后台看得到，模板里也有可运行样例。
 
 ### 订单数据层（支付商无关 / provider-agnostic）
 
@@ -209,7 +209,7 @@ node scripts/export-local-profiles.mjs --sql
 - `pruneNav()`：`/account` 被剪时，Nav 账户入口改指 `/dashboard`（若保留）或 `/login`。
 - `prunePostLoginRedirects()` / `pruneDemoRoute()`：登录、OAuth 回调、结账成功、demo 登录的字面量统一改指真实存在的路由。
 - `pruneAdminLink()`：只保留用户后台时，「管理员后台」快捷入口改指 `/` 并换成「返回站点」文案，不留死链。
-- `pruneStylesLink()` / `pruneStylesSitemap()`：`/styles` 是 marketit 站点自有的营销页（导入站点自己的 `lib/generator/themes`，不进模板），从生成的 `Nav.tsx` 与 `sitemap.ts` 中剪掉，避免每个客户工程出现指向 404 的导航项。
+- `pruneStylesLink()` / `pruneStylesSitemap()`：`/styles` 是 make1day 站点自有的营销页（导入站点自己的 `lib/generator/themes`，不进模板），从生成的 `Nav.tsx` 与 `sitemap.ts` 中剪掉，避免每个客户工程出现指向 404 的导航项。
 - `app/api/profile/route.ts` 随 `account` 剪枝；`app/api/admin/users/route.ts` 随 `admin` 剪枝（见 `ACCOUNT_FILES` / `ADMIN_FILES`）。
 - `app/styles/page.tsx` 与 `components/StylePlayground.tsx` 列入 `SITE_ONLY_FILES`，与 `app/agent-ready/page.tsx` 同等处理。
 - `scripts/lib/ai-docs.mjs` 增加 `account` / `admin` 两条条件 scoped rule，`AGENTS.md` 按选项目动写明两套后台是否存在。

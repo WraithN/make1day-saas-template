@@ -195,7 +195,7 @@ if (!isAcquiring) {
   }
 } else {
   // Acquiring create-order payload: EVERY contract field must come from env.
-  // marketit never invents one — see docs/waffo.md §5.
+  // make1day never invents one — see docs/waffo.md §5.
   for (const name of [
     "WAFFO_ACQUIRING_MERCHANT_INFO",
     "WAFFO_ACQUIRING_USER_INFO",

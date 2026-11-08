@@ -1,6 +1,6 @@
 # 支付 — 配置指南
 
-marketit 内置可插拔的计费层。在 **Builder → 03 · 支付** 步骤中选择一个支付商；生成的应用会从 `PAYMENT_PROVIDER` 读取该选择，并接入对应的客户端与 Webhook 处理。
+make1day 内置可插拔的计费层。在 **Builder → 03 · 支付** 步骤中选择一个支付商；生成的应用会从 `PAYMENT_PROVIDER` 读取该选择，并接入对应的客户端与 Webhook 处理。
 
 本指南说明如何配置每个选项，让生成的应用真正能够向客户收费。
 
@@ -139,7 +139,7 @@ WAFFO_WEBHOOK_PUBLIC_KEY_PROD="-----BEGIN PUBLIC KEY-----
 
 旧的 `WAFFO_WEBHOOK_SECRET`（HMAC）**已不再参与验签**。**Acquiring 下单已实现**：
 `merchantInfo` / `userInfo` / `paymentInfo` / 订单字段全部来自 `WAFFO_ACQUIRING_*`
-环境变量（marketit 不代填），ID 运行时生成，签名串与响应结构**需按你的 Waffo
+环境变量（make1day 不代填），ID 运行时生成，签名串与响应结构**需按你的 Waffo
 合同核对**。完整协议见 `docs/waffo.md` 第 5 节。
 
 ---
@@ -203,7 +203,9 @@ LEMONSQUEEZY_VARIANT_ID_CARE=12345
 ## 套餐与 Price ID 映射
 
 定价页售卖两个付费项：**Buyout 买断**（一次性，首发 $99）与 **Care 管护**
-（按月，首发 $9/月），另有 **1V1 定制服务**，不提供在线结账。
+（按月，首发 $9/月），另有 **1V1 定制服务**，不提供在线结账。买断含 12 个月免费更新；
+之后可续订 Care 持续获取更新。许可可用于构建并运营你自己的产品（允许商用），
+但不得转售或将源码打包成模板二次售卖。完整规则见 `/pricing`。
 
 - Stripe：`STRIPE_PRICE_ID_BUYOUT`（一次性价格）与
   `STRIPE_PRICE_ID_CARE`（按月循环价格）；旧的 `STRIPE_PRICE_ID_PRO` /

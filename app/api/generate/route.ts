@@ -43,17 +43,20 @@ export async function POST(req: Request) {
   // of the build plus the design tokens, never application source.
   //
   // Generated customer projects ship with the gate OFF (their lib/env.ts
-  // defaults to LICENSE_GATE=off), so this only protects marketit's own
+  // defaults to LICENSE_GATE=off), so this only protects make1day's own
   // deployed site.
   const entitlement = await checkEntitlement(req, parsed.data.licenseKey);
   if (!entitlement.allowed) {
     const trial = ensureTrialToken(req);
+    const updatesExpired = entitlement.reason === "update-window-expired";
     const res = NextResponse.json(
       {
         error: "license_required",
-        code: "PAYMENT_REQUIRED",
+        code: updatesExpired ? "UPDATES_EXPIRED" : "PAYMENT_REQUIRED",
         pricingUrl: "/pricing",
         licenseUrl: "/license",
+        // A Care subscription re-opens the update window for an expired Buyout.
+        careUrl: updatesExpired ? "/pricing#care" : undefined,
         // A free, source-free preview is always offered next to the paywall.
         previewAvailable: true,
         previewUrl: "/api/generate/preview",

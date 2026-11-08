@@ -1,7 +1,7 @@
-// OpenAPI 3.1 contract for marketit's public HTTP surface.
+// OpenAPI 3.1 contract for make1day's public HTTP surface.
 // Self-contained: no project imports, so pruning can exclude this route from
 // generated customer ZIPs without breaking their type-check.
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://marketit.dev").replace(
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com").replace(
   /\/+$/,
   "",
 );
@@ -24,13 +24,13 @@ export function GET() {
   const doc = {
     openapi: "3.1.0",
     info: {
-      title: "marketit API",
+      title: "make1day API",
       version: "1.0.0",
       summary: "Configurable Next.js SaaS starter generator, licensing and payments",
       description:
-        "marketit sells a configurable Next.js 15 SaaS starter. The Builder posts a selection to /api/generate and receives a pruned, buildable, agent-native ZIP containing AGENTS.md, design.md, scoped rules, Cursor rules, CLAUDE.md and up to 12 skills. An MCP endpoint lets coding agents assemble a valid configuration programmatically. Source downloads are gated by an offline license key or an active subscription / email claim — the source ZIP is the product, so anonymous visitors never receive it. A source-free preview package is available without a license. Full human/agent-readable overview: /llms-full.txt. Agent guide: /agent-ready. Go-live notes: docs/waffo-launch-checklist.md.",
+        "make1day sells a configurable Next.js 15 SaaS starter. The Builder posts a selection to /api/generate and receives a pruned, buildable, agent-native ZIP containing AGENTS.md, design.md, scoped rules, Cursor rules, CLAUDE.md and up to 12 skills. An MCP endpoint lets coding agents assemble a valid configuration programmatically. Source downloads are gated by an offline license key or an active subscription / email claim — the source ZIP is the product, so anonymous visitors never receive it. A source-free preview package is available without a license. Full human/agent-readable overview: /llms-full.txt. Agent guide: /agent-ready. Go-live notes: docs/waffo-launch-checklist.md.",
     },
-    servers: [{ url: SITE, description: "marketit site" }],
+    servers: [{ url: SITE, description: "make1day site" }],
     tags: [
       { name: "Generator", description: "Build and download a customized project" },
       { name: "License", description: "Offline HMAC license keys" },
@@ -38,7 +38,7 @@ export function GET() {
       { name: "RAG", description: "Hybrid BM25 + embeddings retrieval" },
       { name: "AI", description: "Multi-provider chat" },
       { name: "Analytics", description: "First-party, consent-gated statistics" },
-      { name: "Mail", description: "Transactional email configuration (marketit site)" },
+      { name: "Mail", description: "Transactional email configuration (make1day site)" },
       { name: "Support", description: "Support tickets / contact form" },
       { name: "Auth recovery", description: "Password reset + email verification" },
       { name: "Privacy", description: "Consent, retention, data export and erasure" },
@@ -539,7 +539,7 @@ export function GET() {
           tags: ["Content / GEO"],
           summary: "Plain-text Markdown variant of a blog article",
           description:
-            "A GEO surface for AI crawlers and answer engines. Returns the title, company byline (marketit), published/updated dates, canonical path, category, tags, full body and the article's structured FAQ as text/markdown. ?lang=en|zh|ja|fr|de selects a translation with English fallback. Declared on the HTML article as an alternate of type text/markdown and listed in /sitemap.xml.",
+            "A GEO surface for AI crawlers and answer engines. Returns the title, company byline (make1day), published/updated dates, canonical path, category, tags, full body and the article's structured FAQ as text/markdown. ?lang=en|zh|ja|fr|de selects a translation with English fallback. Declared on the HTML article as an alternate of type text/markdown and listed in /sitemap.xml.",
           parameters: [
             { name: "slug", in: "path", required: true, schema: { type: "string" }, description: "Canonical article slug or a legacy alias" },
             { name: "lang", in: "query", required: false, schema: { type: "string", enum: ["en", "zh", "ja", "fr", "de"], default: "en" } },

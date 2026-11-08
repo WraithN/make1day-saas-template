@@ -13,19 +13,19 @@ import { NextResponse } from "next/server";
  */
 export const dynamic = "force-static";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://marketit.dev";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com";
 
 export function GET() {
   return NextResponse.json(
     {
-      name: "marketit",
+      name: "make1day",
       description:
         "Configurable AI SaaS starter: pick a stack, receive a pruned, white-label source ZIP. Machine-readable docs and a gated scaffolding tool for coding agents.",
       url: SITE_URL,
       version: "1.0.0",
       protocolVersion: "0.3.0",
       provider: {
-        organization: "marketit",
+        organization: "make1day",
         url: SITE_URL,
       },
       documentationUrl: `${SITE_URL}/llms-full.txt`,

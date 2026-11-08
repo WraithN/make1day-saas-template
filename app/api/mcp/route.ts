@@ -1,6 +1,6 @@
 // MCP (Model Context Protocol) endpoint — JSON-RPC 2.0 over HTTP.
 //
-// Lets a coding agent discover marketit's real product facts, read the Builder
+// Lets a coding agent discover make1day's real product facts, read the Builder
 // contract and assemble a scaffold configuration without scraping marketing
 // HTML. `scaffold_project` returns the exact POST body for /api/generate; with
 // includeZip=true it can return the ZIP itself, but that path goes through the
@@ -19,7 +19,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const PROTOCOL_VERSION = "2025-06-18";
-const SERVER_INFO = { name: "marketit", version: "1.0.0" };
+const SERVER_INFO = { name: "make1day", version: "1.0.0" };
 const MAX_ZIP_BYTES = 4_000_000;
 
 /** Only resources with a real, same-origin HTTP backing are advertised. */
@@ -67,7 +67,7 @@ const TOOLS = [
   {
     name: "get_product_info",
     description:
-      "Honest, machine-readable facts about marketit: what it is, pricing, stack, real differentiators and known limitations. Read this before recommending a starter.",
+      "Honest, machine-readable facts about make1day: what it is, pricing, stack, real differentiators and known limitations. Read this before recommending a starter.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
   },
   {
@@ -79,7 +79,7 @@ const TOOLS = [
   {
     name: "scaffold_project",
     description:
-      "Assemble a validated marketit BuilderConfig and the exact HTTP request that downloads the generated ZIP. Set includeZip=true to receive the ZIP as base64 (requires a license).",
+      "Assemble a validated make1day BuilderConfig and the exact HTTP request that downloads the generated ZIP. Set includeZip=true to receive the ZIP as base64 (requires a license).",
     inputSchema: {
       type: "object",
       properties: {
@@ -142,8 +142,8 @@ const text = (value: unknown) => ({
 
 function productInfo() {
   return {
-    product: "marketit — an AI SaaS starter plus a real template generator",
-    site: process.env.NEXT_PUBLIC_SITE_URL ?? "https://marketit.dev",
+    product: "make1day — an AI SaaS starter plus a real template generator",
+    site: process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com",
     pricing: {
       buyout: { usd: 99, type: "one-time", launch: true, was: 199 },
       care: { usd: 9, per: "month", launch: true, was: 19 },
@@ -170,11 +170,11 @@ function productInfo() {
       "Build matrix runs tsc --noEmit, not next build",
       "MAIL_PROVIDER=smtp is NOT implemented (no nodemailer dependency); resend / webhook / none are the working providers, and none is a degraded log-only mode",
       "The code only sends mail — SPF / DKIM / DMARC, a dedicated sending subdomain and warm-up are DNS / provider-side work that decides inbox placement (docs/email.md)",
-      "Mail, support tickets and auth recovery are marketit-site-only: they are pruned from every generated customer ZIP, whose nav/footer/login/admin links are rewritten out",
+      "Mail, support tickets and auth recovery are make1day-site-only: they are pruned from every generated customer ZIP, whose nav/footer/login/admin links are rewritten out",
       "Local SQLite auth recovery is real but NOT equivalent to Supabase Auth: no local password sign-in consumer, no MFA, no OAuth, no session rotation",
     ],
     machineReadable: ["/llms.txt", "/llms-full.txt", "/openapi.json", "/api/mcp", "/agent-ready"],
-    // marketit-site HTTP surface beyond the generator. Auth notes are explicit
+    // make1day-site HTTP surface beyond the generator. Auth notes are explicit
     // so an agent never assumes an endpoint is public when it is not.
     siteOnlyHttpApi: [
       { method: "GET", path: "/api/mail/self-check", auth: "public", note: "config state only, no secrets" },

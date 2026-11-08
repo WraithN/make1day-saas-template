@@ -1,10 +1,10 @@
 ---
 name: deploy
-description: Configure environment variables, runtimes and deployment for Vercel / Cloudflare / self-host builds of a marketit project.
+description: Configure environment variables, runtimes and deployment for Vercel / Cloudflare / self-host builds of a make1day project.
 globs: .env.example, next.config.mjs, wrangler.toml, middleware.ts, app/**/route.ts
 ---
 
-# Skill: Deploy & Env (marketit)
+# Skill: Deploy & Env (make1day)
 
 ## Env contract
 - All env reads go through `lib/env.ts`. Clients are constructed **lazily**, so `next build` succeeds with zero secrets.

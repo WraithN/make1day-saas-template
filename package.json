@@ -1,8 +1,8 @@
 {
-  "name": "marketit",
+  "name": "make1day",
   "version": "0.1.0",
   "private": true,
-  "description": "marketit — configurable AI SaaS starter and source generator. Auth, subscriptions, a real AI feature, an admin console, and white-label ZIP delivery.",
+  "description": "make1day — configurable AI SaaS starter and source generator. Auth, subscriptions, a real AI feature, an admin console, and white-label ZIP delivery.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

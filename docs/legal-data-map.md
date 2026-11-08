@@ -3,7 +3,7 @@
 The privacy policy (`app/privacy/page.tsx`) and terms (`app/terms/page.tsx`)
 used to describe a *different product* than the one running: they claimed
 preferences never leave the browser, that account data lives in the buyer's
-own Supabase project, and gave a `privacy@marketit.dev` address that did not
+own Supabase project, and gave a `privacy@make1day.com` address that did not
 match the site's contact mailbox. All three were false.
 
 This document is the inventory those pages are written against. **If you add a
@@ -17,7 +17,7 @@ Every entity / mailbox / domain string on the legal pages resolves through
 
 | Env var | Used for | Default |
 |---|---|---|
-| `NEXT_PUBLIC_PRODUCT_NAME` | Brand name in legal copy | `marketit` |
+| `NEXT_PUBLIC_PRODUCT_NAME` | Brand name in legal copy | `make1day` |
 | `NEXT_PUBLIC_LEGAL_ENTITY` | Data controller / operator name | falls back to product name (**placeholder, not a legal entity**) |
 | `NEXT_PUBLIC_LEGAL_ADDRESS` | Postal address (optional) | empty |
 | `NEXT_PUBLIC_LEGAL_JURISDICTION` | Governing jurisdiction (optional) | empty |

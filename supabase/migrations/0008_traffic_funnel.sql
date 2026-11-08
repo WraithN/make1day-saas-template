@@ -1,4 +1,4 @@
--- marketit — traffic funnel events
+-- make1day — traffic funnel events
 -- Run AFTER 0006_observability.sql.
 --
 -- The `pageviews` table from 0006 only counts hits per path. It cannot answer

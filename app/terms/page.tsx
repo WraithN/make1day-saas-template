@@ -57,14 +57,30 @@ export default function TermsPage() {
           <p>
             The generated project ships with the repository&apos;s MIT{" "}
             <span className="font-mono">LICENSE</span> file. Under that license
-            you may use, copy, modify and redistribute the code you receive,
-            including commercially. Two limits are worth stating plainly: the
-            generator, the builder UI and this product site are{" "}
-            <strong className="text-ink">not part of the delivered ZIP</strong>
-            , so one purchase does not include the ability to generate further
-            copies for others; and the MIT license does not transfer ownership
-            of the {PRODUCT} name, marks, or the content of this website.
+            you may use, copy, modify and deploy the code you receive, including
+            for commercial purposes in products you own and operate. A few
+            limits apply plainly:
           </p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            <li>
+              The generator, the builder UI and this product site are{" "}
+              <strong className="text-ink">not part of the delivered ZIP</strong>
+              , so one purchase does not include the right to generate further
+              copies for others.
+            </li>
+            <li>
+              You may not resell, sublicense, or redistribute the source code,
+              nor package it — modified or unmodified — as a competing
+              boilerplate, starter kit or template for sale. Building and
+              shipping your own end-product SaaS is encouraged; operating a
+              competing &ldquo;buy my SaaS template&rdquo; business with this
+              code is not.
+            </li>
+            <li>
+              The MIT license does not transfer ownership of the {PRODUCT} name,
+              marks, or the content of this website.
+            </li>
+          </ul>
           <p className="mt-2">
             Third-party services you connect (payment providers, Supabase, AI
             providers, email delivery, hosting) are governed by their own terms

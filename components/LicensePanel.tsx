@@ -17,6 +17,9 @@ const TEXT: Record<
     active: string;
     manage: string;
     note: string;
+    freeUntil: string;
+    careUpdates: string;
+    expired: string;
   }
 > = {
   en: {
@@ -30,6 +33,9 @@ const TEXT: Record<
     active: "Active license",
     manage: "Redeem a different key",
     note: "No license yet? The free preview shows the file inventory and the design tokens — no source code. Keys are stored in an httpOnly cookie on this device.",
+    freeUntil: "Free updates until {date}",
+    careUpdates: "Updates included with your Care plan",
+    expired: "Free updates expired — renew Care to keep downloading updates",
   },
   zh: {
     title: "解锁下载",
@@ -42,6 +48,9 @@ const TEXT: Record<
     active: "当前授权有效",
     manage: "更换密钥",
     note: "还没有授权？免费预览会给你文件清单和设计令牌，不含源码。密钥保存在本机的 httpOnly Cookie 中。",
+    freeUntil: "免费更新至 {date}",
+    careUpdates: "更新包含在 Care 套餐中",
+    expired: "免费更新已到期——续订 Care 可持续获取更新",
   },
   ja: {
     title: "ダウンロードを解除",
@@ -54,6 +63,9 @@ const TEXT: Record<
     active: "ライセンス有効",
     manage: "別のキーを登録",
     note: "ライセンスがまだの場合は無料プレビュー（ファイル一覧とデザイントークン、ソースコードなし）を利用できます。キーは httpOnly Cookie に保存されます。",
+    freeUntil: "無料アップデートは {date} まで",
+    careUpdates: "Care プランにアップデートが含まれます",
+    expired: "無料アップデート期限切れ——Care を更新して継続",
   },
   fr: {
     title: "Débloquer les téléchargements",
@@ -66,6 +78,9 @@ const TEXT: Record<
     active: "Licence active",
     manage: "Changer de clé",
     note: "Pas encore de licence ? L'aperçu gratuit montre l'inventaire des fichiers et les tokens de design — sans code source. La clé est stockée dans un cookie httpOnly.",
+    freeUntil: "Mises à jour gratuites jusqu'au {date}",
+    careUpdates: "Mises à jour incluses avec votre plan Care",
+    expired: "Mises à jour gratuites expirées — renouvelez Care pour continuer",
   },
   de: {
     title: "Downloads freischalten",
@@ -78,6 +93,9 @@ const TEXT: Record<
     active: "Aktive Lizenz",
     manage: "Anderen Schlüssel einlösen",
     note: "Noch keine Lizenz? Die kostenlose Vorschau zeigt die Dateiliste und die Design-Tokens — ohne Quellcode. Schlüssel werden in einem httpOnly-Cookie auf diesem Gerät gespeichert.",
+    freeUntil: "Kostenlose Updates bis {date}",
+    careUpdates: "Updates in Ihrem Care-Tarif enthalten",
+    expired: "Kostenlose Updates abgelaufen — Care verlängern, um Updates zu erhalten",
   },
 };
 
@@ -87,6 +105,7 @@ type Status = {
   plan: string | null;
   email: string | null;
   expiresAt: string | null;
+  updatesUntil: string | null;
 };
 
 export function LicensePanel({
@@ -131,6 +150,7 @@ export function LicensePanel({
         plan: j.plan,
         email: j.email,
         expiresAt: j.expiresAt,
+        updatesUntil: j.updatesUntil ?? null,
       });
       setDone(true);
       setKey("");
@@ -148,10 +168,25 @@ export function LicensePanel({
     <div className={compact ? "mt-4 border-t border-line pt-4" : "card"}>
       <div className="eyebrow mb-2">{s.title}</div>
       {active && (
-        <p className="mb-3 text-sm text-accent">
-          {done ? s.success : s.active}
-          {status?.plan ? ` · ${status.plan}` : ""}
-        </p>
+        <>
+          <p className="mb-3 text-sm text-accent">
+            {done ? s.success : s.active}
+            {status?.plan ? ` · ${status.plan}` : ""}
+          </p>
+          {status?.plan === "buyout" && status?.updatesUntil && (
+            <p className="mb-2 text-xs text-ink-soft">
+              {new Date(status.updatesUntil).getTime() > Date.now()
+                ? s.freeUntil.replace(
+                    "{date}",
+                    new Date(status.updatesUntil).toLocaleDateString(),
+                  )
+                : s.expired}
+            </p>
+          )}
+          {status?.plan === "care" && (
+            <p className="mb-2 text-xs text-ink-soft">{s.careUpdates}</p>
+          )}
+        </>
       )}
       <p className="text-sm text-ink-soft">{s.body}</p>
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">

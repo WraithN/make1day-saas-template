@@ -17,11 +17,11 @@ function opt(name: string, fallback = ""): string {
 /**
  * The one public contact mailbox. Sales, operator notifications and the legal
  * notices all resolve through this helper so they can never drift apart —
- * the old privacy/terms pages hard-coded a different domain (marketit.dev)
+ * the old privacy/terms pages hard-coded a different domain (make1day.com)
  * than the site's contact address, which is both wrong and misleading.
  */
 function publicContactEmail(): string {
-  // Deliberately an obvious placeholder: the brand is marketit but the
+  // Deliberately an obvious placeholder: the brand is make1day but the
   // production domain is not registered yet. Set NEXT_PUBLIC_CONTACT_EMAIL to
   // a real mailbox on your own domain before launch; never invent one here.
   return opt("NEXT_PUBLIC_CONTACT_EMAIL", "hello@example.com");
@@ -36,7 +36,7 @@ function acquiringContract(name: string, where: string): string {
   const v = process.env[name];
   if (!v || !v.trim()) {
     throw new Error(
-      `Waffo Acquiring: missing ${name}. ${where} Copy it from your Waffo merchant contract / integration guide (waffo.com/docs) — marketit never invents contract fields. See docs/waffo.md §5.`,
+      `Waffo Acquiring: missing ${name}. ${where} Copy it from your Waffo merchant contract / integration guide (waffo.com/docs) — make1day never invents contract fields. See docs/waffo.md §5.`,
     );
   }
   return v;
@@ -107,7 +107,7 @@ export const env = {
   paypalPlanPro: () => opt("PAYPAL_PLAN_ID_PRO"),
   paypalPlanScale: () => opt("PAYPAL_PLAN_ID_SCALE"),
 
-  // ── Waffo (active gateway for marketit's own checkout) ────────
+  // ── Waffo (active gateway for make1day's own checkout) ────────
   // IMPORTANT: "Waffo" is two different products with INCOMPATIBLE protocols.
   //   pancake   = MoR / global payments, docs.waffo.ai, @waffo/pancake-ts
   //   acquiring = SE-Asia acquiring gateway, waffo.com/docs, RSA X-SIGNATURE
@@ -148,9 +148,34 @@ export const env = {
   waffoPriceBuyout: () => opt("WAFFO_PRICE_ID_BUYOUT"),
   waffoPriceCare: () => opt("WAFFO_PRICE_ID_CARE"),
 
+  // ── Black Friday campaign (reserved hook; OFF by default) ──────
+  // The /black-friday page shows promo pricing + a countdown. To charge the
+  // promo for real, the operator creates Black Friday products in the active
+  // payment provider and sets the *_BF price ids below, then flips
+  // BLACK_FRIDAY_ACTIVE. priceForPlanBf() resolves them; it returns null when
+  // the campaign is off OR no BF id is set, so /pricing (which uses
+  // priceForPlan, never the BF branch) is never affected.
+  // Single source of truth, readable on BOTH server and client: the /black-friday
+  // page (server) and the Nav link (client) must agree, so we read the
+  // NEXT_PUBLIC_ variant. Default OFF — flip it to "true" to launch the promo.
+  blackFridayActive: () =>
+    opt("NEXT_PUBLIC_BLACK_FRIDAY_ACTIVE", "false").toLowerCase() === "true",
+  // ISO-8601 timestamp the offer ends (used by the countdown). Optional.
+  blackFridayEndsAt: () => opt("BLACK_FRIDAY_ENDS_AT"),
+  stripePriceBuyoutBf: () => opt("STRIPE_PRICE_ID_BUYOUT_BF"),
+  stripePriceCareBf: () => opt("STRIPE_PRICE_ID_CARE_BF"),
+  creemPriceBuyoutBf: () => opt("CREEM_PRICE_ID_BUYOUT_BF"),
+  creemPriceCareBf: () => opt("CREEM_PRICE_ID_CARE_BF"),
+  waffoPriceBuyoutBf: () => opt("WAFFO_PRICE_ID_BUYOUT_BF"),
+  waffoPriceCareBf: () => opt("WAFFO_PRICE_ID_CARE_BF"),
+  lemonsqueezyVariantBuyoutBf: () => opt("LEMONSQUEEZY_VARIANT_BUYOUT_BF"),
+  lemonsqueezyVariantCareBf: () => opt("LEMONSQUEEZY_VARIANT_CARE_BF"),
+  paypalPlanBuyoutBf: () => opt("PAYPAL_PLAN_ID_BUYOUT_BF"),
+  paypalPlanCareBf: () => opt("PAYPAL_PLAN_ID_CARE_BF"),
+
   // ── Waffo Acquiring (WAFFO_FLAVOR=acquiring) ────────────────
   // POST /api/v1/order/create needs merchant-contract fields. EVERY value
-  // below comes from env (JSON string / scalar); marketit invents none of them.
+  // below comes from env (JSON string / scalar); make1day invents none of them.
   // Missing → acquiringContract() throws a named, actionable error. The exact
   // field names/shapes are 需按你的 Waffo 合同核对 (docs/waffo.md §5).
   waffoAcquiringMerchantInfo: () =>
@@ -291,9 +316,9 @@ export const env = {
   // fills these in before launch (see .env.example "Legal / data controller").
   // Until NEXT_PUBLIC_LEGAL_ENTITY is set, the brand name is used as a
   // placeholder — that is intentional and documented, not a real entity.
-  productName: () => opt("NEXT_PUBLIC_PRODUCT_NAME", "marketit"),
+  productName: () => opt("NEXT_PUBLIC_PRODUCT_NAME", "make1day"),
   legalEntity: () =>
-    opt("NEXT_PUBLIC_LEGAL_ENTITY") || opt("NEXT_PUBLIC_PRODUCT_NAME", "marketit"),
+    opt("NEXT_PUBLIC_LEGAL_ENTITY") || opt("NEXT_PUBLIC_PRODUCT_NAME", "make1day"),
   legalAddress: () => opt("NEXT_PUBLIC_LEGAL_ADDRESS"),
   legalJurisdiction: () => opt("NEXT_PUBLIC_LEGAL_JURISDICTION"),
   privacyEmail: () => opt("NEXT_PUBLIC_PRIVACY_EMAIL") || publicContactEmail(),
@@ -318,7 +343,7 @@ export const env = {
   //   auto → ON in production, OFF in development.
   // The generated customer project ships with this rewritten to default
   // "off" (see lib/generator/prune.ts → pruneLicenseGateDefault), so a
-  // customer never inherits marketit's own paywall.
+  // customer never inherits make1day's own paywall.
   licenseGateMode: () => opt("LICENSE_GATE", "auto").toLowerCase(),
   // Free PREVIEW downloads per visitor per UTC day. 0 = no anonymous
   // previews at all. Note: a preview never contains application source
@@ -408,6 +433,33 @@ export function priceForPlan(plan: PricePlan): string | null {
         isBuyout ? env.stripePriceBuyout() : env.stripePriceCare(),
         isBuyout ? env.stripePricePro() : env.stripePriceScale(),
       );
+  }
+}
+
+/**
+ * Black Friday price/plan id for a plan, or null when the campaign is off or no
+ * BF id is configured. Mirrors priceForPlan() but reads the *_BF env vars. The
+ * /black-friday page (and any checkout it starts with `blackFriday: true`)
+ * uses this; /pricing never does, so its prices are untouched by the campaign.
+ */
+export function priceForPlanBf(plan: PricePlan): string | null {
+  if (!env.blackFridayActive()) return null;
+  const provider = env.paymentProvider();
+  const isBuyout = plan === "buyout" || plan === "pro";
+  const bf = (buyoutId: string, careId: string) =>
+    (isBuyout ? buyoutId : careId) || null;
+  switch (provider) {
+    case "creem":
+      return bf(env.creemPriceBuyoutBf(), env.creemPriceCareBf());
+    case "paypal":
+      return bf(env.paypalPlanBuyoutBf(), env.paypalPlanCareBf());
+    case "waffo":
+      return bf(env.waffoPriceBuyoutBf(), env.waffoPriceCareBf());
+    case "lemonsqueezy":
+      return bf(env.lemonsqueezyVariantBuyoutBf(), env.lemonsqueezyVariantCareBf());
+    case "stripe":
+    default:
+      return bf(env.stripePriceBuyoutBf(), env.stripePriceCareBf());
   }
 }
 

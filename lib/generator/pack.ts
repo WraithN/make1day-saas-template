@@ -1,4 +1,4 @@
-// Packs the marketit source tree into a customized template ZIP.
+// Packs the make1day source tree into a customized template ZIP.
 // The generated project is the same source that builds cleanly, but unselected
 // modules are genuinely pruned (see ./prune) and the rest is pre-configured to
 // the user's picks, with package.json renamed.
@@ -306,7 +306,7 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     }
   };
 
-  // The Style Playground is a marketit-site asset; never ship it. Strip its
+  // The Style Playground is a make1day-site asset; never ship it. Strip its
   // Nav entry from every generated project (pruneNav additionally retargets
   // the account link only when the user console is absent).
   await rewrite("components/Nav.tsx", (s) =>
@@ -316,7 +316,7 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     ),
   );
 
-  // /admin/tickets is a marketit-site-only page. The admin console (when it
+  // /admin/tickets is a make1day-site-only page. The admin console (when it
   // ships at all) must not link to a route that is absent from the ZIP.
   await rewrite("app/admin/layout.tsx", pruneTicketsNav);
 
@@ -336,7 +336,7 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
       ),
   );
 
-  // The auth-recovery pages are marketit-site-only. The login page ships in
+  // The auth-recovery pages are make1day-site-only. The login page ships in
   // every build, so its "forgot password" anchor must be removed.
   await rewrite("app/login/page.tsx", customerLoginLinks);
 
@@ -358,7 +358,7 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
   await rewrite("app/robots.ts", pruneBuilderRobots);
 
   // The customer's project ships with the download gate OFF — it must never
-  // inherit marketit's own paywall (auto = ON in production).
+  // inherit make1day's own paywall (auto = ON in production).
   await rewrite("lib/env.ts", pruneLicenseGateDefault);
   if (target !== "/account") {
     await rewrite("app/auth/demo/route.ts", (s) => pruneDemoRoute(s, target));
@@ -381,7 +381,7 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
   }
 
   // ── Customer-owned site ────────────────────────────────────────────────
-  // marketit's own home / pricing / blog / compare / faq / license pages are
+  // make1day's own home / pricing / blog / compare / faq / license pages are
   // pruned (SITE_MARKETING_FILES). These are their brand-free replacements,
   // built from the customer's own BuilderConfig. Written AFTER the rewrites
   // above so nothing re-introduces our marketing copy.
@@ -425,7 +425,7 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     zip.file(
       "LICENSE",
       licenseSrc.replace(
-        /Copyright \(c\)\s+\d{4}\s+marketit/gi,
+        /Copyright \(c\)\s+\d{4}\s+make1day/gi,
         `Copyright (c) ${new Date().getFullYear()} ${config.appName}`,
       ),
     );

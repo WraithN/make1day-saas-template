@@ -1,4 +1,4 @@
--- marketit — profiles RBAC + editable fields
+-- make1day — profiles RBAC + editable fields
 -- Run AFTER 0001_init.sql (and 0002_rag.sql / 0003_licenses.sql if used).
 --
 -- Adds:

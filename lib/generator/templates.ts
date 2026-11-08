@@ -1,5 +1,5 @@
 // Render the generated template's .env.example, README.md and shipkit.config.json
-// from a BuilderConfig. The generated project is the SAME source as marketit, but
+// from a BuilderConfig. The generated project is the SAME source as make1day, but
 // pre-configured to exactly the user's selections.
 
 import type { BuilderConfig } from "./config";

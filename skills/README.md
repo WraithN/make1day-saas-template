@@ -1,6 +1,6 @@
-# marketit Skills — 12 AI coding playbooks
+# make1day Skills — 12 AI coding playbooks
 
-Self-contained playbooks that ship with a marketit project. Each file has YAML
+Self-contained playbooks that ship with a make1day project. Each file has YAML
 frontmatter (`name`, `description`, `globs`) so a coding agent can pick the right
 one automatically. `AGENTS.md` is the entry point; `ai/rules/*.md` are the scoped
 rules that point at these playbooks.

@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { env, priceForPlan } from "@/lib/env";
+import { env, priceForPlan, priceForPlanBf } from "@/lib/env";
 import type {
   CheckoutParams,
   CheckoutResult,
@@ -39,8 +39,8 @@ function normalizeStatus(s: string): NormalizedStatus {
 
 function planFromPrice(priceId: string | null | undefined): PlanId | undefined {
   if (!priceId) return undefined;
-  if (priceId === priceForPlan("buyout")) return "buyout";
-  if (priceId === priceForPlan("care")) return "care";
+  if (priceId === priceForPlan("buyout") || priceId === priceForPlanBf("buyout")) return "buyout";
+  if (priceId === priceForPlan("care") || priceId === priceForPlanBf("care")) return "care";
   return undefined;
 }
 
@@ -49,7 +49,9 @@ export const stripeProvider: PaymentProvider = {
   label: "Stripe",
 
   async createCheckout(p: CheckoutParams): Promise<CheckoutResult> {
-    const priceId = priceForPlan(p.plan);
+    const priceId = p.blackFriday
+      ? priceForPlanBf(p.plan) ?? priceForPlan(p.plan)
+      : priceForPlan(p.plan);
     if (!priceId) throw new Error(`No Stripe price configured for plan "${p.plan}"`);
 
     // Buyout is a one-time payment — it must not create a subscription or a

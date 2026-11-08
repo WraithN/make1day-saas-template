@@ -1,4 +1,4 @@
-# marketit MCP server (`scaffold_project`)
+# make1day MCP server (`scaffold_project`)
 
 `POST /api/mcp` speaks **JSON-RPC 2.0 / MCP** over HTTP. A coding agent can
 discover honest product facts, read the Builder's valid enums and assemble a
@@ -48,7 +48,7 @@ The response `content[0].text` is JSON containing `config`, `generate`, and
     "shipkit": {
       "command": "node",
       "args": ["C:/path/to/shipkit/scripts/mcp-server.mjs"],
-      "env": { "SHIPKIT_MCP_URL": "https://marketit.dev" }
+      "env": { "SHIPKIT_MCP_URL": "https://make1day.com" }
     }
   }
 }

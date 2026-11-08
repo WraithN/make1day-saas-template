@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { POSTS } from "@/lib/content/blog";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://marketit.dev";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com";
 const LANGS = ["en", "zh", "ja", "fr", "de"];
 
 export default function sitemap(): MetadataRoute.Sitemap {

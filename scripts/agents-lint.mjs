@@ -36,7 +36,7 @@ const warn = (msg) => warnings.push(msg);
 // else that names the operator's product must not appear in a customer project.
 // Competitor names are intentionally NOT here — a generated project may mention
 // competitors in its own copy, and "brand leak" only means OUR product.
-const BRANDS = ["ShipKit", "ShipYourProduct", "Uncorne", "marketit"];
+const BRANDS = ["ShipKit", "ShipYourProduct", "Uncorne", "make1day"];
 const KEEP_WIRE = /X-ShipKit-Entitlement|shipkit\.config\.json|x-shipkit-license|shipkit\.db|SK1\./;
 
 const generated = read("ai/doc-spec.json") !== null;

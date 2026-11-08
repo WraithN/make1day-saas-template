@@ -1,4 +1,4 @@
-// Builder configuration types + defaults for the marketit template generator.
+// Builder configuration types + defaults for the make1day template generator.
 // The user picks components in the /builder UI; these selections drive the
 // generated template's env defaults, README and manifest.
 

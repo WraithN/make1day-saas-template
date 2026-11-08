@@ -18,7 +18,7 @@ import type { Lang } from "@/lib/i18n-core";
 export const dynamic = "force-dynamic";
 
 const LANGS: readonly string[] = ["en", "zh", "ja", "fr", "de"];
-const COMPANY = "marketit";
+const COMPANY = "make1day";
 
 export async function GET(
   req: NextRequest,

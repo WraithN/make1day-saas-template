@@ -5,9 +5,9 @@ import path from "node:path";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Build matrix — marketit",
+  title: "Build matrix — make1day",
   description:
-    "Every marketit template build is verified: pruning correctness and a type-check (and, for a subset, a real next build) inside the generated project.",
+    "Every make1day template build is verified: pruning correctness and a type-check (and, for a subset, a real next build) inside the generated project.",
   robots: { index: false, follow: false },
 };
 
@@ -56,7 +56,7 @@ export default function BuildMatrixPage() {
         Every download is verified to build.
       </h1>
       <p className="mt-3 max-w-2xl text-ink-soft">
-        marketit regenerates each template, then asserts pruning correctness and
+        make1day regenerates each template, then asserts pruning correctness and
         runs a type-check inside the generated project. A representative subset
         also runs a real <code className="rounded bg-surface px-1">next build</code>{" "}
         to measure artifact size. This is the last published run.

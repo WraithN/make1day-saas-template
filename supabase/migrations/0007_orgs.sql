@@ -1,4 +1,4 @@
--- marketit — multi-tenancy scaffolding: organizations + memberships
+-- make1day — multi-tenancy scaffolding: organizations + memberships
 -- Run AFTER 0006_observability.sql.
 --
 -- Adds a lightweight org/workspace model that scopes data per tenant:

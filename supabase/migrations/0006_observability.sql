@@ -1,4 +1,4 @@
--- marketit — observability: durable pageview counters
+-- make1day — observability: durable pageview counters
 -- Run AFTER 0005_orders.sql.
 --
 -- The marketing site records first-party, privacy-friendly pageview counts

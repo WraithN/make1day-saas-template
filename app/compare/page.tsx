@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { CompareContent } from "@/components/CompareContent";
 
 export const metadata: Metadata = {
-  title: "marketit vs ShipFast, Makerkit, Supastarter — comparison",
+  title: "make1day vs ShipFast, Makerkit, Supastarter — comparison",
   description:
-    "An honest, source-level comparison of marketit against ShipFast, Makerkit and Supastarter — the best Next.js SaaS boilerplates in 2026.",
+    "An honest, source-level comparison of make1day against ShipFast, Makerkit and Supastarter — the best Next.js SaaS boilerplates in 2026.",
   keywords: [
     "ShipFast alternative",
     "Makerkit alternative",

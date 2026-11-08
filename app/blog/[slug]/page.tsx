@@ -14,8 +14,8 @@ import { Markdown } from "@/lib/markdown";
 
 // Keep this literal stable: the generator rewrites it to localhost inside
 // customer ZIPs. Set NEXT_PUBLIC_SITE_URL to the real domain at launch.
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://marketit.dev";
-const COMPANY = "marketit";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com";
+const COMPANY = "make1day";
 
 /** Canonical slugs AND legacy aliases resolve to a static page. */
 export function generateStaticParams() {
@@ -184,7 +184,9 @@ export default async function BlogPost({
                     +
                   </span>
                 </summary>
-                <p className="mt-3 text-sm leading-relaxed text-ink-soft">{it.a}</p>
+                <div className="mt-3 text-sm leading-relaxed text-ink-soft">
+                  <Markdown source={it.a} />
+                </div>
               </details>
             ))}
           </div>

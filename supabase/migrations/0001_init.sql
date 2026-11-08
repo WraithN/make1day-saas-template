@@ -1,4 +1,4 @@
--- marketit — initial schema
+-- make1day — initial schema
 -- Run this in the Supabase SQL editor, or via the Supabase CLI:
 --   supabase db push   (or paste into Dashboard → SQL Editor)
 

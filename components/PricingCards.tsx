@@ -25,6 +25,12 @@ export type Plan = {
   muted?: boolean;
   /** Small accent caption under the feature list (e.g. what Care actually sells). */
   note?: string;
+  /** Black Friday badge — shows the BLACK FRIDAY tag instead of "launch price". */
+  bf?: boolean;
+  /** Where the CTA links when there is no priceId (defaults to /login). The
+   *  Black Friday page overrides this to /pricing so an unconfigured promo
+   *  still sends buyers to the real purchase page. */
+  ctaFallbackHref?: string;
 };
 
 export function PricingCards({ plans }: { plans: Plan[] }) {
@@ -38,7 +44,7 @@ export function PricingCards({ plans }: { plans: Plan[] }) {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ plan: plan.id }),
+        body: JSON.stringify({ plan: plan.id, blackFriday: plan.bf }),
       });
       const data = await res.json();
       if (data.url) {
@@ -84,11 +90,15 @@ export function PricingCards({ plans }: { plans: Plan[] }) {
             >
               {plan.name}
             </h3>
-            {plan.launch && (
+            {plan.bf ? (
+              <span className="rounded-full border border-accent/50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-accent">
+                {t("blackfriday.badge")}
+              </span>
+            ) : plan.launch ? (
               <span className="rounded-full border border-accent/50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-accent">
                 {t("pricing.launch")}
               </span>
-            )}
+            ) : null}
           </div>
           <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
             <span
@@ -134,7 +144,11 @@ export function PricingCards({ plans }: { plans: Plan[] }) {
                 {busyId === plan.id ? t("login.sending") : t(plan.ctaKey)}
               </button>
             ) : (
-              <Link href="/login" className="btn-solid w-full" data-cta={`pricing-${plan.id}`}>
+              <Link
+                href={plan.ctaFallbackHref ?? "/login"}
+                className="btn-solid w-full"
+                data-cta={`pricing-${plan.id}`}
+              >
                 {t(plan.ctaKey)}
               </Link>
             )}
