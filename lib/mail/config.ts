@@ -9,12 +9,27 @@ import {
 import { logger } from "@/lib/logger";
 import type { MailProvider } from "./types";
 
-const IMPLEMENTED: MailProvider[] = ["resend", "webhook", "none"];
+const IMPLEMENTED: MailProvider[] = [
+  "resend",
+  "sendgrid",
+  "postmark",
+  "mailgun",
+  "webhook",
+  "none",
+];
 
 /** Resolve MAIL_PROVIDER; an unknown value degrades to the safe "none" mode. */
 export function currentMailProvider(): MailProvider {
   const raw = env.mailProvider();
-  if (raw === "resend" || raw === "webhook" || raw === "smtp" || raw === "none") {
+  if (
+    raw === "resend" ||
+    raw === "sendgrid" ||
+    raw === "postmark" ||
+    raw === "mailgun" ||
+    raw === "webhook" ||
+    raw === "smtp" ||
+    raw === "none"
+  ) {
     return raw;
   }
   if (raw) {

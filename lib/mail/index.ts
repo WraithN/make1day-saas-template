@@ -1,9 +1,12 @@
 // Unified transactional mail dispatcher.
 //
-// Three working transports, all over fetch (zero runtime dependencies):
-//   * resend  — POST https://api.resend.com/emails (REST).
-//   * webhook — POST to a configurable MAIL_WEBHOOK_URL (custom HTTP mailer).
-//   * none    — logs the message and returns delivered:false (never throws).
+// Six working transports, all over fetch (zero runtime dependencies):
+//   * resend   — POST https://api.resend.com/emails (REST).
+//   * sendgrid — POST https://api.sendgrid.com/v3/mail/send (REST).
+//   * postmark — POST https://api.postmarkapp.com/email (Server API).
+//   * mailgun  — POST https://api.mailgun.net/v3/{domain}/messages (REST + form).
+//   * webhook  — POST to a configurable MAIL_WEBHOOK_URL (custom HTTP mailer).
+//   * none     — logs the message and returns delivered:false (never throws).
 // "smtp" is a RESERVED, UNIMPLEMENTED value: it throws a clear MailError
 // instead of claiming support. See docs/email.md.
 //
@@ -132,6 +135,143 @@ async function sendWebhook(input: SendMailInput, from: string): Promise<string |
   }
 }
 
+async function sendSendGrid(input: SendMailInput, from: string): Promise<string | undefined> {
+  const apiKey = env.sendgridApiKey().trim();
+  if (!apiKey) {
+    throw new MailError("invalid_config", "SENDGRID_API_KEY is not configured");
+  }
+  const fromName = env.mailFromName().trim();
+  const replyTo = env.mailReplyTo().trim();
+  const body = {
+    personalizations: [{ to: [{ email: input.to }] }],
+    from: fromName ? { email: from, name: fromName } : { email: from },
+    ...(replyTo ? { reply_to: { email: replyTo } } : {}),
+    subject: input.subject,
+    content: [
+      { type: "text/plain", value: input.text },
+      { type: "text/html", value: input.html },
+    ],
+  };
+  const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(MAIL_HTTP_TIMEOUT_MS),
+  });
+  if (!res.ok) {
+    let detail = "";
+    try {
+      const parsed = (await res.json()) as { errors?: { message?: string }[] };
+      detail = parsed?.errors?.[0]?.message ? `: ${parsed.errors[0].message}` : "";
+    } catch {
+      /* non-JSON error body — keep the status only */
+    }
+    throw new MailError(
+      "transport_error",
+      `SendGrid returned HTTP ${res.status}${detail}`,
+    );
+  }
+  // SendGrid returns the message id in the X-Message-Id response header.
+  return res.headers.get("X-Message-Id") ?? undefined;
+}
+
+async function sendPostmark(input: SendMailInput, from: string): Promise<string | undefined> {
+  const token = env.postmarkServerToken().trim();
+  if (!token) {
+    throw new MailError("invalid_config", "POSTMARK_SERVER_TOKEN is not configured");
+  }
+  const replyTo = env.mailReplyTo().trim();
+  const body = {
+    From: from,
+    To: input.to,
+    Subject: input.subject,
+    HtmlBody: input.html,
+    TextBody: input.text,
+    ...(replyTo ? { ReplyTo: replyTo } : {}),
+    MessageStream: "outbound",
+  };
+  const res = await fetch("https://api.postmarkapp.com/email", {
+    method: "POST",
+    headers: {
+      "X-Postmark-Server-Token": token,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(MAIL_HTTP_TIMEOUT_MS),
+  });
+  if (!res.ok) {
+    let detail = "";
+    try {
+      const parsed = (await res.json()) as { Message?: string };
+      detail = parsed?.Message ? `: ${parsed.Message}` : "";
+    } catch {
+      /* non-JSON error body — keep the status only */
+    }
+    throw new MailError(
+      "transport_error",
+      `Postmark returned HTTP ${res.status}${detail}`,
+    );
+  }
+  try {
+    const parsed = (await res.json()) as { MessageID?: string };
+    return parsed?.MessageID;
+  } catch {
+    return undefined;
+  }
+}
+
+async function sendMailgun(input: SendMailInput, from: string): Promise<string | undefined> {
+  const apiKey = env.mailgunApiKey().trim();
+  const domain = env.mailgunDomain().trim();
+  if (!apiKey || !domain) {
+    throw new MailError(
+      "invalid_config",
+      "MAILGUN_API_KEY and MAILGUN_DOMAIN must both be configured",
+    );
+  }
+  const replyTo = env.mailReplyTo().trim();
+  const form = new URLSearchParams();
+  form.set("from", from);
+  form.set("to", input.to);
+  form.set("subject", input.subject);
+  form.set("html", input.html);
+  form.set("text", input.text);
+  if (replyTo) form.set("h:Reply-To", replyTo);
+  const res = await fetch(`https://api.mailgun.net/v3/${domain}/messages`, {
+    method: "POST",
+    headers: {
+      // Mailgun uses HTTP Basic auth with username "api" and the API key.
+      Authorization: `Basic ${Buffer.from(`api:${apiKey}`).toString("base64")}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: form.toString(),
+    signal: AbortSignal.timeout(MAIL_HTTP_TIMEOUT_MS),
+  });
+  if (!res.ok) {
+    let detail = "";
+    try {
+      const parsed = (await res.json()) as { message?: string };
+      detail = parsed?.message ? `: ${parsed.message}` : "";
+    } catch {
+      /* non-JSON error body — keep the status only */
+    }
+    throw new MailError(
+      "transport_error",
+      `Mailgun returned HTTP ${res.status}${detail}`,
+    );
+  }
+  try {
+    const parsed = (await res.json()) as { id?: string };
+    return parsed?.id;
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * Send one email. Throws a typed MailError for configuration / transport
  * problems (except in "none" mode, which is always a safe no-op).
@@ -156,7 +296,7 @@ export async function sendMail(input: SendMailInput): Promise<SendMailResult> {
   if (provider === "smtp") {
     throw new MailError(
       "smtp_not_implemented",
-      "MAIL_PROVIDER=smtp is reserved but not implemented. Install nodemailer + @types/nodemailer and add a dynamic-import adapter (docs/email.md), or use MAIL_PROVIDER=resend|webhook.",
+      "MAIL_PROVIDER=smtp is reserved but not implemented. Install nodemailer + @types/nodemailer and add a dynamic-import adapter (docs/email.md), or use MAIL_PROVIDER=resend|sendgrid|postmark|mailgun|webhook.",
     );
   }
 
@@ -166,10 +306,26 @@ export async function sendMail(input: SendMailInput): Promise<SendMailResult> {
   }
 
   try {
-    const id =
-      provider === "resend"
-        ? await sendResend(input, from)
-        : await sendWebhook(input, from);
+    let id: string | undefined;
+    switch (provider) {
+      case "resend":
+        id = await sendResend(input, from);
+        break;
+      case "sendgrid":
+        id = await sendSendGrid(input, from);
+        break;
+      case "postmark":
+        id = await sendPostmark(input, from);
+        break;
+      case "mailgun":
+        id = await sendMailgun(input, from);
+        break;
+      case "webhook":
+        id = await sendWebhook(input, from);
+        break;
+      default:
+        throw new MailError("invalid_config", `Unknown mail provider: ${provider}`);
+    }
     logger.info("transactional mail delivered", {
       to: input.to,
       subject: input.subject,

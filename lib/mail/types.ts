@@ -5,15 +5,25 @@ import type { Lang } from "@/lib/i18n-core";
 
 /**
  * The configured mail provider.
- *   resend  — Resend REST API (implemented, zero dependencies).
- *   webhook — custom HTTP mailer (implemented, configurable URL + bearer token).
- *   none    — safe no-op (implemented).
- *   smtp    — RESERVED, NOT IMPLEMENTED. Kept as a recognised value so a
- *             deployment can declare its intent without us pretending it
- *             works; sendMail throws MailError("smtp_not_implemented").
- *             See docs/email.md.
+ *   resend   — Resend REST API (implemented, zero dependencies).
+ *   sendgrid — SendGrid v3 Mail Send API (implemented, zero dependencies).
+ *   postmark — Postmark Server API (implemented, zero dependencies).
+ *   mailgun  — Mailgun Messages API (implemented, zero dependencies).
+ *   webhook  — custom HTTP mailer (implemented, configurable URL + bearer token).
+ *   none     — safe no-op (implemented).
+ *   smtp     — RESERVED, NOT IMPLEMENTED. Kept as a recognised value so a
+ *              deployment can declare its intent without us pretending it
+ *              works; sendMail throws MailError("smtp_not_implemented").
+ *              See docs/email.md.
  */
-export type MailProvider = "resend" | "webhook" | "smtp" | "none";
+export type MailProvider =
+  | "resend"
+  | "sendgrid"
+  | "postmark"
+  | "mailgun"
+  | "webhook"
+  | "smtp"
+  | "none";
 
 /** Template identifiers handled by lib/mail/templates.ts. */
 export type MailTemplate =
