@@ -106,7 +106,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "Is SMTP supported for transactional email?",
-        a: "**No.** `MAIL_PROVIDER` accepts `resend` (Resend REST), `webhook` (a custom HTTP mailer) or `none` (a safe logged no-op).\n\n`MAIL_PROVIDER=smtp` is a reserved, **not-implemented** value; there is no nodemailer dependency.\n\nA durable retry queue (`mail_outbox` + `/api/cron/mail-outbox`) does exist, but the host scheduler must be configured by the operator; with `MAIL_PROVIDER=none` nothing is queued or sent. SPF/DKIM/DMARC are operator-side DNS work. See `docs/email.md`.",
+        a: "**No.** `MAIL_PROVIDER` accepts `resend` (Resend REST), `sendgrid` (SendGrid v3), `postmark` (Postmark Server API), `mailgun` (Mailgun Messages API), `webhook` (a custom HTTP mailer) or `none` (a safe logged no-op).\n\n`MAIL_PROVIDER=smtp` is a reserved, **not-implemented** value; there is no nodemailer dependency.\n\nA durable retry queue (`mail_outbox` + `/api/cron/mail-outbox`) does exist, but the host scheduler must be configured by the operator; with `MAIL_PROVIDER=none` nothing is queued or sent. SPF/DKIM/DMARC are operator-side DNS work. See `docs/email.md`.",
       },
       {
         q: "How many visual styles and build combinations are verified?",
@@ -198,7 +198,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "事务邮件支持 SMTP 吗？",
-        a: "**不支持。** `MAIL_PROVIDER` 可接受 `resend`（Resend REST）、`webhook`（自定义 HTTP mailer）或 `none`（安全空操作）。\n\n`MAIL_PROVIDER=smtp` 只是预留值、**尚未实现**，仓库里也没有 nodemailer 依赖。\n\n持久化重试队列（`mail_outbox` + `/api/cron/mail-outbox`）已经存在，但宿主机定时任务要由运维方自己配置；设为 `none` 时既不发信也不入队。SPF/DKIM/DMARC 属于运营方 DNS 侧工作。详见 `docs/email.md`。",
+        a: "**不支持。** `MAIL_PROVIDER` 可接受 `resend`（Resend REST）、`sendgrid`（SendGrid v3）、`postmark`（Postmark Server API）、`mailgun`（Mailgun Messages API）、`webhook`（自定义 HTTP mailer）或 `none`（安全空操作）。\n\n`MAIL_PROVIDER=smtp` 只是预留值、**尚未实现**，仓库里也没有 nodemailer 依赖。\n\n持久化重试队列（`mail_outbox` + `/api/cron/mail-outbox`）已经存在，但宿主机定时任务要由运维方自己配置；设为 `none` 时既不发信也不入队。SPF/DKIM/DMARC 属于运营方 DNS 侧工作。详见 `docs/email.md`。",
       },
       {
         q: "有多少套视觉风格和多少组构建验证？",

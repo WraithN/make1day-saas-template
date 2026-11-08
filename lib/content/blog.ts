@@ -288,7 +288,7 @@ Because the product IS the download, this project has to solve things a fixed st
 
 ## Honest limits
 
-This is an honest starter, not a batteries-included platform: the consoles do have profile and role mutation endpoints and a billing portal, but the local auth path has no MFA, OAuth or session rotation; SMTP is not implemented (Resend REST, a custom HTTP mailer or a safe no-op); the mail retry queue and the optional external error sink exist but require an operator-configured cron and \`ERROR_REPORT_URL\`; download / activation events are logged with hashed emails, while the refund rule stays a plain 14-day window. Multi-tenancy ships SQL and helpers, but you must scope your own domain tables. If you need a batteries-included B2B tenant model from day one, Makerkit or Supastarter go deeper.
+This is an honest starter, not a batteries-included platform: the consoles do have profile and role mutation endpoints and a billing portal, but the local auth path has no MFA, OAuth or session rotation; SMTP is not implemented (Resend, SendGrid, Postmark and Mailgun REST APIs, a custom HTTP mailer or a safe no-op); the mail retry queue and the optional external error sink exist but require an operator-configured cron and \`ERROR_REPORT_URL\`; download / activation events are logged with hashed emails, while the refund rule stays a plain 14-day window. Multi-tenancy ships SQL and helpers, but you must scope your own domain tables. If you need a batteries-included B2B tenant model from day one, Makerkit or Supastarter go deeper.
 
 No starter is universally best. Choose against the 40% that is yours.`,
       zh: `如果你是因为搜「ShipFast 替代品」或「Makerkit 替代品」来到这里，你正在权衡大家推荐的同几个名字。有用的答案不是功能清单，而是这些产品从哪一步开始不再可比。
@@ -311,7 +311,7 @@ No starter is universally best. Choose against the 40% that is yours.`,
 
 ## 诚实的限制
 
-这是一套诚实标注边界的模板，不是开箱即用的完整平台：后台已有资料修改、角色管理与账单门户；本地登录路径没有 MFA、OAuth 与会话轮换；SMTP 明确未实现（只有 Resend REST、自定义 HTTP mailer 或安全空操作）；邮件重试队列与可选外部错误上报已存在，但需要运维方配置定时任务与 \`ERROR_REPORT_URL\`；下载与兑换事件会以哈希邮箱记录，退款规则仍是纯 14 天窗口。多租户附带 SQL 与助手函数，但你自己的业务表要自己做租户隔离。若第一天就要开箱即用的 B2B 租户模型，Makerkit 或 Supastarter 更完整。
+这是一套诚实标注边界的模板，不是开箱即用的完整平台：后台已有资料修改、角色管理与账单门户；本地登录路径没有 MFA、OAuth 与会话轮换；SMTP 明确未实现（只有 Resend、SendGrid、Postmark、Mailgun 的 REST、自定义 HTTP mailer 或安全空操作）；邮件重试队列与可选外部错误上报已存在，但需要运维方配置定时任务与 \`ERROR_REPORT_URL\`；下载与兑换事件会以哈希邮箱记录，退款规则仍是纯 14 天窗口。多租户附带 SQL 与助手函数，但你自己的业务表要自己做租户隔离。若第一天就要开箱即用的 B2B 租户模型，Makerkit 或 Supastarter 更完整。
 
 没有哪个模板是通用最佳，只有对你那 40% 而言的最佳。`,
     },
@@ -715,6 +715,243 @@ robots 应显式允许 AI 爬虫访问机器可读路由，sitemap 也应列出�
         { q: "llms.txt 和 llms-full.txt 有什么区别？", a: "llms.txt 是给有限上下文看的精要概览与链接；llms-full.txt 承载长文事实，如配置枚举、API schema、裁剪规则与诚实限制。" },
         { q: "客户工程里会带上本站的 llms.txt 和 MCP 端点吗？", a: "不会。它们是站点专属，每个客户 ZIP 都会剪掉。生成的工程改为携带自己的 AGENTS.md、design.md、scoped rules、Cursor rules、CLAUDE.md 与 skills playbook。" },
         { q: "不用关键词量的话，GEO 该看什么指标？", a: "看 AI 引荐流量（chatgpt.com、perplexity.ai、gemini.google.com）、AI 回答里的品牌提及与 SOV，以及被引用的 URL 是否是 FAQ、Markdown 变体这类机器可读面。" },
+      ],
+    },
+  },
+  {
+    slug: "waffo-vs-creem-payment-gateways",
+    date: "2026-11-08",
+    category: "Comparison",
+    readingMinutes: 8,
+    tags: ["Waffo vs Creem", "SaaS payment gateway comparison", "Merchant of Record", "indie SaaS payments"],
+    title: {
+      en: "Waffo vs Creem: Which Payment Gateway for Your SaaS in 2026?",
+      zh: "Waffo vs Creem：2026 年你的 SaaS 该选哪个支付网关？",
+    },
+    excerpt: {
+      en: "A practical comparison of Waffo and Creem for indie SaaS founders — fees, onboarding, global coverage, webhooks and developer experience — without the marketing spin.",
+      zh: "面向独立 SaaS 创始人的 Waffo 与 Creem 务实对比——费率、入驻、全球覆盖、Webhook 与开发体验，去掉营销滤镜。",
+    },
+    body: {
+      en: `Choosing a payment gateway is one of the few decisions that is hard to reverse later: once customers, invoices and tax filings are tied to a provider, switching is painful. This comparison looks at two merchant-of-record-style options that indie founders keep comparing — Waffo and Creem.
+
+## Two different product shapes
+
+Waffo is not a single product. In the make1day adapters it ships in two flavours: **Pancake** (a Merchant of Record / global checkout, docs.waffo.ai) and **Acquiring** (a SE-Asia acquiring gateway, waffo.com/docs, RSA-signed webhooks). Creem is a hosted checkout plus a Merchant of Record, with a Stripe-like API and webhooks. The practical difference: Waffo Acquiring is built for a specific regional acquiring flow, while Creem and Waffo Pancake are closer to "drop-in global checkout".
+
+## Fees and payout
+
+Both are MoR-ish, which means they take a higher cut than a raw processor because they absorb sales tax / VAT and compliance. Exact numbers move constantly, so verify on each provider's pricing page before you commit. The thing that matters more than the headline percentage is the payout schedule and whether refunds and chargebacks are netted transparently.
+
+## Onboarding and KYC
+
+Creem's onboarding is aimed at digital products and is generally quick for software. Waffo Pancake onboarding is straightforward for a solo founder; Waffo Acquiring requires the merchant contract fields (merchant info, user info, payment info, currency, order description) that the make1day integration reads from env. Neither is instant if your product category triggers extra review.
+
+## Global coverage and tax
+
+This is where a Merchant of Record earns its fee. If you sell worldwide, an MoR registers and remits VAT / GST / sales tax on your behalf. Both Waffo (Pancake) and Creem position themselves here. Acquiring-only setups shift that tax burden back to you.
+
+## Developer experience
+
+Both expose a hosted checkout so you never touch card data. Creem's API is the more familiar Stripe-like surface. Waffo Pancake uses a Store-Slug or API-Key auth and a checkout session endpoint; Waffo Acquiring signs requests with RSA and needs the platform public key for webhook verification. If your stack already has a unified checkout + webhook contract (like make1day's six adapters behind one interface), the per-gateway differences stay contained.
+
+## Which to pick
+
+Pick Creem if you want the fastest Stripe-like integration and a hosted dashboard. Pick Waffo Pancake if you want an MoR with a simple global checkout. Pick Waffo Acquiring only if you already have a regional acquiring contract. And if you are not sure, build behind a switchable layer so the gateway is a config change, not a rewrite.`,
+      zh: `支付网关是少数难以回头的决策：一旦客户、发票与税务归档绑定了某个供应商，更换成本很高。这篇对比看独立创始人常拿来比较的两种「类似商户登记（MoR）」方案——Waffo 与 Creem。
+
+## 两种不同形态
+
+Waffo 不是一个单一产品。在 make1day 的适配器里它有两种形态：**Pancake**（商户登记 / 全球结账，docs.waffo.ai）与 **Acquiring**（东南亚收单网关，waffo.com/docs，RSA 签名 Webhook）。Creem 是托管结账加商户登记，提供类 Stripe 的 API 与 Webhook。实际差别在于：Waffo Acquiring 为特定区域的收单流程而建，而 Creem 与 Waffo Pancake 更接近「即插即用的全球结账」。
+
+## 费率和结算
+
+两者都偏 MoR，意味着它们比裸处理器抽成更高，因为替你承担了销售税 / VAT 与合规。具体数字经常变动，落地前务必在各家定价页核实。比表面百分比更重要的是结算周期，以及退款、拒付是否透明地净额结算。
+
+## 入驻与 KYC
+
+Creem 的入驻面向数字商品，对软件通常很快。Waffo Pancake 对独立创始人也很容易；Waffo Acquiring 则需要商户合同字段（商户信息、用户信息、支付信息、币种、订单描述），make1day 的集成会从 env 读取这些。若你的品类触发额外审核，两者都不是即时的。
+
+## 全球覆盖与税务
+
+这是 MoR 收费的价值所在。若你面向全球销售，MoR 会替你注册并代缴 VAT / GST / 销售税。Waffo（Pancake）与 Creem 都以此定位。仅收单的接法则把税务负担推回给你。
+
+## 开发体验
+
+两者都提供托管结账，因此你无需碰卡号数据。Creem 的 API 是更熟悉的类 Stripe 表面。Waffo Pancake 用 Store-Slug 或 API-Key 鉴权与结账会话端点；Waffo Acquiring 用 RSA 给请求签名，并需要平台公钥验证 Webhook。若你的技术栈已有统一的结账 + Webhook 契约（如 make1day 在单一接口后接的六个适配器），各网关差异就被隔离了。
+
+## 该选哪个
+
+想要最快的类 Stripe 接入与托管后台，选 Creem。想要 MoR + 简洁全球结账，选 Waffo Pancake。若你已有区域收单合同，才选 Waffo Acquiring。若还不确定，就建在可切换的层之上，让网关成为配置项而非重写。`,
+    },
+    faq: {
+      en: [
+        { q: "Is Waffo or Creem cheaper?", a: "Both are merchant-of-record style and take a higher cut than a raw processor because they handle sales tax and compliance. Fees change often — verify on each provider's pricing page rather than trusting a comparison snapshot." },
+        { q: "Can I switch gateways later?", a: "If your checkout and webhook logic sit behind one unified interface, switching is a config change. If you hard-coded one provider, it is a rewrite. Prefer the switchable layer." },
+        { q: "Does Waffo handle VAT like Creem?", a: "Waffo Pancake and Creem both act as Merchant of Record and remit tax for you. Waffo Acquiring is a regional acquiring gateway and shifts tax compliance back to the merchant." },
+      ],
+      zh: [
+        { q: "Waffo 和 Creem 哪个更便宜？", a: "两者都是商户登记（MoR）模式，比裸处理器抽成更高，因为它们承担销售税与合规。费率经常变动——请以各家定价页为准，别轻信对比快照。" },
+        { q: "以后能换网关吗？", a: "若结账与 Webhook 逻辑在统一接口之后，更换只是配置项；若硬编码了某一家，则是重写。优先选可切换的层。" },
+        { q: "Waffo 也像 Creem 一样处理 VAT 吗？", a: "Waffo Pancake 与 Creem 都是商户登记，替你代缴税。Waffo Acquiring 是区域收单网关，税务合规责任回到商户身上。" },
+      ],
+    },
+  },
+  {
+    slug: "waffo-payment-setup-tutorial",
+    date: "2026-11-08",
+    category: "Tutorial",
+    readingMinutes: 7,
+    tags: ["Waffo payment setup", "Waffo Pancake tutorial", "Next.js SaaS checkout", "Waffo webhook"],
+    title: {
+      en: "Set Up Waffo Payments in a Next.js SaaS (Step by Step)",
+      zh: "在 Next.js SaaS 中接入 Waffo 支付（分步教程）",
+    },
+    excerpt: {
+      en: "Wire Waffo (Pancake MoR or Acquiring) into a Next.js checkout: API keys, webhook verification, price ids and a test purchase.",
+      zh: "把 Waffo（Pancake MoR 或 Acquiring）接进 Next.js 结账：API key、Webhook 验签、价目 id 与一次测试购买。",
+    },
+    body: {
+      en: `Waffo has two flavours and the setup differs between them. This tutorial covers both, because the make1day integration supports each through the same checkout and webhook contract.
+
+## 1. Decide the flavour
+
+Set **WAFFO_FLAVOR** to **pancake** (global MoR checkout) or **acquiring** (SE-Asia acquiring). The default is pancake; the adapter switches endpoints and signing accordingly.
+
+## 2. Gather credentials
+
+For Pancake you need a **WAFFO_STORE_SLUG** (or **WAFFO_STORE_ID** / **WAFFO_MERCHANT_ID**) and a **WAFFO_PRIVATE_KEY**. For Acquiring you need the merchant contract fields: **WAFFO_ACQUIRING_MERCHANT_INFO**, **WAFFO_ACQUIRING_USER_INFO**, **WAFFO_ACQUIRING_PAYMENT_INFO**, **WAFFO_ACQUIRING_ORDER_CURRENCY** and **WAFFO_ACQUIRING_ORDER_DESCRIPTION**, plus **WAFFO_PRIVATE_KEY** and the per-environment webhook public key.
+
+## 3. Create products and prices
+
+In the Waffo dashboard create a one-time product for Buyout and a recurring product for Care, then copy their price ids into **WAFFO_PRICE_ID_BUYOUT** and **WAFFO_PRICE_ID_CARE**. For a Black Friday or MGM promo, create separate price ids and set **WAFFO_PRICE_ID_BUYOUT_BF** / **_MGM** (the webhook plan inference recognises them automatically).
+
+## 4. Configure the webhook
+
+Point Waffo at your **/api/payments/webhook/waffo** endpoint. Pancake verifies with the platform RSA public key (**WAFFO_WEBHOOK_PUBLIC_KEY**, test / prod variants). Acquiring signs the request with RSA and needs the same public key. Always verify the signature server-side before trusting the payload — never skip it.
+
+## 5. Set the provider
+
+Set **PAYMENT_PROVIDER=waffo** and the Waffo env vars above. A checkout call resolves the right price id for the active plan, and the webhook grants the licence by inferring the plan from the price id.
+
+## 6. Run a sandbox test
+
+Use the Waffo test environment (**WAFFO_ENVIRONMENT=test**) and a test purchase. Confirm the webhook fires, the plan is inferred correctly, and the licence key is issued. Do not go live until a real sandbox round-trip is green.
+
+If you are on make1day, the six adapters already share this contract, so the same code path works for Creem, Stripe, PayPal and Lemon Squeezy — only the env vars change.`,
+      zh: `Waffo 有两种形态，接入方式不同。本教程两种都覆盖，因为 make1day 的集成通过同一套结账与 Webhook 契约支持两者。
+
+## 1. 确定形态
+
+把 **WAFFO_FLAVOR** 设为 **pancake**（全球 MoR 结账）或 **acquiring**（东南亚收单）。默认是 pancake；适配器据此切换端点与签名。
+
+## 2. 收集凭证
+
+Pancake 需要 **WAFFO_STORE_SLUG**（或 **WAFFO_STORE_ID** / **WAFFO_MERCHANT_ID**）与 **WAFFO_PRIVATE_KEY**。Acquiring 需要商户合同字段：**WAFFO_ACQUIRING_MERCHANT_INFO**、**WAFFO_ACQUIRING_USER_INFO**、**WAFFO_ACQUIRING_PAYMENT_INFO**、**WAFFO_ACQUIRING_ORDER_CURRENCY**、**WAFFO_ACQUIRING_ORDER_DESCRIPTION**，外加 **WAFFO_PRIVATE_KEY** 与各环境的 Webhook 公钥。
+
+## 3. 创建商品与价格
+
+在 Waffo 后台为 Buyout 建一次性商品、为 Care 建周期商品，把价格 id 填入 **WAFFO_PRICE_ID_BUYOUT** 与 **WAFFO_PRICE_ID_CARE**。若做黑五或 MGM 促销，另建价格 id 并设 **WAFFO_PRICE_ID_BUYOUT_BF** / **_MGM**（Webhook 的 plan 反推会自动识别）。
+
+## 4. 配置 Webhook
+
+把 Waffo 指向你的 **/api/payments/webhook/waffo** 端点。Pancake 用平台 RSA 公钥（**WAFFO_WEBHOOK_PUBLIC_KEY**，含 test / prod 变体）验证。Acquiring 用 RSA 给请求签名，同样需要该公钥。务必在服务端验证签名后再信任负载——绝不能跳过。
+
+## 5. 设定网关
+
+设 **PAYMENT_PROVIDER=waffo** 及上述 Waffo 环境变量。结账调用会为当前方案解析正确的价格 id，Webhook 则通过价格 id 反推方案并发放许可。
+
+## 6. 跑沙箱测试
+
+使用 Waffo 测试环境（**WAFFO_ENVIRONMENT=test**）做一次测试购买。确认 Webhook 触发、方案被正确反推、许可 key 已签发。在真实沙箱往返变绿前不要上线。
+
+若你用 make1day，六个适配器共享同一套契约，因此 Creem、Stripe、PayPal、Lemon Squeezy 走的是同一代码路径——只换 env 即可。`,
+    },
+    faq: {
+      en: [
+        { q: "Which Waffo flavour should I use?", a: "Use pancake for a global Merchant-of-Record checkout. Use acquiring only if you already have a regional acquiring contract that requires its specific fields and RSA signing." },
+        { q: "Do I need to verify the Waffo webhook signature?", a: "Yes. The integration verifies it server-side with the platform public key for both flavours. Skipping verification would let anyone forge a paid event." },
+        { q: "How does the licence get issued?", a: "The webhook infers the plan from the price id (including BF and MGM ids) and calls the licence grant. Without a configured price id the checkout falls back to display mode." },
+      ],
+      zh: [
+        { q: "该用哪种 Waffo 形态？", a: "想要全球商户登记结账用 pancake。仅当你已有需要特定字段与 RSA 签名的区域收单合同时，才用 acquiring。" },
+        { q: "需要验证 Waffo Webhook 签名吗？", a: "需要。集成对两种形态都用平台公钥在服务端验证。跳过验证会让任何人伪造已支付事件。" },
+        { q: "许可是怎么签发的？", a: "Webhook 通过价格 id（含 BF 与 MGM id）反推方案并调用许可发放。若未配置价格 id，结账会回退到展示模式。" },
+      ],
+    },
+  },
+  {
+    slug: "creem-payment-setup-tutorial",
+    date: "2026-11-08",
+    category: "Tutorial",
+    readingMinutes: 7,
+    tags: ["Creem payment setup", "Creem tutorial", "Creem webhook", "Next.js SaaS checkout"],
+    title: {
+      en: "Set Up Creem Payments in a Next.js SaaS (Step by Step)",
+      zh: "在 Next.js SaaS 中接入 Creem 支付（分步教程）",
+    },
+    excerpt: {
+      en: "Connect Creem's hosted checkout to a Next.js app: API key, products and prices, webhook signatures and a sandbox test.",
+      zh: "把 Creem 的托管结账接到 Next.js 应用：API key、商品与价格、Webhook 签名与沙箱测试。",
+    },
+    body: {
+      en: `Creem is the closest thing to a Stripe-like hosted checkout with a Merchant of Record. This tutorial gets a Next.js SaaS taking real payments through it.
+
+## 1. Create the account and API key
+
+Sign up at Creem, switch to test mode, and create an API key. Store it as **CREEM_API_KEY**. Set **CREEM_ENV=test** for development and **live** only after your sandbox round-trip is green.
+
+## 2. Create products and prices
+
+In the Creem dashboard create a one-time product for Buyout and a recurring product for Care. Copy their price ids into **CREEM_PRICE_ID_PRO** (one-time Buyout maps to the PRO slot, recurring Care maps to SCALE) — or, if your integration separates them, **CREEM_PRICE_ID_BUYOUT** / **CREEM_PRICE_ID_CARE**. For a Black Friday or MGM promo, create separate price ids and set **CREEM_PRICE_ID_BUYOUT_BF** / **_MGM**; the webhook plan inference already recognises them.
+
+## 3. Set the webhook
+
+Point Creem at your **/api/payments/webhook/creem** endpoint and copy the webhook secret into **CREEM_WEBHOOK_SECRET**. The integration verifies the signature on every event before trusting it. A checkout event resolves the plan from the product / price id and grants the licence; a refund or cancellation event revokes it.
+
+## 4. Set the provider
+
+Set **PAYMENT_PROVIDER=creem** plus **CREEM_API_KEY** and **CREEM_WEBHOOK_SECRET**. A checkout call picks the right price id for the active plan (or the BF / MGM price id when the promo is on), and redirects to Creem's hosted checkout.
+
+## 5. Run a sandbox test
+
+Use test mode and a test purchase. Confirm the webhook fires, the plan is inferred correctly, the licence key is issued, and a test refund revokes it. Go live (CREEM_ENV=live with live keys) only after that round-trip is green.
+
+Because Creem, Waffo, Stripe, PayPal and Lemon Squeezy all sit behind the same checkout and webhook contract in make1day, switching providers is a config change — not a rewrite.`,
+      zh: `Creem 是最接近「类 Stripe 托管结账 + 商户登记」的方案。本教程让 Next.js SaaS 通过它收真实款项。
+
+## 1. 创建账户与 API key
+
+在 Creem 注册，切到测试模式，创建 API key，存入 **CREEM_API_KEY**。开发期设 **CREEM_ENV=test**，沙箱往返变绿后再改为 **live**。
+
+## 2. 创建商品与价格
+
+在 Creem 后台为 Buyout 建一次性商品、为 Care 建周期商品。把价格 id 填入 **CREEM_PRICE_ID_PRO**（一次性 Buyout 映射到 PRO 槽、周期 Care 映射到 SCALE），若你的集成分开字段则填 **CREEM_PRICE_ID_BUYOUT** / **CREEM_PRICE_ID_CARE**。若做黑五或 MGM 促销，另建价格 id 并设 **CREEM_PRICE_ID_BUYOUT_BF** / **_MGM**；Webhook 的 plan 反推已能识别。
+
+## 3. 配置 Webhook
+
+把 Creem 指向你的 **/api/payments/webhook/creem** 端点，把 Webhook 密钥存入 **CREEM_WEBHOOK_SECRET**。集成会在信任每个事件前验证签名。结账事件通过商品 / 价格 id 反推方案并发放许可；退款或取消事件则撤消它。
+
+## 4. 设定网关
+
+设 **PAYMENT_PROVIDER=creem**，外加 **CREEM_API_KEY** 与 **CREEM_WEBHOOK_SECRET**。结账调用为当前方案（或促销开启时的 BF / MGM 价格 id）选取正确价格 id，并重定向到 Creem 托管结账。
+
+## 5. 跑沙箱测试
+
+用测试模式做一次测试购买。确认 Webhook 触发、方案被正确反推、许可 key 已签发，且测试退款能撤消许可。在往返变绿后再上线（CREEM_ENV=live 并换正式 key）。
+
+由于 Creem、Waffo、Stripe、PayPal、Lemon Squeezy 在 make1day 里都位于同一套结账与 Webhook 契约之后，切换供应商只是配置项——不是重写。`,
+    },
+    faq: {
+      en: [
+        { q: "Is Creem a Merchant of Record?", a: "Yes — Creem handles sales tax / VAT and compliance for you, which is why its fee is higher than a raw processor. Verify the current rate on Creem's pricing page." },
+        { q: "Do I need to verify the Creem webhook signature?", a: "Yes. The integration verifies it with CREEM_WEBHOOK_SECRET on every event. Skipping it would let anyone forge a paid event." },
+        { q: "What happens on a refund?", a: "The webhook sees the cancellation / refund event and revokes the licence so a refunded customer cannot keep access." },
+      ],
+      zh: [
+        { q: "Creem 是商户登记（MoR）吗？", a: "是——Creem 替你处理销售税 / VAT 与合规，这正是其费率高于裸处理器的原因。请以 Creem 定价页的当前费率为准。" },
+        { q: "需要验证 Creem Webhook 签名吗？", a: "需要。集成对每个事件都用 CREEM_WEBHOOK_SECRET 验证。跳过会让任何人伪造已支付事件。" },
+        { q: "退款会怎样？", a: "Webhook 收到取消 / 退款事件后会撤消许可，使退款客户无法继续访问。" },
       ],
     },
   },
