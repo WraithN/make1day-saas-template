@@ -128,12 +128,25 @@ export const paypalProvider: PaymentProvider = {
       const subscriptionId = r.id ?? r.billing_agreement_id ?? r.subscription_id ?? "";
       const periodEnd = r.billing_info?.next_billing_time ?? r.next_billing_time ?? null;
       const payAmount = r.billing_info?.last_payment?.amount;
+      const buyerEmail: string | undefined =
+        r.subscriber?.email_address ?? r.payer_email ?? undefined;
       out.push({
-        customerId: r.subscriber?.email_address ?? r.payer_email ?? r.id ?? "",
+        customerId: buyerEmail ?? r.id ?? "",
         subscriptionId: String(subscriptionId),
         status: normalizeStatus(r.status ?? "ACTIVE"),
         plan: planFromPaypalPlan(r.plan_id ?? r.plan?.id),
         periodEnd,
+        // Same contract as the other gateways: a completed payment must carry
+        // the fields the shared webhook needs to issue a license. Without
+        // grantsAccess the buyer pays but never receives the ZIP.
+        email: buyerEmail,
+        eventType: type,
+        eventId: String(event.id ?? `${type}:${subscriptionId}`),
+        orderId: String(r.id ?? subscriptionId),
+        grantsAccess:
+          (type === "PAYMENT.SALE.COMPLETED" ||
+            type === "BILLING.SUBSCRIPTION.ACTIVATED") &&
+          Boolean(buyerEmail),
         amount: payAmount ? Number(payAmount.value) : undefined,
         currency: payAmount?.currency_code ?? undefined,
       });

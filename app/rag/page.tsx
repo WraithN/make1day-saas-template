@@ -17,7 +17,7 @@ export default function RagPage() {
         <div className="eyebrow mb-2">BENCHMARK</div>
         <h2 className="text-lg font-semibold">Proven retrieval quality</h2>
         <p className="mt-2 text-sm text-ink-soft">
-          Every ShipKit RAG demo is measured against a golden question set with{" "}
+          Every marketit RAG demo is measured against a golden question set with{" "}
           <code className="rounded bg-surface px-1">npm run rag:bench</code>. It
           posts each question to <code className="rounded bg-surface px-1">/api/rag/query</code>{" "}
           and checks whether the expected source surfaces in the top-4 citations.
@@ -44,8 +44,8 @@ export default function RagPage() {
         </div>
         <div className="mt-4 space-y-1 text-sm">
           {[
-            ["How much does ShipKit cost?", "ShipKit pricing"],
-            ["ShipKit 是用什么框架和语言构建的？", "技术架构 / Architecture"],
+            ["How much does marketit cost?", "marketit pricing"],
+            ["marketit 是用什么框架和语言构建的？", "技术架构 / Architecture"],
             ["How does the RAG module combine BM25 and embeddings?", "RAG module guide"],
             ["Is there a 1:1 custom development service?", "Custom services / 定制服务"],
           ].map(([q, src]) => (

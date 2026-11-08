@@ -3,9 +3,11 @@ import { Trans } from "@/lib/i18n";
 import type { Lang } from "@/lib/i18n-core";
 import { getAllPosts } from "@/lib/content/blog";
 
-// Blog teaser: tutorial-type posts (Guide/Tutorial/Billing) get the teal tag;
-// competitor-comparison posts get the blue tag — distinct colors per the brief.
-// Cards are items-start so their natural height differences show (not equal).
+// Blog teaser: tutorial-type posts get the teal tag; competitor-comparison
+// posts get the brick tag. Cards are equal-height (grid stretch + h-full) so
+// the three columns line up, and rotate through the highlighter palette.
+const TONES = ["card-mint", "card-cream", "card-pink"];
+
 export function BlogTeaser({ lang }: { lang: Lang }) {
   const posts = getAllPosts().slice(0, 3);
   return (
@@ -15,43 +17,43 @@ export function BlogTeaser({ lang }: { lang: Lang }) {
           <p className="eyebrow mb-3">
             <Trans k="homeBlog.eyebrow" lang={lang} />
           </p>
-          <h2 className="text-[18px] font-medium text-[#f0f0f0]">
+          <h2 className="text-[18px] font-semibold text-ink">
             <Trans k="homeBlog.title" lang={lang} />
           </h2>
         </div>
         <Link
           href="/blog"
-          className="text-[14px] text-accent hover:underline"
+          className="text-[14px] font-bold text-accent hover:underline"
         >
           <Trans k="homeBlog.viewAll" lang={lang} />
         </Link>
       </div>
 
-      <div className="mt-8 grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {posts.map((p) => {
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {posts.map((p, idx) => {
           const isCompare = p.category === "Comparison";
           return (
             <Link
               key={p.slug}
               href={`/blog/${p.slug}`}
-              className="card flex flex-col hover:border-accent/50"
+              className={`card flex h-full flex-col ${TONES[idx % TONES.length]}`}
             >
               <span
                 className={`chip w-fit text-[11px] ${
                   isCompare
-                    ? "border-accent2/50 text-accent2"
-                    : "border-accent/50 text-accent"
+                    ? "text-accent"
+                    : "text-accent2"
                 }`}
               >
                 {p.category}
               </span>
-              <h3 className="mt-3 text-[14px] font-medium leading-snug text-[#f0f0f0]">
+              <h3 className="mt-3 text-[14px] font-bold leading-snug text-ink">
                 {p.title[lang] ?? p.title.en}
               </h3>
-              <p className="mt-2 flex-1 text-[14px] leading-relaxed text-[#949494]">
+              <p className="mt-2 flex-1 text-[14px] leading-relaxed text-ink-soft">
                 {p.excerpt[lang] ?? p.excerpt.en}
               </p>
-              <p className="mt-4 text-[12px] text-[#666666]">
+              <p className="mt-auto pt-4 text-[12px] text-muted">
                 {p.date} · {p.readingMinutes} min
               </p>
             </Link>

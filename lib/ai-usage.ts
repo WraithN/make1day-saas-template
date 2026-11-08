@@ -6,7 +6,7 @@
 // subscribes to a Care plan cannot burn through the whole LLM bill in one
 // afternoon.
 //
-// Storage mirrors the rest of ShipKit: Supabase when a service-role key is
+// Storage mirrors the rest of marketit: Supabase when a service-role key is
 // configured (production), the local SQLite database otherwise (dev /
 // self-hosted). Switching backends is an env change, not a code change.
 //
@@ -178,7 +178,16 @@ async function consumeSupabase(
   };
 }
 
-/** Non-atomic fallback for schemas without the consume_ai_usage() RPC. */
+/**
+ * Atomic fallback for schemas without migration 0009's consume_ai_usage().
+ *
+ * A read-modify-write upsert used to live here; two concurrent requests could
+ * both read the last free slot and both call the model. It now delegates to
+ * the generic consume_rate_limit() RPC (migration 0011), which takes an
+ * advisory lock. A 24h window aligned to the Unix epoch is exactly the UTC
+ * day, so it matches the primary quota semantics. If that RPC is missing too,
+ * we FAIL CLOSED rather than let an unmetered request reach a paid model.
+ */
 async function consumeSupabaseFallback(
   userId: string,
   day: string,
@@ -187,33 +196,38 @@ async function consumeSupabaseFallback(
   const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
   const db = createSupabaseAdminClient();
 
-  const { data: row, error: readError } = await db
-    .from("ai_usage")
-    .select("day, used")
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (readError) throw new Error(readError.message);
-
-  const used = row && row.day === day ? Number(row.used) || 0 : 0;
-  if (used >= limit) {
-    return { userId, day, used, limit, remaining: 0, allowed: false };
+  const { data, error } = await db.rpc("consume_rate_limit", {
+    p_bucket: `ai-usage:${userId}`,
+    p_limit: limit,
+    p_window_ms: 86_400_000,
+  });
+  if (error) {
+    logger.error(
+      "AI quota cannot be enforced atomically — apply migrations 0009 and 0011",
+      { err: error.message },
+    );
+    return { userId, day, used: limit, limit, remaining: 0, allowed: false };
   }
 
-  const next = used + 1;
-  const { error: writeError } = await db.from("ai_usage").upsert(
-    { user_id: userId, day, used: next },
-    { onConflict: "user_id" },
-  );
-  if (writeError) throw new Error(writeError.message);
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | { allowed?: boolean; remaining?: number }
+    | null;
+  const remaining = Math.max(0, Number(row?.remaining) || 0);
+  const used = Math.max(0, limit - remaining);
+  const allowed = row?.allowed !== false;
 
-  return {
-    userId,
-    day,
-    used: next,
-    limit,
-    remaining: Math.max(0, limit - next),
-    allowed: true,
-  };
+  // Best-effort mirror for the admin dashboard only. The AUTHORITATIVE
+  // decision above came from the atomic counter, so a stale mirror can never
+  // grant an extra model call.
+  try {
+    await db
+      .from("ai_usage")
+      .upsert({ user_id: userId, day, used }, { onConflict: "user_id" });
+  } catch {
+    /* reporting-only */
+  }
+
+  return { userId, day, used, limit, remaining, allowed };
 }
 
 async function readTodaySupabase(userId: string, day: string): Promise<number> {

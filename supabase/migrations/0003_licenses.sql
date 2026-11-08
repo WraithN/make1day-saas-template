@@ -1,4 +1,4 @@
--- ShipKit — license gate + webhook idempotency
+-- marketit — license gate + webhook idempotency
 -- Run after 0001_init.sql (and 0002_rag.sql if you use RAG).
 -- These tables are server-only: the webhook route uses the service-role key.
 

@@ -29,7 +29,7 @@ const ROOT = process.cwd();
 const specPath = path.join(ROOT, "ai/doc-spec.json");
 
 if (!fs.existsSync(specPath)) {
-  console.error("Missing ai/doc-spec.json — run this inside a generated ShipKit project.");
+  console.error("Missing ai/doc-spec.json — run this inside a generated marketit project.");
   process.exit(1);
 }
 const spec = JSON.parse(fs.readFileSync(specPath, "utf8"));

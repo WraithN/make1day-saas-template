@@ -2,21 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ───────────────────────────────────────────────────────────────────────────
+   C 档「涂鸦粗描边」设计系统
+   ---------------------------------------------------------------------------
+   Palette stays as space-separated RGB channels so every existing Tailwind
+   opacity modifier (`bg-surface/60`, `border-accent/40`, …) keeps working.
+   `--accent` / `--accent2` are the *readable* emphasis colours (brick red and
+   deep teal); the loud highlighter colours live in `--doodle-*` and are only
+   used behind dark ink, never as small text on the cream paper.
+   ─────────────────────────────────────────────────────────────────────────── */
 :root {
-  color-scheme: dark;
-  /* Palette as space-separated RGB channels so Tailwind opacity
-     modifiers (e.g. bg-surface/60) keep working. */
-  --bg: 10 11 15;
-  --surface: 17 19 25;
-  --line: 35 38 47;
-  --accent: 94 234 212;
-  --accent2: 96 165 250;
-  --ink: 242 244 247;
-  --ink-soft: 200 207 217;
-  --muted: 171 179 194;
+  color-scheme: light;
+  --bg: 255 248 231; /* #fff8e7 cream paper */
+  --surface: 255 255 255;
+  --line: 96 88 72; /* soft ink-brown for 1px utility borders */
+  --accent: 201 80 58; /* #c9503a brick — readable on cream */
+  --accent2: 27 138 131; /* #1b8a83 deep teal — readable on cream */
+  --ink: 17 17 17;
+  --ink-soft: 51 51 51;
+  --muted: 100 92 78;
+  --radius: 6px;
+  /* Hand-drawn kit */
+  --doodle-ink: #111111;
+  --doodle-yellow: #ffd93d;
+  --doodle-teal: #4ecdc4;
+  --doodle-red: #ff6b6b;
+  --doodle-mint: #d9f2ef;
+  --doodle-pink: #f7d9e3;
+  --doodle-cream: #ffe9a8;
+  --doodle-stroke: 3px;
+  --doodle-shadow: 6px 6px 0 var(--doodle-ink);
+  --doodle-shadow-sm: 4px 4px 0 var(--doodle-ink);
   /* System font stack — native hinting on every OS, zero web-font requests,
-     zero FOUT/CLS. CJK gets the platform's best face instead of falling back
-     from a Latin-only webfont (a common cause of blurry mixed-script text). */
+     zero FOUT/CLS. CJK gets the platform's best face. */
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text",
     "Segoe UI", "Inter", "Helvetica Neue", Arial, "PingFang SC",
     "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei",
@@ -25,21 +43,28 @@
     Menlo, Consolas, "Liberation Mono", monospace;
 }
 
-/* Light presentation of the ShipKit site. Toggled by adding `light` to <html>.
-   Dark is the default (above). Colors use the same RGB-channel tokens so all
-   Tailwind `bg-surface/60` etc. opacity modifiers keep working. */
+/* `html.light` is the quiet "plain paper" companion: same hand-drawn shapes,
+   muted highlighter colours. The theme toggle therefore switches between a
+   loud and a restrained version of the SAME design language — it no longer
+   flips between an unrelated dark and light theme. */
 html.light {
   color-scheme: light;
-  --bg: 247 248 250;
+  --bg: 252 251 247;
   --surface: 255 255 255;
-  --line: 226 232 240;
-  --accent: 79 70 229;
-  --accent2: 236 72 153;
-  --ink: 15 23 42;
-  --ink-soft: 71 85 105;
-  /* Darker than the old slate-400: ~4.8:1 on white, so small labels stay
-     legible instead of looking washed-out / blurry. */
-  --muted: 100 116 139;
+  --line: 122 114 98;
+  --accent: 62 56 47;
+  --accent2: 108 100 88;
+  --ink: 34 31 26;
+  --ink-soft: 74 68 58;
+  --muted: 112 104 90;
+  --doodle-yellow: #ece5d2;
+  --doodle-teal: #e3ecea;
+  --doodle-red: #efe4e2;
+  --doodle-mint: #eef4f2;
+  --doodle-pink: #f4edef;
+  --doodle-cream: #f5efdd;
+  --doodle-shadow: 4px 4px 0 var(--doodle-ink);
+  --doodle-shadow-sm: 3px 3px 0 var(--doodle-ink);
 }
 
 html {
@@ -53,11 +78,9 @@ body {
   color: rgb(var(--ink));
   font-family: var(--font-sans);
   font-weight: 400;
-  /* Crisp text: let the OS use its native (subpixel) antialiasing. Forcing
-     grayscale AA, `optimizeLegibility` or `font-synthesis: none` makes glyphs
-     thin and fuzzy — especially at 10–12px and on Windows. Compositing layers
-     (backdrop-blur / hover transforms) also drop subpixel AA, so surfaces are
-     kept solid and hover uses box-shadow only. */
+  /* Crisp text: OS-native antialiasing. Forced grayscale AA,
+     optimizeLegibility or font-synthesis:none make glyphs thin and fuzzy —
+     especially at 10–12px and on Windows. */
   -webkit-font-smoothing: auto;
   -moz-osx-font-smoothing: auto;
   text-rendering: auto;
@@ -83,30 +106,27 @@ pre {
   max-width: 100%;
 }
 
-/* Faint engineering grid backdrop (top only) */
+/* Faint dotted paper grain in place of the old engineering grid. */
 .tech-grid {
-  background-image: linear-gradient(
-      to right,
-      rgb(var(--accent) / 0.04) 1px,
-      transparent 1px
-    ),
-    linear-gradient(to bottom, rgb(var(--accent) / 0.04) 1px, transparent 1px);
-  background-size: 44px 44px;
+  background-image: radial-gradient(
+    rgb(var(--accent) / 0.13) 1.1px,
+    transparent 1.1px
+  );
+  background-size: 22px 22px;
   -webkit-mask-image: radial-gradient(
-    ellipse 80% 50% at 50% 0%,
-    #000 40%,
-    transparent 75%
+    ellipse 80% 55% at 50% 0%,
+    #000 35%,
+    transparent 78%
   );
   mask-image: radial-gradient(
-    ellipse 80% 50% at 50% 0%,
-    #000 40%,
-    transparent 75%
+    ellipse 80% 55% at 50% 0%,
+    #000 35%,
+    transparent 78%
   );
 }
 
 @layer components {
-  /* Landing-page font stack mandated by the ShipKit brand spec:
-     PingFang SC / Microsoft YaHei first, then system + Inter fallback. */
+  /* Landing-page font stack: PingFang SC / Microsoft YaHei first. */
   .sk-font {
     font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system,
       BlinkMacSystemFont, Inter, sans-serif;
@@ -114,62 +134,446 @@ pre {
   .wrap {
     @apply mx-auto w-full max-w-6xl px-4 sm:px-5;
   }
+
+  /* Sticker badge instead of a thin mono eyebrow: readable on cream. */
   .eyebrow {
-    @apply font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-accent sm:text-xs sm:tracking-[0.22em];
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--doodle-ink);
+    background: var(--doodle-teal);
+    border: 2.5px solid var(--doodle-ink);
+    border-radius: 3px;
+    box-shadow: 3px 3px 0 var(--doodle-ink);
+    padding: 5px 11px;
+    transform: rotate(-1.5deg);
   }
-  .tag {
-    @apply inline-block font-mono text-[11px] font-medium uppercase tracking-wider text-muted border border-line rounded px-2 py-1;
-  }
+  .tag,
   .chip {
-    @apply font-mono text-[11px] font-medium text-ink-soft border border-line rounded px-2 py-1;
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: rgb(var(--ink-soft));
+    background: rgb(var(--surface));
+    border: 2px solid rgb(var(--line));
+    border-radius: 4px;
+    padding: 3px 8px;
+    box-shadow: 2px 2px 0 rgb(var(--line) / 0.3);
   }
+
   /* Solid surface (no backdrop-blur) keeps text crisp. */
   .card {
-    @apply border border-line rounded-2xl bg-surface p-4 sm:p-5;
+    background: rgb(var(--surface));
+    border: var(--doodle-stroke) solid var(--doodle-ink);
+    border-radius: var(--radius);
+    box-shadow: var(--doodle-shadow);
+    padding: 1.1rem 1.25rem;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
   }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 6px 9px 0 var(--doodle-ink);
+  }
+
   .btn-solid {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: 0.5rem;
-    background: rgb(var(--accent));
-    color: rgb(var(--bg));
-    font-weight: 600;
-    /* 44px minimum tap target for touch devices. */
     min-height: 44px;
-    padding: 0.625rem 1rem;
+    padding: 0.625rem 1.1rem;
     font-size: 0.875rem;
-    transition: box-shadow 0.15s ease;
+    font-weight: 800;
+    color: var(--doodle-ink);
+    background: var(--doodle-yellow);
+    border: var(--doodle-stroke) solid var(--doodle-ink);
+    border-radius: var(--radius);
+    box-shadow: var(--doodle-shadow);
+    transform: rotate(-1deg);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
   }
   .btn-solid:hover {
-    /* No transform: a compositing layer would rasterise the label and make
-       it blurry. Box-shadow alone gives the same lift. */
-    box-shadow: 0 8px 26px -8px rgb(var(--accent) / 0.55);
+    transform: translate(-3px, -3px) rotate(-1deg);
+    box-shadow: 9px 9px 0 var(--doodle-ink);
   }
+  .btn-solid:active {
+    transform: translate(3px, 3px) rotate(-1deg);
+    box-shadow: 2px 2px 0 var(--doodle-ink);
+  }
+  .btn-solid:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 2px 2px 0 var(--doodle-ink);
+  }
+  /* Loud hero variant — the red CTA from the C-graded prototype. */
+  .btn-hero {
+    background: var(--doodle-red);
+  }
+
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-line text-ink px-4 py-2.5 text-sm transition hover:border-accent hover:text-accent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     min-height: 44px;
+    padding: 0.625rem 1.1rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--doodle-ink);
+    background: rgb(var(--surface));
+    border: var(--doodle-stroke) solid var(--doodle-ink);
+    border-radius: var(--radius);
+    box-shadow: var(--doodle-shadow-sm);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
   }
+  .btn-ghost:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--doodle-ink);
+  }
+
   .input {
     /* 16px on mobile prevents iOS Safari from auto-zooming on focus. */
-    @apply w-full rounded-lg bg-bg border border-line px-3 py-2.5 text-base text-ink outline-none focus:border-accent sm:text-sm;
+    width: 100%;
     min-height: 44px;
+    padding: 0.625rem 0.75rem;
+    font-size: 1rem;
+    color: rgb(var(--ink));
+    background: rgb(var(--surface));
+    border: 2.5px solid var(--doodle-ink);
+    border-radius: var(--radius);
+    box-shadow: 3px 3px 0 rgb(var(--line) / 0.3);
+    outline: none;
+  }
+  .input:focus {
+    box-shadow: 4px 4px 0 var(--doodle-ink);
+  }
+  @media (min-width: 640px) {
+    .input {
+      font-size: 0.875rem;
+    }
   }
 }
 
+/* Site chrome. These classes are intentionally site-only: a generated
+   project ships its own globals.css (buildGlobalsCss) and simply ignores
+   them, falling back to its chosen neutral palette. */
+.sk-nav {
+  border-bottom: 3px solid var(--doodle-ink);
+}
+.sk-footer {
+  border-top: 3px solid var(--doodle-ink);
+  background: var(--doodle-yellow);
+}
+/* Target the wordmark structurally, NOT by changing Nav's className:
+   `customerNavBrand()` in the generator matches that className string
+   verbatim to strip our brand from customer ZIPs. A structural selector
+   keeps the site-only styling without breaking that rewrite (and the
+   matrix's brand assertions). */
+.sk-nav nav.wrap > a:first-child {
+  display: inline-block;
+  background: var(--doodle-yellow);
+  border: 2.5px solid var(--doodle-ink);
+  border-radius: 4px;
+  box-shadow: 3px 3px 0 var(--doodle-ink);
+  padding: 3px 11px;
+  font-weight: 800;
+  transform: rotate(-2deg);
+}
+
+/* Highlighter colour blocks — the C-graded palette used as card surfaces.
+   Declared outside @layer components so they beat `.card`'s background. */
+.card-mint {
+  background: var(--doodle-mint);
+}
+.card-cream {
+  background: var(--doodle-cream);
+}
+.card-pink {
+  background: var(--doodle-pink);
+}
+.card-yellow {
+  background: var(--doodle-yellow);
+}
+
+/* Dense data views (admin grids, logs, code listings): calm the heavy display
+   shadows so long tables stay scannable. `:has()` is progressive enhancement —
+   older browsers simply keep the standard card. The console pages themselves
+   have no doodle layer, no rotation and no stickers, so they remain usable. */
+main:has(table) .card,
+main:has(pre) .card {
+  border-width: 2px;
+  box-shadow: 3px 3px 0 var(--doodle-ink);
+}
+main:has(table) .card:hover,
+main:has(pre) .card:hover {
+  transform: none;
+}
+
+/* Gradient text would break the flat ink look; use a solid highlight shadow. */
 .grad-text {
-  background: linear-gradient(
-    90deg,
-    rgb(var(--accent)),
-    rgb(var(--accent2))
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: rgb(var(--ink));
+  text-shadow: 3px 3px 0 var(--doodle-yellow);
 }
 
 ::selection {
-  background: rgb(var(--accent) / 0.3);
-  color: rgb(var(--ink));
+  background: var(--doodle-yellow);
+  color: var(--doodle-ink);
+}
+
+/* ── Hand-drawn decorations ─────────────────────────────────────────────── */
+/* The whole layer sits BELOW the hero content and never eats clicks. Every
+   SVG has an explicit width/height so the browser never falls back to the
+   default 150px box (that was the source of the stretched stars/arrow). */
+.doodle-deco {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.doodle-deco > * {
+  position: absolute;
+  pointer-events: none;
+}
+.doodle-deco svg {
+  display: block;
+}
+.doodle-arrow {
+  right: 9%;
+  bottom: 15%;
+  width: 118px;
+  height: 88px;
+}
+.doodle-arrow path {
+  fill: none;
+  stroke: var(--doodle-ink);
+  stroke-width: 3.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.doodle-star {
+  width: 46px;
+  height: 46px;
+  left: 9%;
+  top: 20%;
+}
+.doodle-star.s2 {
+  width: 26px;
+  height: 26px;
+  left: 17%;
+  top: 36%;
+}
+.doodle-star.s3 {
+  width: 20px;
+  height: 20px;
+  right: 14%;
+  top: 25%;
+}
+.doodle-star path {
+  fill: var(--doodle-yellow);
+  stroke: var(--doodle-ink);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+.doodle-star.s2 path {
+  fill: var(--doodle-teal);
+}
+.doodle-star.s3 path {
+  fill: var(--doodle-red);
+}
+.doodle-note {
+  left: 3%;
+  bottom: 6%;
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 700;
+  color: var(--doodle-ink);
+  background: var(--doodle-teal);
+  border: 2.5px solid var(--doodle-ink);
+  border-radius: 3px;
+  box-shadow: var(--doodle-shadow-sm);
+  transform: rotate(5deg);
+  --tilt: 5deg;
+}
+.doodle-controls {
+  position: absolute;
+  right: 18px;
+  top: 14px;
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+.doodle-controls button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--doodle-ink);
+  background: rgb(var(--surface));
+  border: 2px solid var(--doodle-ink);
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 var(--doodle-ink);
+  cursor: pointer;
+}
+.doodle-controls button:hover {
+  background: var(--doodle-yellow);
+}
+.doodle-controls button:focus-visible {
+  outline: 3px solid var(--doodle-teal);
+  outline-offset: 2px;
+}
+
+/* Yellow marker highlight for hero copy. */
+.doodle-hl {
+  background: var(--doodle-yellow);
+  padding: 0 6px;
+  box-shadow: 2px 2px 0 var(--doodle-ink);
+}
+.doodle-headline {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-shadow: 3px 3px 0 var(--doodle-yellow);
+}
+
+@keyframes sk-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes sk-wobble {
+  0%,
+  100% {
+    transform: rotate(calc(var(--tilt, 0deg) - 4deg));
+  }
+  50% {
+    transform: rotate(calc(var(--tilt, 0deg) + 5deg));
+  }
+}
+@keyframes sk-twinkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(-9deg);
+  }
+  50% {
+    transform: scale(1.18) rotate(9deg);
+  }
+}
+@keyframes sk-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Every decorative <path> carries pathLength="100", so dash math is geometry
+   independent: 100 -> 0 draws exactly one CLOSED lap (including the final
+   edge of the star). The old hand-estimated --len was shorter than the real
+   outline, which left one side permanently unstroked. `forwards` keeps the
+   finished ink on screen instead of erasing it on the next loop. */
+@keyframes sk-scribble {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Motion is opt-in at runtime: the client component adds `sk-motion` to
+   <html> after mount, so SSR output never animates and hydration is stable. */
+html.sk-motion .doodle-deco svg path {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: sk-scribble 1.6s ease-out forwards;
+}
+/* Stagger the ink: the arrow head follows its curve, the small stars follow
+   the big one. Each one still ends at a fully closed outline. */
+html.sk-motion .doodle-arrow path:last-child {
+  animation-delay: 0.3s;
+}
+html.sk-motion .doodle-star.s2 path {
+  animation-delay: 0.18s;
+}
+html.sk-motion .doodle-star.s3 path {
+  animation-delay: 0.36s;
+}
+html.sk-motion .doodle-arrow {
+  animation: sk-bob 3.4s ease-in-out infinite;
+}
+html.sk-motion .doodle-star {
+  animation: sk-twinkle 2.6s ease-in-out infinite;
+}
+html.sk-motion .doodle-star.s2 {
+  animation-delay: 0.5s;
+}
+html.sk-motion .doodle-star.s3 {
+  animation-delay: 1.1s;
+}
+html.sk-motion .doodle-note {
+  animation: sk-wobble 4.2s ease-in-out infinite;
+}
+html.sk-motion .doodle-rise {
+  animation: sk-rise-in 0.55s ease-out backwards;
+}
+
+/* Explicit off switch + OS preference. Kill the dash array too, otherwise
+   an unanimated long path would render as a broken dashed line. */
+html.sk-no-motion *,
+html.sk-no-motion *::before,
+html.sk-no-motion *::after {
+  animation: none !important;
+  transition: none !important;
+}
+html.sk-no-motion .doodle-deco svg path {
+  stroke-dasharray: none !important;
+  stroke-dashoffset: 0 !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .doodle-deco svg path {
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .doodle-deco {
+    display: none;
+  }
+  /* Keep the switch reachable on phones, but tuck it out of the copy. */
+  .doodle-controls {
+    position: static;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .card {
+    box-shadow: var(--doodle-shadow-sm);
+  }
+  .card:hover {
+    transform: none;
+  }
 }

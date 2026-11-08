@@ -7,19 +7,31 @@
 > 但其中的功能矩阵与字段定义仍可作为行业口径参考。价格随促销变动，以官网为准。
 > 📌 第 1–3 节是**调研当时的状态快照**；`4.1 本轮落地状态` 记录之后两轮（A+C、P0）的
 > 实际改动。读结论时以 4.1 与 `docs/agent-native.md` / `docs/mcp.md` 为准。
+>
+> 🆕 **状态校正（2026-11-08）**：下文表格与「待办」清单是 **2026-11-05 的历史快照**，
+> 其中多项已不成立，请勿据此判断当前能力。当前事实：
+> - 风格 **11 套**（10 套调色板 + Doodle），语言 **五语**（en/zh/ja/fr/de），构建矩阵 **18 组**；
+> - `/styles` 交互预览页已上线，`/build-matrix` 本地快照页可展示通过率与产物体积；代表用例支持 `--build` 真跑 `next build`；
+> - 两套后台**已可写**：`/api/profile` 改资料、`/api/admin/users` 改角色、`/api/billing/portal` 账单门户、`/admin/tickets` 改工单状态；`0004_profiles_rbac.sql` / `0007_orgs.sql` 随包交付；`/admin` 未配置凭据时**全环境关闭**；
+> - 白标清理已完成：`pack.ts` 对 ZIP 全文本文件 sweep `neutralizeBrand()`，`verify-matrix.mjs` 对 18 组做全文本品牌断言；
+> - 付款已自动发 key 邮件（失败进 `mail_outbox` 重试），guest checkout 走 `/api/license/claim`；保留期清理、consent / delivery 审计日志、数据导出/删除、DPA 模板都已落地；
+> - `npm run agents:lint` 把 `AGENTS.md` / scoped rules / skills 索引变成机器可校验的契约；
+> - MCP 增加 `resources/read`，新增 `/.well-known/agent-card.json` 与 `?format=md`；
+> - Cloudflare 目标改用 Workers + OpenNext + `nodejs_compat`（仍需 Supabase 才能持久化）。
+> 仍然真实的历史限制：无 IaC/Docker、无社区、多租户业务表需自行加 `org_id` 过滤、PayPal 无账单门户、SMTP 未实现。
 
 ## 1. 市场地图：产品在卖什么
 
 2026 年这个品类的竞争已经不在「谁有 auth + Stripe + 邮件」——那已经是入场券。
 真正的三条分界线是：
 
-1. **交付形态**：整包仓库（ShipFast / Makerkit / Supastarter） vs **可视化配置后导出**（Divjoy / ShipKit）。
+1. **交付形态**：整包仓库（ShipFast / Makerkit / Supastarter） vs **可视化配置后导出**（Divjoy / marketit）。
 2. **买方是谁**：人（看落地页、社区、教程） vs **AI coding agent**（读 README / AGENTS.md / llms.txt / 目录结构）。
-3. **深度 vs 速度**：B2B 多租户 / RBAC / IaC（Makerkit / Supastarter / VibeReady） vs 单人周末上线（ShipFast / ShipKit）。
+3. **深度 vs 速度**：B2B 多租户 / RBAC / IaC（Makerkit / Supastarter / VibeReady） vs 单人周末上线（ShipFast / marketit）。
 
 | 产品 | 价格（一次性） | 定位 | 关键强项 | 明确短板 |
 |---|---|---|---|---|
-| **ShipKit** | **$99 首发**（原价 $199）+ $9/月 Care | 可配置、可剪枝的生成器 | 按选项真剪枝、10 套风格、根 AGENTS.md + design.md + scoped rules + 12 skills、混合 RAG、四语 i18n + llms-full/OpenAPI/MCP、可勾选的四语用户/管理员后台、17 组构建矩阵 CI、MoR 支付 | 无社区、无多租户、无 IaC/Docker、后台为只读起步版、build matrix 未跑 next build、白标未清干净 |
+| **marketit** | **$99 首发**（原价 $199）+ $9/月 Care | 可配置、可剪枝的生成器 | 按选项真剪枝、10 套风格、根 AGENTS.md + design.md + scoped rules + 12 skills、混合 RAG、四语 i18n + llms-full/OpenAPI/MCP、可勾选的四语用户/管理员后台、17 组构建矩阵 CI、MoR 支付 | 无社区、无多租户、无 IaC/Docker、后台为只读起步版、build matrix 未跑 next build、白标未清干净 |
 | ShipFast | $199（All-in $249） | 最快上线 | 5,000+ Discord、转化型落地页、口碑 | **无 AGENTS.md / skills / 质量门禁**、无多租户、MongoDB 为主 |
 | Divjoy | $199（Standard），目录站报 $299–599 | 可视化代码生成器 | 选 UI kit / auth / DB / 支付后导出 | React(非 Next) 仍用已废弃 CRA，2025–26 社区沉寂 |
 | Makerkit | $299（Pro）/ $599（Team） | 国际化 B2B | i18n、Next.js + React Router 7、AGENTS.md / Cursor rules / MCP / 子代理、多租户最深 | 按席位分层收费、无 IaC、质量靠 MCP 非提交门禁 |
@@ -29,12 +41,12 @@
 | GitHub 免费 starter | 免费 | 学习 | 结构透明 | 功能最少、维护不稳定 |
 
 价格带：**$0（免费）→ $99–149（低价新秀）→ $199–249（主流）→ $299+（B2B / 团队）**。
-ShipKit 的 $99 处于最低付费档，但功能密度接近 $299 档——这是当前最锋利的价格武器，
+marketit 的 $99 处于最低付费档，但功能密度接近 $299 档——这是当前最锋利的价格武器，
 代价是**没有品牌与社区背书**，必须靠"看得见的差异"而不是"我更便宜"来转化。
 
 ## 2. 能力矩阵（重点看 AI 与工程化）
 
-| 维度 | ShipKit | ShipFast | Divjoy | Makerkit | Supastarter | VibeReady |
+| 维度 | marketit | ShipFast | Divjoy | Makerkit | Supastarter | VibeReady |
 |---|---|---|---|---|---|---|
 | 生成器按选项真剪枝 | ✅ | — | ✅（较老） | — | — | — |
 | AGENTS.md / 智能体说明 | ✅ 按风格生成 | ❌ | ❌ | ✅ | ✅ | ✅ 核心卖点 |
@@ -51,7 +63,7 @@ ShipKit 的 $99 处于最低付费档，但功能密度接近 $299 档——这�
 
 ## 3. 差异化审计：哪些是真的，哪些是自嗨
 
-### ✅ 真差异（竞品普遍没有，且 ShipKit 已落地）
+### ✅ 真差异（竞品普遍没有，且 marketit 已落地）
 
 1. **按选项剪枝 + 下载即可构建**。Divjoy 是同类里最接近的，但已明显老化；
    Makerkit/Supastarter/ShipFast 都是"给一整个仓库，自己删"。
@@ -68,7 +80,7 @@ ShipKit 的 $99 处于最低付费档，但功能密度接近 $299 档——这�
 ### ⚠️ 半真（有代码但没形成卖点）
 
 - 调研当时只有 5 个 skills、无 scoped rules / 提交门禁 / living docs；**P0 后已补齐 12 skills + scoped rules + `ai:docs` 重建**，但数量仍少于 VibeReady 的 22–24 个，且规则未被 lint 强制（见 4.1）。
-- "白标"没做干净：生成的 ZIP 仍带 ShipKit 营销页与品牌，README 宣称 MIT 却无 LICENSE 文件。
+- "白标"没做干净：生成的 ZIP 仍带 marketit 营销页与品牌，README 宣称 MIT 却无 LICENSE 文件。
 - 10 套风格只在生成器里，站点没有一个可交互的"风格→产物"展示页，说服力弱。
 
 ### ❌ 伪差异（别写进文案）
@@ -82,13 +94,13 @@ ShipKit 的 $99 处于最低付费档，但功能密度接近 $299 档——这�
 
 | 优先级 | 差异化功能 | 为什么现在做 | 验收标准 |
 |---|---|---|---|
-| **P0** | **Agent-Native Delivery**：把 design.md/agents.md 升级成完整 AI 开发包 —— 根 `AGENTS.md`、按模块生成的 scoped rules、可调用 skills（加到 12+）、`make ai-setup` 式一键适配 Cursor/Claude Code、以及"配置变更自动重生成文档" | 直接对标 VibeReady 的 3-layer 框架（$149–399 的核心卖点），而 ShipKit 独有「按风格生成 design.md」和「按选项剪枝」，组合起来是更强的故事；2026 买方大量变成 AI agent | 生成 ZIP 含 AGENTS.md + ≥12 skills + scoped rules；README/llms.txt 明确声明；AI agent 能按文档新增一个受保护页面并通过 `tsc && build` |
+| **P0** | **Agent-Native Delivery**：把 design.md/agents.md 升级成完整 AI 开发包 —— 根 `AGENTS.md`、按模块生成的 scoped rules、可调用 skills（加到 12+）、`make ai-setup` 式一键适配 Cursor/Claude Code、以及"配置变更自动重生成文档" | 直接对标 VibeReady 的 3-layer 框架（$149–399 的核心卖点），而 marketit 独有「按风格生成 design.md」和「按选项剪枝」，组合起来是更强的故事；2026 买方大量变成 AI agent | 生成 ZIP 含 AGENTS.md + ≥12 skills + scoped rules；README/llms.txt 明确声明；AI agent 能按文档新增一个受保护页面并通过 `tsc && build` |
 | **P0** | **GEO / Agent Discovery**：`llms.txt` 扩成 `llms-full.txt` + `/.well-known/agents.md`，把"选型所需的机器可读事实"（价格、栈、剪枝组合、限制）标准化；提供 MCP server 暴露 `scaffold_project` 工具 | 竞品几乎都没做；AI agent 会从 README/AGENTS.md/llms.txt 判断用哪个 starter，这是 2026 新增的分发入口 | 有可抓取的 llms-full.txt；MCP 工具能返回项目 ZIP 或配置 JSON；官网有独立落地页讲这件事 |
 | **P1** | **Build Matrix CI**：对「10 风格 × 关键选项组合」在 CI 里跑 `tsc + next build`，站点展示实时通过率与产物体积 | 生成器最大的信任问题是"下载后能不能编译"；竞品没人敢公开这个指标 | GitHub Actions 覆盖 ≥12 组合，失败即阻断；对比页新增"下载即构建通过"一行 |
 | **P1** | **Style Playground**：可交互预览 10 套风格并一键切换到 Builder，展示 design.md 片段 | 10 套风格是已投入的资产，但当前藏在下拉框里，无法形成转化 | 独立 `/styles` 页，四语，含 token 表与 design.md 摘录，跳转带 `?style=` |
 | **P1** | **Hybrid RAG 作为旗舰模块**：补命中率评测集 + 引用高亮 + 一键导入自有文档 | 竞品里只有 VibeReady 有完整 RAG，Makerkit 是付费模板；B 档已实现，差的是"可证明的效果" | `/rag` 页展示评测指标与示例问答，README 有 benchmark |
 | **P2** | **MoR / 无公司收款包**：以 Waffo Pancake 为默认，写「无需注册公司即可全球收款」的落地页与长尾词 | 独立开发者真实痛点，竞品全是 Stripe 系；已接通 | `/blog` 新增 1 篇中英长尾文，对比页新增 MoR 行 |
-| **P2** | **白标清理 + 真 LICENSE**：ZIP 去掉 ShipKit 营销页，补 LICENSE 与品牌替换脚本 | 现在"白标"是虚假宣传，是退款/差评风险 | 生成 ZIP 无 ShipKit 品牌字符串；`npm run rebrand` 一键改名 |
+| **P2** | **白标清理 + 真 LICENSE**：ZIP 去掉 marketit 营销页，补 LICENSE 与品牌替换脚本 | 现在"白标"是虚假宣传，是退款/差评风险 | 生成 ZIP 无 marketit 品牌字符串；`npm run rebrand` 一键改名 |
 
 ### 4.1 本轮落地状态（2026-11-05，用户选 A + C）
 
@@ -111,7 +123,7 @@ ShipKit 的 $99 处于最低付费档，但功能密度接近 $299 档——这�
 ### 明确不建议碰
 
 - **多租户 / RBAC / 超级后台**：Makerkit、Supastarter 深耕多年，补齐成本极高，且目标用户（单人独立开发者）不需要；先把勾选项从 Builder 移除或标注 coming soon，避免虚假宣传。
-- **Terraform / K8s / 完整 CI 平台**：VibeReady 的定位，ShipKit 打"轻"才有优势。
+- **Terraform / K8s / 完整 CI 平台**：VibeReady 的定位，marketit 打"轻"才有优势。
 - **社区运营**：5000 人 Discord 不是短期能补的，用「可验证的产物质量」替代「社区背书」。
 
 ## 5. 建议定位语
@@ -130,7 +142,7 @@ ShipKit 的 $99 处于最低付费档，但功能密度接近 $299 档——这�
 
 ## 6. 结论
 
-ShipKit 不缺功能，缺的是**把已有功能组织成一个别人没有的故事**。当前最值钱的两块资产
+marketit 不缺功能，缺的是**把已有功能组织成一个别人没有的故事**。当前最值钱的两块资产
 （按风格生成设计文档、按选项剪枝）恰好都是 2026 年 AI coding 工作流最需要的东西，而竞品
 要么没有（ShipFast / Divjoy），要么有框架但没有设计系统层（VibeReady / Makerkit / Supastarter）。
 建议把资源集中在 **Agent-Native Delivery + GEO 分发 + 可验证的构建矩阵**，而不是补多租户追平 B2B 竞品。

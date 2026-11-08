@@ -1,6 +1,6 @@
 // SaaS visual styles for the generated template.
 //
-// Each style is just a palette of CSS custom properties. The running ShipKit
+// Each style is just a palette of CSS custom properties. The running marketit
 // app and the generated scaffold both consume these via Tailwind's
 // `rgb(var(--x) / <alpha-value>)` tokens, so switching a style is a single
 // `:root` swap — no duplicated component CSS.
@@ -25,6 +25,22 @@ type Palette = {
 };
 
 export const PALETTES: Record<StyleId, Palette> = {
+  // ── Hand-drawn (the site's own C-graded skin, also exportable) ──────
+  // `--accent` / `--accent2` are readable brick + deep teal; the loud
+  // highlighter colours are injected separately as `--doodle-*` below.
+  doodle: {
+    scheme: "light",
+    bg: "255 248 231",
+    surface: "255 255 255",
+    line: "96 88 72",
+    accent: "201 80 58",
+    accent2: "27 138 131",
+    ink: "17 17 17",
+    inkSoft: "51 51 51",
+    muted: "100 92 78",
+    radius: "6px",
+    texture: "dots",
+  },
   // ── Dark ──────────────────────────────────────────────
   midnight: {
     scheme: "dark",
@@ -341,7 +357,7 @@ pre {
 }
 
 /* Style-level corner radius (overrides the fixed Tailwind radii above so each
-   ShipKit style has its own "shape" without duplicated component CSS). */
+   marketit style has its own "shape" without duplicated component CSS). */
 .card,
 .btn-solid,
 .btn-ghost,
@@ -350,9 +366,104 @@ pre {
 }
 `;
 
+/* Extra variables for the hand-drawn style. These are plain hex colours
+   (not RGB channels) because they are only ever used as solid fills behind
+   dark ink — never with Tailwind opacity modifiers. */
+const DOODLE_VARS = `
+  --doodle-ink: #111111;
+  --doodle-yellow: #ffd93d;
+  --doodle-teal: #4ecdc4;
+  --doodle-red: #ff6b6b;
+  --doodle-mint: #d9f2ef;
+  --doodle-pink: #f7d9e3;
+  --doodle-cream: #ffe9a8;`;
+
+/* `html.light` is the quiet "plain paper" companion for the doodle style. */
+const DOODLE_QUIET_VARS = `
+  --doodle-yellow: #ece5d2;
+  --doodle-teal: #e3ecea;
+  --doodle-red: #efe4e2;
+  --doodle-mint: #eef4f2;
+  --doodle-pink: #f4edef;
+  --doodle-cream: #f5efdd;`;
+
+/** Component overrides appended ONLY when the doodle style is selected. */
+const DOODLE_CSS = `
+/* Hand-drawn ink outlines. Declared outside @layer components so these
+   rules win over the neutral component CSS above. */
+.card {
+  border: 3px solid var(--doodle-ink);
+  box-shadow: 6px 6px 0 var(--doodle-ink);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 6px 9px 0 var(--doodle-ink);
+}
+.btn-solid {
+  color: var(--doodle-ink);
+  background: var(--doodle-yellow);
+  border: 3px solid var(--doodle-ink);
+  box-shadow: 6px 6px 0 var(--doodle-ink);
+  font-weight: 800;
+  transform: rotate(-1deg);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.btn-solid:hover {
+  transform: translate(-3px, -3px) rotate(-1deg);
+  box-shadow: 9px 9px 0 var(--doodle-ink);
+}
+.btn-solid:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-ghost {
+  color: var(--doodle-ink);
+  border: 3px solid var(--doodle-ink);
+  box-shadow: 4px 4px 0 var(--doodle-ink);
+  font-weight: 700;
+}
+.input {
+  border: 2.5px solid var(--doodle-ink);
+}
+.eyebrow {
+  display: inline-block;
+  padding: 5px 11px;
+  color: var(--doodle-ink);
+  background: var(--doodle-teal);
+  border: 2.5px solid var(--doodle-ink);
+  border-radius: 3px;
+  box-shadow: 3px 3px 0 var(--doodle-ink);
+  font-weight: 800;
+  transform: rotate(-1.5deg);
+}
+.tag,
+.chip {
+  border: 2px solid var(--doodle-ink);
+  font-weight: 700;
+}
+.card-mint { background: var(--doodle-mint); }
+.card-cream { background: var(--doodle-cream); }
+.card-pink { background: var(--doodle-pink); }
+.card-yellow { background: var(--doodle-yellow); }
+::selection {
+  background: var(--doodle-yellow);
+  color: var(--doodle-ink);
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+@media (max-width: 720px) {
+  .card { box-shadow: 4px 4px 0 var(--doodle-ink); }
+  .card:hover { transform: none; }
+}
+`;
+
 /** Full globals.css for a chosen style (palette injected into :root). */
 export function buildGlobalsCss(style: StyleId): string {
   const p = PALETTES[style];
+  const isDoodle = style === "doodle";
   // ThemeToggle adds `html.light` — generated builds need a matching light
   // palette or the toggle is a no-op in the downloaded project.
   const light = PALETTES.paper;
@@ -366,7 +477,7 @@ export function buildGlobalsCss(style: StyleId): string {
   --ink: ${p.ink};
   --ink-soft: ${p.inkSoft};
   --muted: ${p.muted};
-  --radius: ${p.radius};
+  --radius: ${p.radius};${isDoodle ? DOODLE_VARS : ""}
   /* System stack: native hinting, no web-font request, correct CJK face. */
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text",
     "Segoe UI", "Inter", "Helvetica Neue", Arial, "PingFang SC",
@@ -385,7 +496,7 @@ html.light {
   --accent2: ${light.accent2};
   --ink: ${light.ink};
   --ink-soft: ${light.inkSoft};
-  --muted: ${light.muted};
+  --muted: ${light.muted};${isDoodle ? DOODLE_QUIET_VARS : ""}
 }
 
 html,
@@ -393,5 +504,5 @@ body {
   background: rgb(var(--bg));
   color: rgb(var(--ink));
 }
-${STATIC_CSS}`;
+${STATIC_CSS}${isDoodle ? DOODLE_CSS : ""}`;
 }

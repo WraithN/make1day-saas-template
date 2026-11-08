@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { buildPreviewZip } from "@/lib/generator/preview";
@@ -30,6 +31,13 @@ const configSchema = builderConfigSchema.extend({
 });
 
 export async function POST(req: Request) {
+  const blocked = await guardApiWrite(req, {
+    bucket: "generate-preview",
+    limit: 20,
+    windowMs: 3600000,
+  });
+  if (blocked) return blocked;
+
   const body = await req.json().catch(() => ({}));
   const parsed = configSchema.safeParse(body);
   if (!parsed.success) {

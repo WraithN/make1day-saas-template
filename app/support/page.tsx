@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Contact support",
   description:
-    "Send the ShipKit team a support message, or reach us by email / a 1:1 call.",
+    "Send the marketit team a support message, or reach us by email / a 1:1 call.",
 };
 
 export default async function SupportPage() {
@@ -17,7 +17,7 @@ export default async function SupportPage() {
   const c = msgCopy(lang);
   const contactEmail = env.contactEmail();
   const bookingUrl = env.bookingUrl();
-  const mailto = `mailto:${contactEmail}?subject=${encodeURIComponent("ShipKit support")}`;
+  const mailto = `mailto:${contactEmail}?subject=${encodeURIComponent("marketit support")}`;
 
   return (
     <section className="wrap py-12 sm:py-20">

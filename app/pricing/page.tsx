@@ -80,7 +80,7 @@ export default async function PricingPage() {
   const offersJsonLd = {
     "@context": "https://schema.org",
     "@type": "OfferCatalog",
-    name: "ShipKit plans",
+    name: "marketit plans",
     itemListElement: [
       {
         "@type": "Offer",

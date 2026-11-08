@@ -1,11 +1,11 @@
 ---
 name: testing-qa
-description: Set up and run tests in a ShipKit project (Vitest for units, Playwright for e2e) and apply a QA checklist before shipping.
+description: Set up and run tests in a marketit project (Vitest for units, Playwright for e2e) and apply a QA checklist before shipping.
 ---
 
-# Skill: Testing & QA (ShipKit)
+# Skill: Testing & QA (marketit)
 
-Use this skill when adding tests or doing a pre-ship QA pass on a ShipKit project.
+Use this skill when adding tests or doing a pre-ship QA pass on a marketit project.
 
 ## Tooling
 - **Unit/integration:** Vitest (`*.test.ts` next to source or in `__tests__`).

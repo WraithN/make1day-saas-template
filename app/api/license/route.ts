@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import {
   LICENSE_COOKIE,
@@ -5,12 +6,20 @@ import {
   verifyLicenseKey,
 } from "@/lib/license";
 import { isLicenseGateEnabled } from "@/lib/env";
+import { recordDeliveryEvent } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** Redeem a license key: verify it, then store it in an httpOnly cookie. */
 export async function POST(req: Request) {
+  const blocked = await guardApiWrite(req, {
+    bucket: "license-redeem",
+    limit: 30,
+    windowMs: 3600000,
+  });
+  if (blocked) return blocked;
+
   const body = await req.json().catch(() => ({}));
   const key = typeof body?.licenseKey === "string" ? body.licenseKey.trim() : "";
   if (!key) {
@@ -20,6 +29,14 @@ export async function POST(req: Request) {
   if (!payload) {
     return NextResponse.json({ error: "invalid_license" }, { status: 400 });
   }
+
+  // A redeemed key is the moment the buyer takes possession of the product.
+  // Logged with a hashed email so refund / support disputes have evidence
+  // without creating a new plaintext PII store.
+  recordDeliveryEvent("activate", {
+    jti: payload.jti,
+    email: payload.email,
+  });
 
   const res = NextResponse.json({
     ok: true,

@@ -1,12 +1,12 @@
 ---
 name: backend-api
-description: Implement Route Handlers, Supabase data access, Zod validation, and error handling in a ShipKit project following its conventions.
+description: Implement Route Handlers, Supabase data access, Zod validation, and error handling in a marketit project following its conventions.
 ---
 
-# Skill: Backend & API (ShipKit)
+# Skill: Backend & API (marketit)
 
 Use this skill when adding server logic: API routes, database access, auth, or
-webhooks in a ShipKit project.
+webhooks in a marketit project.
 
 ## Stack
 - Next.js Route Handlers (`app/api/<name>/route.ts`), runtime `nodejs`.

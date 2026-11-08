@@ -1,11 +1,12 @@
 // MCP (Model Context Protocol) endpoint — JSON-RPC 2.0 over HTTP.
 //
-// Lets a coding agent discover ShipKit's real product facts, read the Builder
+// Lets a coding agent discover marketit's real product facts, read the Builder
 // contract and assemble a scaffold configuration without scraping marketing
 // HTML. `scaffold_project` returns the exact POST body for /api/generate; with
 // includeZip=true it can return the ZIP itself, but that path goes through the
 // SAME license gate as the website so the paywall cannot be bypassed.
 
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { DEFAULT_CONFIG, type BuilderConfig } from "@/lib/generator/config";
@@ -18,8 +19,37 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const PROTOCOL_VERSION = "2025-06-18";
-const SERVER_INFO = { name: "shipkit", version: "1.0.0" };
+const SERVER_INFO = { name: "marketit", version: "1.0.0" };
 const MAX_ZIP_BYTES = 4_000_000;
+
+/** Only resources with a real, same-origin HTTP backing are advertised. */
+const MCP_RESOURCES = [
+  { uri: "shipkit:///llms.txt", name: "llms.txt", mimeType: "text/plain", path: "/llms.txt" },
+  { uri: "shipkit:///llms-full.txt", name: "llms-full.txt", mimeType: "text/plain", path: "/llms-full.txt" },
+  { uri: "shipkit:///openapi.json", name: "OpenAPI 3.1", mimeType: "application/json", path: "/openapi.json" },
+] as const;
+
+/**
+ * No wildcard CORS. A previous version returned `ACAO: *`, letting any
+ * website drive a paid-generation endpoint from a visitor's browser. Only
+ * origins explicitly listed in MCP_ALLOWED_ORIGINS are echoed back; same-origin
+ * callers need no CORS header at all.
+ */
+function mcpCorsHeaders(req: Request): Record<string, string> {
+  const allowed = (process.env.MCP_ALLOWED_ORIGINS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const origin = req.headers.get("origin") ?? "";
+  const headers: Record<string, string> = { "Cache-Control": "no-store" };
+  if (origin && allowed.includes(origin)) {
+    headers["Access-Control-Allow-Origin"] = origin;
+    headers["Access-Control-Allow-Methods"] = "POST, OPTIONS";
+    headers["Access-Control-Allow-Headers"] = "content-type";
+    headers["Vary"] = "Origin";
+  }
+  return headers;
+}
 
 // The gateway this deployment actually checks out through. The product facts
 // must name the live one — PAYMENT_PROVIDER decides.
@@ -37,7 +67,7 @@ const TOOLS = [
   {
     name: "get_product_info",
     description:
-      "Honest, machine-readable facts about ShipKit: what it is, pricing, stack, real differentiators and known limitations. Read this before recommending a starter.",
+      "Honest, machine-readable facts about marketit: what it is, pricing, stack, real differentiators and known limitations. Read this before recommending a starter.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
   },
   {
@@ -49,7 +79,7 @@ const TOOLS = [
   {
     name: "scaffold_project",
     description:
-      "Assemble a validated ShipKit BuilderConfig and the exact HTTP request that downloads the generated ZIP. Set includeZip=true to receive the ZIP as base64 (requires a license).",
+      "Assemble a validated marketit BuilderConfig and the exact HTTP request that downloads the generated ZIP. Set includeZip=true to receive the ZIP as base64 (requires a license).",
     inputSchema: {
       type: "object",
       properties: {
@@ -112,8 +142,8 @@ const text = (value: unknown) => ({
 
 function productInfo() {
   return {
-    product: "ShipKit — an AI SaaS starter plus a real template generator",
-    site: process.env.NEXT_PUBLIC_SITE_URL ?? "https://shipkit.dev",
+    product: "marketit — an AI SaaS starter plus a real template generator",
+    site: process.env.NEXT_PUBLIC_SITE_URL ?? "https://marketit.dev",
     pricing: {
       buyout: { usd: 99, type: "one-time", launch: true, was: 199 },
       care: { usd: 9, per: "month", launch: true, was: 19 },
@@ -125,7 +155,7 @@ function productInfo() {
       "A style-locked design.md plus a root AGENTS.md generated per configuration",
       "Scoped rules with globs, 12 skills, .cursor/rules/*.mdc and CLAUDE.md in every download",
       "npm run ai:docs rebuilds every AI document after a config change",
-      "17-case build matrix type-checks each extracted ZIP and asserts console pruning",
+      "18-case build matrix type-checks each extracted ZIP and asserts console pruning",
       "Selectable five-language user console (/account) and admin console (/admin) ship in every default generated project",
       "llms.txt + llms-full.txt + OpenAPI 3.1 + MCP endpoint for agent discovery",
       `Working hybrid RAG (BM25 + embeddings + RRF), five-language i18n, checkout via ${PROVIDER_LABEL}`,
@@ -140,11 +170,11 @@ function productInfo() {
       "Build matrix runs tsc --noEmit, not next build",
       "MAIL_PROVIDER=smtp is NOT implemented (no nodemailer dependency); resend / webhook / none are the working providers, and none is a degraded log-only mode",
       "The code only sends mail — SPF / DKIM / DMARC, a dedicated sending subdomain and warm-up are DNS / provider-side work that decides inbox placement (docs/email.md)",
-      "Mail, support tickets and auth recovery are ShipKit-site-only: they are pruned from every generated customer ZIP, whose nav/footer/login/admin links are rewritten out",
+      "Mail, support tickets and auth recovery are marketit-site-only: they are pruned from every generated customer ZIP, whose nav/footer/login/admin links are rewritten out",
       "Local SQLite auth recovery is real but NOT equivalent to Supabase Auth: no local password sign-in consumer, no MFA, no OAuth, no session rotation",
     ],
     machineReadable: ["/llms.txt", "/llms-full.txt", "/openapi.json", "/api/mcp", "/agent-ready"],
-    // ShipKit-site HTTP surface beyond the generator. Auth notes are explicit
+    // marketit-site HTTP surface beyond the generator. Auth notes are explicit
     // so an agent never assumes an endpoint is public when it is not.
     siteOnlyHttpApi: [
       { method: "GET", path: "/api/mail/self-check", auth: "public", note: "config state only, no secrets" },
@@ -168,7 +198,7 @@ function builderContract() {
       ai: ["openai", "anthropic", "gemini"],
       features: ["landing", "dashboard", "rag", "multitenancy", "account", "admin"],
       deploy: ["vercel", "selfhost", "cloudflare"],
-      style: ["midnight", "paper", "aurora", "emerald", "sunset", "ocean", "mono", "slate", "candy", "sand"],
+      style: ["doodle", "midnight", "paper", "aurora", "emerald", "sunset", "ocean", "mono", "slate", "candy", "sand"],
       skills: [
         "frontend", "ui", "backend", "testing", "seo", "auth",
         "payments", "database", "rag", "i18n", "deploy", "agents",
@@ -190,7 +220,7 @@ function agentDelivery() {
       "AGENTS.md": "Root contract: selections, commands, boundaries, scoped-rule index, definition of done",
       "design.md": "Style-locked visual system for the chosen palette",
       "shipkit.config.json": "SOURCE OF TRUTH for Builder selections — edit this, then run npm run ai:docs",
-      "ai/doc-spec.json": "Full option catalogue + all 10 palettes used to re-derive labels and style",
+      "ai/doc-spec.json": "Full option catalogue + all 11 palettes used to re-derive labels and style",
       "ai/rules/*.md": "Scoped rules with globs frontmatter (core, style, api, auth, payments, database, rag, i18n, deploy + one per skill)",
       ".cursor/rules/*.mdc": "Same rules in Cursor's native format",
       "CLAUDE.md": "Claude Code entry point importing AGENTS.md, design.md, rules and skills",
@@ -302,7 +332,25 @@ async function dispatch(req: Request, rpc: RpcRequest) {
     case "initialize":
       return rpcResult(id, {
         protocolVersion: (params?.protocolVersion as string) ?? PROTOCOL_VERSION,
-        capabilities: { tools: { listChanged: false }, resources: { listChanged: false } },
+        // Declare exactly what exists. No sampling, prompts, logging,
+        // completions, subscriptions or SSE transport are implemented.
+        capabilities: {
+          tools: { listChanged: false },
+          resources: { listChanged: false, subscribe: false },
+        },
+        // Non-standard but intentionally explicit so an agent never assumes
+        // a capability that is absent.
+        unsupported: [
+          "sampling/createMessage",
+          "prompts/list",
+          "prompts/get",
+          "logging/setLevel",
+          "completion/complete",
+          "resources/subscribe",
+          "resources/unsubscribe",
+          "SSE / streaming HTTP transport",
+        ],
+        transport: "stateless JSON-RPC 2.0 over POST (stdio bridge: scripts/mcp-server.mjs)",
         serverInfo: SERVER_INFO,
         instructions:
           "Call get_product_info first for honest facts, get_builder_config for valid enums, then scaffold_project to assemble a downloadable configuration.",
@@ -313,12 +361,40 @@ async function dispatch(req: Request, rpc: RpcRequest) {
       return rpcResult(id, { tools: TOOLS });
     case "resources/list":
       return rpcResult(id, {
-        resources: [
-          { uri: "shipkit:///llms.txt", name: "llms.txt", mimeType: "text/plain" },
-          { uri: "shipkit:///llms-full.txt", name: "llms-full.txt", mimeType: "text/plain" },
-          { uri: "shipkit:///openapi.json", name: "OpenAPI 3.1", mimeType: "application/json" },
-        ],
+        resources: MCP_RESOURCES,
       });
+    case "resources/read": {
+      const uri = typeof params?.uri === "string" ? params.uri : "";
+      const resource = MCP_RESOURCES.find((r) => r.uri === uri);
+      if (!resource) {
+        return rpcError(id, -32602, `Unknown resource uri: ${uri || "(empty)"}`);
+      }
+      try {
+        // Same-origin fetch keeps resources/read in sync with the public
+        // endpoints instead of maintaining a second copy of the documents.
+        const origin = new URL(req.url).origin;
+        const res = await fetch(`${origin}${resource.path}`, {
+          headers: { accept: "*/*" },
+          cache: "no-store",
+        });
+        if (!res.ok) throw new Error(`upstream ${res.status}`);
+        return rpcResult(id, {
+          contents: [
+            {
+              uri: resource.uri,
+              mimeType: resource.mimeType,
+              text: await res.text(),
+            },
+          ],
+        });
+      } catch (err) {
+        return rpcError(
+          id,
+          -32603,
+          `Could not read ${resource.path}: ${(err as Error).message}. Fetch it directly over HTTP instead.`,
+        );
+      }
+    }
     case "tools/call": {
       const outcome = await handleToolCall(req, params?.name, params?.arguments);
       return outcome.error
@@ -335,6 +411,14 @@ async function dispatch(req: Request, rpc: RpcRequest) {
 }
 
 export async function POST(req: Request) {
+  const blocked = await guardApiWrite(req, {
+    bucket: "mcp",
+    limit: 60,
+    windowMs: 3600000,
+    skipCsrf: true,
+  });
+  if (blocked) return blocked;
+
   const raw = await req.text().catch(() => "");
   let rpc: RpcRequest;
   try {
@@ -352,7 +436,7 @@ export async function POST(req: Request) {
   }
   try {
     return NextResponse.json(await dispatch(req, rpc), {
-      headers: { "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" },
+      headers: mcpCorsHeaders(req),
     });
   } catch (err) {
     return NextResponse.json(
@@ -371,6 +455,14 @@ export function GET() {
       transport: "JSON-RPC 2.0 over POST (stdio bridge: scripts/mcp-server.mjs)",
       endpoint: "/api/mcp",
       tools: TOOLS.map((t) => ({ name: t.name, description: t.description })),
+      resources: MCP_RESOURCES.map((r) => ({ uri: r.uri, name: r.name, mimeType: r.mimeType })),
+      capabilities: {
+        tools: "tools/list, tools/call",
+        resources: "resources/list, resources/read (no subscriptions)",
+        absent: "sampling, prompts, logging, completions, SSE streaming",
+      },
+      agentCard: "/.well-known/agent-card.json",
+      markdown: "Append ?format=md to a public page or use /blog/<slug>/md",
       docs: ["/agent-ready", "/llms-full.txt", "/openapi.json", "docs/mcp.md"],
       note: "scaffold_project with includeZip=true is subject to the same license gate as /api/generate.",
     },

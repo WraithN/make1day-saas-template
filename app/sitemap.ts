@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { POSTS } from "@/lib/content/blog";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://shipkit.dev";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://marketit.dev";
 const LANGS = ["en", "zh", "ja", "fr", "de"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -44,12 +44,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
-  // Blog posts (localized variants included).
+  // Blog posts (canonical slugs ONLY). Legacy aliases still resolve as static
+  // pages with a canonical pointing at the current slug; listing them here as
+  // well would send duplicate-content signals, so they are intentionally absent.
   for (const post of POSTS) {
     const path = `/blog/${post.slug}`;
+    const modified = new Date(post.updated ?? post.date);
     entries.push({
       url: `${BASE}${path}`,
-      lastModified: new Date(post.date),
+      lastModified: modified,
       changeFrequency: "monthly",
       priority: 0.6,
     });
@@ -57,16 +60,42 @@ export default function sitemap(): MetadataRoute.Sitemap {
       if (l === "en") continue;
       entries.push({
         url: `${BASE}${path}?lang=${l}`,
-        lastModified: new Date(post.date),
+        lastModified: modified,
         changeFrequency: "monthly",
         priority: 0.5,
+      });
+    }
+
+    // Markdown variants are a separate, agent-readable surface. They are
+    // linked from each article's metadata alternates and footer, and are
+    // explicitly allowed in robots.txt for both generic and AI crawlers.
+    const mdPath = `${path}/md`;
+    entries.push({
+      url: `${BASE}${mdPath}`,
+      lastModified: modified,
+      changeFrequency: "monthly",
+      priority: 0.4,
+    });
+    for (const l of LANGS) {
+      if (l === "en") continue;
+      entries.push({
+        url: `${BASE}${mdPath}?lang=${l}`,
+        lastModified: modified,
+        changeFrequency: "monthly",
+        priority: 0.3,
       });
     }
   }
 
   // Machine-readable endpoints for AI agents / answer engines. These are not
   // marketing pages, but listing them helps discovery (see docs/agent-discovery.md).
-  for (const path of ["/llms.txt", "/llms-full.txt", "/openapi.json"]) {
+  for (const path of [
+    "/llms.txt",
+    "/llms-full.txt",
+    "/openapi.json",
+    "/api/mcp",
+    "/.well-known/agent-card.json",
+  ]) {
     entries.push({
       url: `${BASE}${path}`,
       lastModified: now,

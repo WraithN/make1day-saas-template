@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/subscriptions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -43,6 +44,13 @@ export async function GET() {
  * blocks self-escalation as defence in depth.
  */
 export async function PATCH(request: Request) {
+  const blocked = await guardApiWrite(request, {
+    bucket: "profile-write",
+    limit: 60,
+    windowMs: 3600000,
+  });
+  if (blocked) return blocked;
+
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });

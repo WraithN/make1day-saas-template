@@ -73,13 +73,12 @@ export function Nav() {
   return (
     // Solid bg (no backdrop-blur): compositing layers drop subpixel AA and
     // make the nav text look fuzzy.
-    <header className="sticky top-0 z-50 border-b border-line/70 bg-bg">
+    <header className="sk-nav sticky top-0 z-50 border-b border-line/70 bg-bg">
       <nav className="wrap flex h-14 items-center justify-between gap-3">
+        {/* Keep this <Link> className verbatim: customerNavBrand() matches it
+            structurally to swap in the customer's own app name. */}
         <Link href="/" className="shrink-0 font-semibold tracking-tight">
-          Ship<span className="text-accent">Kit</span>
-          <span className="ml-2 hidden font-mono text-[11px] font-medium text-ink-soft sm:inline">
-            by Uncorne
-          </span>
+          marketit
         </Link>
 
         {/* ── Desktop (>= md) ── */}

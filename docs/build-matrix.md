@@ -14,12 +14,12 @@
 
 任一断言或类型检查失败，该 case 即失败；`--all` 会跑完全部 case 再汇总失败列表。
 
-## 覆盖维度（17 个 case）
+## 覆盖维度（18 个 case）
 
 | 维度 | 覆盖 |
 |---|---|
 | 支付商 | `waffo` / `stripe` / `creem` / `paypal` / `lemonsqueezy` / `none`（6/6） |
-| 视觉风格 | midnight, candy, aurora, paper, mono, sunset, ocean, slate, emerald, sand（10/10） |
+| 视觉风格 | doodle, midnight, candy, aurora, paper, mono, sunset, ocean, slate, emerald, sand（11/11） |
 | 部署目标 | `vercel` / `cloudflare` / `selfhost`（3/3） |
 | 功能模块 | rag on/off、dashboard on/off、multitenancy on/off、全功能组合 |
 | 两套后台 | 全开、全关、仅 account、仅 admin（新增 `account-only` / `admin-only` 两个 case） |
@@ -68,7 +68,7 @@ node scripts/verify-matrix.mjs --case default-waffo-midnight --build --publish
 
 1. 在 `scripts/verify-matrix.mjs` 的 `CASES` 追加 `{ id, config }`（`c({...})` 基于 `BASE` 覆盖）；
 2. 把同一个 `id` 加进 `.github/workflows/generated-matrix.yml` 的 `matrix.case`；
-3. 同步更新 `scripts/verify-matrix.mjs` 里的 `CASES.length` 断言与顶部注释，以及 README / CI / `llms*.txt` / `openapi.json` / `/api/mcp` / compare 里的用例数（当前 **17**）与支付商数（当前 **6**）。新网关还要加进 `PAYMENT_FILES`、`prune.ts` 的 `PAYMENT_FILES` / `PAYMENT_LABELS` 与 `schema.ts` 的 zod 枚举；
+3. 同步更新 `scripts/verify-matrix.mjs` 里的 `CASES.length` 断言与顶部注释，以及 README / CI / `llms*.txt` / `openapi.json` / `/api/mcp` / compare 里的用例数（当前 **18**）与支付商数（当前 **6**）。新网关还要加进 `PAYMENT_FILES`、`prune.ts` 的 `PAYMENT_FILES` / `PAYMENT_LABELS` 与 `schema.ts` 的 zod 枚举；
 4. 本地跑 `node scripts/verify-matrix.mjs --case <id>` 通过后再提交。
 
 ## 诚实边界

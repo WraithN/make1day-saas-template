@@ -9,7 +9,10 @@ import { SeoLinks } from "@/components/SeoLinks";
 import { Analytics } from "@/components/Analytics";
 import { PageviewTracker } from "@/components/PageviewTracker";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://shipkit.dev";
+// Deploy-time domain placeholder. Keep this literal stable: the generator's
+// customerSeoLinks()/neutralizeBrand() rewrites exactly this string to
+// localhost in customer ZIPs. Replace it with the real domain via env at launch.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://marketit.dev";
 
 /** Explicit mobile viewport + OS theme color (status bar / browser chrome). */
 export const viewport: Viewport = {
@@ -17,7 +20,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   colorScheme: "dark light",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7f8fa" },
+    { media: "(prefers-color-scheme: light)", color: "#fff8e7" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0b0f" },
   ],
 };
@@ -25,12 +28,12 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "ShipKit — Ship your AI SaaS MVP in days, not months",
-    template: "%s · ShipKit",
+    default: "marketit — Ship your AI SaaS MVP in days, not months",
+    template: "%s · marketit",
   },
   description:
-    "An AI SaaS MVP starter by Uncorne: auth, subscriptions, one real AI feature, a clean admin. Clone it, reskin it, launch.",
-  applicationName: "ShipKit",
+    "marketit is a configurable AI SaaS starter: auth, subscriptions, a real AI feature, an admin console and a build generator. Pick your stack, download the source, launch.",
+  applicationName: "marketit",
   keywords: [
     "AI SaaS starter",
     "Next.js SaaS boilerplate",
@@ -38,20 +41,20 @@ export const metadata: Metadata = {
     "Stripe Supabase starter",
     "AI MVP",
   ],
-  authors: [{ name: "Uncorne" }],
-  creator: "Uncorne",
+  authors: [{ name: "marketit" }],
+  creator: "marketit",
   openGraph: {
     type: "website",
     url: SITE_URL,
-    siteName: "ShipKit",
-    title: "ShipKit — Ship your AI SaaS MVP in days, not months",
+    siteName: "marketit",
+    title: "marketit — Ship your AI SaaS MVP in days, not months",
     description:
       "A production-grade AI SaaS starter: auth, billing, DB, admin and one real AI feature. Pick your stack, download, launch.",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "ShipKit — Ship your AI SaaS MVP in days, not months",
+    title: "marketit — Ship your AI SaaS MVP in days, not months",
     description:
       "A production-grade AI SaaS starter. Pick your stack, download a buildable Next.js project, launch.",
   },
@@ -65,17 +68,16 @@ export const metadata: Metadata = {
 const ORG_JSONLD = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "Uncorne",
+  name: "marketit",
   url: SITE_URL,
   description:
-    "Uncorne builds senior-led AI SaaS, app and agent products. ShipKit is its open AI SaaS starter.",
-  sameAs: ["https://github.com/uncorne/shipkit"],
+    "marketit publishes a configurable, white-labelled AI SaaS starter and the generator that produces each customer build.",
 };
 
 const SITE_JSONLD = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "ShipKit",
+  name: "marketit",
   url: SITE_URL,
   inLanguage: ["en", "zh", "ja", "fr", "de"],
 };

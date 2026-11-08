@@ -15,7 +15,7 @@
  *      and a cleared cookie, must not mint another preview)
  *   4. a valid offline SK1 license key unlocks the full source ZIP
  *   5. that ZIP has brand-free home/pricing, no generator factory, no
- *      ShipKit marketing pages and no dead links
+ *      marketit marketing pages and no dead links
  *   6. RAG ingest/query refuse anonymous callers, demo session still works
  */
 const path = require("node:path");
@@ -107,6 +107,10 @@ function startApp() {
   const env = {
     ...process.env,
     LICENSE_GATE: "on",
+    // Exercise the demo (one-cookie) session path too. Production keeps this
+    // closed unless BOTH flags are set, so the smoke server opts in explicitly.
+    NEXT_PUBLIC_ENABLE_DEMO: "true",
+    DEMO_IN_PRODUCTION: "true",
     FREE_GENERATIONS_PER_DAY: "1",
     FREE_GENERATIONS_PER_DAY_PER_IP: "1",
     SQLITE_PATH: dbPath,
@@ -256,7 +260,7 @@ async function runChecks() {
       "",
     );
     check(
-      "customer ZIP drops ShipKit marketing pages",
+      "customer ZIP drops marketit marketing pages",
       !names.some((n) =>
         ["app/blog/", "app/compare/", "app/faq/", "app/license/"].some((p) =>
           n.startsWith(p),
@@ -274,7 +278,7 @@ async function runChecks() {
     const pricing = await z.file("app/pricing/page.tsx").async("string");
     const sitemap = await z.file("app/sitemap.ts").async("string");
     const env = await z.file("lib/env.ts").async("string");
-    const forbidden = ["ShipKit", "Uncorne", "Makerkit", "Supastarter", "ShipFast"];
+    const forbidden = ["marketit", "marketit", "Makerkit", "Supastarter", "ShipFast"];
     check(
       "generated home + pricing are brand-free",
       ![home, pricing].some((s) => forbidden.some((w) => s.includes(w))),

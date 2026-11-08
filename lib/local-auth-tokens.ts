@@ -5,7 +5,7 @@
 // database stores its SHA-256 hash. A token is single-use (the row is deleted
 // inside the same transaction that reads it) and hard-expires.
 //
-// This module is Node-only and ShipKit-site-only. It is deliberately NOT a
+// This module is Node-only and marketit-site-only. It is deliberately NOT a
 // full auth provider: there is no local password SIGN-IN endpoint, no MFA,
 // no OAuth and no session rotation. See AGENTS.md "Known gaps".
 //

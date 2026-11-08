@@ -18,11 +18,31 @@ export function isSubscribed(row: SubscriptionRow | null): boolean {
   return !!row && (row.status === "active" || row.status === "trialing");
 }
 
-export async function getCurrentUser() {
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) return null;
-  return data.user;
+export type CurrentUser = {
+  id: string;
+  email?: string;
+  user_metadata?: Record<string, unknown>;
+};
+
+/**
+ * Supabase Auth user when configured; otherwise the LOCAL SQLite session
+ * created by /api/auth/local. This is what makes password resets and email
+ * verification actually usable on a self-hosted install.
+ */
+export async function getCurrentUser(): Promise<CurrentUser | null> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.auth.getUser();
+    if (!error && data.user) return data.user as CurrentUser;
+  } catch {
+    // Supabase is not configured in this deployment — fall through.
+  }
+  try {
+    const { currentLocalUser } = await import("@/lib/local-auth");
+    return await currentLocalUser();
+  } catch {
+    return null;
+  }
 }
 
 export async function getSubscription(

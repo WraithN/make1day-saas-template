@@ -1,5 +1,5 @@
 // Five-language copy for /agent-ready. This page explains how AI agents and
-// answer engines discover what ShipKit actually is — and how the downloaded
+// answer engines discover what marketit actually is — and how the downloaded
 // project keeps an AI coding agent on the rails afterwards.
 
 import type { Lang } from "@/lib/i18n-core";
@@ -29,11 +29,11 @@ export type AgentReadyCopy = {
 const EN: AgentReadyCopy = {
   eyebrow: "AGENT-NATIVE DELIVERY · GEO",
   title: "Readable by agents. Usable by coding agents.",
-  lede: "Most starters are only readable by humans. ShipKit publishes machine-readable facts for answer engines, an MCP tool for agents that want to act, and a generated project that ships with its own AI coding contract.",
+  lede: "Most starters are only readable by humans. marketit publishes machine-readable facts for answer engines, an MCP tool for agents that want to act, and a generated project that ships with its own AI coding contract.",
   stackTitle: "The discovery stack",
   stackSub: "Four layers, each answering a different question.",
   stack: [
-    { name: "Short facts", path: "/llms.txt", audience: "Answer engines", desc: "What ShipKit is, what it costs, which pages and docs matter. The 30-second read." },
+    { name: "Short facts", path: "/llms.txt", audience: "Answer engines", desc: "What marketit is, what it costs, which pages and docs matter. The 30-second read." },
     { name: "Full facts", path: "/llms-full.txt", audience: "Selection agents", desc: "Every BuilderConfig enum, pruning rule, RAG parameter, payment protocol, license-gate order and known limitation." },
     { name: "Executable contract", path: "/openapi.json", audience: "Tool-using agents", desc: "OpenAPI 3.1 with request/response schemas, error codes and the 402 license-required response of /api/generate." },
     { name: "MCP endpoint", path: "/api/mcp", audience: "Coding agents", desc: "JSON-RPC 2.0 tools: get_product_info, get_builder_config, scaffold_project and get_agent_delivery. A stdio bridge ships for Cursor and Claude Code." },
@@ -77,11 +77,11 @@ const EN: AgentReadyCopy = {
 const ZH: AgentReadyCopy = {
   eyebrow: "AGENT 原生交付 · GEO",
   title: "既能被 agent 读懂，也能被 coding agent 直接用",
-  lede: "大多数脚手架只写给人类看。ShipKit 为答案引擎提供机器可读事实，为想直接动手的 agent 提供 MCP 工具，并让下载的工程自带一份 AI 编码契约。",
+  lede: "大多数脚手架只写给人类看。marketit 为答案引擎提供机器可读事实，为想直接动手的 agent 提供 MCP 工具，并让下载的工程自带一份 AI 编码契约。",
   stackTitle: "四层发现入口",
   stackSub: "每一层回答一个不同的问题。",
   stack: [
-    { name: "短版事实", path: "/llms.txt", audience: "答案引擎", desc: "ShipKit 是什么、卖多少钱、哪些页面和文档值得读。30 秒读完。" },
+    { name: "短版事实", path: "/llms.txt", audience: "答案引擎", desc: "marketit 是什么、卖多少钱、哪些页面和文档值得读。30 秒读完。" },
     { name: "完整事实", path: "/llms-full.txt", audience: "选型 agent", desc: "完整的 BuilderConfig 枚举、剪枝规则、RAG 参数、支付协议、授权门槛顺序与已知限制。" },
     { name: "可执行契约", path: "/openapi.json", audience: "工具型 agent", desc: "OpenAPI 3.1，含请求/响应 schema、错误码，以及 /api/generate 的 402 授权响应。" },
     { name: "MCP 端点", path: "/api/mcp", audience: "编码 agent", desc: "JSON-RPC 2.0 工具：get_product_info、get_builder_config、scaffold_project、get_agent_delivery；附带 Cursor / Claude Code 的 stdio 桥接脚本。" },
@@ -113,7 +113,7 @@ const ZH: AgentReadyCopy = {
     "构建矩阵用 tsc 校验 17 个生成 ZIP，并对代表性组合跑真实 next build；/build-matrix 读取 CI 快照，只反映最近一次 `npm run verify:matrix --build --publish` 的结果。",
     "AI chat 已按 token 流式返回，并有每用户每日配额（AI_MESSAGES_PER_DAY，用尽返回 429）；RAG 摄入/查询需要登录且有效订阅。",
     "多租户附带 0007_orgs.sql（organizations + memberships + RLS）与 lib/org.ts 助手，但工作区 UI 需同时勾选用户后台才随包交付，且你自己的业务表要自行加 .eq(\"org_id\", ...) 做租户隔离。",
-    "生成工程的首页/定价页已无 ShipKit 品牌并附带 MIT LICENSE；Waffo acquiring 下单报文、Cloudflare 边缘构建与开箱即用的账单门户仍需自行补齐。",
+    "生成工程的首页/定价页已无 marketit 品牌并附带 MIT LICENSE；Waffo acquiring 下单报文、Cloudflare 边缘构建与开箱即用的账单门户仍需自行补齐。",
     "npm run ai:docs 只重建文档、不重写 app/globals.css；真正换配色需要回 Builder 重新生成 ZIP。",
   ],
   ctaTitle: "从一次真实下载开始",
@@ -125,11 +125,11 @@ const ZH: AgentReadyCopy = {
 const JA: AgentReadyCopy = {
   eyebrow: "AGENT ネイティブ配信 · GEO",
   title: "エージェントが読め、コーディングエージェントが使える。",
-  lede: "多くのスターターは人間しか読めません。ShipKit は回答エンジン向けの機械可読な事実、実際に操作したいエージェント向けの MCP ツール、そして AI コーディング契約を同梱した生成プロジェクトを提供します。",
+  lede: "多くのスターターは人間しか読めません。marketit は回答エンジン向けの機械可読な事実、実際に操作したいエージェント向けの MCP ツール、そして AI コーディング契約を同梱した生成プロジェクトを提供します。",
   stackTitle: "4 層のディスカバリースタック",
   stackSub: "それぞれ異なる問いに答えます。",
   stack: [
-    { name: "短い事実", path: "/llms.txt", audience: "回答エンジン", desc: "ShipKit の概要、価格、重要なページとドキュメント。30 秒で読めます。" },
+    { name: "短い事実", path: "/llms.txt", audience: "回答エンジン", desc: "marketit の概要、価格、重要なページとドキュメント。30 秒で読めます。" },
     { name: "完全な事実", path: "/llms-full.txt", audience: "選定エージェント", desc: "BuilderConfig の全列挙、prune 規則、RAG パラメータ、決済プロトコル、ライセンスゲートの順序、既知の制限。" },
     { name: "実行可能な契約", path: "/openapi.json", audience: "ツール利用エージェント", desc: "OpenAPI 3.1。リクエスト/レスポンス schema、エラーコード、/api/generate の 402 応答を含みます。" },
     { name: "MCP エンドポイント", path: "/api/mcp", audience: "コーディングエージェント", desc: "JSON-RPC 2.0 ツール：get_product_info / get_builder_config / scaffold_project / get_agent_delivery。Cursor・Claude Code 用 stdio ブリッジ付き。" },
@@ -161,7 +161,7 @@ const JA: AgentReadyCopy = {
     "ビルド行列は 17 個の ZIP を tsc で検証し、代表的な組み合わせには実際の next build も実行します。/build-matrix は CI スナップショットを読むため、直近の `npm run verify:matrix --build --publish` 時点の結果です。",
     "AI chat はトークン単位でストリーミングし、ユーザーごとの日次クォータ（AI_MESSAGES_PER_DAY、超過で 429）があります。RAG の投入/検索にはログインと有効なサブスクが必要です。",
     "multitenancy には 0007_orgs.sql（organizations + memberships + RLS）と lib/org.ts が付属しますが、ワークスペース UI は account も選択した場合のみ同梱され、自社テーブルには自分で .eq(\"org_id\", ...) を追加する必要があります。",
-    "生成プロジェクトのホーム/料金ページからは ShipKit ブランドを除去し MIT LICENSE を同梱しています。Waffo acquiring の注文ペイロード、Cloudflare エッジビルド、請求ポータルは未実装です。",
+    "生成プロジェクトのホーム/料金ページからは marketit ブランドを除去し MIT LICENSE を同梱しています。Waffo acquiring の注文ペイロード、Cloudflare エッジビルド、請求ポータルは未実装です。",
     "npm run ai:docs はドキュメントのみを再生成し app/globals.css は書き換えません。配色変更には Builder からの再生成が必要です。",
   ],
   ctaTitle: "実際のダウンロードから始める",
@@ -173,11 +173,11 @@ const JA: AgentReadyCopy = {
 const FR: AgentReadyCopy = {
   eyebrow: "LIVRAISON AGENT-NATIVE · GEO",
   title: "Lisible par les agents. Utilisable par les agents de code.",
-  lede: "La plupart des starters ne s'adressent qu'aux humains. ShipKit publie des faits lisibles par machine pour les moteurs de réponse, un outil MCP pour les agents qui veulent agir, et un projet généré livré avec son propre contrat de codage IA.",
+  lede: "La plupart des starters ne s'adressent qu'aux humains. marketit publie des faits lisibles par machine pour les moteurs de réponse, un outil MCP pour les agents qui veulent agir, et un projet généré livré avec son propre contrat de codage IA.",
   stackTitle: "Les quatre couches de découverte",
   stackSub: "Chaque couche répond à une question différente.",
   stack: [
-    { name: "Faits courts", path: "/llms.txt", audience: "Moteurs de réponse", desc: "Ce qu'est ShipKit, son prix, les pages et documents importants. Lecture en 30 secondes." },
+    { name: "Faits courts", path: "/llms.txt", audience: "Moteurs de réponse", desc: "Ce qu'est marketit, son prix, les pages et documents importants. Lecture en 30 secondes." },
     { name: "Faits complets", path: "/llms-full.txt", audience: "Agents de sélection", desc: "Toutes les valeurs de BuilderConfig, règles d'élagage, paramètres RAG, protocole de paiement, ordre du gate de licence et limites connues." },
     { name: "Contrat exécutable", path: "/openapi.json", audience: "Agents outillés", desc: "OpenAPI 3.1 avec schémas requête/réponse, codes d'erreur et la réponse 402 de /api/generate." },
     { name: "Endpoint MCP", path: "/api/mcp", audience: "Agents de code", desc: "Outils JSON-RPC 2.0 : get_product_info, get_builder_config, scaffold_project, get_agent_delivery. Un pont stdio est fourni pour Cursor et Claude Code." },
@@ -221,11 +221,11 @@ const FR: AgentReadyCopy = {
 const DE: AgentReadyCopy = {
   eyebrow: "AGENT-NATIVE LIEFERUNG · GEO",
   title: "Von Agents lesbar. Von Coding-Agents nutzbar.",
-  lede: "Die meisten Starter sind nur für Menschen lesbar. ShipKit veröffentlicht maschinenlesbare Fakten für Answer-Engines, ein MCP-Tool für Agents, die handeln wollen, und ein generiertes Projekt, das mit einem eigenen KI-Coding-Vertrag ausgeliefert wird.",
+  lede: "Die meisten Starter sind nur für Menschen lesbar. marketit veröffentlicht maschinenlesbare Fakten für Answer-Engines, ein MCP-Tool für Agents, die handeln wollen, und ein generiertes Projekt, das mit einem eigenen KI-Coding-Vertrag ausgeliefert wird.",
   stackTitle: "Der Discovery-Stack",
   stackSub: "Vier Ebenen, jede beantwortet eine andere Frage.",
   stack: [
-    { name: "Kurze Fakten", path: "/llms.txt", audience: "Answer-Engines", desc: "Was ShipKit ist, was es kostet, welche Seiten und Docs zählen. Die 30-Sekunden-Lektüre." },
+    { name: "Kurze Fakten", path: "/llms.txt", audience: "Answer-Engines", desc: "Was marketit ist, was es kostet, welche Seiten und Docs zählen. Die 30-Sekunden-Lektüre." },
     { name: "Volle Fakten", path: "/llms-full.txt", audience: "Selektions-Agents", desc: "Jede BuilderConfig-Enum, Pruning-Regel, RAG-Parameter, Zahlungsprotokoll, Lizenz-Gate-Reihenfolge und bekannte Limitierungen." },
     { name: "Ausführbarer Vertrag", path: "/openapi.json", audience: "Werkzeug-Agents", desc: "OpenAPI 3.1 mit Request/Response-Schemas, Fehlercodes und der 402-Lizenz-Antwort von /api/generate." },
     { name: "MCP-Endpoint", path: "/api/mcp", audience: "Coding-Agents", desc: "JSON-RPC-2.0-Tools: get_product_info, get_builder_config, scaffold_project und get_agent_delivery. Eine stdio-Brücke für Cursor und Claude Code ist enthalten." },

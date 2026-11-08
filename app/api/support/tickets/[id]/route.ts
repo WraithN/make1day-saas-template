@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
@@ -22,6 +23,13 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const blocked = await guardApiWrite(request, {
+    bucket: "tickets-write",
+    limit: 30,
+    windowMs: 3600000,
+  });
+  if (blocked) return blocked;
+
   if (!(await isOperatorAuthorized())) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }

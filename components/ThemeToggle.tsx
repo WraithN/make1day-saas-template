@@ -3,17 +3,24 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/lib/i18n";
 
+/**
+ * Switches between the loud highlighter palette (`html` without `light`) and
+ * the quiet "plain paper" companion (`html.light`). Both are the same
+ * hand-drawn design language, so the sun/moon metaphor was replaced by a
+ * colour-swatch icon. `sk_theme` keeps the original storage key so existing
+ * visitors keep their preference.
+ */
 export function ThemeToggle() {
   const { t } = useLanguage();
-  const [light, setLight] = useState(false);
+  const [quiet, setQuiet] = useState(false);
 
   useEffect(() => {
-    setLight(document.documentElement.classList.contains("light"));
+    setQuiet(document.documentElement.classList.contains("light"));
   }, []);
 
   function toggle() {
-    const next = !light;
-    setLight(next);
+    const next = !quiet;
+    setQuiet(next);
     document.documentElement.classList.toggle("light", next);
     try {
       localStorage.setItem("sk_theme", next ? "light" : "dark");
@@ -27,19 +34,21 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={t("theme.toggle")}
+      aria-pressed={quiet}
       title={t("theme.toggle")}
-      className="flex h-8 w-8 items-center justify-center rounded-md border border-line/70 text-muted transition-colors hover:text-ink"
+      className="flex h-8 w-8 items-center justify-center rounded-md border-2 border-ink bg-surface transition-colors hover:bg-accent/10"
     >
-      {light ? (
-        // Moon
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      {quiet ? (
+        // Plain paper: one muted swatch.
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+          <circle cx="8" cy="8" r="6" fill="#b8b0a0" stroke="#111111" strokeWidth="2" />
         </svg>
       ) : (
-        // Sun
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <circle cx="12" cy="12" r="4" />
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+        // Full palette: three highlighter dots.
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+          <circle cx="5" cy="6" r="3.2" fill="#ffd93d" stroke="#111111" strokeWidth="1.4" />
+          <circle cx="11" cy="6" r="3.2" fill="#4ecdc4" stroke="#111111" strokeWidth="1.4" />
+          <circle cx="8" cy="11" r="3.2" fill="#ff6b6b" stroke="#111111" strokeWidth="1.4" />
         </svg>
       )}
     </button>

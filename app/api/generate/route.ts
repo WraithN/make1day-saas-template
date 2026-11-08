@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { buildProjectZip } from "@/lib/generator/pack";
@@ -5,6 +6,7 @@ import { slugify, type BuilderConfig } from "@/lib/generator/config";
 import { checkEntitlement, ensureTrialToken, TRIAL_COOKIE } from "@/lib/license";
 import { builderConfigSchema } from "@/lib/generator/schema";
 import { recordTrafficEvent } from "@/lib/traffic";
+import { recordDeliveryEvent } from "@/lib/observability";
 import { resolveIdentity } from "@/lib/visitor-id";
 
 export const runtime = "nodejs";
@@ -17,6 +19,13 @@ const configSchema = builderConfigSchema.extend({
 });
 
 export async function POST(req: Request) {
+  const blocked = await guardApiWrite(req, {
+    bucket: "generate",
+    limit: 30,
+    windowMs: 3600000,
+  });
+  if (blocked) return blocked;
+
   const body = await req.json().catch(() => ({}));
   const parsed = configSchema.safeParse(body);
   if (!parsed.success) {
@@ -34,7 +43,7 @@ export async function POST(req: Request) {
   // of the build plus the design tokens, never application source.
   //
   // Generated customer projects ship with the gate OFF (their lib/env.ts
-  // defaults to LICENSE_GATE=off), so this only protects ShipKit's own
+  // defaults to LICENSE_GATE=off), so this only protects marketit's own
   // deployed site.
   const entitlement = await checkEntitlement(req, parsed.data.licenseKey);
   if (!entitlement.allowed) {
@@ -86,6 +95,13 @@ export async function POST(req: Request) {
       label: "download",
       createdAt: new Date().toISOString(),
     }).catch(() => {});
+
+    // Auditable delivery evidence for the 14-day refund window. The email is
+    // written as a one-way hash; no IP, user agent or raw address is stored.
+    recordDeliveryEvent("download", {
+      jti: entitlement.jti,
+      email: entitlement.email,
+    });
 
     return new NextResponse(new Blob([zip as BlobPart]), {
       status: 200,

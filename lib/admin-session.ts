@@ -23,7 +23,7 @@ export async function currentOperator(): Promise<string | null> {
     const jar = await cookies();
     const sid = jar.get(ADMIN_SESSION_COOKIE)?.value;
     if (!sid) return null;
-    return sessionUser(sid);
+    return await sessionUser(sid);
   } catch {
     // No session cookie, an expired session, or a database that cannot be
     // opened (Node < 22.5 without Supabase). Treat as "not signed in".

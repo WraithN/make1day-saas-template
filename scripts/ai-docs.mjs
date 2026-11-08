@@ -29,7 +29,7 @@ const dryRun = argv.includes("--dry-run");
 
 if (!fs.existsSync(specPath)) {
   console.error(`Missing ${path.relative(ROOT, specPath)}.`);
-  console.error("This command runs inside a generated ShipKit project.");
+  console.error("This command runs inside a generated marketit project.");
   process.exit(1);
 }
 

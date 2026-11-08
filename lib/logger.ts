@@ -1,4 +1,6 @@
-// Structured, level-aware logger for ShipKit server runtimes.
+import { forwardToSink } from "@/lib/error-sink";
+
+// Structured, level-aware logger for marketit server runtimes.
 //
 // Emits one JSON object per line (Loggly / Datadog / CloudWatch / systemd
 // friendly) and never throws into the caller. In development it also pretty-
@@ -39,6 +41,9 @@ function emit(level: LogLevel, msg: string, ctx?: LogContext) {
     dep: process.env.DEPLOYMENT_ID ?? undefined,
   };
   const line = JSON.stringify(entry);
+  // Errors are additionally shipped to an optional external sink and stored
+  // locally by /api/errors. The fire-and-forget call never blocks the request.
+  if (level === "error") forwardToSink(entry);
   if (process.env.NODE_ENV === "production") {
     // One line per event — safe for log shippers.
     process.stdout.write(line + "\n");

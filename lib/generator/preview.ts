@@ -165,7 +165,7 @@ function moduleSummary(c: BuilderConfig): string[] {
 /** The palette as CSS custom properties — the same tokens the app uses. */
 function tokensCss(style: BuilderConfig["style"]): string {
   const p = PALETTES[style];
-  return `/* ShipKit preview — the design tokens of the "${style}" style.
+  return `/* marketit preview — the design tokens of the "${style}" style.
    These are the exact values the full build ships in app/globals.css. */
 :root {
   --bg: ${p.bg};
@@ -232,10 +232,10 @@ export async function buildPreviewZip(
 
   // ── PREVIEW.md ───────────────────────────────────────────────────────────
   const md: string[] = [];
-  md.push(`# ${config.appName} — ShipKit preview`);
+  md.push(`# ${config.appName} — marketit preview`);
   md.push("");
   md.push(
-    "This is the **preview** of the template you configured in the ShipKit builder.",
+    "This is the **preview** of the template you configured in the marketit builder.",
   );
   md.push("");
   md.push(
@@ -287,7 +287,7 @@ export async function buildPreviewZip(
 
   // ── README.md ────────────────────────────────────────────────────────────
   const readme: string[] = [];
-  readme.push(`# ${config.appName} — ShipKit preview package`);
+  readme.push(`# ${config.appName} — marketit preview package`);
   readme.push("");
   readme.push(
     "This is a **preview**, not the template. It deliberately contains no application " +

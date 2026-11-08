@@ -8,7 +8,7 @@
  *   3. assert the generated files / pruning decisions,
  *   4. run `tsc --noEmit` INSIDE the generated project.
  *
- * Requires a running ShipKit server with the license gate OFF — the matrix
+ * Requires a running marketit server with the license gate OFF — the matrix
  * downloads the FULL paid ZIP without a license, which a gated deployment
  * correctly refuses:
  *   LICENSE_GATE=off npx next dev -p 3000
@@ -51,7 +51,7 @@ const ALL_SKILLS = [
   "payments", "database", "rag", "i18n", "deploy", "agents",
 ];
 
-// 17 representative combinations: all 6 payment choices, all 10 styles,
+// 18 representative combinations: all 6 payment choices, all 11 styles,
 // all 3 deploy targets, RAG on/off, dashboard on/off, both consoles on/off
 // and each console alone, multitenancy on/off, skills empty/full,
 // auth/AI provider variations.
@@ -121,6 +121,12 @@ const CASES = [
     id: "lemonsqueezy-slate",
     config: c({ payment: "lemonsqueezy", style: "slate" }),
   },
+  {
+    // Hand-drawn style: the ZIP must carry the extra ink-outline CSS and the
+    // doodle palette, while the other 10 palettes stay untouched.
+    id: "waffo-doodle",
+    config: c({ style: "doodle" }),
+  },
 ];
 
 if (argv.includes("--list")) {
@@ -177,9 +183,11 @@ const SITE_ONLY_FILES = [
   "app/llms-full.txt/route.ts",
   "app/openapi.json/route.ts",
   "app/api/mcp/route.ts",
+  "app/api/markdown/route.ts",
+  "app/.well-known/agent-card.json/route.ts",
   "app/agent-ready/page.tsx",
   "lib/content/agent-ready.ts",
-  // ShipKit-site operational features (mail / support / auth recovery).
+  // marketit-site operational features (mail / support / auth recovery).
   // Pruned by lib/generator/prune.ts SITE_ONLY_FILES; the absence assertions
   // below keep them out of every generated ZIP without adding matrix cases.
   "lib/content/messaging.ts",
@@ -203,13 +211,27 @@ const SITE_ONLY_FILES = [
   "app/verify-email/page.tsx",
   "components/AuthFlow.tsx",
   "supabase/migrations/0010_support_tickets.sql",
+  // marketit-site delivery + governance (added 2026-11-08).
+  // lib/csrf.ts / lib/http-guard.ts / lib/rate-limit.ts and migration 0011
+  // ship in every build: customer API routes import them.
+  "lib/mail/outbox.ts",
+  "lib/license-delivery.ts",
+  "lib/legal-lifecycle.ts",
+  "app/api/license/claim/route.ts",
+  "app/api/cron/mail-outbox/route.ts",
+  "app/api/cron/retention/route.ts",
+  "app/api/privacy/export/route.ts",
+  "app/api/privacy/erase/route.ts",
+  "app/api/privacy/consent/route.ts",
+  "components/LicenseClaimForm.tsx",
 ];
-// ShipKit's OWN marketing site. A customer going live must not be advertsing
+// marketit's OWN marketing site. A customer going live must not be advertsing
 // our $99 license, our competitors or our SEO posts. These are replaced by
 // brand-free customer pages built from their BuilderConfig.
 const SITE_MARKETING_FILES = [
   "app/blog/page.tsx",
   "app/blog/[slug]/page.tsx",
+  "app/blog/[slug]/md/route.ts",
   "app/compare/page.tsx",
   "app/faq/page.tsx",
   "app/license/page.tsx",
@@ -225,6 +247,7 @@ const SITE_MARKETING_FILES = [
   "components/home/ThemePreviewSection.tsx",
   "components/home/FeatureMatrix.tsx",
   "components/home/BlogTeaser.tsx",
+  "components/home/HandDrawnDeco.tsx",
 ];
 // The generator itself must never ship: one purchase would otherwise mean
 // unlimited generations (and resales) of the product that was just paid for.
@@ -252,7 +275,7 @@ function assert(condition, message) {
 
 // Guard the documented case count: adding/removing a case means the README,
 // CI workflow and machine-readable docs numbers must be updated too.
-assert(CASES.length === 17, `expected 17 matrix cases, got ${CASES.length}`);
+assert(CASES.length === 18, `expected 18 matrix cases, got ${CASES.length}`);
 
 function dirSizeKb(dir) {
   let total = 0;
@@ -288,17 +311,36 @@ function dirSizeKb(dir) {
 function runBuild(outDir) {
   const nextBin = path.join(ROOT, "node_modules", "next", "dist", "bin", "next");
   const started = Date.now();
-  const res = spawnSync(
-    process.execPath,
-    [nextBin, "build"],
-    {
-      cwd: outDir,
-      stdio: ["ignore", "pipe", "pipe"],
-      env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1", NODE_ENV: "production" },
-      maxBuffer: 32 * 1024 * 1024,
-    },
-  );
-  const log = `${res.stdout ?? ""}${res.stderr ?? ""}`.toString();
+  let res;
+  let log = "";
+  // On Windows Next's cleanDistDir races on .next/trace and throws EPERM on a
+  // fresh build; a second attempt in the same dir reliably succeeds (project
+  // MEMORY §3). Retry once before giving up.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    res = spawnSync(
+      process.execPath,
+      [nextBin, "build"],
+      {
+        cwd: outDir,
+        stdio: ["ignore", "pipe", "pipe"],
+        // Suppress the .next/trace file: on Windows Next's cleanDistDir races
+        // when deleting/recreating it and throws EPERM (see project MEMORY §3).
+        // The trace is a debug-only artifact, so this does not weaken the check.
+        env: {
+          ...process.env,
+          NEXT_TELEMETRY_DISABLED: "1",
+          NODE_ENV: "production",
+          NEXT_PRIVATE_SUPPRESS_TRACE: "1",
+        },
+        maxBuffer: 32 * 1024 * 1024,
+      },
+    );
+    log = `${res.stdout ?? ""}${res.stderr ?? ""}`.toString();
+    if (res.status === 0) break;
+    if (attempt < 2) {
+      console.log(`      build attempt ${attempt} failed (exit ${res.status}), retrying`);
+    }
+  }
   const ok = res.status === 0;
   const m = log.match(/First Load JS shared by all\s+([\d.]+)\s*kB/);
   const sharedKb = m ? parseFloat(m[1]) : null;
@@ -398,9 +440,15 @@ async function verifyCase(entry, doBuild) {
     "scripts/ai-setup.mjs",
     "scripts/export-local-profiles.mjs",
     "scripts/rebrand.mjs",
+    "scripts/agents-lint.mjs",
   ]) {
     assert(exists(rel), `missing ${rel}`);
   }
+  const shippedPkg = JSON.parse(await read("package.json"));
+  assert(
+    shippedPkg.scripts?.["agents:lint"] === "node scripts/agents-lint.mjs",
+    "generated package.json must expose npm run agents:lint",
+  );
   // The legacy lowercase name must be gone: on case-insensitive filesystems
   // (Windows) it would collide with the standard root AGENTS.md.
   assert(!exists("agents.md"), "legacy agents.md leaked into ZIP");
@@ -408,14 +456,22 @@ async function verifyCase(entry, doBuild) {
   // White-label: every generated project must ship an MIT LICENSE file.
   assert(exists("LICENSE"), "LICENSE missing from ZIP");
 
+  // The hand-drawn ink-outline CSS is style-specific: it must ship for the
+  // doodle palette and must NOT leak into any of the other 10 palettes.
+  const shippedCss = await read("app/globals.css");
+  assert(
+    (config.style === "doodle") === shippedCss.includes("--doodle-ink"),
+    "doodle CSS leaked into (or is missing from) the generated stylesheet",
+  );
+
   // Site-only endpoints must never leak into a customer project.
   for (const rel of SITE_ONLY_FILES) {
     assert(!exists(rel), `site-only endpoint leaked into ZIP: ${rel}`);
   }
 
-  // ShipKit's own marketing pages/content must never reach a customer.
+  // marketit's own marketing pages/content must never reach a customer.
   for (const rel of SITE_MARKETING_FILES) {
-    assert(!exists(rel), `ShipKit marketing page leaked into ZIP: ${rel}`);
+    assert(!exists(rel), `marketit marketing page leaked into ZIP: ${rel}`);
   }
   // The generator must never leak into a customer project.
   for (const rel of GENERATOR_FILES) {
@@ -460,11 +516,40 @@ async function verifyCase(entry, doBuild) {
       customerPricing.includes("app.plan.cta"),
     "app/pricing/page.tsx is not the generated customer pricing page",
   );
-  for (const rel of ["app/page.tsx", "app/pricing/page.tsx", "app/sitemap.ts"]) {
-    const src = await read(rel);
-    for (const brand of ["ShipKit", "Uncorne", "Makerkit", "Supastarter", "ShipFast"]) {
-      assert(!src.includes(brand), `our branding leaked into customer ${rel}: ${brand}`);
+  // White-label: sweep EVERY text entry in the ZIP. The old three-page check
+  // missed skills/*.md, scripts/, generated AI docs, LICENSE and metadata.
+  const BRAND_LEAK = [
+    "ShipYourProduct", "Uncorne", "marketit",
+    "Makerkit", "Supastarter", "ShipFast",
+  ];
+  // These are wire-level identifiers, not branding — renaming them would
+  // break already-issued license keys and MCP client configs.
+  const KEEP_WIRE =
+    /X-ShipKit-Entitlement|shipkit\.config\.json|x-shipkit-license|shipkit\.db|SK1\./;
+  const TEXT_FILE =
+    /\.(ts|tsx|js|mjs|cjs|json|md|mdx|mdc|txt|css|scss|html|yml|yaml|toml|sql|py|sh)$/i;
+  for (const rel of files) {
+    if (rel.endsWith("/")) continue;
+    if (!TEXT_FILE.test(rel) && rel !== "LICENSE" && !rel.startsWith(".env")) continue;
+    let src;
+    try {
+      src = await read(rel);
+    } catch {
+      continue;
     }
+    for (const brand of BRAND_LEAK) {
+      assert(
+        !src.includes(brand),
+        `our branding leaked into customer ${rel}: ${brand}`,
+      );
+    }
+    const stray = src
+      .split("\n")
+      .filter((line) => line.includes("ShipKit") && !KEEP_WIRE.test(line));
+    assert(
+      stray.length === 0,
+      `legacy ShipKit string leaked into customer ${rel}`,
+    );
   }
   // The sitemap must only reference routes that exist in this build.
   const shippedSitemap = await read("app/sitemap.ts");
@@ -476,11 +561,13 @@ async function verifyCase(entry, doBuild) {
   // Root metadata must describe the customer's app, not ours.
   const shippedLayout = await read("app/layout.tsx");
   assert(
-    shippedLayout.includes("APP_NAME") && !shippedLayout.includes("by Uncorne"),
-    "root layout metadata still describes ShipKit",
+    shippedLayout.includes("APP_NAME") &&
+      !shippedLayout.includes("by marketit") &&
+      !shippedLayout.includes("by marketit"),
+    "root layout metadata still describes our brand",
   );
   // The customer project must ship with the download gate OFF by default —
-  // it must never inherit ShipKit's own (production = ON) paywall.
+  // it must never inherit marketit's own (production = ON) paywall.
   const shippedEnv = await read("lib/env.ts");
   assert(
     /licenseGateMode: \(\) => opt\("LICENSE_GATE", "off"\)/.test(shippedEnv),
@@ -637,8 +724,8 @@ async function verifyCase(entry, doBuild) {
   assert(docSpec.labels?.skills?.length === config.skills.length, "doc-spec skill count mismatch");
   assert(docSpec.catalog?.skills?.length === 12, "doc-spec catalogue must contain all 12 skills");
   assert(
-    Object.keys(docSpec.catalog?.styles ?? {}).length === 10,
-    "doc-spec catalogue must contain all 10 palettes",
+    Object.keys(docSpec.catalog?.styles ?? {}).length === 11,
+    "doc-spec catalogue must contain all 11 palettes",
   );
   const skillsIndex = await read("skills/README.md");
   assert(
@@ -671,6 +758,43 @@ async function verifyCase(entry, doBuild) {
     /LICENSE_GATE=off/.test(envExample),
     "generated project must ship with the download gate OFF",
   );
+
+  // Cloudflare target must use the Workers/OpenNext adapter: the old
+  // next-on-pages edge runtime cannot run our Node-runtime route handlers.
+  const isCloudflare = config.deploy === "cloudflare";
+  assert(
+    exists("wrangler.toml") === isCloudflare,
+    "wrangler.toml must ship only for the cloudflare deploy target",
+  );
+  assert(
+    exists("open-next.config.ts.example") === isCloudflare,
+    "open-next.config.ts.example must ship only for the cloudflare target",
+  );
+  if (isCloudflare) {
+    const wrangler = await read("wrangler.toml");
+    assert(
+      wrangler.includes('main = ".open-next/worker.js"') &&
+        wrangler.includes('"nodejs_compat"') &&
+        wrangler.includes(".open-next/assets"),
+      "cloudflare wrangler.toml must be an OpenNext Workers config with nodejs_compat",
+    );
+    assert(
+      !wrangler.includes("next-on-pages") && !wrangler.includes("pages_build_output_dir"),
+      "cloudflare target must not fall back to the retired Pages adapter",
+    );
+    const cfReadme = await read("README.md");
+    assert(
+      cfReadme.includes("SUPABASE_SERVICE_ROLE_KEY") &&
+        cfReadme.includes("node:sqlite"),
+      "cloudflare README must warn that the local SQLite backend cannot run on Workers",
+    );
+    const cfPkg = JSON.parse(await read("package.json"));
+    assert(
+      typeof cfPkg.scripts?.deploy === "string" &&
+        cfPkg.scripts.deploy.includes("opennextjs-cloudflare"),
+      "cloudflare package.json must expose the OpenNext deploy script",
+    );
+  }
 
   // Type-check the generated project with the repository's own TypeScript.
   const tsc = path.join(ROOT, "node_modules", "typescript", "bin", "tsc");

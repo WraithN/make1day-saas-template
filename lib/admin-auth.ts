@@ -3,7 +3,7 @@
 // Why this exists instead of HTTP Basic Auth: a Basic-Auth challenge renders
 // a native browser dialog that embedded previews, some kiosk browsers and
 // every non-Chrome client refuse to show — the visitor just sees a bare
-// "Authentication required" body with no way to type a password. ShipKit
+// "Authentication required" body with no way to type a password. marketit
 // therefore uses a normal in-page login form that exchanges credentials for
 // an opaque session cookie.
 //
@@ -20,6 +20,12 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { env } from "@/lib/env";
 import { ADMIN_SESSION_COOKIE } from "@/lib/admin-cookie";
+import { isWeakAdminPassword } from "@/lib/admin-guard";
+import {
+  signAdminSession,
+  verifyAdminSession,
+  adminSidFromCookie,
+} from "@/lib/admin-cookie-sig";
 import { all, get, run } from "@/lib/sqlite";
 
 export { ADMIN_SESSION_COOKIE };
@@ -77,6 +83,13 @@ export function ensureAdminUser(): void {
   const username = env.adminUser().trim();
   const password = env.adminPassword();
   if (!username || !password) return;
+  // A documented placeholder like `change-me` must never seed a live console.
+  // Development keeps working so the operator can still try the UI locally.
+  if (process.env.NODE_ENV === "production" && isWeakAdminPassword()) {
+    throw new Error(
+      "Refusing to seed a weak ADMIN_PASSWORD in production — set a 12+ character secret.",
+    );
+  }
 
   const salt = randomBytes(16).toString("hex");
   run(
@@ -109,7 +122,7 @@ export function authenticate(username: string, password: string): boolean {
 
 // ── Sessions ───────────────────────────────────────────────────────────────
 
-export function createSession(username: string): string {
+export async function createSession(username: string): Promise<string | null> {
   const sid = randomBytes(32).toString("hex");
   const now = Date.now();
   run(
@@ -120,11 +133,16 @@ export function createSession(username: string): string {
     new Date(now).toISOString(),
     new Date(now + SESSION_TTL_MS).toISOString(),
   );
-  return sid;
+  // The browser receives `<sid>.<hmac>`; middleware can verify it at the Edge
+  // without reaching SQLite. Without a signing secret there is no session.
+  return signAdminSession(sid);
 }
 
-/** The signed-in operator for a session id, or null when it is invalid/expired. */
-export function sessionUser(sid: string | undefined | null): string | null {
+/** Verify the signed cookie, then look the session up in the local store. */
+export async function sessionUser(
+  cookieValue: string | undefined | null,
+): Promise<string | null> {
+  const sid = await verifyAdminSession(cookieValue);
   if (!sid) return null;
   const row = get<SessionRow>(
     "SELECT sid, username, expires_at FROM admin_sessions WHERE sid = ?",
@@ -138,7 +156,8 @@ export function sessionUser(sid: string | undefined | null): string | null {
   return row.username;
 }
 
-export function destroySession(sid: string | undefined | null): void {
+export function destroySession(cookieValue: string | undefined | null): void {
+  const sid = adminSidFromCookie(cookieValue);
   if (!sid) return;
   run("DELETE FROM admin_sessions WHERE sid = ?", sid);
 }

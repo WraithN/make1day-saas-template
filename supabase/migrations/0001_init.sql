@@ -1,4 +1,4 @@
--- ShipKit — initial schema
+-- marketit — initial schema
 -- Run this in the Supabase SQL editor, or via the Supabase CLI:
 --   supabase db push   (or paste into Dashboard → SQL Editor)
 

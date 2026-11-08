@@ -4,14 +4,23 @@ import { useLanguage } from "@/lib/i18n";
 import { faqContent } from "@/lib/content/faq";
 
 export function FaqContent() {
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
   const c = faqContent[lang] ?? faqContent.en;
+  // The graph must declare the language of the TEXT it contains, not the UI
+  // language. When a locale has no translation yet we fall back to English
+  // Q&A, so claiming `ja` / `fr` / `de` here would be a factual error that
+  // answer engines can quote.
+  const contentLang = faqContent[lang] ? lang : "en";
 
-  // FAQPage structured data (English source of truth for the schema).
+  // FAQPage structured data uses the SAME localised Q&A the visitor sees —
+  // an English-only graph on a Chinese page is easy for answer engines to
+  // mis-quote. The publisher matches the Organization name in layout.tsx.
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: faqContent.en.items.map((it) => ({
+    inLanguage: contentLang,
+    publisher: { "@type": "Organization", name: "marketit" },
+    mainEntity: c.items.map((it) => ({
       "@type": "Question",
       name: it.q,
       acceptedAnswer: { "@type": "Answer", text: it.a },
@@ -28,6 +37,10 @@ export function FaqContent() {
         <div className="eyebrow mb-3">{c.eyebrow}</div>
         <h1 className="text-3xl font-semibold sm:text-4xl">{c.heading}</h1>
         <p className="mx-auto mt-4 max-w-2xl text-ink-soft">{c.subtitle}</p>
+        <p className="mt-2 text-xs text-muted">
+          {c.items.length} Q&amp;A · {t("footer.blog")}:{" "}
+          <span className="font-semibold text-ink">marketit</span>
+        </p>
       </div>
 
       <div className="mx-auto mt-8 max-w-3xl space-y-3 sm:mt-12 sm:space-y-4">

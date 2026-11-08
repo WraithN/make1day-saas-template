@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { z } from "zod";
@@ -58,6 +59,13 @@ async function authorizeQuery(): Promise<NextResponse | null> {
 
 /** POST /api/rag/query — retrieve context, then answer with citations. */
 export async function POST(req: Request) {
+  const blocked = await guardApiWrite(req, {
+    bucket: "rag-query",
+    limit: 60,
+    windowMs: 3600000,
+  });
+  if (blocked) return blocked;
+
   const denied = await authorizeQuery();
   if (denied) return denied;
 

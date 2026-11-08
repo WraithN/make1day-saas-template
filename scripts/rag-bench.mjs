@@ -1,6 +1,6 @@
 // RAG benchmark — measures retrieval quality against a golden question set.
 //
-// It hits a running ShipKit server's /api/rag/query endpoint (zero-config:
+// It hits a running marketit server's /api/rag/query endpoint (zero-config:
 // BM25-only retrieval works without any embedding key), checks whether the
 // expected source document appears in the top-K citations, and reports a
 // recall@K and MRR score. Use it to prove the RAG module actually retrieves
@@ -28,12 +28,12 @@ const COOKIE = process.env.RAG_COOKIE ?? "sk_demo=1";
 // Golden set: each question should be answerable from exactly one seeded doc.
 // `source` is the seeded document title that must surface in the top-K.
 const GOLDEN = [
-  { q: "How much does ShipKit cost?", source: "ShipKit pricing" },
-  { q: "ShipKit 是用什么框架和语言构建的？", source: "技术架构 / Architecture" },
+  { q: "How much does marketit cost?", source: "marketit pricing" },
+  { q: "marketit 是用什么框架和语言构建的？", source: "技术架构 / Architecture" },
   { q: "How does the RAG module combine BM25 and embeddings?", source: "RAG module guide" },
-  { q: "What does the Care subscription include?", source: "ShipKit pricing" },
-  { q: "Does ShipKit generate an AGENTS.md for the downloaded project?", source: "Generated template docs / 模板文档" },
-  { q: "ShipKit 支持哪些支付服务商？", source: "技术架构 / Architecture" },
+  { q: "What does the Care subscription include?", source: "marketit pricing" },
+  { q: "Does marketit generate an AGENTS.md for the downloaded project?", source: "Generated template docs / 模板文档" },
+  { q: "marketit 支持哪些支付服务商？", source: "技术架构 / Architecture" },
   { q: "Is there a 1:1 custom development service?", source: "Custom services / 定制服务" },
   { q: "How do I index my own document into the RAG demo?", source: "RAG module guide" },
 ];

@@ -1,9 +1,9 @@
-# ShipKit
+# marketit
 
 > Ship your AI SaaS MVP in days, not months.
-> An AI SaaS MVP starter by **Uncorne** — auth, subscriptions, one real AI feature, a signed-in user console and an operator admin console. Clone it, reskin it, launch.
+> An AI SaaS MVP starter by **marketit** — auth, subscriptions, one real AI feature, a signed-in user console and an operator admin console. Clone it, reskin it, launch.
 
-This is the production-grade starter that powers the ShipKit demo. It is the
+This is the production-grade starter that powers the marketit demo. It is the
 template, not a client's product. Everything below is real and runnable once you
 drop in your own keys.
 
@@ -29,7 +29,8 @@ drop in your own keys.
 | **Lemon Squeezy** — JSON:API checkout + timing-safe HMAC webhook + customer portal | ✅ |
 | **Hybrid RAG** — chunking, BM25 (EN + CJK) + embeddings fused with RRF, cited answers, `/rag` demo UI, optional pgvector | ✅ |
 | **Agent discovery / GEO** — `llms.txt`, `llms-full.txt`, OpenAPI 3.1 `openapi.json`, AI-bot robots allowlist, machine-readable sitemap entries | ✅ |
-| **Generated-template build matrix** — 17 GitHub Actions cases, each downloading a real ZIP and type-checking the extracted project | ✅ |
+| **Generated-template build matrix** — 18 GitHub Actions cases, each downloading a real ZIP and type-checking the extracted project | ✅ |
+| **Editorial / GEO content** — 9 long-form articles with per-post structured FAQ + `FAQPage`/`BlogPosting`/`BreadcrumbList` JSON-LD, `/blog/<slug>/md` Markdown variants for AI crawlers, 21 EN + 21 ZH FAQ answers, all published under the company name | ✅ |
 | **Agent-Native Delivery** — root `AGENTS.md`, style-locked `design.md`, scoped rules, 12 skills, `.cursor/rules/*.mdc`, `CLAUDE.md`, deterministic `npm run ai:docs` | ✅ |
 | **MCP `scaffold_project`** — stateless JSON-RPC 2.0 endpoint + stdio bridge for Cursor / Claude Code, license-gated ZIP option | ✅ |
 | **`/agent-ready` landing page** — five-language guide to the machine-readable stack | ✅ |
@@ -112,15 +113,16 @@ go-live checklist.
 ## Support, transactional email and account recovery
 
 These three areas are **real, working features of this repository's own site
-runtime**, and are **ShipKit-site-only**: they are pruned from every generated
+runtime**, and are **marketit-site-only**: they are pruned from every generated
 customer ZIP (see `SITE_ONLY_FILES`), and the corresponding Nav / Footer / login
 / admin links are rewritten out of the customer package so no dead link survives.
 
 - **Mail** (`lib/mail/*`, `docs/email.md`): `MAIL_PROVIDER=resend` (Resend REST,
   zero dependencies), `webhook` (configurable HTTP mailer) or `none` (safe logged
   no-op). `sendMail` / `sendMailSafely`, a typed `MailError`, structured logging,
-  and four five-language templates (verify / reset / ticket acknowledgement /
-  new-ticket operator notice). `GET /api/mail/self-check` reports configuration
+  and five five-language templates (verify / reset / ticket acknowledgement /
+  new-ticket operator notice / license key delivery). A failed send is persisted
+  in `mail_outbox` for `POST /api/cron/mail-outbox` to retry. `GET /api/mail/self-check` reports configuration
   state **without secret values**. **`MAIL_PROVIDER=smtp` is NOT implemented** —
   there is no `nodemailer` dependency; install it and add a dynamic-import
   adapter yourself before claiming SMTP support. The code only sends: SPF, DKIM,
@@ -145,7 +147,7 @@ customer ZIP (see `SITE_ONLY_FILES`), and the corresponding Nav / Footer / login
 These are **not** implemented; see the code paths named here before promising
 them to a customer:
 - Waffo `acquiring` create-order IS implemented, but every merchant-contract
-  field comes from a `WAFFO_ACQUIRING_*` env var (ShipKit invents none) and the
+  field comes from a `WAFFO_ACQUIRING_*` env var (marketit invents none) and the
   RSA signing string / response shape / webhook attribution are
   **需按你的 Waffo 合同核对** (see `docs/waffo.md` §5). The default `pancake`
   flavor is complete. Lemon Squeezy's webhook custom-data echo location, the
@@ -159,9 +161,10 @@ them to a customer:
 - PayPal creates subscription checkouts only; Creem's portal endpoint/field names are best-effort assumptions (wrapped in try/catch so a miss degrades gracefully).
 - Cloudflare deploy output still contains Node-runtime routes and `node:crypto` / `fs` imports.
 - `MAIL_PROVIDER=smtp` is **not implemented** (no `nodemailer` dependency — add it yourself, see `docs/email.md`). `MAIL_PROVIDER=none` is degraded: mail is logged, not delivered, and `GET /api/mail/self-check` flags it. Deliverability depends on DNS (SPF / DKIM / DMARC / dedicated sending subdomain), not on this code; there is no retry queue and no outbound-webhook signature. Resend field names and Supabase Auth redirect / email-template details are **需按服务商文档核对**. The local SQLite auth recovery flow is real (hash-only one-time tokens, scrypt hashes, anti-enumeration) but has no local password sign-in consumer and no MFA / OAuth / session rotation — it is not equivalent to Supabase Auth.
-- Generated projects ship **brand-free** home and pricing pages built from the customer's `appName` and module picks; ShipKit's own blog / compare / faq / license redemption pages are pruned. `/privacy` and `/terms` are placeholders the customer must replace with their own legal text. `npm run rebrand -- "Your Brand"` is still available for a global rename. Mail, support tickets and auth recovery are likewise ShipKit-site-only and are pruned from every ZIP; the downloaded starter has no built-in support form, no password-reset page and no transactional mail of its own. The ticket POST throttle is in-memory / per-instance.
+- Generated projects ship **brand-free** home and pricing pages built from the customer's `appName` and module picks; marketit's own blog / compare / faq / license redemption pages are pruned. `/privacy` and `/terms` are placeholders the customer must replace with their own legal text. `npm run rebrand -- "Your Brand"` is still available for a global rename. Mail, support tickets and auth recovery are likewise marketit-site-only and are pruned from every ZIP; the downloaded starter has no built-in support form, no password-reset page and no transactional mail of its own. The ticket POST throttle is in-memory / per-instance.
 - Every generated project ships an MIT `LICENSE` file; edit its copyright line to your name after rebranding.
-- The build matrix runs `tsc --noEmit` on all 17 cases; a representative subset also runs a real `next build` (pass rate + artifact sizes are published to `public/build-matrix.json` and shown on `/build-matrix`). Run `node scripts/verify-matrix.mjs --all --build --publish` to refresh it.
+- This site's own `/privacy` and `/terms` now mirror the real data map (`docs/legal-data-map.md`) and resolve every entity, mailbox, jurisdiction and site URL from `lib/env.ts` — no company name is hard-coded in legal copy. Still missing: an automated retention job, a consent audit log, a download log (the old "14 days if not downloaded" refund promise could not be evidenced, so all five `pricing.rules.r5` strings use a plain 14-day window), a DPA template and a data-export endpoint. The repo `LICENSE` is MIT while the site sells generated builds — read `docs/legal-data-map.md` §5 before launch.
+- The build matrix runs `tsc --noEmit` on all 18 cases; a representative subset also runs a real `next build` (pass rate + artifact sizes are published to `public/build-matrix.json` and shown on `/build-matrix`). Run `node scripts/verify-matrix.mjs --all --build --publish` to refresh it.
 - `/api/mcp` is stateless JSON-RPC only — no sampling, prompts, subscriptions or SSE streaming. `scaffold_project` returns configuration JSON by default; `includeZip=true` is license-gated.
 - `AGENTS.md` / scoped rules are written conventions, not lint-enforced; auto-loading of `.cursor/rules` and `CLAUDE.md` depends on the client tool.
 
@@ -178,7 +181,7 @@ pluggable payments (Stripe / Creem / PayPal / Waffo / Lemon Squeezy) · multi-pr
 
 ```bash
 # 1. clone
-git clone https://github.com/uncorne/shipkit.git
+git clone https://github.com/your-org/shipyourproduct.git
 cd shipkit
 
 # 2. install
@@ -300,7 +303,7 @@ Lemon Squeezy 账户核对.
 > route reads `PAYMENT_PROVIDER` to pick the verifier). Verification failures
 > return 400 and persistence failures return 500 so the gateway retries.
 > See `docs/payments*.md` for the per-gateway setup guides (English / 中文 /
-> 日本語 / Français; the app UI itself is five-language),
+> 日本語 / Français / Deutsch; the app UI itself is five-language),
 > `docs/waffo-launch-checklist.md` for the Pancake go-live runbook, and
 > `docs/competitive-analysis.md` for the 2026 competitor / differentiation review.
 
@@ -323,7 +326,7 @@ Fill in only the keys for the providers you use.
 
 ## Deploy (1-click)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/uncorne/shipkit)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-org/shipyourproduct)
 
 After deploying, set the same environment variables in the Vercel project
 settings (including `PAYMENT_PROVIDER` and your chosen gateway's keys), and add
@@ -339,13 +342,13 @@ from that exact `BuilderConfig`:
 | File | Purpose |
 | --- | --- |
 | `AGENTS.md` | Root contract: selections, commands, repo map, scoped-rule index, 8 non-negotiable rules, style lock, definition of done |
-| `design.md` | Style-locked visual spec for one of 10 palettes: token/HEX table, typography, `--radius`, texture, component vocabulary, responsive/a11y, do/don't |
+| `design.md` | Style-locked visual spec for one of 11 palettes: token/HEX table, typography, `--radius`, texture, component vocabulary, responsive/a11y, do/don't |
 | `ai/rules/*.md` | Scoped rules with `globs` frontmatter — core / style / api / auth / payments / database / rag / i18n / deploy + one per selected skill |
 | `.cursor/rules/*.mdc` | The same rules in Cursor's native format |
 | `CLAUDE.md` | Claude Code entry point importing `AGENTS.md`, `design.md`, all rules and skills |
 | `skills/*.md` | 12 playbooks (frontend, UI, backend, testing, SEO, auth, payments, database, RAG, i18n, deploy, agent workflow), pruned by selection |
 | `shipkit.config.json` | **Source of truth** for selections — edit this, then run `ai:docs` |
-| `ai/doc-spec.json` | Full option catalogue + all 10 palettes used to re-derive labels and style |
+| `ai/doc-spec.json` | Full option catalogue + all 11 palettes used to re-derive labels and style |
 
 One renderer (`scripts/lib/ai-docs.mjs`) is used both by `lib/generator/pack.ts`
 and by the downloaded project's `npm run ai:docs`, so regeneration is
@@ -380,9 +383,9 @@ LICENSE_GATE=off npx next start -p 3000   # terminal 1 (read-only .next)
 npm run verify:matrix                     # terminal 2, or: node scripts/verify-matrix.mjs --all
 ```
 
-`.github/workflows/generated-matrix.yml` runs 17 parallel cases covering all 6
-payment gateways, all 10 styles, all 3 deploy targets and the RAG/dashboard/skills
-switches. Each case downloads a real ZIP, asserts that site-only endpoints, ShipKit
+`.github/workflows/generated-matrix.yml` runs 18 parallel cases covering all 6
+payment gateways, all 11 styles, all 3 deploy targets and the RAG/dashboard/skills
+switches. Each case downloads a real ZIP, asserts that site-only endpoints, marketit
 marketing pages, the generator itself and unselected modules were pruned, then
 runs `tsc --noEmit` inside the extracted project. A representative subset also
 runs a real `next build` (see Known gaps).

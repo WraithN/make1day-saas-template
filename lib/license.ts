@@ -67,6 +67,10 @@ export type Entitlement = {
   reason: EntitlementReason;
   plan?: "buyout" | "care";
   remaining?: number;
+  /** Present when a specific issued key backs the entitlement (delivery log). */
+  jti?: string;
+  /** Buyer email, hashed before it is written to delivery_events. */
+  email?: string;
 };
 
 // ── Offline key (HMAC-SHA256) ──────────────────────────────────────────────
@@ -385,7 +389,7 @@ function isPublicIp(ip: string): boolean {
  * A single-entry x-forwarded-for was written by the client itself and is
  * therefore ignored — those requests share one "global" bucket.
  */
-function clientNetwork(req: Request): string {
+export function clientNetwork(req: Request): string {
   for (const header of [
     "cf-connecting-ip",
     "x-vercel-forwarded-for",
@@ -562,7 +566,13 @@ export async function checkEntitlement(
   if (key) {
     const payload = verifyLicenseKey(key);
     if (payload) {
-      return { allowed: true, reason: "license-key", plan: payload.plan };
+      return {
+        allowed: true,
+        reason: "license-key",
+        plan: payload.plan,
+        jti: payload.jti,
+        email: payload.email,
+      };
     }
   }
 
@@ -586,11 +596,18 @@ export async function checkEntitlement(
           allowed: true,
           reason: "subscription",
           plan: sub.plan === "buyout" ? "buyout" : "care",
+          email: user.email,
         };
       }
       const owned = await findLicenseByEmail(user.email);
       if (owned) {
-        return { allowed: true, reason: "license-email", plan: owned.plan };
+        return {
+          allowed: true,
+          reason: "license-email",
+          plan: owned.plan,
+          jti: owned.jti,
+          email: owned.email,
+        };
       }
     }
   } catch {

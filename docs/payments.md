@@ -1,6 +1,6 @@
 # Payments — Configuration Guide
 
-ShipKit ships with a pluggable billing layer. In the **Builder → 03 · Payments**
+marketit ships with a pluggable billing layer. In the **Builder → 03 · Payments**
 step you pick one provider; the generated scaffold reads that choice from
 `PAYMENT_PROVIDER` and wires up the correct client + webhook handler.
 
@@ -157,7 +157,7 @@ sends `subscription.activated` for the same first payment.
 
 `WAFFO_WEBHOOK_SECRET` (legacy HMAC) is **not used** — both Waffo products use
 RSA. **Acquiring checkout is implemented**: all `merchantInfo` / `userInfo` /
-`paymentInfo` / order fields come from `WAFFO_ACQUIRING_*` env vars (ShipKit
+`paymentInfo` / order fields come from `WAFFO_ACQUIRING_*` env vars (marketit
 invents none), ids are generated at runtime, and the signing string / response
 shape are **需按你的 Waffo 合同核对**. Full protocol reference: `docs/waffo.md` §5.
 
@@ -254,7 +254,7 @@ no online checkout.
 
 ## Content paywall (paid access)
 
-ShipKit ships a **provider-agnostic content paywall**: the same entitlement check
+marketit ships a **provider-agnostic content paywall**: the same entitlement check
 that gates `POST /api/generate` also gates premium site content. This is a
 **Builder feature** (`premium`) in generated projects, and the interception
 engine is part of the core so any project can switch it on via env alone.
@@ -321,7 +321,7 @@ without operator involvement. The flow is provider-agnostic through the
 - One-time **Buyout** purchases don't create a subscription row, so the portal
   button only appears for active recurring subscriptions.
 
-**Note:** the portal is a hosted, provider-controlled page — ShipKit never
+**Note:** the portal is a hosted, provider-controlled page — marketit never
 touches card data. After the buyer finishes, they are returned to
 `/account/billing`.
 

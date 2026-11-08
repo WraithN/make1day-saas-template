@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -10,6 +11,13 @@ import { resolveIdentity } from "@/lib/visitor-id";
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  const blocked = await guardApiWrite(req, {
+    bucket: "checkout",
+    limit: 30,
+    windowMs: 3600000,
+  });
+  if (blocked) return blocked;
+
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },

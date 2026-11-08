@@ -1,6 +1,6 @@
 # Paiements — Guide de configuration
 
-ShipKit intègre une couche de facturation remplaçable. Dans l'étape **Builder → 03 · Paiements**, vous choisissez un fournisseur ; l'application générée lit ce choix depuis `PAYMENT_PROVIDER` et branche le client et le gestionnaire de webhook correspondants.
+marketit intègre une couche de facturation remplaçable. Dans l'étape **Builder → 03 · Paiements**, vous choisissez un fournisseur ; l'application générée lit ce choix depuis `PAYMENT_PROVIDER` et branche le client et le gestionnaire de webhook correspondants.
 
 Ce guide explique comment configurer chaque option pour que l'application générée puisse réellement facturer vos clients.
 
@@ -143,7 +143,7 @@ est RSA-SHA256 sur `${t}.${rawBody}` (tolérance 45 min) ;
 accompagne déjà le premier paiement. L'ancien `WAFFO_WEBHOOK_SECRET` (HMAC)
 n'est plus utilisé. **La création de commande Acquiring est implémentée** :
 tous les champs `merchantInfo` / `userInfo` / `paymentInfo` / commande
-proviennent des variables `WAFFO_ACQUIRING_*` (ShipKit n'invente aucune valeur),
+proviennent des variables `WAFFO_ACQUIRING_*` (marketit n'invente aucune valeur),
 les identifiants sont générés à l'exécution, et la chaîne de signature / la
 forme de la réponse sont **à vérifier avec votre contrat Waffo**.
 Référence complète : `docs/waffo.md` §5.

@@ -18,6 +18,9 @@ export type TemplateData = {
   subject?: string;
   message?: string;
   id?: string;
+  /** License delivery / recovery fields. */
+  licenseKey?: string;
+  plan?: string;
 };
 
 function escapeHtml(v: string): string {
@@ -38,7 +41,7 @@ function plain(lang: Lang, key: MsgKey, vars: Record<string, string | number>): 
 }
 
 export function appName(): string {
-  return env.mailFromName().trim() || "ShipKit";
+  return env.mailFromName().trim() || "marketit";
 }
 
 function vars(data: TemplateData): Record<string, string | number> {
@@ -50,6 +53,8 @@ function vars(data: TemplateData): Record<string, string | number> {
     subject: data.subject ?? "",
     message: data.message ?? "",
     id: data.id ?? "",
+    key: data.licenseKey ?? "",
+    plan: data.plan ?? "",
   };
 }
 
@@ -58,6 +63,7 @@ const SUBJECT_KEYS: Record<MailTemplate, MsgKey> = {
   reset: "mail.subject.reset",
   ticketUser: "mail.subject.ticketUser",
   ticketOperator: "mail.subject.ticketOperator",
+  licenseKey: "mail.subject.licenseKey",
 };
 
 const HEADING_KEYS: Record<MailTemplate, MsgKey> = {
@@ -65,6 +71,7 @@ const HEADING_KEYS: Record<MailTemplate, MsgKey> = {
   reset: "mail.heading.reset",
   ticketUser: "mail.heading.ticketUser",
   ticketOperator: "mail.heading.ticketOperator",
+  licenseKey: "mail.heading.licenseKey",
 };
 
 const BODY_KEYS: Record<MailTemplate, MsgKey> = {
@@ -72,6 +79,7 @@ const BODY_KEYS: Record<MailTemplate, MsgKey> = {
   reset: "mail.body.reset",
   ticketUser: "mail.body.ticketUser",
   ticketOperator: "mail.body.ticketOperator",
+  licenseKey: "mail.body.licenseKey",
 };
 
 /** Minimal, self-contained HTML layout — no external CSS, safe for clients. */
@@ -106,12 +114,32 @@ export function renderMail(
   const subject = plain(lang, SUBJECT_KEYS[template], v);
   const heading = msg(lang, HEADING_KEYS[template], v);
   const body = msg(lang, BODY_KEYS[template], v);
-  const note = msg(lang, "mail.note", v);
+  const noteKey: MsgKey = template === "licenseKey" ? "mail.licenseHint" : "mail.note";
+  const note = msg(lang, noteKey, v);
   const footer = msg(lang, "mail.footer", v);
   const hasLink = template === "verify" || template === "reset";
 
   let bodyHtml = `<p>${body}</p>`;
   let bodyText = plain(lang, BODY_KEYS[template], v);
+
+  if (template === "licenseKey") {
+    // The key IS the product. Show it in a copy-friendly block and repeat it
+    // in text/plain so readers without an HTML client still get their goods.
+    const keyBlock = [
+      `<div style="margin:18px 0;padding:14px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;">`,
+      `<div style="font-size:12px;color:#6b7280;">${msg(lang, "mail.labelPlan", v)}: ${escapeHtml(data.plan ?? "")}</div>`,
+      `<div style="font-size:12px;color:#6b7280;margin-top:4px;">${msg(lang, "mail.labelKey", v)}</div>`,
+      `<code style="display:block;margin-top:6px;font-size:12px;word-break:break-all;">${escapeHtml(data.licenseKey ?? "")}</code>`,
+      `</div>`,
+    ].join("");
+    bodyHtml += keyBlock;
+    bodyText = [
+      bodyText,
+      "",
+      `${msg(lang, "mail.labelPlan", v)}: ${data.plan ?? ""}`,
+      `${msg(lang, "mail.labelKey", v)}: ${data.licenseKey ?? ""}`,
+    ].join("\n");
+  }
 
   if (template === "ticketOperator") {
     // A small labelled details block, with every value HTML-escaped.
@@ -158,7 +186,7 @@ export function renderMail(
     bodyText,
     actionText,
     "",
-    plain(lang, "mail.note", v),
+    plain(lang, noteKey, v),
     "",
     plain(lang, "mail.footer", v),
   ].join("\n");

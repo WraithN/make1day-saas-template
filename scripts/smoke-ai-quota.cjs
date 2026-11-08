@@ -360,6 +360,10 @@ async function main() {
   const envB = {
     AI_MESSAGES_PER_DAY: String(LIMIT),
     LICENSE_GATE: "on",
+    // Enable the (production-closed) demo session explicitly so the demo
+    // RAG/AI paths can be exercised.
+    NEXT_PUBLIC_ENABLE_DEMO: "true",
+    DEMO_IN_PRODUCTION: "true",
     SQLITE_PATH: dbPath,
   };
   delete envB.NEXT_PUBLIC_SUPABASE_URL;

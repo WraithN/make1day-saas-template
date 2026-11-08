@@ -1,7 +1,7 @@
-// OpenAPI 3.1 contract for ShipKit's public HTTP surface.
+// OpenAPI 3.1 contract for marketit's public HTTP surface.
 // Self-contained: no project imports, so pruning can exclude this route from
 // generated customer ZIPs without breaking their type-check.
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://shipkit.dev").replace(
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://marketit.dev").replace(
   /\/+$/,
   "",
 );
@@ -24,13 +24,13 @@ export function GET() {
   const doc = {
     openapi: "3.1.0",
     info: {
-      title: "ShipKit API",
+      title: "marketit API",
       version: "1.0.0",
       summary: "Configurable Next.js SaaS starter generator, licensing and payments",
       description:
-        "ShipKit sells a configurable Next.js 15 SaaS starter. The Builder posts a selection to /api/generate and receives a pruned, buildable, agent-native ZIP containing AGENTS.md, design.md, scoped rules, Cursor rules, CLAUDE.md and up to 12 skills. An MCP endpoint lets coding agents assemble a valid configuration programmatically. Source downloads are gated by an offline license key or an active subscription / email claim — the source ZIP is the product, so anonymous visitors never receive it. A source-free preview package is available without a license. Full human/agent-readable overview: /llms-full.txt. Agent guide: /agent-ready. Go-live notes: docs/waffo-launch-checklist.md.",
+        "marketit sells a configurable Next.js 15 SaaS starter. The Builder posts a selection to /api/generate and receives a pruned, buildable, agent-native ZIP containing AGENTS.md, design.md, scoped rules, Cursor rules, CLAUDE.md and up to 12 skills. An MCP endpoint lets coding agents assemble a valid configuration programmatically. Source downloads are gated by an offline license key or an active subscription / email claim — the source ZIP is the product, so anonymous visitors never receive it. A source-free preview package is available without a license. Full human/agent-readable overview: /llms-full.txt. Agent guide: /agent-ready. Go-live notes: docs/waffo-launch-checklist.md.",
     },
-    servers: [{ url: SITE, description: "ShipKit site" }],
+    servers: [{ url: SITE, description: "marketit site" }],
     tags: [
       { name: "Generator", description: "Build and download a customized project" },
       { name: "License", description: "Offline HMAC license keys" },
@@ -38,9 +38,12 @@ export function GET() {
       { name: "RAG", description: "Hybrid BM25 + embeddings retrieval" },
       { name: "AI", description: "Multi-provider chat" },
       { name: "Analytics", description: "First-party, consent-gated statistics" },
-      { name: "Mail", description: "Transactional email configuration (ShipKit site)" },
+      { name: "Mail", description: "Transactional email configuration (marketit site)" },
       { name: "Support", description: "Support tickets / contact form" },
       { name: "Auth recovery", description: "Password reset + email verification" },
+      { name: "Privacy", description: "Consent, retention, data export and erasure" },
+      { name: "Observability", description: "Health probe and client/server error collection" },
+      { name: "Content / GEO", description: "Machine-readable docs and Markdown variants" },
       {
         name: "MCP",
         description: "Model Context Protocol tools for agent-driven scaffolding",
@@ -262,7 +265,7 @@ export function GET() {
           tags: ["Support"],
           summary: "Create a support ticket and send two notification emails",
           description:
-            "Public. Zod-validated (email, subject 3-200, message 10-5000), honeypot field `company`, and a per-IP/visitor throttle (5 / minute, in-memory). A signed-in Supabase user is associated when present. The row is written FIRST, then two best-effort five-language emails (requester acknowledgement + operator notice) are sent — a mail outage never loses the ticket. Response includes mailDelivered flags.",
+            "Public. Zod-validated (email, subject 3-200, message 10-5000), honeypot field `company`, same-origin/CSRF protection at the Edge and a persistent dual-backend rate limit (5 / minute, SQLite transaction or Supabase RPC). A signed-in Supabase user is associated when present. The row is written FIRST, then two best-effort five-language emails (requester acknowledgement + operator notice) are sent — a mail outage never loses the ticket. Response includes mailDelivered flags.",
           requestBody: {
             required: true,
             content: {
@@ -531,12 +534,151 @@ export function GET() {
           },
         },
       },
+      "/blog/{slug}/md": {
+        get: {
+          tags: ["Content / GEO"],
+          summary: "Plain-text Markdown variant of a blog article",
+          description:
+            "A GEO surface for AI crawlers and answer engines. Returns the title, company byline (marketit), published/updated dates, canonical path, category, tags, full body and the article's structured FAQ as text/markdown. ?lang=en|zh|ja|fr|de selects a translation with English fallback. Declared on the HTML article as an alternate of type text/markdown and listed in /sitemap.xml.",
+          parameters: [
+            { name: "slug", in: "path", required: true, schema: { type: "string" }, description: "Canonical article slug or a legacy alias" },
+            { name: "lang", in: "query", required: false, schema: { type: "string", enum: ["en", "zh", "ja", "fr", "de"], default: "en" } },
+          ],
+          responses: {
+            "200": {
+              description: "Markdown document",
+              content: { "text/markdown": { schema: { type: "string" } } },
+            },
+            "404": { description: "Unknown slug" },
+          },
+        },
+      },
+      "/api/markdown": {
+        get: {
+          tags: ["Content / GEO"],
+          summary: "Internal target of the ?format=md page variant",
+          description:
+            "Append ?format=md to any public page. middleware.ts rewrites it here with ?path=<page>&lang=<lang>. /faq returns the full localised Q&A, /blog returns the article index, /blog/<slug> returns the complete article, and other allowlisted pages return a factual Markdown digest. Content-Language and a canonical Link header describe the real body language. Direct calls are allowed; the same-origin rule applies.",
+          parameters: [
+            { name: "path", in: "query", required: true, schema: { type: "string" }, description: "Original page pathname" },
+            { name: "lang", in: "query", required: false, schema: { type: "string", enum: ["en", "zh", "ja", "fr", "de"], default: "en" } },
+          ],
+          responses: {
+            "200": { description: "Markdown document", content: { "text/markdown": { schema: { type: "string" } } } },
+            "404": { description: "Page has no Markdown variant" },
+          },
+        },
+      },
+      "/.well-known/agent-card.json": {
+        get: {
+          tags: ["Content / GEO"],
+          summary: "Agent capability discovery descriptor",
+          description:
+            "Declares the machine-readable endpoints, security scheme and explicit limitations (no A2A task lifecycle, no streaming, no push notifications).",
+          responses: { "200": json(200, "Agent card", { type: "object" }) },
+        },
+      },
+      "/api/license/claim": {
+        post: {
+          tags: ["License"],
+          summary: "Re-send a license key to the checkout email",
+          description:
+            "Always returns { ok: true } to prevent account enumeration. Two persistent rate-limit buckets (IP + hashed address). Requires a configured mail provider; failures are queued in mail_outbox.",
+          requestBody: {
+            required: true,
+            content: { "application/json": { schema: { type: "object", required: ["email"], properties: { email: { type: "string", format: "email" }, lang: { type: "string", enum: ["en", "zh", "ja", "fr", "de"] } } } } },
+          },
+          responses: { "200": json(200, "Generic success", { type: "object" }), "429": err("Rate limited (Retry-After)") },
+        },
+      },
+      "/api/privacy/export": {
+        post: {
+          tags: ["Privacy"],
+          summary: "Export the signed-in user's data as JSON",
+          description: "Requires a session. Returns profile, licences, orders, tickets, consent/delivery events, queued mail and attributed traffic events.",
+          responses: { "200": json(200, "my-data.json", { type: "object" }), "401": err("Unauthorized") },
+        },
+      },
+      "/api/privacy/erase": {
+        post: {
+          tags: ["Privacy"],
+          summary: "Erase the signed-in user's personal data",
+          description: "Requires a session and an exact confirmEmail match. Order/licence rows are kept for accounting with an irreversible email tombstone.",
+          responses: { "200": json(200, "Erasure result", { type: "object" }), "401": err("Unauthorized") },
+        },
+      },
+      "/api/privacy/consent": {
+        post: {
+          tags: ["Privacy"],
+          summary: "Record an accept / withdraw / policy_view consent event (hashed subject)",
+          responses: { "200": json(200, "Recorded", { type: "object" }) },
+        },
+      },
+      "/api/cron/retention": {
+        post: {
+          tags: ["Privacy"],
+          summary: "Run the 90-day data retention job",
+          description: "Protected by CRON_SECRET (disabled in production when unset). Deletes time-bounded records; never deletes pending mail, orders or licences.",
+          responses: { "200": json(200, "Per-table deletion counts", { type: "object" }), "503": err("CRON_SECRET not configured") },
+        },
+      },
+      "/api/cron/mail-outbox": {
+        get: { tags: ["Mail"], summary: "Outbox stats (pending / dead / delivered)", responses: { "200": json(200, "Stats", { type: "object" }) } },
+        post: {
+          tags: ["Mail"],
+          summary: "Retry pending transactional mail",
+          description: "Protected by CRON_SECRET (disabled in production when unset).",
+          responses: { "200": json(200, "Flush result", { type: "object" }), "503": err("CRON_SECRET not configured") },
+        },
+      },
+      "/api/errors": {
+        post: {
+          tags: ["Observability"],
+          summary: "Client error collector for the error boundaries",
+          description: "Rate limited. Writes error_events and forwards to ERROR_REPORT_URL when configured. Never accepts arbitrary PII.",
+          responses: { "202": json(202, "Accepted", { type: "object" }), "429": err("Rate limited") },
+        },
+      },
+      "/api/health": {
+        get: {
+          tags: ["Observability"],
+          summary: "Readiness probe (SQLite SELECT 1 + dependency summary)",
+          description: "Returns 503 when the database is unavailable. Lists missing operator variables without exposing secret values.",
+          responses: { "200": json(200, "Healthy", { type: "object" }), "503": json(503, "Degraded", { type: "object" }) },
+        },
+      },
+      "/api/auth/local": {
+        post: {
+          tags: ["Auth recovery"],
+          summary: "Local password sign-in / sign-out (no Supabase configured)",
+          description: "Rate limited. Sessions are stored as SHA-256 token hashes in local_sessions and set in an httpOnly cookie.",
+          responses: { "200": json(200, "Sign-in result", { type: "object" }), "401": err("Bad credentials"), "429": err("Rate limited") },
+        },
+      },
+      "/llms.txt": {
+        get: {
+          tags: ["Content / GEO"],
+          summary: "Short machine-readable product overview with the full blog + FAQ index",
+          responses: {
+            "200": { description: "llms.txt", content: { "text/plain": { schema: { type: "string" } } } },
+          },
+        },
+      },
+      "/llms-full.txt": {
+        get: {
+          tags: ["Content / GEO"],
+          summary: "Long-form machine-readable reference (config enum, pruning, API, limitations)",
+          responses: {
+            "200": { description: "llms-full.txt", content: { "text/plain": { schema: { type: "string" } } } },
+          },
+        },
+      },
       "/api/mcp": {
         post: {
           tags: ["MCP"],
-          summary: "MCP JSON-RPC 2.0 endpoint (initialize / tools/list / tools/call)",
+          summary: "MCP JSON-RPC 2.0 endpoint (tools + resources)",
           description:
-            "Stateless Model Context Protocol over HTTP. Tools: get_product_info, get_builder_config, scaffold_project, get_agent_delivery. scaffold_project returns a validated BuilderConfig plus the exact POST body for /api/generate; includeZip=true returns the ZIP as base64 and is subject to the SAME license gate. Notifications (requests without id) receive HTTP 204. Reference: docs/mcp.md.",
+            "Stateless Model Context Protocol over HTTP. Tools: get_product_info, get_builder_config, scaffold_project, get_agent_delivery. Resources: llms.txt, llms-full.txt, openapi.json via resources/list + resources/read. No sampling, prompts, logging, completions, subscriptions or SSE. scaffold_project returns a validated BuilderConfig plus the exact POST body for /api/generate; includeZip=true returns the ZIP as base64 and is subject to the SAME license gate. Notifications (requests without id) receive HTTP 204. Reference: docs/mcp.md.",
           requestBody: {
             required: true,
             content: {
@@ -549,7 +691,7 @@ export function GET() {
                     id: { type: ["string", "number", "null"] },
                     method: {
                       type: "string",
-                      enum: ["initialize", "ping", "tools/list", "tools/call", "resources/list"],
+                      enum: ["initialize", "ping", "tools/list", "tools/call", "resources/list", "resources/read"],
                     },
                     params: { type: "object", additionalProperties: true },
                   },
@@ -649,7 +791,7 @@ export function GET() {
             deploy: { type: "string", enum: ["vercel", "selfhost", "cloudflare"] },
             style: {
               type: "string",
-              enum: ["midnight", "paper", "aurora", "emerald", "sunset", "ocean", "mono", "slate", "candy", "sand"],
+              enum: ["doodle", "midnight", "paper", "aurora", "emerald", "sunset", "ocean", "mono", "slate", "candy", "sand"],
             },
             skills: {
               type: "array",

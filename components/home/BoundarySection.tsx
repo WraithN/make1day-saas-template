@@ -6,35 +6,35 @@ const LIMS = [1, 2, 3, 4] as const;
 
 // The honesty anchor of the whole page: a collapsible capability / boundary
 // contrast. "Stable today" is bright and open; "Known limits" is dimmed and
-// collapsed — ShipKit's transparency made visible, not a flat feature list.
+// collapsed — transparency made visible, not a flat feature list.
 export function BoundarySection({ lang }: { lang: Lang }) {
   return (
     <section id="boundaries" className="sk-font wrap py-14 sm:py-20">
       <p className="eyebrow mb-3">
         <Trans k="boundary.eyebrow" lang={lang} />
       </p>
-      <h2 className="max-w-3xl text-[18px] font-medium leading-snug text-[#f0f0f0]">
+      <h2 className="max-w-3xl text-[18px] font-semibold leading-snug text-ink">
         <Trans k="boundary.title" lang={lang} />
       </h2>
-      <p className="mt-3 max-w-2xl text-[14px] leading-relaxed text-[#949494]">
+      <p className="mt-3 max-w-2xl text-[14px] leading-relaxed text-muted">
         <Trans k="boundary.intro" lang={lang} />
       </p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <div>
-          <p className="eyebrow mb-3 text-accent">
+          <p className="eyebrow mb-3">
             <Trans k="boundary.capLabel" lang={lang} />
           </p>
           <div className="space-y-3">
             {CAPS.map((i) => (
-              <details key={i} className="card border-accent/40" open>
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[14px] font-medium text-[#f0f0f0]">
+              <details key={i} className="card card-mint border-accent/40" open>
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[14px] font-bold text-ink">
                   <span>
                     <Trans k={`boundary.cap${i}.t`} lang={lang} />
                   </span>
-                  <span className="text-[#666666]">▾</span>
+                  <span className="text-muted" aria-hidden="true">▾</span>
                 </summary>
-                <p className="mt-2 text-[14px] leading-relaxed text-[#949494]">
+                <p className="mt-2 text-[14px] leading-relaxed text-ink-soft">
                   <Trans k={`boundary.cap${i}.d`} lang={lang} />
                 </p>
               </details>
@@ -43,19 +43,19 @@ export function BoundarySection({ lang }: { lang: Lang }) {
         </div>
 
         <div>
-          <p className="eyebrow mb-3 text-[#949494]">
+          <p className="eyebrow mb-3">
             <Trans k="boundary.limLabel" lang={lang} />
           </p>
           <div className="space-y-3">
             {LIMS.map((i) => (
-              <details key={i} className="card border-line">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[14px] font-medium text-[#c4c4c4]">
+              <details key={i} className="card">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[14px] font-bold text-ink">
                   <span>
                     <Trans k={`boundary.lim${i}.t`} lang={lang} />
                   </span>
-                  <span className="text-[#666666]">▾</span>
+                  <span className="text-muted" aria-hidden="true">▾</span>
                 </summary>
-                <p className="mt-2 text-[14px] leading-relaxed text-[#949494]">
+                <p className="mt-2 text-[14px] leading-relaxed text-ink-soft">
                   <Trans k={`boundary.lim${i}.d`} lang={lang} />
                 </p>
               </details>

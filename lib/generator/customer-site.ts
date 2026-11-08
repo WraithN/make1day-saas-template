@@ -1,13 +1,13 @@
 // Customer-owned site pages for the generated ZIP.
 //
-// ShipKit's own marketing pages (home, pricing, blog, compare, faq, license)
+// marketit's own marketing pages (home, pricing, blog, compare, faq, license)
 // describe SHIPKIT — its $99 source license, its competitors, its SEO posts.
 // Shipping them inside a customer's starter meant the customer's own site
 // was silently advertising our product instead of theirs. This module builds
 // a neutral, brand-free starter home + pricing page from the BuilderConfig,
 // and rewires the shared chrome (metadata / nav / footer / sitemap / robots).
 //
-// These are ZIP-only outputs: the on-disk ShipKit site is untouched.
+// These are ZIP-only outputs: the on-disk marketit site is untouched.
 
 import type { BuilderConfig } from "./config";
 
@@ -173,7 +173,7 @@ const APP_COPY: Record<Lang, Record<string, string>> = {
 
 /**
  * Inject the neutral `app.*` keys into each locale block of the shipped
- * lib/i18n-core.ts. The keys are ZIP-only: ShipKit's own on-disk dictionary
+ * lib/i18n-core.ts. The keys are ZIP-only: marketit's own on-disk dictionary
  * never gains them, and the generated pages resolve them through tr()/t().
  */
 export function injectAppCopy(source: string): string {
@@ -295,8 +295,13 @@ export function buildCustomerPricing(config: BuilderConfig): string {
 import { PricingCards, type Plan } from "@/components/PricingCards";
 ${priceImport}import { getLang, tr } from "@/lib/i18n-server";
 
-// ── Your prices. Replace these placeholder amounts before launch. ──
-const AMOUNTS = { buyout: "$99", care: "$19" } as const;
+// ── Display prices, configurable via env (never hard-coded in your UI). ──
+// Set NEXT_PUBLIC_PRICE_BUYOUT_DISPLAY / NEXT_PUBLIC_PRICE_CARE_DISPLAY to
+// match the real amounts configured at your payment provider.
+const AMOUNTS = {
+  buyout: process.env.NEXT_PUBLIC_PRICE_BUYOUT_DISPLAY ?? "$99",
+  care: process.env.NEXT_PUBLIC_PRICE_CARE_DISPLAY ?? "$19",
+} as const;
 
 export default async function PricingPage() {
   const lang = await getLang();
@@ -411,7 +416,7 @@ ${rows}
 `;
 }
 
-/** Robots file with no ShipKit-specific endpoints. */
+/** Robots file with no marketit-specific endpoints. */
 export function buildCustomerRobots(): string {
   return `import type { MetadataRoute } from "next";
 
@@ -434,7 +439,7 @@ export default function robots(): MetadataRoute.Robots {
 
 // ── Shared chrome rewrites ────────────────────────────────────────────────
 
-/** Replace the ShipKit metadata + JSON-LD blocks with the customer's brand. */
+/** Replace the marketit metadata + JSON-LD blocks with the customer's brand. */
 export function neutralizeRootLayout(source: string, appName: string): string {
   const safe = JSON.stringify(appName);
   const metadata = `export const metadata: Metadata = {
@@ -476,22 +481,22 @@ export function neutralizeRootLayout(source: string, appName: string): string {
     (m) => `${m}\nconst APP_NAME = ${safe};`,
   );
   // Never hard-code our own domain as the fallback in a customer's repo.
-  out = out.replaceAll("https://shipkit.dev", "http://localhost:3000");
+  out = out.replaceAll("https://marketit.dev", "http://localhost:3000");
   return out;
 }
 
-/** Drop the ShipKit-only links from the generated navigation. */
+/** Drop the marketit-only links from the generated navigation. */
 export function customerNav(source: string): string {
   return source
     .replace(/\s*\{ href: "\/blog", label: t\("nav\.blog"\) \},/, "")
     .replace(/\s*\{ href: "\/styles", label: t\("nav\.styles"\) \},/, "")
     .replace(/\s*\{ href: "\/builder", label: t\("nav\.builder"\) \},/, "")
-    // /support is a ShipKit-site-only page. Strip its nav item so the
+    // /support is a marketit-site-only page. Strip its nav item so the
     // generated project never links to a route that is absent from the ZIP.
     .replace(/\s*\{ href: "\/support", label: t\("nav\.support"\) \},/, "");
 }
 
-/** Replace the "ShipKit by Uncorne" wordmark in Nav with the app name. */
+/** Replace the marketit wordmark in Nav with the app name. */
 export function customerNavBrand(source: string, appName: string): string {
   const safe = JSON.stringify(appName);
   return source
@@ -507,12 +512,15 @@ export function customerFooter(source: string, appName: string): string {
   return source
     .replace(/\s*<Link href="\/blog"[\s\S]*?<\/Link>/, "")
     .replace(/\s*<Link href="\/agent-ready"[\s\S]*?<\/Link>/, "")
-    // /support is ShipKit-site-only — remove its footer link too.
+    // /support is marketit-site-only — remove its footer link too.
     .replace(/\s*<Link href="\/support"[\s\S]*?<\/Link>/, "")
     .replace(/\s*<a\s+href="https:\/\/github\.com\/uncorne\/shipkit"[\s\S]*?<\/a>/, "")
+    // Matches the single-brand footer line (product — tagline). The site no
+    // longer repeats the company name twice, so the old "…<span>marketit</span>."
+    // anchor is gone; stop at the wrapper's closing </div> instead.
     .replace(
-      /<span className="font-semibold text-ink">ShipKit<\/span>[\s\S]*?<span className="font-mono">Uncorne<\/span>\./,
-      `<span className="font-semibold text-ink">{APP_NAME}</span> — <span>{tr(lang, "app.footer.note")}</span>.`,
+      /<span className="font-semibold text-ink">marketit<\/span>[\s\S]*?<\/div>/,
+      `<span className="font-semibold text-ink">{APP_NAME}</span> — <span>{tr(lang, "app.footer.note")}</span></div>`,
     )
     .replace(
       /export async function Footer\(\) \{/,
@@ -526,7 +534,7 @@ export function customerLicenseLinks(source: string): string {
 }
 
 /**
- * /forgot-password (and the whole auth-recovery flow) is ShipKit-site-only.
+ * /forgot-password (and the whole auth-recovery flow) is marketit-site-only.
  * The login page ships in every build, so strip its "forgot password" anchor
  * or the generated project would link to a route that is absent from the ZIP.
  */
@@ -534,9 +542,9 @@ export function customerLoginLinks(source: string): string {
   return source.replace(/\s*<a\s+href="\/forgot-password"[\s\S]*?<\/a>/, "");
 }
 
-/** Remove the hard-coded ShipKit domain fallback from the SEO helper. */
+/** Remove the hard-coded marketit domain fallback from the SEO helper. */
 export function customerSeoLinks(source: string): string {
-  return source.replaceAll("https://shipkit.dev", "http://localhost:3000");
+  return source.replaceAll("https://marketit.dev", "http://localhost:3000");
 }
 
 /**
@@ -545,19 +553,44 @@ export function customerSeoLinks(source: string): string {
  * and the generated README must keep their provenance.
  */
 export function neutralizeBrand(source: string, appName: string): string {
-  return source
+  // Wire-level identifiers are NOT branding. A cosmetic rebrand must never
+  // rename a header/cookie/filename that an issued key or client depends on.
+  const KEEP = [
+    "X-ShipKit-Entitlement",
+    "x-shipkit-license",
+    "shipkit.config.json",
+    "shipkit.db",
+    "SK1.",
+  ];
+  const slug = appName.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  let out = source;
+  KEEP.forEach((literal, i) => {
+    out = out.split(literal).join(`@@WIRE${i}@@`);
+  });
+  // Domains must be rewritten BEFORE the brand word, otherwise the domain
+  // becomes `<brand>.dev` and still points at us. Legacy names are kept here
+  // so an older template re-generated through this builder is cleaned too.
+  out = out
+    .replaceAll("https://marketit.dev", "http://localhost:3000")
+    .replaceAll("marketit.dev", `${slug}.example`)
+    .replaceAll("uncorne/shipkit", `${slug}/app`)
+    .replaceAll("ShipYourProduct", appName)
     .replaceAll("ShipKit", appName)
     .replaceAll("Uncorne", appName)
-    .replaceAll("uncorne.com", "example.com")
-    .replaceAll("uncorne/shipkit", `${appName.toLowerCase()}/app`)
-    .replaceAll("https://shipkit.dev", "http://localhost:3000")
-    .replaceAll("shipkit.dev", "localhost:3000");
+    .replaceAll("marketit", appName);
+  KEEP.forEach((literal, i) => {
+    out = out.split(`@@WIRE${i}@@`).join(literal);
+  });
+  return out;
 }
 
 /**
- * Placeholder legal pages. ShipKit's own privacy/terms describe OUR company,
- * our data controller and our contact address — shipping them would be both
- * wrong branding and legally misleading. The customer must supply their own.
+ * Legal page template for generated projects. marketit's own privacy/terms
+ * describe OUR company and OUR data processing — shipping them would be both
+ * wrong branding and legally misleading. Instead we ship a structured,
+ * config-driven template: entity and contact come from the customer's env,
+ * and every factual claim that only the operator knows is explicitly marked
+ * as a field to fill in (never invented).
  */
 export function buildCustomerLegal(
   kind: "privacy" | "terms",
@@ -568,28 +601,62 @@ export function buildCustomerLegal(
     kind === "privacy"
       ? "How this application handles data, cookies and privacy choices."
       : "The terms governing the use of this application.";
-  return `// PLACEHOLDER — replace this page with your own ${title} before launch.
-// The generated project does not know your legal entity, data controller or
-// contact address. The starter's own legal text is deliberately NOT shipped.
+  const component = kind === "privacy" ? "Privacy" : "Terms";
+  const sections =
+    kind === "privacy"
+      ? [
+          ["1. Data controller", "The controller is the entity below. Set NEXT_PUBLIC_LEGAL_ENTITY and NEXT_PUBLIC_PRIVACY_EMAIL before launch."],
+          ["2. Data we store", "List the categories you actually collect (account email, orders, support messages, telemetry). The starter's default build stores account, order and license records; modules you disabled are not present."],
+          ["3. Purpose and legal basis", "State why each category is processed and the legal basis that applies in your jurisdictions."],
+          ["4. Retention", "Define retention per category and the deletion schedule you actually run. Do not claim automatic deletion unless it is implemented."],
+          ["5. Sub-processors and transfers", "List payment, mail, hosting and analytics providers you use, plus any cross-border transfer safeguards."],
+          ["6. Your rights", "Describe access, correction, export and deletion requests and how users exercise them."],
+          ["7. Cookies", "List the cookies this deployment sets and their lifetimes."],
+        ]
+      : [
+          ["1. Parties and scope", "Identify the operator (below) and what service these terms cover."],
+          ["2. Accounts and acceptable use", "State your own rules for accounts, prohibited conduct and suspension."],
+          ["3. Payments, refunds and cancellation", "State your real price, billing period, refund window and cancellation process. These must match your payment provider's settings."],
+          ["4. License to the software", "State the license granted for any source or hosted deliverable and the restrictions that apply."],
+          ["5. Disclaimers and liability", "Have counsel draft the warranty and liability terms for your jurisdiction."],
+          ["6. Governing law and contact", "State the governing law, dispute process and the contact address below."],
+        ];
+  const sectionJsx = sections
+    .map(
+      ([heading, body]) =>
+        `        <h2 className="mt-8 text-xl font-semibold">${heading}</h2>\n` +
+        `        <p className="mt-2 text-ink-soft">${body}</p>`,
+    )
+    .join("\n");
+
+  return `// Generated legal template for ${config.appName}.
+// This is a STRUCTURED STARTING POINT, not legal advice: replace every
+// bracketed / descriptive field with your own real practices before launch.
+// Entity and contact are read from env so a rebrand needs no code edit.
 import type { Metadata } from "next";
+import { env } from "@/lib/env";
 
 export const metadata: Metadata = {
   title: ${JSON.stringify(title)},
   description: ${JSON.stringify(description)},
 };
 
-export default function ${kind === "privacy" ? "Privacy" : "Terms"}Page() {
+export default function ${component}Page() {
+  const entity = env.legalEntity();
+  const contact = env.privacyEmail();
   return (
     <section className="wrap prose-sm py-12 sm:py-20">
       <h1 className="text-3xl font-semibold">${title}</h1>
       <p className="mt-4 max-w-2xl text-ink-soft">
-        This is a placeholder for ${JSON.stringify(config.appName)}. Replace it
-        with your own ${title}: describe what data you collect, how long you
-        keep it, who the data controller is, and how users can contact you.
+        Operator: <strong>{entity}</strong> · Contact:{" "}
+        <span className="font-mono">{contact}</span>
       </p>
       <p className="mt-3 max-w-2xl text-ink-soft">
-        Contact: <span className="font-mono">legal@example.com</span>
+        This template is shipped with the starter. Each section below describes
+        the field an operator must complete; it does not assert a practice your
+        deployment may not have. Review with counsel before going live.
       </p>
+${sectionJsx}
     </section>
   );
 }

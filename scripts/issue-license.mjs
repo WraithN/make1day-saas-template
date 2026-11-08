@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Manually issue a ShipKit license key (for offline sales, comp seats, or
+ * Manually issue a marketit license key (for offline sales, comp seats, or
  * reconciling a paid order whose webhook was lost).
  *
  * Usage:

@@ -1,6 +1,6 @@
 # 決済 — 設定ガイド
 
-ShipKit には差し替え可能な課金レイヤーが組み込まれています。**Builder → 03 · 決済** ステップでプロバイダを 1 つ選ぶと、生成されたアプリは `PAYMENT_PROVIDER` からその選択を読み込み、対応するクライアントと Webhook ハンドラを接続します。
+marketit には差し替え可能な課金レイヤーが組み込まれています。**Builder → 03 · 決済** ステップでプロバイダを 1 つ選ぶと、生成されたアプリは `PAYMENT_PROVIDER` からその選択を読み込み、対応するクライアントと Webhook ハンドラを接続します。
 
 本ガイドでは、各オプションを実際に課金できるように設定する方法を説明します。
 
@@ -141,7 +141,7 @@ WAFFO_WEBHOOK_PUBLIC_KEY_PROD="-----BEGIN PUBLIC KEY-----
 併発するため意図的に無視します。旧 `WAFFO_WEBHOOK_SECRET`（HMAC）は未使用。
 **Acquiring の order/create は実装済み**：`merchantInfo` / `userInfo` /
 `paymentInfo` / 注文項目はすべて `WAFFO_ACQUIRING_*` 環境変数から取得し
-（ShipKit は値を捏造しません）、ID は実行時生成、署名文字列とレスポンス形状は
+（marketit は値を捏造しません）、ID は実行時生成、署名文字列とレスポンス形状は
 **ご自身の Waffo 契約で要確認**。詳細は `docs/waffo.md` §5。
 
 ---

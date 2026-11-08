@@ -1,14 +1,15 @@
 {
-  "name": "shipkit",
+  "name": "marketit",
   "version": "0.1.0",
   "private": true,
-  "description": "ShipKit — an AI SaaS MVP starter by Uncorne. Auth, subscriptions, one real AI feature, a clean admin. Clone it, reskin it, launch.",
+  "description": "marketit — configurable AI SaaS starter and source generator. Auth, subscriptions, a real AI feature, an admin console, and white-label ZIP delivery.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "waffo:preflight": "node scripts/waffo-preflight.mjs",
+    "probe:webhook": "node scripts/payment-webhook-probe.mjs",
     "verify:matrix": "node scripts/verify-matrix.mjs --all",
     "smoke": "npm run smoke:gate && npm run smoke:ai:quota && npm run smoke:ai:quota:supabase && npm run smoke:ai:stream",
     "smoke:gate": "node scripts/smoke-license-gate.cjs",
@@ -17,7 +18,8 @@
     "smoke:ai:stream": "node scripts/smoke-ai-stream.cjs",
     "export:profiles": "node scripts/export-local-profiles.mjs",
     "rag:bench": "node scripts/rag-bench.mjs",
-    "rebrand": "node scripts/rebrand.mjs"
+    "rebrand": "node scripts/rebrand.mjs",
+    "agents:lint": "node scripts/agents-lint.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",

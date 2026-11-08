@@ -20,7 +20,7 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
       nodes.push(
         <code
           key={`${keyPrefix}-c${i}`}
-          className="rounded bg-black/80 px-1.5 py-0.5 font-mono text-[0.85em] text-accent"
+          className="rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-[0.85em] text-accent"
         >
           {m[3]}
         </code>,
@@ -73,7 +73,7 @@ export function Markdown({ source }: { source: string }) {
       blocks.push(
         <pre
           key={`pre-${key++}`}
-          className="my-5 overflow-x-auto rounded-xl border border-line bg-black/90 p-4 text-sm"
+          className="my-5 overflow-x-auto rounded-xl border-2 border-line bg-surface p-4 text-sm"
         >
           <code className="font-mono text-ink-soft">{code.join("\n")}</code>
         </pre>,

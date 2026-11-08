@@ -1,4 +1,4 @@
--- ShipKit — support tickets (Supabase mirror of lib/sqlite.ts SCHEMA).
+-- marketit — support tickets (Supabase mirror of lib/sqlite.ts SCHEMA).
 -- Run AFTER 0004_profiles_rbac.sql: the operator SELECT policy reuses the
 -- public.is_staff_or_admin() SECURITY DEFINER helper defined there.
 --

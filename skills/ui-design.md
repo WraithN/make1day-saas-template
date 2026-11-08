@@ -1,11 +1,11 @@
 ---
 name: ui-design
-description: Apply ShipKit's visual design system — tokens, spacing scale, component patterns, and accessibility — when creating or restyling UI so it stays coherent with the chosen style palette.
+description: Apply marketit's visual design system — tokens, spacing scale, component patterns, and accessibility — when creating or restyling UI so it stays coherent with the chosen style palette.
 ---
 
-# Skill: UI Design (ShipKit)
+# Skill: UI Design (marketit)
 
-Use this skill when designing or restyling any UI surface in a ShipKit project.
+Use this skill when designing or restyling any UI surface in a marketit project.
 The goal is a cohesive look that respects the active style palette.
 
 ## Design tokens (from `app/globals.css` `:root`)

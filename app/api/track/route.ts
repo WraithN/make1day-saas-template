@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse, type NextRequest } from "next/server";
 import { recordPageview } from "@/lib/stats";
 import { recordTrafficEvent, type TrafficEventKind } from "@/lib/traffic";
@@ -32,6 +33,13 @@ function clean(value: unknown, max: number): string | null {
 }
 
 export async function POST(req: NextRequest) {
+  const blocked = await guardApiWrite(req, {
+    bucket: "track",
+    limit: 600,
+    windowMs: 3600000,
+  });
+  if (blocked) return blocked;
+
   try {
     const body = (await req.json().catch(() => ({}))) as {
       kind?: string;

@@ -1,6 +1,6 @@
 # 支付 — 配置指南
 
-ShipKit 内置可插拔的计费层。在 **Builder → 03 · 支付** 步骤中选择一个支付商；生成的应用会从 `PAYMENT_PROVIDER` 读取该选择，并接入对应的客户端与 Webhook 处理。
+marketit 内置可插拔的计费层。在 **Builder → 03 · 支付** 步骤中选择一个支付商；生成的应用会从 `PAYMENT_PROVIDER` 读取该选择，并接入对应的客户端与 Webhook 处理。
 
 本指南说明如何配置每个选项，让生成的应用真正能够向客户收费。
 
@@ -139,7 +139,7 @@ WAFFO_WEBHOOK_PUBLIC_KEY_PROD="-----BEGIN PUBLIC KEY-----
 
 旧的 `WAFFO_WEBHOOK_SECRET`（HMAC）**已不再参与验签**。**Acquiring 下单已实现**：
 `merchantInfo` / `userInfo` / `paymentInfo` / 订单字段全部来自 `WAFFO_ACQUIRING_*`
-环境变量（ShipKit 不代填），ID 运行时生成，签名串与响应结构**需按你的 Waffo
+环境变量（marketit 不代填），ID 运行时生成，签名串与响应结构**需按你的 Waffo
 合同核对**。完整协议见 `docs/waffo.md` 第 5 节。
 
 ---

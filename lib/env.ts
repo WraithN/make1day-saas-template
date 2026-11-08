@@ -15,6 +15,19 @@ function opt(name: string, fallback = ""): string {
 }
 
 /**
+ * The one public contact mailbox. Sales, operator notifications and the legal
+ * notices all resolve through this helper so they can never drift apart —
+ * the old privacy/terms pages hard-coded a different domain (marketit.dev)
+ * than the site's contact address, which is both wrong and misleading.
+ */
+function publicContactEmail(): string {
+  // Deliberately an obvious placeholder: the brand is marketit but the
+  // production domain is not registered yet. Set NEXT_PUBLIC_CONTACT_EMAIL to
+  // a real mailbox on your own domain before launch; never invent one here.
+  return opt("NEXT_PUBLIC_CONTACT_EMAIL", "hello@example.com");
+}
+
+/**
  * Waffo Acquiring: a merchant-contract value that MUST be supplied by env.
  * We never invent one — the error names the variable and where to get it.
  * Every protocol detail here is marked "需按你的 Waffo 合同核对" in docs/waffo.md §5.
@@ -23,7 +36,7 @@ function acquiringContract(name: string, where: string): string {
   const v = process.env[name];
   if (!v || !v.trim()) {
     throw new Error(
-      `Waffo Acquiring: missing ${name}. ${where} Copy it from your Waffo merchant contract / integration guide (waffo.com/docs) — ShipKit never invents contract fields. See docs/waffo.md §5.`,
+      `Waffo Acquiring: missing ${name}. ${where} Copy it from your Waffo merchant contract / integration guide (waffo.com/docs) — marketit never invents contract fields. See docs/waffo.md §5.`,
     );
   }
   return v;
@@ -64,12 +77,12 @@ export const env = {
       .filter(Boolean),
 
   // ── Payment provider (selects the active gateway) ────────────
-  // ShipKit's own checkout defaults to Creem; flip PAYMENT_PROVIDER to "waffo"
-  // (or stripe/paypal/lemonsqueezy) to switch later without code changes — all
-  // five gateways share the same unified PaymentProvider interface. Generated
-  // projects pick their own gateway in the Builder; the default there mirrors
-  // this value.
-  paymentProvider: () => opt("PAYMENT_PROVIDER", "creem").toLowerCase(),
+  // Defaults to Waffo (Pancake), matching .env.example, the pricing copy and
+  // the docs/waffo.md launch checklist. Flip PAYMENT_PROVIDER to creem /
+  // stripe / paypal / lemonsqueezy / none to switch — all gateways share the
+  // same PaymentProvider interface. Generated projects pick their own gateway
+  // in the Builder; when no env is set they mirror this default.
+  paymentProvider: () => opt("PAYMENT_PROVIDER", "waffo").toLowerCase(),
 
   // Stripe
   stripeSecretKey: () => req("STRIPE_SECRET_KEY"),
@@ -94,7 +107,7 @@ export const env = {
   paypalPlanPro: () => opt("PAYPAL_PLAN_ID_PRO"),
   paypalPlanScale: () => opt("PAYPAL_PLAN_ID_SCALE"),
 
-  // ── Waffo (active gateway for ShipKit's own checkout) ────────
+  // ── Waffo (active gateway for marketit's own checkout) ────────
   // IMPORTANT: "Waffo" is two different products with INCOMPATIBLE protocols.
   //   pancake   = MoR / global payments, docs.waffo.ai, @waffo/pancake-ts
   //   acquiring = SE-Asia acquiring gateway, waffo.com/docs, RSA X-SIGNATURE
@@ -137,7 +150,7 @@ export const env = {
 
   // ── Waffo Acquiring (WAFFO_FLAVOR=acquiring) ────────────────
   // POST /api/v1/order/create needs merchant-contract fields. EVERY value
-  // below comes from env (JSON string / scalar); ShipKit invents none of them.
+  // below comes from env (JSON string / scalar); marketit invents none of them.
   // Missing → acquiringContract() throws a named, actionable error. The exact
   // field names/shapes are 需按你的 Waffo 合同核对 (docs/waffo.md §5).
   waffoAcquiringMerchantInfo: () =>
@@ -236,6 +249,9 @@ export const env = {
   // "memory" (default) keeps vectors in-process; "supabase" additionally
   // persists them to pgvector via supabase/migrations/0002_rag.sql.
   ragVectorStore: () => opt("RAG_VECTOR_STORE", "memory").toLowerCase(),
+  // "on" (default) seeds a handful of neutral, config-derived demo documents
+  // so the first RAG query is useful. "off" starts with an empty store.
+  ragSeedDocs: () => opt("RAG_SEED_DOCS", "on").toLowerCase(),
 
   // ── Site ─────────────────────────────────────────────────────
   siteUrl: () => opt("NEXT_PUBLIC_SITE_URL", "http://localhost:3000"),
@@ -257,7 +273,7 @@ export const env = {
   // Operator inbox for "new support ticket" notifications. Falls back to the
   // public contact address so an operator is never silently left out.
   mailOperatorEmail: () =>
-    opt("MAIL_OPERATOR_EMAIL") || opt("NEXT_PUBLIC_CONTACT_EMAIL", "hello@shipkit.dev"),
+    opt("MAIL_OPERATOR_EMAIL") || publicContactEmail(),
   // Lifetime of password-reset / email-verification links (hours).
   mailTokenTtlHours: () => {
     const n = Number(opt("MAIL_TOKEN_TTL_HOURS", "24"));
@@ -267,7 +283,23 @@ export const env = {
   // ── Sales / 1:1 custom work ──────────────────────────────────
   // Booking link is optional: when empty, the pricing CTA falls back to mailto.
   bookingUrl: () => opt("NEXT_PUBLIC_BOOKING_URL"),
-  contactEmail: () => opt("NEXT_PUBLIC_CONTACT_EMAIL", "hello@shipkit.dev"),
+  contactEmail: () => publicContactEmail(),
+
+  // ── Legal / data-controller identity ─────────────────────────
+  // Single source of truth for the privacy policy, terms and contact blocks.
+  // Never hard-code a company name or a mailbox in a legal page: the operator
+  // fills these in before launch (see .env.example "Legal / data controller").
+  // Until NEXT_PUBLIC_LEGAL_ENTITY is set, the brand name is used as a
+  // placeholder — that is intentional and documented, not a real entity.
+  productName: () => opt("NEXT_PUBLIC_PRODUCT_NAME", "marketit"),
+  legalEntity: () =>
+    opt("NEXT_PUBLIC_LEGAL_ENTITY") || opt("NEXT_PUBLIC_PRODUCT_NAME", "marketit"),
+  legalAddress: () => opt("NEXT_PUBLIC_LEGAL_ADDRESS"),
+  legalJurisdiction: () => opt("NEXT_PUBLIC_LEGAL_JURISDICTION"),
+  privacyEmail: () => opt("NEXT_PUBLIC_PRIVACY_EMAIL") || publicContactEmail(),
+  legalEmail: () => opt("NEXT_PUBLIC_LEGAL_EMAIL") || publicContactEmail(),
+  legalUpdatedAt: () => opt("NEXT_PUBLIC_LEGAL_UPDATED", "2026-11-07"),
+  dpaUrl: () => opt("NEXT_PUBLIC_DPA_URL"),
 
   // ── Analytics / admin ───────────────────────────────────────
   gaId: () => opt("NEXT_PUBLIC_GA_ID"),
@@ -286,7 +318,7 @@ export const env = {
   //   auto → ON in production, OFF in development.
   // The generated customer project ships with this rewritten to default
   // "off" (see lib/generator/prune.ts → pruneLicenseGateDefault), so a
-  // customer never inherits ShipKit's own paywall.
+  // customer never inherits marketit's own paywall.
   licenseGateMode: () => opt("LICENSE_GATE", "auto").toLowerCase(),
   // Free PREVIEW downloads per visitor per UTC day. 0 = no anonymous
   // previews at all. Note: a preview never contains application source
@@ -424,6 +456,40 @@ export function paymentProviderMissingVars(provider: string): string[] {
   return paymentProviderRequiredVars(provider).filter(
     (n) => !process.env[n]?.trim(),
   );
+}
+
+/**
+ * Operator-side settings that a payment provider's own self-check cannot see.
+ * These are the ones that silently break a launch when forgotten: no license
+ * can be signed, admin cookies cannot be verified, cron endpoints stay closed,
+ * and the legal / contact pages still show placeholders.
+ */
+export const OPERATOR_REQUIRED_VARS = [
+  "NEXT_PUBLIC_SITE_URL",
+  "NEXT_PUBLIC_CONTACT_EMAIL",
+  "NEXT_PUBLIC_LEGAL_ENTITY",
+  "LICENSE_SECRET",
+  "ADMIN_SESSION_SECRET",
+  "CRON_SECRET",
+  "ADMIN_USER",
+  "ADMIN_PASSWORD",
+] as const;
+
+// Values that are syntactically present but still not launch-ready. A copied
+// .env.example must not make the self-check go green by accident.
+const OPERATOR_PLACEHOLDERS: Record<string, string[]> = {
+  NEXT_PUBLIC_SITE_URL: ["http://localhost:3000", "https://localhost:3000"],
+  NEXT_PUBLIC_CONTACT_EMAIL: ["hello@example.com"],
+  ADMIN_PASSWORD: ["change-me", "admin", "password"],
+};
+
+/** Missing (or still placeholder) operator settings. Never returns secrets. */
+export function operatorMissingVars(): string[] {
+  return OPERATOR_REQUIRED_VARS.filter((n) => {
+    const value = process.env[n]?.trim().toLowerCase();
+    if (!value) return true;
+    return (OPERATOR_PLACEHOLDERS[n] ?? []).includes(value);
+  });
 }
 
 /** Env vars required by each mail provider (for GET /api/mail/self-check). */

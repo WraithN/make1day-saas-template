@@ -1,4 +1,4 @@
-// Shared contract for every payment gateway ShipKit supports.
+// Shared contract for every payment gateway marketit supports.
 // Each provider normalises its own webhook payload into NormalizedSubEvent so
 // the rest of the app (DB upsert, dashboard) stays provider-agnostic.
 

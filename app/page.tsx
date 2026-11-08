@@ -4,6 +4,7 @@ import { PitfallSection } from "@/components/home/PitfallSection";
 import { ThemePreviewSection } from "@/components/home/ThemePreviewSection";
 import { FeatureMatrix } from "@/components/home/FeatureMatrix";
 import { BlogTeaser } from "@/components/home/BlogTeaser";
+import { HandDrawnDeco } from "@/components/home/HandDrawnDeco";
 import { PricingCards, type Plan } from "@/components/PricingCards";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
@@ -68,23 +69,26 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* HERO — opens with the honest promise, not a hype claim */}
+      {/* HERO — opens with the honest promise, not a hype claim.
+          Decoration layer is absolutely positioned at z-index 1; the copy sits
+          above it at z-index 10 and keeps every click. */}
       <section className="relative overflow-hidden">
         <div className="tech-grid pointer-events-none absolute inset-0" />
-        <div className="wrap relative py-14 text-center sm:py-20 lg:py-24">
-          <div className="eyebrow mb-4">
+        <HandDrawnDeco />
+        <div className="wrap relative z-10 py-14 text-center doodle-rise sm:py-20 lg:py-24">
+          <div className="eyebrow mb-5">
             <Trans k="hero.eyebrow" lang={lang} />
           </div>
-          <h1 className="mx-auto max-w-3xl text-[30px] font-semibold leading-[1.35] text-[#f0f0f0]">
+          <h1 className="doodle-headline mx-auto max-w-3xl text-[30px] leading-[1.35] text-ink sm:text-[42px]">
             <Trans k="hero.title" lang={lang} />
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-[14px] leading-relaxed text-[#c4c4c4]">
+          <p className="mx-auto mt-5 max-w-xl text-[14px] leading-relaxed text-ink-soft">
             <Trans k="hero.subtitle" lang={lang} />
           </p>
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
             <Link
               href="/builder"
-              className="btn-solid w-full text-[16px] sm:w-auto"
+              className="btn-solid btn-hero w-full text-[16px] sm:w-auto"
             >
               <Trans k="hero.getStarted" lang={lang} />
             </Link>
@@ -95,7 +99,7 @@ export default async function HomePage() {
               <Trans k="hero.boundaries" lang={lang} />
             </Link>
           </div>
-          <div className="mt-6 font-mono text-[12px] text-[#666666]">
+          <div className="mt-6 font-mono text-[12px] text-muted">
             <Trans k="hero.meta" lang={lang} />
           </div>
         </div>
@@ -118,10 +122,10 @@ export default async function HomePage() {
         <p className="eyebrow mb-3">
           <Trans k="homePricing.eyebrow" lang={lang} />
         </p>
-        <h2 className="text-[18px] font-medium text-[#f0f0f0]">
+        <h2 className="text-[18px] font-semibold text-ink">
           <Trans k="homePricing.title" lang={lang} />
         </h2>
-        <p className="mt-3 max-w-2xl text-[14px] leading-relaxed text-[#949494]">
+        <p className="mt-3 max-w-2xl text-[14px] leading-relaxed text-muted">
           <Trans k="homePricing.note" lang={lang} />
         </p>
         <div className="mt-8">
@@ -135,10 +139,10 @@ export default async function HomePage() {
       {/* CTA */}
       <section className="sk-font wrap py-10 text-center sm:py-16">
         <div className="card mx-auto max-w-2xl">
-          <h2 className="text-[18px] font-medium text-[#f0f0f0]">
+          <h2 className="text-[18px] font-semibold text-ink">
             <Trans k="cta.heading" lang={lang} />
           </h2>
-          <p className="mt-3 text-[14px] text-[#c4c4c4]">
+          <p className="mt-3 text-[14px] text-ink-soft">
             <Trans k="cta.paragraph" lang={lang} />
           </p>
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">

@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/subscriptions";
 import { resolveAdminRole, canManageRoles, setUserRole, type Role } from "@/lib/rbac";
@@ -24,6 +25,13 @@ const VALID: Role[] = ["admin", "staff", "member"];
  * too — it is the credential the /admin console itself is locked behind.
  */
 export async function PATCH(request: Request) {
+  const blocked = await guardApiWrite(request, {
+    bucket: "admin-users",
+    limit: 60,
+    windowMs: 3600000,
+  });
+  if (blocked) return blocked;
+
   const operator = await currentOperator();
   // The identity of the caller, used for the "do not change your own role"
   // guard. The operator counts: its own row is read-only for the same reason.

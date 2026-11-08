@@ -90,6 +90,7 @@ export const stripeProvider: PaymentProvider = {
     const out: NormalizedSubEvent[] = [];
     if (event.type === "checkout.session.completed") {
       const s = event.data.object as Stripe.Checkout.Session;
+      const buyerEmail = s.customer_details?.email ?? s.customer_email ?? undefined;
       out.push({
         userId: s.client_reference_id ?? undefined,
         customerId: String(s.customer ?? s.customer_email ?? ""),
@@ -99,6 +100,18 @@ export const stripeProvider: PaymentProvider = {
         plan:
           planFromPrice(s.line_items?.data?.[0]?.price?.id) ??
           (s.mode === "payment" ? "buyout" : undefined),
+        // A paid order MUST issue a download license. Without these fields the
+        // shared webhook route would only upsert a subscription and the buyer
+        // would pay for a ZIP they never receive. Subscription updates below
+        // deliberately do NOT set grantsAccess: they carry no buyer email, and
+        // the license was already issued by the original checkout event.
+        email: buyerEmail,
+        eventType: event.type,
+        eventId: event.id,
+        orderId: String(s.payment_intent ?? s.id),
+        grantsAccess:
+          s.payment_status === "paid" &&
+          (Boolean(buyerEmail) || Boolean(s.client_reference_id)),
         amount: toMajor(
           s.amount_total ?? s.line_items?.data?.[0]?.price?.unit_amount ?? undefined,
           s.currency ?? undefined,
@@ -119,6 +132,8 @@ export const stripeProvider: PaymentProvider = {
         subscriptionId: s.id,
         status: normalizeStatus(s.status),
         periodEnd,
+        eventType: event.type,
+        eventId: event.id,
         plan: planFromPrice(s.items.data[0]?.price?.id),
         amount: toMajor(
           s.items?.data?.[0]?.price?.unit_amount ?? undefined,

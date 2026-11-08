@@ -1,10 +1,10 @@
 ---
 name: database
-description: Write Supabase migrations, RLS policies and server-side queries for a ShipKit project.
+description: Write Supabase migrations, RLS policies and server-side queries for a marketit project.
 globs: supabase/**, lib/supabase/admin.ts, .data/**
 ---
 
-# Skill: Database & RLS (ShipKit)
+# Skill: Database & RLS (marketit)
 
 ## Layout
 - `supabase/migrations/0001_init.sql` — profiles, subscriptions, base policies.

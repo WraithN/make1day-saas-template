@@ -4,7 +4,7 @@
 // focused; every locale is typed `Record<keyof typeof en, string>` so a
 // missing key is a COMPILE error instead of a silent English fallback.
 //
-// This module is ShipKit-site-only (pruned from customer ZIPs). It must never
+// This module is marketit-site-only (pruned from customer ZIPs). It must never
 // be imported by a file that ships to customers — customer pages resolve their
 // copy through lib/i18n-core.ts instead.
 
@@ -37,6 +37,14 @@ const en = {
   "mail.labelSubject": "Subject",
   "mail.labelMessage": "Message",
   "mail.labelTicket": "Ticket id",
+  "mail.subject.licenseKey": "Your {app} license key",
+  "mail.heading.licenseKey": "Here is your license key",
+  "mail.body.licenseKey":
+    "Thanks for buying {app}. Your {plan} license key is below. Paste it at {link} (or sign in with this email address) to unlock source downloads. The key is self-verifying and works offline.",
+  "mail.labelKey": "License key",
+  "mail.labelPlan": "Plan",
+  "mail.licenseHint":
+    "Keep this email as proof of purchase. If you checked out as a guest or used a different address, you can request another copy from the license page.",
 
   // ── Public support form ──────────────────────────────────────────────
   "support.eyebrow": "SUPPORT",
@@ -118,6 +126,14 @@ const zh: MessagingCopy = {
   "mail.labelSubject": "主题",
   "mail.labelMessage": "内容",
   "mail.labelTicket": "工单编号",
+  "mail.subject.licenseKey": "你的 {app} 授权密钥",
+  "mail.heading.licenseKey": "这是你的授权密钥",
+  "mail.body.licenseKey":
+    "感谢购买 {app}。下面是你的 {plan} 授权密钥。把它粘贴到 {link}，或用这个邮箱登录，即可解锁源码下载。密钥自带签名，离线也可校验。",
+  "mail.labelKey": "授权密钥",
+  "mail.labelPlan": "套餐",
+  "mail.licenseHint":
+    "请保留这封邮件作为购买凭证。如果你用游客身份结账，或下单邮箱与登录邮箱不同，可以在授权页重新申请一封。",
 
   "support.eyebrow": "支持",
   "support.title": "联系支持",
@@ -187,6 +203,14 @@ const ja: MessagingCopy = {
   "mail.labelSubject": "件名",
   "mail.labelMessage": "本文",
   "mail.labelTicket": "チケット ID",
+  "mail.subject.licenseKey": "{app} のライセンスキー",
+  "mail.heading.licenseKey": "ライセンスキーをお届けします",
+  "mail.body.licenseKey":
+    "{app} のご購入ありがとうございます。{plan} ライセンスキーは下記のとおりです。{link} に貼り付けるか、このメールアドレスでログインするとソースのダウンロードが有効になります。キーは自己検証型でオフラインでも動作します。",
+  "mail.labelKey": "ライセンスキー",
+  "mail.labelPlan": "プラン",
+  "mail.licenseHint":
+    "このメールは購入証明として保管してください。ゲスト決済や、決済時と異なるメールアドレスを使った場合は、ライセンスページから再送できます。",
 
   "support.eyebrow": "サポート",
   "support.title": "サポートに連絡",
@@ -256,6 +280,14 @@ const fr: MessagingCopy = {
   "mail.labelSubject": "Objet",
   "mail.labelMessage": "Message",
   "mail.labelTicket": "Identifiant du ticket",
+  "mail.subject.licenseKey": "Votre clé de licence {app}",
+  "mail.heading.licenseKey": "Voici votre clé de licence",
+  "mail.body.licenseKey":
+    "Merci pour votre achat {app}. Votre clé de licence {plan} figure ci-dessous. Collez-la sur {link} (ou connectez-vous avec cette adresse e-mail) pour débloquer les téléchargements source. La clé est auto-vérifiable et fonctionne hors ligne.",
+  "mail.labelKey": "Clé de licence",
+  "mail.labelPlan": "Formule",
+  "mail.licenseHint":
+    "Conservez cet e-mail comme preuve d'achat. Si vous avez payé en invité ou avec une autre adresse, demandez une nouvelle copie depuis la page de licence.",
 
   "support.eyebrow": "SUPPORT",
   "support.title": "Contacter le support",
@@ -325,6 +357,14 @@ const de: MessagingCopy = {
   "mail.labelSubject": "Betreff",
   "mail.labelMessage": "Nachricht",
   "mail.labelTicket": "Ticket-ID",
+  "mail.subject.licenseKey": "Ihr {app}-Lizenzschlüssel",
+  "mail.heading.licenseKey": "Hier ist Ihr Lizenzschlüssel",
+  "mail.body.licenseKey":
+    "Vielen Dank für den Kauf von {app}. Ihr {plan}-Lizenzschlüssel steht unten. Fügen Sie ihn auf {link} ein (oder melden Sie sich mit dieser E-Mail-Adresse an), um Source-Downloads freizuschalten. Der Schlüssel ist selbstprüfend und funktioniert offline.",
+  "mail.labelKey": "Lizenzschlüssel",
+  "mail.labelPlan": "Tarif",
+  "mail.licenseHint":
+    "Bewahren Sie diese E-Mail als Kaufnachweis auf. Bei Gast-Checkout oder abweichender E-Mail-Adresse können Sie auf der Lizenzseite eine weitere Kopie anfordern.",
 
   "support.eyebrow": "SUPPORT",
   "support.title": "Support kontaktieren",

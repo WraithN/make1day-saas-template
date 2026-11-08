@@ -114,6 +114,11 @@ function startApp(port, extraEnv) {
     OPENAI_BASE_URL: `http://127.0.0.1:${FAKE_PORT}/v1`,
     AI_PROVIDER: "openai",
     LICENSE_GATE: "on",
+    // Demo mode is the configured-provider preview path this test exercises
+    // (it sends the sk_demo cookie). In production (next start) demo stays off
+    // unless both flags are set, so enable it here to match the other suites.
+    NEXT_PUBLIC_ENABLE_DEMO: "true",
+    DEMO_IN_PRODUCTION: "true",
   });
   const nextBin = path.join(ROOT, "node_modules", "next", "dist", "bin", "next");
   const app = spawn(process.execPath, [nextBin, "start", "-p", String(port)], {

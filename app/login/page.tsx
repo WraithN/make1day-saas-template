@@ -6,6 +6,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { env } from "@/lib/env";
 import { isDemoMode, DEMO_USER } from "@/lib/demo";
 import { useLanguage } from "@/lib/i18n";
+import { LocalLoginForm } from "@/components/LocalLoginForm";
 
 type OAuthProvider = "google" | "github" | "apple" | "microsoft" | "gitlab" | "slack";
 
@@ -25,6 +26,10 @@ export default function LoginPage() {
   const [sent, setSent] = useState(false);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // Without Supabase Auth, the magic-link/OAuth form has no backend. Show the
+  // local password form instead (password resets and verification feed it).
+  const localMode = !process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   // Providers enabled via NEXT_PUBLIC_OAUTH_PROVIDERS (defaults to the four below).
   const providers = env
@@ -73,6 +78,8 @@ export default function LoginPage() {
           <div className="mt-6 rounded-lg border border-accent/40 bg-accent/10 p-4 text-sm text-accent">
             {t("login.sent")}
           </div>
+        ) : localMode ? (
+          <LocalLoginForm />
         ) : (
           <form onSubmit={sendMagicLink} className="mt-6 space-y-3">
             <input

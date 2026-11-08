@@ -252,7 +252,7 @@ async function createCheckoutAcquiring(
   p: CheckoutParams,
 ): Promise<CheckoutResult> {
   // Random + traceable: the ids carry plan/userId so ops can match a Waffo
-  // order back to a ShipKit checkout without inventing contract values.
+  // order back to a marketit checkout without inventing contract values.
   const trace = `${p.plan}.${p.userId ?? "anon"}`;
   const merchantOrderId = `SK-${trace}-${randomUUID()}`;
   const paymentRequestId = randomUUID();

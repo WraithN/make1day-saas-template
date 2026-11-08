@@ -1,10 +1,10 @@
 ---
 name: payments
-description: Modify checkout, webhook verification and subscription state in a ShipKit project; keep one-time Buyout and recurring Care billing distinct.
+description: Modify checkout, webhook verification and subscription state in a marketit project; keep one-time Buyout and recurring Care billing distinct.
 globs: lib/payments/**, app/api/checkout/**, app/api/webhook/**, app/api/license/**, app/pricing/**
 ---
 
-# Skill: Payments & Webhooks (ShipKit)
+# Skill: Payments & Webhooks (marketit)
 
 Use this skill for anything that moves money. Mistakes here lose orders.
 

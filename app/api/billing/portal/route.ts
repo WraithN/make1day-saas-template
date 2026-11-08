@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { getCurrentUser, getCurrentSubscription } from "@/lib/subscriptions";
 import { getPaymentProvider } from "@/lib/payments";
@@ -13,7 +14,14 @@ export const dynamic = "force-dynamic";
  * tied to a gateway customer and the provider exposes a portal (Stripe/Creem);
  * otherwise it returns 422 with a `reason` the UI can act on.
  */
-export async function POST() {
+export async function POST(req: Request) {
+  const blocked = await guardApiWrite(req, {
+    bucket: "billing-portal",
+    limit: 30,
+    windowMs: 3600000,
+  });
+  if (blocked) return blocked;
+
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });

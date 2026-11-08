@@ -195,7 +195,7 @@ if (!isAcquiring) {
   }
 } else {
   // Acquiring create-order payload: EVERY contract field must come from env.
-  // ShipKit never invents one — see docs/waffo.md §5.
+  // marketit never invents one — see docs/waffo.md §5.
   for (const name of [
     "WAFFO_ACQUIRING_MERCHANT_INFO",
     "WAFFO_ACQUIRING_USER_INFO",

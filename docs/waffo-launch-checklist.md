@@ -1,4 +1,4 @@
-# Waffo Pancake 上线联调清单（ShipKit）
+# Waffo Pancake 上线联调清单（marketit）
 
 > 适用前提：`PAYMENT_PROVIDER=waffo` 且 `WAFFO_FLAVOR=pancake`（`docs.waffo.ai` 那套 MoR 产品）。
 > 依据 `lib/payments/waffo.ts` 的实际请求/验签逻辑与 `docs/waffo.md` 的官方协议整理。

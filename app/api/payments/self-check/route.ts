@@ -6,6 +6,8 @@ import {
   paymentProviderMissingVars,
   paymentProviderRequiredVars,
   priceForPlan,
+  OPERATOR_REQUIRED_VARS,
+  operatorMissingVars,
 } from "@/lib/env";
 import { waffoConfigSummary } from "@/lib/payments/waffo";
 
@@ -20,6 +22,14 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const provider = env.paymentProvider();
   const gate = licenseGateStatus();
+  // Operator settings are only *required* on a real deployment; local dev and
+  // the smoke suites intentionally run without secrets.
+  const isProduction = process.env.NODE_ENV === "production";
+  const operator = {
+    requiredVars: [...OPERATOR_REQUIRED_VARS],
+    missingVars: isProduction ? operatorMissingVars() : [],
+    enforced: isProduction,
+  };
   const license = {
     gateEnabled: isLicenseGateEnabled(),
     mode: gate.mode,
@@ -54,8 +64,10 @@ export async function GET() {
       requiredEnvVars,
       missingEnvVars,
       license,
+      operator,
       missing: [
         ...missing,
+        ...operator.missingVars,
         ...missingEnvVars,
         ...(priceBuyout ? [] : ["price id for Buyout"]),
         ...(priceCare ? [] : ["price id for Care"]),
@@ -64,6 +76,7 @@ export async function GET() {
       docs: "docs/payments.md",
       ready:
         missing.length === 0 &&
+        operator.missingVars.length === 0 &&
         missingEnvVars.length === 0 &&
         priceBuyout &&
         priceCare,
@@ -75,6 +88,8 @@ export async function GET() {
     provider,
     waffo,
     license,
+    operator,
+    missing: [...missing, ...operator.missingVars, ...waffo.missing],
     docs: "https://docs.waffo.ai/llms.txt (Pancake) / https://waffo.com/docs/llms.txt (Acquiring)",
     checklist: [
       "Create a one-time product for Buyout and a monthly subscription product for Care",
@@ -85,6 +100,9 @@ export async function GET() {
       "Set LICENSE_SECRET (a long random string) — the gate is ON in production either way",
       "Send yourself a test payment, then check /admin/licenses for the issued key",
     ],
-    ready: waffo.ready && license.secretConfigured,
+    ready:
+      waffo.ready &&
+      license.secretConfigured &&
+      operator.missingVars.length === 0,
   });
 }

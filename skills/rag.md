@@ -1,10 +1,10 @@
 ---
 name: rag
-description: Extend the hybrid RAG module (BM25 + dense embeddings + RRF) in a ShipKit project and keep the no-key fallback working.
+description: Extend the hybrid RAG module (BM25 + dense embeddings + RRF) in a marketit project and keep the no-key fallback working.
 globs: lib/rag/**, app/api/rag/**, components/RagDemo.tsx, app/rag/page.tsx
 ---
 
-# Skill: Hybrid RAG (ShipKit)
+# Skill: Hybrid RAG (marketit)
 
 This is a **working** implementation (strategy B), not a placeholder.
 

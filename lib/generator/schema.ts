@@ -33,6 +33,7 @@ export const builderConfigSchema = z.object({
     .max(7),
   deploy: z.enum(["vercel", "selfhost", "cloudflare"]),
   style: z.enum([
+    "doodle",
     "midnight",
     "paper",
     "aurora",

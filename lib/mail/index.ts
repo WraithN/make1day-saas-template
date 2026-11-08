@@ -194,9 +194,15 @@ export async function sendMail(input: SendMailInput): Promise<SendMailResult> {
  */
 export async function sendMailSafely(
   input: SendMailInput,
+  opts: { dedupeKey?: string } = {},
 ): Promise<SendMailResult> {
   try {
-    return await sendMail(input);
+    const sent = await sendMail(input);
+    if (sent.delivered) return sent;
+    // `MAIL_PROVIDER=none` is an explicit safe no-op, not an outage: it should
+    // not fill the retry queue. Everything else is persisted for a retry.
+    if (sent.reason?.startsWith("MAIL_PROVIDER=none")) return sent;
+    throw new MailError("transport_error", sent.reason ?? "not delivered");
   } catch (err) {
     const code = err instanceof MailError ? err.code : "transport_error";
     logger.warn("transactional mail not delivered", {
@@ -206,10 +212,20 @@ export async function sendMailSafely(
       code,
       err: (err as Error).message,
     });
+    let queued = false;
+    try {
+      // Dynamic import keeps this dispatcher free of a static Node-only
+      // dependency (it is also read by generated customer builds' tooling).
+      const { enqueueMail } = await import("./outbox");
+      queued = await enqueueMail(input, { dedupeKey: opts.dedupeKey });
+    } catch {
+      /* storage unavailable — the log line above is the last resort */
+    }
     return {
       delivered: false,
       provider: currentMailProvider(),
       reason: `${code}: ${(err as Error).message}`,
+      queued,
     };
   }
 }

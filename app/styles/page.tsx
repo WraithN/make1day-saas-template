@@ -7,9 +7,9 @@ import { StylePlayground, type StyleItem } from "@/components/StylePlayground";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Styles — ShipKit design system",
+  title: "Styles — marketit design system",
   description:
-    "Preview all ten ShipKit themes — every template ships with a full palette of CSS variables. Pick a look, then carry it into the builder.",
+    "Preview all eleven marketit themes — including the hand-drawn Doodle palette — every template ships with a full set of CSS variables. Pick a look, then carry it into the builder.",
   robots: { index: true, follow: true },
   alternates: { canonical: "/styles" },
 };

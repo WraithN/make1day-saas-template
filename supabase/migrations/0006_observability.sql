@@ -1,4 +1,4 @@
--- ShipKit — observability: durable pageview counters
+-- marketit — observability: durable pageview counters
 -- Run AFTER 0005_orders.sql.
 --
 -- The marketing site records first-party, privacy-friendly pageview counts

@@ -4,9 +4,9 @@ import { getLang } from "@/lib/i18n-server";
 import { AGENT_READY } from "@/lib/content/agent-ready";
 
 export const metadata: Metadata = {
-  title: "Agent-ready SaaS starter — llms.txt, OpenAPI, MCP & AGENTS.md | ShipKit",
+  title: "Agent-ready SaaS starter — llms.txt, OpenAPI, MCP & AGENTS.md | marketit",
   description:
-    "How AI agents discover ShipKit: llms.txt, llms-full.txt, OpenAPI 3.1, an MCP scaffold_project tool, and a generated ZIP with AGENTS.md, scoped rules and 12 skills.",
+    "How AI agents discover marketit: llms.txt, llms-full.txt, OpenAPI 3.1, an MCP scaffold_project tool, and a generated ZIP with AGENTS.md, scoped rules and 12 skills.",
   keywords: [
     "agent-native starter",
     "AGENTS.md Next.js",

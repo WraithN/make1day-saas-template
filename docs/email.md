@@ -1,6 +1,6 @@
-# Transactional email — ShipKit
+# Transactional email — marketit
 
-This document covers **email delivery** for ShipKit: what the code does, what
+This document covers **email delivery** for marketit: what the code does, what
 you must configure on the DNS / provider side, and what is deliberately **not**
 implemented. Read it before promising verification, password-reset or ticket
 notification emails to a customer.
@@ -31,7 +31,7 @@ notification emails to a customer.
   exact field names and error shapes against the current Resend docs before a
   production launch (需按服务商文档核对)**.
 - The **webhook** transport's request body (`to`, `from`, `subject`, `html`,
-  `text`, `replyTo`, `template`, `lang`) is ShipKit's own convention — your
+  `text`, `replyTo`, `template`, `lang`) is marketit's own convention — your
   receiving service must accept it. There is no signature verification on that
   outbound call; use a private URL and `MAIL_WEBHOOK_TOKEN` as a bearer secret.
 
@@ -44,7 +44,7 @@ All are read lazily in `lib/env.ts` (missing values never break `next build`).
 | `MAIL_PROVIDER` | `resend` \| `webhook` \| `smtp`(reserved) \| `none` (default `none`) | all |
 | `RESEND_API_KEY` | Resend API key (`re_…`) | `resend` |
 | `MAIL_FROM` | Verified sender address, e.g. `no-reply@mail.example.com` | `resend`, `webhook` |
-| `MAIL_FROM_NAME` | Display name (default `ShipKit`) | optional |
+| `MAIL_FROM_NAME` | Display name (default `marketit`) | optional |
 | `MAIL_REPLY_TO` | Reply-to address | optional |
 | `MAIL_WEBHOOK_URL` | Your HTTP mailer endpoint | `webhook` |
 | `MAIL_WEBHOOK_TOKEN` | Bearer token sent to that endpoint | optional |
@@ -68,7 +68,7 @@ and counts.
   outage never turns a primary action into HTTP 500. The result records
   `delivered: true|false` and a `reason`.
 
-`lib/mail/templates.ts` renders four templates, with copy from the five-language
+`lib/mail/templates.ts` renders five templates, with copy from the five-language
 dictionary `lib/content/messaging.ts` (en / zh / ja / fr / de):
 
 | Template | When | Contents |
@@ -77,13 +77,21 @@ dictionary `lib/content/messaging.ts` (en / zh / ja / fr / de):
 | `reset` | password reset | one-time link, `{hours}` expiry |
 | `ticketUser` | a support ticket is created | acknowledgement + ticket id |
 | `ticketOperator` | a support ticket is created | notification to `MAIL_OPERATOR_EMAIL` with from / subject / message / id |
+| `licenseKey` | a paid webhook issues a license (or `/api/license/claim` re-sends it) | the key in both HTML and plain text, the plan, a redeem link and a short hint |
 
 Every `{placeholder}` is HTML-escaped in the HTML part. Both `html` and `text`
 parts are always produced (plain-text alternatives reduce spam scores).
 
+**Durable retry:** `sendMailSafely()` now persists a failed send to
+`mail_outbox` (`dedupeKey` prevents webhook replays from queuing duplicates)
+unless the provider is `none`. `POST /api/cron/mail-outbox` retries pending rows
+with backoff; `GET` returns counts. The host's scheduler must call it — there
+is no in-process timer. `POST /api/cron/retention` deletes delivered / dead rows
+after the retention window and never deletes pending mail.
+
 ## 3. DNS configuration checklist (this is NOT code — you must do it yourself)
 
-This is the part that actually decides inbox placement. ShipKit cannot do it
+This is the part that actually decides inbox placement. marketit cannot do it
 from the application process; treat it as a launch runbook.
 
 ### 3.1 Dedicated sending subdomain (isolation)
@@ -181,12 +189,12 @@ from the application process; treat it as a launch runbook.
 ## 5. Custom HTTP webhook provider (alternative to Resend)
 
 Set `MAIL_PROVIDER=webhook`, `MAIL_WEBHOOK_URL=https://…`, optionally
-`MAIL_WEBHOOK_TOKEN`. ShipKit POSTs a JSON body:
+`MAIL_WEBHOOK_TOKEN`. marketit POSTs a JSON body:
 
 ```json
 {
   "to": "user@example.com",
-  "from": "ShipKit <no-reply@mail.example.com>",
+  "from": "marketit <no-reply@mail.example.com>",
   "subject": "…",
   "html": "<!doctype html>…",
   "text": "…",
@@ -197,9 +205,12 @@ Set `MAIL_PROVIDER=webhook`, `MAIL_WEBHOOK_URL=https://…`, optionally
 ```
 
 Your service is then responsible for actually sending the message **and for all
-the DNS / SPF / DKIM / DMARC work in §3**. ShipKit treats HTTP 2xx as accepted;
-a non-2xx is logged as `transport_error` and `delivered:false`. There is no
-retry queue — add one in your service if you need one.
+the DNS / SPF / DKIM / DMARC work in §3**. marketit treats HTTP 2xx as accepted;
+a non-2xx is logged as `transport_error` and `delivered:false`. The caller's
+`sendMailSafely()` then queues the message in `mail_outbox` for
+`POST /api/cron/mail-outbox` to retry, so your service may still receive the
+same logical message more than once once the retry runs — keep the transport
+idempotent where the provider supports an idempotency key.
 
 ## 6. `MAIL_PROVIDER=none` (default)
 
@@ -213,7 +224,10 @@ operator should treat it as red before launch.
 
 - `lib/mail/index.ts` — `sendMail` / `sendMailSafely`, transports.
 - `lib/mail/config.ts` — provider resolution, `mailConfigStatus()`.
-- `lib/mail/templates.ts` — four templates.
+- `lib/mail/templates.ts` — five templates (incl. `licenseKey`).
+- `lib/mail/outbox.ts` — durable retry queue, dual backend.
+- `lib/license-delivery.ts` + `app/api/license/claim/route.ts` — automatic key email and self-service re-send.
+- `app/api/cron/mail-outbox/route.ts` + `app/api/cron/retention/route.ts` — retry and cleanup endpoints (need a host scheduler).
 - `lib/mail/types.ts` — `MailError`, `SendMailInput`, `SendMailResult`.
 - `lib/content/messaging.ts` — five-language copy for templates and UI.
 - `GET /api/mail/self-check` — secret-free configuration state.

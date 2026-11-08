@@ -1,6 +1,6 @@
 // Local SQLite persistence for the dev / self-hosted install.
 //
-// ShipKit ships two storage backends:
+// marketit ships two storage backends:
 //   * Supabase (Postgres) — the production path, used when a service-role key
 //     is configured. See lib/license.ts, lib/orders.ts, lib/stats.ts.
 //   * SQLite (this file) — the LOCAL path. A single file under .data/ that
@@ -67,7 +67,7 @@ function loadSqlite(): SqliteModule {
   }
 
   throw new Error(
-    "ShipKit's local database needs Node.js 22.5+ (built-in `node:sqlite`). " +
+    "marketit's local database needs Node.js 22.5+ (built-in `node:sqlite`). " +
       "Upgrade Node, or configure Supabase (SUPABASE_SERVICE_ROLE_KEY) to use " +
       "the hosted database instead.",
   );
@@ -274,6 +274,82 @@ CREATE TABLE IF NOT EXISTS meta (
   key   TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
+
+-- Local password sign-in sessions (the consumer for the password-reset and
+-- email-verification flows). Only the SHA-256 hash of the opaque token is
+-- stored, so a database leak cannot be replayed as a session cookie.
+CREATE TABLE IF NOT EXISTS local_sessions (
+  token_hash TEXT PRIMARY KEY,
+  email      TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_local_sessions_expires ON local_sessions(expires_at);
+
+-- Durable transactional-mail retry queue. A mail outage must never lose a
+-- paid customer's license key: failed sends are stored here and retried by
+-- /api/cron/mail-outbox. dedupe_key makes webhook replays idempotent.
+CREATE TABLE IF NOT EXISTS mail_outbox (
+  id              TEXT PRIMARY KEY,
+  dedupe_key      TEXT UNIQUE,
+  recipient       TEXT NOT NULL,
+  subject         TEXT NOT NULL,
+  html            TEXT NOT NULL,
+  text_body       TEXT NOT NULL,
+  template        TEXT,
+  lang            TEXT,
+  status          TEXT NOT NULL DEFAULT 'pending', -- pending | delivered | dead
+  attempts        INTEGER NOT NULL DEFAULT 0,
+  next_attempt_at TEXT NOT NULL,
+  last_error      TEXT,
+  created_at      TEXT NOT NULL,
+  updated_at      TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_mail_outbox_due
+  ON mail_outbox(status, next_attempt_at);
+
+-- Shared, persistent rate limiting. The previous in-memory Maps only worked
+-- on a single instance; this table is transactionally incremented so every
+-- replica sees the same counter.
+CREATE TABLE IF NOT EXISTS rate_limits (
+  bucket     TEXT PRIMARY KEY,
+  window_key TEXT NOT NULL,
+  used       INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL
+);
+
+-- Consent audit trail (privacy/terms acceptance, marketing opt-in/out).
+CREATE TABLE IF NOT EXISTS consent_events (
+  id         TEXT PRIMARY KEY,
+  subject    TEXT NOT NULL,          -- hashed visitor id or email
+  kind       TEXT NOT NULL,          -- accept | withdraw | export | erase
+  policy     TEXT NOT NULL,
+  detail     TEXT,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_consent_subject ON consent_events(subject);
+
+-- Download / license activation log. Kept deliberately minimal (no IP, no
+-- user agent) — see docs/legal-data-map.md for the retention policy.
+CREATE TABLE IF NOT EXISTS delivery_events (
+  id         TEXT PRIMARY KEY,
+  jti        TEXT,
+  email_hash TEXT,
+  kind       TEXT NOT NULL,          -- download | activate | claim_mail
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_delivery_created ON delivery_events(created_at DESC);
+
+-- Generic structured error events. External sinks are optional; this table
+-- is the local fallback so an incident is never completely invisible.
+CREATE TABLE IF NOT EXISTS error_events (
+  id         TEXT PRIMARY KEY,
+  level      TEXT NOT NULL,
+  message    TEXT NOT NULL,
+  context    TEXT,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_error_created ON error_events(created_at DESC);
 `;
 
 function migrate(database: SqliteDatabase): void {

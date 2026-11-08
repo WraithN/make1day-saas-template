@@ -9,6 +9,7 @@
 import { chunkText } from "./chunk";
 import { embedTexts } from "./embed";
 import { putVectors, isPgvectorEnabled, pgUpsertChunks } from "./vector";
+import { env } from "@/lib/env";
 import type { RagChunk, RagDocument } from "./types";
 
 type Stored = { doc: RagDocument; chunks: RagChunk[] };
@@ -118,52 +119,52 @@ export async function ensureSeededAsync(): Promise<void> {
 }
 
 // Seed docs make the very first query useful even before the user ingests
-// anything. Mixed EN/ZH also demonstrates the tokenizer.
-const SEED: { title: string; text: string }[] = [
-  {
-    title: "ShipKit pricing",
-    text: `ShipKit uses a one-time buyout plus an optional care subscription.
-The Free tier costs $0 and lets you evaluate the starter with the marketing site and documentation.
-The Buyout tier is a one-time $99 payment at launch price, down from the $199 list price. It includes the complete source code, all features (auth, billing, AI, admin, multi-tenancy, RAG), and permanent ownership of the code you download.
-The Care tier is $9 per month at launch price, down from the $19 list price. It includes upstream drift-proof patches, deployment assistance, priority support, new components each month, security and dependency updates, and compliance template updates.
-Subscriptions renew automatically and can be cancelled at any time. Cancelling Care never revokes your buyout license or source code.
-Compared with competitors, ShipFast costs about $199, Divjoy about $199, Makerkit about $299 and Supastarter about $299 for a one-time license.`,
-  },
-  {
-    title: "技术架构 / Architecture",
-    text: `ShipKit 基于 Next.js 15 App Router、React 19 与 TypeScript 构建。
-认证使用 Supabase Auth，支持邮箱 magic link 以及 Google、GitHub、Apple、Microsoft 等 OAuth 登录；所有数据表都启用 row-level security。
-计费通过 lib/payments 的 provider 抽象接入，本站默认使用 Waffo，也可切换 Stripe、Creem 或 PayPal；Webhook 验签后同步订阅状态。Waffo 的一次性买断发送 mode payment，Care 订阅发送 mode subscription。
-AI 层是多供应商的：OpenAI 兼容接口、Anthropic Claude 与 Google Gemini 都通过 lib/ai 统一调用，聊天端点受登录与套餐限制。
-样式系统使用一串 CSS 自定义属性（--bg、--surface、--accent 等），切换风格只需替换 :root 调色板。`,
-  },
-  {
-    title: "RAG module guide",
-    text: `The RAG module implements hybrid document question answering with citations.
+// anything. They are generated from THIS PROJECT's own configuration, never
+// from the template vendor's marketing copy: no hardcoded prices, competitor
+// names or brand claims can leak into a customer's generated project.
+// Set RAG_SEED_DOCS=off to start with an empty store (an ingest-only demo).
+function seedDocuments(): { title: string; text: string }[] {
+  const app = env.productName();
+  return [
+    {
+      title: `${app} pricing`,
+      text: `${app} sells a one-time source licence plus an optional recurring care plan. The exact amounts, currencies and price ids are NOT hard-coded in the retrieval index: they come from the operator's payment-provider configuration (lib/env.ts -> priceForPlan) and the pricing page. Read /pricing and the PAYMENT_PROVIDER / *_PRICE_ID_* environment variables for the current numbers. A cancelled care plan never revokes a one-time source licence that was already delivered.`,
+    },
+    {
+      title: "技术架构 / Architecture",
+      text: `${app} 基于 Next.js 15 App Router、React 19 与 TypeScript 构建。
+认证优先使用 Supabase Auth（邮箱 magic link 与可配置 OAuth）；未配置 Supabase 时回退到本地 SQLite 的 scrypt 密码哈希与一次性令牌。
+计费通过 lib/payments 的 PaymentProvider 抽象接入，PAYMENT_PROVIDER 决定启用哪一个网关；webhook 验签成功后才写入订单与许可。
+AI 层是多供应商的：OpenAI 兼容接口、Anthropic Claude 与 Google Gemini 通过 lib/ai 统一调用，聊天端点受登录与每日配额限制。
+样式系统使用 CSS 自定义属性（--bg、--surface、--accent 等），切换风格只需替换 :root 调色板。`,
+    },
+    {
+      title: "RAG module guide",
+      text: `The RAG module implements hybrid document question answering with citations.
 POST /api/rag/ingest accepts { title, text } and returns the created document with its chunk count; chunks are embedded when an embedding key is available.
 POST /api/rag/query accepts { question, provider? } and returns { answer, citations, mode, retrieval }.
 Retrieval combines two complementary branches: Okapi BM25 over Latin words plus CJK unigrams and bigrams (lib/rag/retrieve.ts), and dense embeddings from an OpenAI-compatible /embeddings endpoint (lib/rag/embed.ts).
 The two ranked lists are fused with Reciprocal Rank Fusion, RRF, using k = 60 in lib/rag/hybrid.ts. A passage found by both lexical and semantic search ranks higher than one found by either alone.
-Vectors are cached in memory by default. Set RAG_VECTOR_STORE=supabase to persist them to pgvector with supabase/migrations/0002_rag.sql, which also provides a tsvector index and a SQL-side RRF function.
-If no embedding key is configured, retrieval automatically degrades to BM25 only. If no AI chat key is configured, the answer falls back to extractive mode and returns the retrieved passages verbatim.
+Documents default to a process-local in-memory store on globalThis, shared across dev HMR instances. They are NOT durable: a serverless cold start or a restart loses every ingested document. Set RAG_VECTOR_STORE=supabase to persist vectors to pgvector with supabase/migrations/0002_rag.sql, and back the document store with your own database for production.
+Set RAG_SEED_DOCS=off to disable the built-in demo documents. If no embedding key is configured, retrieval automatically degrades to BM25 only. If no AI chat key is configured, the answer falls back to extractive mode and returns the retrieved passages verbatim.
 There is no LangChain, LlamaIndex or vector database client dependency: the whole pipeline is plain TypeScript.`,
-  },
-  {
-    title: "Custom services / 定制服务",
-    text: `ShipKit offers custom development as a separate 1:1 service. It is not a self-checkout plan: the work is scoped in a free 30-minute one-on-one call, then quoted as a fixed price before anything starts. There is no automatic charge and no obligation to proceed.
-Scope includes custom components, themes and industry templates; private deployment, SSO, database and infrastructure integration; wiring the AI and RAG modules to your own data and models; and migrating an existing codebase, code audits and compliance work.
-To start, use the Book a 1:1 call button on the pricing page, or email the contact address shown there. 定制服务需要先进行 1V1 沟通，确认需求范围后再给出固定报价，不会自动扣费。`,
-  },
-  {
-    title: "Generated template docs / 模板文档",
-    text: `Every ZIP downloaded from the Builder is agent-native: it contains a root AGENTS.md, a style-locked design.md, scoped rules in ai/rules/*.md, .cursor/rules/*.mdc for Cursor, CLAUDE.md for Claude Code, and up to 12 skills/*.md playbooks.
+    },
+    {
+      title: "Custom services / 定制服务",
+      text: `Custom development is handled outside self-checkout: scope the work in a call, agree a fixed quote, then start. There is no automatic charge and no obligation to proceed. Typical scope includes custom components, themes and industry templates; private deployment, SSO, database and infrastructure integration; wiring the AI and RAG modules to your own data and models; and migrating or auditing an existing codebase. Use the booking link or the contact address on the pricing page. 定制服务需要先沟通确认范围，再给出固定报价，不会自动扣费。`,
+    },
+    {
+      title: "Agent-native project docs / 模板文档",
+      text: `The generated project is agent-native: it contains a root AGENTS.md, a style-locked design.md, scoped rules in ai/rules/*.md, .cursor/rules/*.mdc for Cursor, CLAUDE.md for Claude Code, and skills/*.md playbooks.
 AGENTS.md is the root AI coding contract: the exact selected modules, which ones were pruned, repository layout, commands, scoped-rule index, server/client boundaries, the single /api/webhook payment rule, five-language i18n requirements, a style lock with concrete token values, and a definition of done.
 design.md locks the visual system for the chosen style: colour tokens with hex references, the system font stack, corner radius, surface texture rules, component vocabulary, responsive breakpoints, accessibility rules and a do/don't checklist.
-All of these documents are generated from one shared spec (ai/doc-spec.json + scripts/lib/ai-docs.mjs). Inside the downloaded project, npm run ai:docs rebuilds every document after a config change, and npm run ai:setup refreshes the Cursor and Claude Code integrations. 生成的模板会带上对应风格的 design.md 与 AGENTS.md，以及按选项生成的 scoped rules，方便直接用 AI coding 继续开发。`,
-  },
-];
+All of these documents are generated from one shared spec. Inside the downloaded project, npm run ai:docs rebuilds every document after a config change, and npm run ai:setup refreshes the Cursor and Claude Code integrations. 生成的模板会带上对应风格的 design.md 与 AGENTS.md，方便直接用 AI coding 继续开发。`,
+    },
+  ];
+}
 
 export function ensureSeeded(): void {
   if (documents.size > 0) return;
-  for (const doc of SEED) ingestDocument(doc.title, doc.text);
+  if (env.ragSeedDocs() === "off") return;
+  for (const doc of seedDocuments()) ingestDocument(doc.title, doc.text);
 }

@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/lib/i18n";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://shipkit.dev";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://marketit.dev";
 const LANGS = ["en", "zh", "ja", "fr", "de"];
 
 // Renders the correct canonical + hreflang for the *current* page (not just

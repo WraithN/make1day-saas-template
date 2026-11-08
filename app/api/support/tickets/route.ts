@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { env } from "@/lib/env";
@@ -32,37 +33,8 @@ const createSchema = z.object({
 // ── Simple per-visitor / per-IP throttle ──────────────────────────────────
 // In-memory and per-instance (same pattern as /api/admin/login). A multi-
 // instance deployment should move this to the shared SQLite/Supabase store.
-const WINDOW_MS = 60_000;
-const MAX_PER_WINDOW = 5;
-const hits = new Map<string, { count: number; resetAt: number }>();
-
-function clientKey(request: Request): string {
-  const h = request.headers;
-  const ip =
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    h.get("x-real-ip") ||
-    "local";
-  const cookie = h.get("cookie") ?? "";
-  const vid = /(?:^|;\s*)sk_vid=([a-f0-9]{32})/.exec(cookie)?.[1] ?? "anon";
-  return `${ip}:${vid}`;
-}
-
-function tooMany(key: string): boolean {
-  const now = Date.now();
-  const e = hits.get(key);
-  if (!e || e.resetAt <= now) return false;
-  return e.count >= MAX_PER_WINDOW;
-}
-
-function recordHit(key: string): void {
-  const now = Date.now();
-  const e = hits.get(key);
-  if (!e || e.resetAt <= now) {
-    hits.set(key, { count: 1, resetAt: now + WINDOW_MS });
-    return;
-  }
-  e.count += 1;
-}
+// Throttling now uses the persistent, cross-instance guard in
+// lib/http-guard.ts (SQLite or the consume_rate_limit() Supabase RPC).
 
 /** Best-effort session lookup: local SQLite mode has no Supabase env at all. */
 async function optionalUserId(): Promise<string | null> {
@@ -82,10 +54,13 @@ async function optionalUserId(): Promise<string | null> {
  * outage never loses the ticket.
  */
 export async function POST(request: Request) {
-  const key = clientKey(request);
-  if (tooMany(key)) {
-    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
-  }
+  const blocked = await guardApiWrite(request, {
+    bucket: "tickets",
+    limit: 5,
+    windowMs: 60000,
+  });
+  if (blocked) return blocked;
+
 
   let body: unknown;
   try {
@@ -98,13 +73,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
 
-  recordHit(key);
   const { email, subject, message, company } = parsed.data;
   const lang = pickLang(parsed.data.lang);
 
   // Honeypot hit: mirror a success without persisting or sending anything.
   if (company && company.trim()) {
-    logger.info("support ticket honeypot hit — discarded", { key });
+    logger.info("support ticket honeypot hit — discarded");
     return NextResponse.json({ ok: true, ticketId: null });
   }
 

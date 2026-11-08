@@ -1,5 +1,7 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { deliverLicenseKey } from "@/lib/license-delivery";
 import { getPaymentProvider } from "@/lib/payments";
 import { env } from "@/lib/env";
 import {
@@ -58,16 +60,35 @@ async function upsertSubscription(params: {
  * supports public checkout). The buyer can later auto-claim it by signing in
  * with the same email.
  */
+/** Some adapters only carry a user id. Resolve the checkout email so the
+ *  license can still be delivered instead of waiting for operator support. */
+async function resolveBuyerEmail(
+  e: NormalizedSubEvent,
+): Promise<string | undefined> {
+  if (e.email) return e.email;
+  if (!e.userId) return undefined;
+  try {
+    const admin = createSupabaseAdminClient() as unknown as {
+      auth: { admin: { getUserById: (id: string) => Promise<{ data?: { user?: { email?: string } } }> } };
+    };
+    const { data } = await admin.auth.admin.getUserById(e.userId);
+    return data?.user?.email ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 async function grantLicense(
   e: NormalizedSubEvent,
 ): Promise<LicenseRecord | null> {
   if (!e.grantsAccess || !e.plan) return null;
-  if (!e.email && !e.userId) {
+  const email = await resolveBuyerEmail(e);
+  if (!email && !e.userId) {
     throw new Error("Paid event has neither buyerEmail nor userId");
   }
   const plan = e.plan === "care" || e.plan === "scale" ? "care" : "buyout";
   return issueLicense({
-    email: e.email,
+    email,
     plan,
     orderId: e.orderId ?? e.subscriptionId,
     periodEnd: e.periodEnd,
@@ -104,14 +125,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ ...okBody(), ignored: true });
   }
 
+  // Providers that omit event ids still retry. Hash the verified raw body so
+  // the replay of such an event is deduped instead of issuing a second key.
+  const rawDigest = createHash("sha256").update(rawBody).digest("hex");
+
   try {
     for (const e of events) {
       // Waffo retries up to 4 times; dedupe on (eventType, eventId) so a
-      // retry never issues a second license or double-provisions access.
-      const fresh =
-        !e.eventType || !e.eventId
-          ? true
-          : await recordWebhookEvent(e.eventType, e.eventId);
+      // retry never issues a second license, sends a second key email or
+      // double-provisions access. Missing ids fall back to the body digest —
+      // the old `fresh = true` fallback let a replay mint unlimited keys.
+      const fresh = await recordWebhookEvent(
+        e.eventType ?? "event",
+        e.eventId ?? `body:${rawDigest}`,
+      );
       if (!fresh) continue;
 
       if (e.userId) {
@@ -136,7 +163,17 @@ export async function POST(req: Request) {
         }
       }
 
-      await grantLicense(e);
+      // A paid order must reach the buyer without operator intervention.
+      // Delivery failures are queued for retry, never swallowed here.
+      const license = await grantLicense(e);
+      if (license) {
+        await deliverLicenseKey(license).catch((err) =>
+          logger.warn("license delivery skipped", {
+            jti: license.jti,
+            err: (err as Error).message,
+          }),
+        );
+      }
 
       // Record a provider-agnostic order row for every event that carries a
       // plan. Idempotent on (provider, providerOrderId) so retries never

@@ -14,13 +14,21 @@ export function isDemoMode(): boolean {
   );
   // A configured auth backend always wins — no opt-in backdoor.
   if (supabaseConfigured) return false;
-  if (process.env.NEXT_PUBLIC_ENABLE_DEMO === "false") return false;
+  const flag = process.env.NEXT_PUBLIC_ENABLE_DEMO?.trim().toLowerCase();
+  if (flag === "false") return false;
+  // Development keeps the zero-config dashboard preview. PRODUCTION is
+  // closed by default: a stray env var can no longer create a one-cookie
+  // login backdoor on a deployed site. Re-enabling it there requires BOTH
+  // explicit flags so it can never happen by accident.
+  if (process.env.NODE_ENV === "production") {
+    return flag === "true" && process.env.DEMO_IN_PRODUCTION === "true";
+  }
   return true;
 }
 
 export const DEMO_USER = {
   id: "demo-user",
-  email: "demo@shipkit.dev",
+  email: "demo@example.com",
 };
 
 export const DEMO_SUBSCRIPTION = {

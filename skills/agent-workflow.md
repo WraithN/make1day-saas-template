@@ -1,10 +1,10 @@
 ---
 name: agent-workflow
-description: Start any coding task in a ShipKit project — load AGENTS.md, design.md, scoped rules and the right skill before writing code.
+description: Start any coding task in a marketit project — load AGENTS.md, design.md, scoped rules and the right skill before writing code.
 globs: AGENTS.md, design.md, ai/**, .cursor/**, CLAUDE.md, skills/**, shipkit.config.json
 ---
 
-# Skill: Agent Workflow (ShipKit)
+# Skill: Agent Workflow (marketit)
 
 This repository is generated to be **agent-native**. Follow this order for every task.
 

@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { env } from "@/lib/env";
@@ -37,27 +38,8 @@ const confirmSchema = z.object({
   lang: z.string().optional(),
 });
 
-// ── Simple per-IP throttle (in-memory, per instance) ──────────────────────
-const WINDOW_MS = 60_000;
-const MAX_PER_WINDOW = 8;
-const hits = new Map<string, { count: number; resetAt: number }>();
-
-function rateLimited(request: Request): boolean {
-  const h = request.headers;
-  const ip =
-    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    h.get("x-real-ip") ||
-    "local";
-  const key = `pw:${ip}`;
-  const now = Date.now();
-  const e = hits.get(key);
-  if (!e || e.resetAt <= now) {
-    hits.set(key, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-  e.count += 1;
-  return e.count > MAX_PER_WINDOW;
-}
+// Throttling now uses the persistent, cross-instance guard in
+// lib/http-guard.ts (SQLite or the consume_rate_limit() Supabase RPC).
 
 function siteUrl(): string {
   return env.siteUrl().replace(/\/+$/, "");
@@ -76,9 +58,13 @@ function siteUrl(): string {
  * link via /auth/callback) — 需按 Supabase 文档核对 the exact redirect flow.
  */
 export async function POST(request: Request) {
-  if (rateLimited(request)) {
-    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
-  }
+  const blocked = await guardApiWrite(request, {
+    bucket: "password-reset",
+    limit: 8,
+    windowMs: 60000,
+  });
+  if (blocked) return blocked;
+
 
   let body: unknown;
   try {

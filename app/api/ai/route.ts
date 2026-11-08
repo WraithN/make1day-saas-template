@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { z } from "zod";
@@ -12,17 +13,27 @@ export const runtime = "nodejs";
 function mockReply(message: string): string {
   return (
     `Got it — you asked: "${message.slice(0, 120)}". ` +
-    `This is ShipKit's demo reply (no AI key is configured). ` +
+    `This is marketit's demo reply (no AI key is configured). ` +
     `Wire up OPENAI_API_KEY (or any OpenAI-compatible provider) in .env.local ` +
     `and this endpoint will stream a real model response instead.`
   );
 }
 
 export async function POST(req: Request) {
+  const blocked = await guardApiWrite(req, {
+    bucket: "ai",
+    limit: 60,
+    windowMs: 3600000,
+  });
+  if (blocked) return blocked;
+
   const demoCookie = (await cookies()).get(DEMO_COOKIE)?.value;
   const demo = isDemoMode() && demoCookie;
 
-  // The user the quota is charged to (demo mode never spends quota).
+  // The user the quota is charged to. Demo mode is a zero-config preview and is
+  // intentionally NOT quota-limited (the daily-message tests assert this): a
+  // demo must always respond. The per-IP rate limit in guardApiWrite still
+  // applies, so it is not an open relay. Real, signed-in users are charged.
   let quotaUserId: string | null = null;
 
   if (!demo) {
@@ -94,7 +105,7 @@ export async function POST(req: Request) {
     {
       role: "system" as const,
       content:
-        "You are ShipKit's demo assistant. You help founders plan and ship AI SaaS products. Be concise and concrete.",
+        "You are marketit's demo assistant. You help founders plan and ship AI SaaS products. Be concise and concrete.",
     },
     { role: "user" as const, content: parsed.data.message },
   ];

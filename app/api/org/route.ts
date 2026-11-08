@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/subscriptions";
 import { createOrg } from "@/lib/org";
@@ -9,6 +10,13 @@ export const dynamic = "force-dynamic";
 // Create a new workspace/org for the signed-in user (they become owner) and
 // switch the active org to it.
 export async function POST(req: Request) {
+  const blocked = await guardApiWrite(req, {
+    bucket: "org-write",
+    limit: 30,
+    windowMs: 3600000,
+  });
+  if (blocked) return blocked;
+
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });

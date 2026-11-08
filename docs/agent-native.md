@@ -1,4 +1,4 @@
-# Agent-Native Delivery — ShipKit P0
+# Agent-Native Delivery — marketit P0
 
 > 竞品报告 `docs/competitive-analysis.md` 的 P0 项。目标：让 AI coding agent 下载 ZIP 后
 > **不需要猜** —— 根目录就有契约、按风格锁定的设计说明、按目录生效的 scoped rules，
@@ -19,7 +19,7 @@ scripts/lib/ai-docs.mjs        (零依赖 ESM：唯一的文档渲染器，build
 ```
 
 `ai/doc-spec.json` 随 ZIP 一起交付，包含 `config` 缓存、**全 12 个 skill 的元数据**、
-**全 10 套 palette**（token/HEX/radius/texture）、字体栈和全部选项 label。
+**全 11 套风格**（10 套 palette + Doodle 手绘主题，各自含 token/HEX/radius/texture）、字体栈和全部选项 label。
 `shipkit.config.json` 是**选项的主源**：`ai-docs` / `ai-setup` 每次运行都先读它，
 再用 catalog 重新派生 labels 与 style（`deriveSpec()`），因此改 manifest 才会真正改文档。
 **不要手改输出文件。**
@@ -68,7 +68,7 @@ node scripts/ai-docs.mjs --dry-run   # 只报告哪些文件会变
 
 ## 5. 验收方式
 
-- `verify-matrix.mjs --all`（17 组）对每组真实 ZIP 断言：`AGENTS.md` 存在且含本构建 style、
+- `verify-matrix.mjs --all`（18 组）对每组真实 ZIP 断言：`AGENTS.md` 存在且含本构建 style、
   `agents.md` 不存在、scoped rules 精确等于条件计数、`.cursor/rules/*.mdc` 与 `ai/rules/*.md` 数量一致、
   两套后台文件按勾选存活且无死链、
   `CLAUDE.md` import 完整、`ai/doc-spec.json` 的 style/skills 与配置一致、
@@ -82,5 +82,5 @@ node scripts/ai-docs.mjs --dry-run   # 只报告哪些文件会变
 - Scoped rules 是否自动生效取决于客户端是否读取 `.cursor/rules` / `CLAUDE.md` / `globs`；
   `AGENTS.md` 是通用兜底。
 - Cursor 的 `.mdc` 格式、`@import` 语法会随工具版本变化，接入示例见 `docs/mcp.md`。
-- 生成工程的首页/定价页已由 `lib/generator/customer-site.ts` 从客户配置生成，ShipKit 自家营销页（blog / compare / faq / license 兑换页）已从客户包剪掉；但 `/privacy`、`/terms` 只是占位法律页，客户上线前必须替换。
+- 生成工程的首页/定价页已由 `lib/generator/customer-site.ts` 从客户配置生成，marketit 自家营销页（blog / compare / faq / license 兑换页）已从客户包剪掉；但 `/privacy`、`/terms` 只是占位法律页，客户上线前必须替换。
 - **改 `style` 只重建文档，不会重写 `app/globals.css`**（CSS 是打包时注入的）。要真正换配色必须回 Builder 重新生成 ZIP；`ai:docs` 覆盖的是 skills / features / payment / auth / deploy 等不改变 CSS 的配置。

@@ -1,3 +1,4 @@
+import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { z } from "zod";
@@ -49,6 +50,13 @@ async function authorizeIngest(): Promise<NextResponse | null> {
 
 /** POST /api/rag/ingest — split + index a document. */
 export async function POST(req: Request) {
+  const blocked = await guardApiWrite(req, {
+    bucket: "rag-ingest",
+    limit: 20,
+    windowMs: 3600000,
+  });
+  if (blocked) return blocked;
+
   const denied = await authorizeIngest();
   if (denied) return denied;
 

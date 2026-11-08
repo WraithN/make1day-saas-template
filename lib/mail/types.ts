@@ -20,7 +20,8 @@ export type MailTemplate =
   | "verify"
   | "reset"
   | "ticketUser"
-  | "ticketOperator";
+  | "ticketOperator"
+  | "licenseKey";
 
 export type SendMailInput = {
   to: string;
@@ -44,6 +45,8 @@ export type SendMailResult = {
   id?: string;
   /** Human-readable reason when delivered=false (never a secret). */
   reason?: string;
+  /** True when the message was persisted to the retry outbox instead. */
+  queued?: boolean;
 };
 
 export type MailErrorCode =

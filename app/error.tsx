@@ -16,10 +16,21 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Surface the error for observability. In production this would forward
-    // to your error tracker (Sentry/Datadog); here we keep it lightweight.
     // eslint-disable-next-line no-console
     console.error("Route error", error?.message, error?.digest);
+    // Persist the incident locally (error_events) and forward it to the
+    // configured external sink via /api/errors. Best effort, never blocking.
+    void fetch("/api/errors", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        level: "error",
+        message: error?.message ?? "render error",
+        digest: error?.digest,
+        url: window.location.href,
+      }),
+      keepalive: true,
+    }).catch(() => {});
   }, [error]);
 
   return (

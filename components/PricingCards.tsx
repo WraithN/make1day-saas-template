@@ -53,12 +53,17 @@ export function PricingCards({ plans }: { plans: Plan[] }) {
     }
   }
 
+  // Highlighter blocks rotate through the hand-drawn palette. These classes
+  // are site-only; a generated project (which ships its own globals.css)
+  // simply falls back to plain white cards.
+  const tones = ["", "card-yellow", "card-mint"];
+
   return (
-    <div className="grid items-start gap-4 sm:gap-5 lg:grid-cols-3">
-      {plans.map((plan) => (
+    <div className="grid gap-4 sm:gap-5 lg:grid-cols-3">
+      {plans.map((plan, idx) => (
         <div
           key={plan.id}
-          className={`card flex flex-col ${
+          className={`card flex h-full flex-col ${tones[idx % tones.length] ?? ""} ${
             plan.highlight
               ? "relative border-accent ring-1 ring-accent/30"
               : plan.muted
@@ -67,7 +72,7 @@ export function PricingCards({ plans }: { plans: Plan[] }) {
           }`}
         >
           {plan.highlight && (
-            <span className="absolute -top-px left-6 -translate-y-1/2 rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-bg">
+            <span className="absolute -top-px left-6 -translate-y-1/2 rounded-md border-2 border-ink bg-accent px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white">
               {t("pricing.popular")}
             </span>
           )}
@@ -116,7 +121,9 @@ export function PricingCards({ plans }: { plans: Plan[] }) {
               {t(plan.note)}
             </p>
           )}
-          <div className="mt-6">
+          {/* mt-auto pins every CTA to the same baseline across the three
+              equal-height cards, regardless of feature-list length. */}
+          <div className="mt-auto pt-6">
             {plan.priceId ? (
               <button
                 className="btn-solid w-full"

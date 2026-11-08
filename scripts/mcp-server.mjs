@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 /**
- * stdio <-> HTTP bridge for ShipKit's MCP endpoint.
+ * stdio <-> HTTP bridge for marketit's MCP endpoint.
  *
- * Cursor and Claude Code speak JSON-RPC over stdio; the ShipKit site exposes
+ * Cursor and Claude Code speak JSON-RPC over stdio; the marketit site exposes
  * the same protocol over HTTP at /api/mcp. This bridge only forwards lines,
  * so tool definitions and the license gate stay on the server.
  *
- *   SHIPKIT_MCP_URL=https://shipkit.dev node scripts/mcp-server.mjs
+ *   SHIPKIT_MCP_URL=https://marketit.dev node scripts/mcp-server.mjs
  *
  * Cursor (~/.cursor/mcp.json):
  *   { "mcpServers": { "shipkit": {
  *       "command": "node",
  *       "args": ["<abs path>/scripts/mcp-server.mjs"],
- *       "env": { "SHIPKIT_MCP_URL": "https://shipkit.dev" }
+ *       "env": { "SHIPKIT_MCP_URL": "https://marketit.dev" }
  *   } } }
  *
  * Claude Code:

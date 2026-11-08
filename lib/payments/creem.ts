@@ -107,13 +107,27 @@ export const creemProvider: PaymentProvider = {
       const periodEnd = obj.current_period_end
         ? new Date(obj.current_period_end * 1000).toISOString()
         : obj.current_period_end ?? null;
+      const buyerEmail: string | undefined =
+        obj.customer_email ?? obj.email ?? obj.customer?.email ?? undefined;
+      const userId: string | undefined = obj.metadata?.userId || undefined;
       out.push({
-        userId: obj.metadata?.userId || undefined,
+        userId,
         customerId: String(customerId),
         subscriptionId: String(subscriptionId),
         status: normalizeStatus(obj.status ?? "active"),
         plan: planFromProduct(productId),
         periodEnd,
+        // Paid checkout must grant the download license — see the shared
+        // webhook route (grantLicense requires grantsAccess + plan + an
+        // email/userId to attribute the key to). Subscription updates keep
+        // grantsAccess unset because they cannot always identify the buyer.
+        email: buyerEmail,
+        eventType,
+        eventId: String(payload.id ?? obj.id ?? subscriptionId),
+        orderId: String(obj.id ?? subscriptionId),
+        grantsAccess:
+          eventType === "checkout.completed" &&
+          (Boolean(buyerEmail) || Boolean(userId)),
         amount: toMajor(obj.amount, obj.currency),
         currency: obj.currency ?? undefined,
       });

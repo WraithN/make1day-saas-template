@@ -7,14 +7,16 @@ export async function Footer() {
   const year = new Date().getFullYear();
   const copyright = tr(lang, "footer.copyright").replace("{year}", String(year));
   return (
-    <footer className="border-t border-line/70 mt-20">
+    <footer className="sk-footer border-t border-line/70 mt-20">
       <div className="wrap flex flex-col gap-3 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+        {/* One brand, one tagline. The old "product — tagline Company."
+            line showed the company name twice; customerFooter() matches this
+            exact shape when it swaps in the customer's own app name. */}
         <div>
-          <span className="font-semibold text-ink">ShipKit</span> —{" "}
+          <span className="font-semibold text-ink">marketit</span> —{" "}
           <span>
             <Trans k="footer.tagline" lang={lang} />
-          </span>{" "}
-          <span className="font-mono">Uncorne</span>.
+          </span>
         </div>
         <div className="flex flex-wrap gap-5">
           <Link href="/blog" className="hover:text-ink">
@@ -32,14 +34,6 @@ export async function Footer() {
           <Link href="/support" className="hover:text-ink">
             <Trans k="footer.support" lang={lang} />
           </Link>
-          <a
-            href="https://github.com/uncorne/shipkit"
-            className="hover:text-ink"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            <Trans k="footer.github" lang={lang} />
-          </a>
           <Link href="/privacy" className="hover:text-ink">
             <Trans k="footer.privacy" lang={lang} />
           </Link>

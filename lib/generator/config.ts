@@ -1,4 +1,4 @@
-// Builder configuration types + defaults for the ShipKit template generator.
+// Builder configuration types + defaults for the marketit template generator.
 // The user picks components in the /builder UI; these selections drive the
 // generated template's env defaults, README and manifest.
 
@@ -21,6 +21,7 @@ export type Feature =
   | "premium";
 export type DeployTarget = "vercel" | "selfhost" | "cloudflare";
 export type StyleId =
+  | "doodle"
   | "midnight"
   | "paper"
   | "aurora"
@@ -116,6 +117,7 @@ export const DEPLOY_OPTIONS: { id: DeployTarget; label: string; note?: string }[
 ];
 
 export const STYLE_OPTIONS: { id: StyleId; label: string; note: string }[] = [
+  { id: "doodle", label: "Doodle", note: "Light · ink outlines · highlighter blocks" },
   { id: "midnight", label: "Midnight", note: "Dark · teal accent · grid" },
   { id: "aurora", label: "Aurora", note: "Dark · violet / cyan · glow" },
   { id: "emerald", label: "Emerald", note: "Dark · green / amber · dots" },
