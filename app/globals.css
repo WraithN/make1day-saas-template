@@ -215,6 +215,30 @@ pre {
     background: var(--doodle-red);
   }
 
+  /* Black Friday nav pill — deliberately loud so the promo can't be missed.
+     Site-only (app/globals.css); the customer build uses buildGlobalsCss(). */
+  .nav-bf-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.7rem;
+    border-radius: 9999px;
+    background: var(--doodle-red);
+    color: #fff;
+    font-weight: 800;
+    border: 2px solid var(--doodle-ink);
+    box-shadow: 3px 3px 0 var(--doodle-ink);
+    transform: rotate(-1.5deg);
+    animation: nav-bf-pulse 1.8s ease-in-out infinite;
+  }
+  .nav-bf-pill:hover {
+    color: #fff;
+  }
+  @keyframes nav-bf-pulse {
+    0%, 100% { transform: rotate(-1.5deg) scale(1); }
+    50% { transform: rotate(-1.5deg) scale(1.07); }
+  }
+
   .btn-ghost {
     display: inline-flex;
     align-items: center;

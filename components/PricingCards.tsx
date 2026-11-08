@@ -33,6 +33,17 @@ export type Plan = {
   ctaFallbackHref?: string;
 };
 
+// Inline spinner so a clicked checkout button shows immediate feedback while
+// the (sometimes slow) redirect to the payment provider resolves.
+function Spinner() {
+  return (
+    <span
+      aria-hidden="true"
+      className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+    />
+  );
+}
+
 export function PricingCards({ plans }: { plans: Plan[] }) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const { t } = useLanguage();
@@ -140,8 +151,16 @@ export function PricingCards({ plans }: { plans: Plan[] }) {
                 data-cta={`pricing-${plan.id}`}
                 onClick={() => checkout(plan)}
                 disabled={busyId === plan.id}
+                aria-busy={busyId === plan.id}
               >
-                {busyId === plan.id ? t("login.sending") : t(plan.ctaKey)}
+                {busyId === plan.id ? (
+                  <>
+                    <Spinner />
+                    {t("login.sending")}
+                  </>
+                ) : (
+                  t(plan.ctaKey)
+                )}
               </button>
             ) : (
               <Link

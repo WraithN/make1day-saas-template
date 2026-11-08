@@ -1,22 +1,23 @@
 import { BlackFridayCountdown } from "@/components/BlackFridayCountdown";
-import { PricingCards, type Plan } from "@/components/PricingCards";
+import { BlackFridayPlans, type BfPlan } from "@/components/BlackFridayPlans";
 import { env, priceForPlanBf } from "@/lib/env";
 import { Trans } from "@/lib/i18n";
-import { getLang } from "@/lib/i18n-server";
+import { getLang, tr } from "@/lib/i18n-server";
 import Link from "next/link";
 
-// Keep the structured-data amounts in sync with the cards below. The Black
-// Friday page shows the PROMO prices (strong anchor against the struck list
-// price); /pricing is untouched and uses its own constants.
-const BF_BUYOUT_PRICE = "149";
+// Three-tier Black Friday pricing. The buy button charges the BF price (lowest);
+// the struck price is the list anchor; the MGM tier unlocks by sharing.
 const BF_BUYOUT_ORIGINAL = "299";
-const BF_CARE_PRICE = "15";
+const BF_BUYOUT_MGM = "149";
+const BF_BUYOUT_PRICE = "99";
 const BF_CARE_ORIGINAL = "29";
+const BF_CARE_MGM = "15";
+const BF_CARE_PRICE = "9";
 
 export const metadata = {
   title: "Black Friday — make1day",
   description:
-    "Black Friday: own the make1day source at the year's lowest price. One buyout, optional care. Offer ends when the countdown hits zero.",
+    "Black Friday: own the make1day source at the year's lowest price. Three tiers — list price, MGM share price, and the Black Friday deal. Share to unlock the MGM price.",
 };
 
 export default async function BlackFridayPage() {
@@ -51,27 +52,26 @@ export default async function BlackFridayPage() {
     );
   }
 
-  // ── Campaign ON → hero + countdown + promo cards ──
-  const plans: Plan[] = [
+  // ── Campaign ON → hero + countdown + 3-tier promo cards + share bar ──
+  const plans: BfPlan[] = [
     {
       id: "free",
       name: "Free",
-      price: "$0",
-      period: "",
+      originalPrice: "",
+      mgmPrice: "",
+      bfPrice: "$0",
       forever: true,
       features: ["pricing.free.f1", "pricing.free.f2", "pricing.free.f3"],
-      ctaKey: "pricing.getStarted",
       priceId: null,
       ctaFallbackHref: "/pricing",
     },
     {
       id: "buyout",
       name: "Buyout",
-      price: `$${BF_BUYOUT_PRICE}`,
       originalPrice: `$${BF_BUYOUT_ORIGINAL}`,
-      period: "",
+      mgmPrice: `$${BF_BUYOUT_MGM}`,
+      bfPrice: `$${BF_BUYOUT_PRICE}`,
       once: true,
-      bf: true,
       features: [
         "pricing.buyout.f1",
         "pricing.buyout.f2",
@@ -79,22 +79,17 @@ export default async function BlackFridayPage() {
         "pricing.buyout.f4",
         "pricing.buyout.f5",
       ],
-      ctaKey: "blackfriday.cta",
-      // Resolves to the BF price id only when the operator has configured one
-      // AND the campaign is active; otherwise null → CTA falls back to /pricing.
       priceId: priceForPlanBf("buyout") || null,
       ctaFallbackHref: "/pricing",
-      highlight: true,
       note: "blackfriday.saveBuyout",
     },
     {
       id: "care",
       name: "Care",
-      price: `$${BF_CARE_PRICE}`,
       originalPrice: `$${BF_CARE_ORIGINAL}`,
-      period: "",
+      mgmPrice: `$${BF_CARE_MGM}`,
+      bfPrice: `$${BF_CARE_PRICE}`,
       monthly: true,
-      bf: true,
       features: [
         "pricing.care.f1",
         "pricing.care.f2",
@@ -103,7 +98,6 @@ export default async function BlackFridayPage() {
         "pricing.care.f5",
         "pricing.care.f6",
       ],
-      ctaKey: "blackfriday.cta",
       priceId: priceForPlanBf("care") || null,
       ctaFallbackHref: "/pricing",
       note: "blackfriday.saveCare",
@@ -134,16 +128,19 @@ export default async function BlackFridayPage() {
         name: "Care — monthly (Black Friday)",
         price: BF_CARE_PRICE,
         priceCurrency: "USD",
+        url: `${site}/black-friday`,
         priceSpecification: {
           "@type": "UnitPriceSpecification",
           price: BF_CARE_PRICE,
           priceCurrency: "USD",
           unitText: "MONTH",
         },
-        url: `${site}/black-friday`,
       },
     ],
   };
+
+  const shareUrl = `${site}/black-friday`;
+  const shareText = tr(lang, "blackfriday.shareText");
 
   return (
     <section className="wrap py-12 sm:py-20">
@@ -163,7 +160,7 @@ export default async function BlackFridayPage() {
       </div>
 
       <div className="mt-10">
-        <PricingCards plans={plans} />
+        <BlackFridayPlans plans={plans} shareUrl={shareUrl} shareText={shareText} />
       </div>
 
       <div className="card mx-auto mt-10 max-w-3xl sm:p-6">

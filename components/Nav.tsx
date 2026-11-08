@@ -99,7 +99,9 @@ export function Nav() {
               key={l.href}
               href={l.href}
               data-cta={`nav-${l.href.replace("/", "")}`}
-              className="hover:text-ink"
+              className={
+                l.href === "/black-friday" ? "nav-bf-pill" : "hover:text-ink"
+              }
             >
               {l.label}
             </Link>
@@ -147,7 +149,11 @@ export function Nav() {
                 href={l.href}
                 data-cta={`nav-${l.href.replace("/", "")}`}
                 onClick={() => setOpen(false)}
-                className="flex min-h-[44px] items-center rounded-lg px-3 text-ink-soft transition-colors hover:bg-surface hover:text-ink"
+                className={
+                  l.href === "/black-friday"
+                    ? "nav-bf-pill my-1"
+                    : "flex min-h-[44px] items-center rounded-lg px-3 text-ink-soft transition-colors hover:bg-surface hover:text-ink"
+                }
               >
                 {l.label}
               </Link>

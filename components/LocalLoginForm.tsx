@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/i18n";
 import type { Lang } from "@/lib/i18n-core";
+import { DEMO_COOKIE } from "@/lib/demo";
 
 const TEXT: Record<
   Lang,
@@ -50,6 +51,7 @@ export function LocalLoginForm() {
   const { lang } = useLanguage();
   const router = useRouter();
   const s = TEXT[lang];
+  const dev = process.env.NODE_ENV !== "production";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -69,6 +71,10 @@ export function LocalLoginForm() {
         setError(true);
         return;
       }
+      // In dev, mirror the demo cookie so the nav reflects the logged-in state.
+      if (dev) {
+        document.cookie = `${DEMO_COOKIE}=1; path=/; max-age=86400; samesite=lax`;
+      }
       router.push("/account");
       router.refresh();
     } catch {
@@ -84,7 +90,7 @@ export function LocalLoginForm() {
       <p className="text-xs text-muted">{s.body}</p>
       <input
         type="email"
-        required
+        required={!dev}
         placeholder="you@company.com"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
@@ -93,16 +99,35 @@ export function LocalLoginForm() {
       />
       <input
         type="password"
-        required
+        required={!dev}
         placeholder={s.password}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         className="input"
         aria-label={s.password}
       />
-      <button className="btn-solid w-full" disabled={busy || !email || !password}>
-        {s.submit}
+      <button
+        className="btn-solid w-full"
+        disabled={busy || (!dev && (!email || !password))}
+        aria-busy={busy}
+      >
+        {busy ? (
+          <>
+            <span
+              aria-hidden="true"
+              className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+            />
+            {s.submit}
+          </>
+        ) : (
+          s.submit
+        )}
       </button>
+      {dev && (
+        <p className="text-center text-xs text-muted">
+          开发环境：邮箱和密码留空也可直接登录。
+        </p>
+      )}
       {error && <p className="text-sm text-red-400">{s.error}</p>}
     </form>
   );

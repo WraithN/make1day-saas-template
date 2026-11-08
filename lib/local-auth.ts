@@ -108,6 +108,29 @@ export async function signOutLocal(): Promise<void> {
   }
 }
 
+/**
+ * Dev-only shortcut: log in with an empty username/password. Lets a developer
+ * reach /account without inventing credentials during local work. Hard-disabled
+ * in production so it can never become a real backdoor. The session is a normal
+ * local session (resolved by currentLocalUser), not the demo cookie.
+ */
+export async function devAutoLogin(): Promise<string | null> {
+  if (process.env.NODE_ENV === "production") return null;
+  const email = "dev@example.com";
+  const raw = randomBytes(32).toString("base64url");
+  const now = new Date().toISOString();
+  run("DELETE FROM local_sessions WHERE email = ?", email);
+  run(
+    `INSERT INTO local_sessions (token_hash, email, expires_at, created_at)
+     VALUES (?, ?, ?, ?)`,
+    hash(raw),
+    email,
+    new Date(Date.now() + LOCAL_SESSION_TTL_MS).toISOString(),
+    now,
+  );
+  return raw;
+}
+
 /** Drop expired rows (called opportunistically by the retention job). */
 export function pruneLocalSessions(): number {
   return run(

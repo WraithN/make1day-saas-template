@@ -5,6 +5,7 @@ import {
   LOCAL_SESSION_TTL_MS,
   signInLocal,
   signOutLocal,
+  devAutoLogin,
 } from "@/lib/local-auth";
 
 export const runtime = "nodejs";
@@ -41,7 +42,11 @@ export async function POST(req: Request) {
 
   const email = typeof body?.email === "string" ? body.email : "";
   const password = typeof body?.password === "string" ? body.password : "";
-  const token = await signInLocal(email, password);
+  // Dev convenience: empty credentials sign in directly (production refuses).
+  const token =
+    !email && !password && process.env.NODE_ENV !== "production"
+      ? await devAutoLogin()
+      : await signInLocal(email, password);
   if (!token) {
     return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
   }
