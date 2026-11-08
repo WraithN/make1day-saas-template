@@ -10,7 +10,15 @@ export type PaymentProvider =
   | "paypal"
   | "waffo"
   | "lemonsqueezy";
-export type AiProvider = "openai" | "anthropic" | "gemini";
+export type AiProvider =
+  | "openai"
+  | "anthropic"
+  | "gemini"
+  | "mistral"
+  | "cohere"
+  | "xai"
+  | "perplexity"
+  | "ollama";
 export type Feature =
   | "landing"
   | "dashboard"
@@ -31,7 +39,12 @@ export type StyleId =
   | "mono"
   | "slate"
   | "candy"
-  | "sand";
+  | "sand"
+  | "y2k"
+  | "pixel"
+  | "neon"
+  | "glass"
+  | "retro";
 export type SkillId =
   | "frontend"
   | "ui"
@@ -49,7 +62,7 @@ export type SkillId =
 export interface BuilderConfig {
   appName: string;
   auth: AuthProvider[];
-  payment: PaymentProvider;
+  payment: PaymentProvider[];
   ai: AiProvider[];
   features: Feature[];
   deploy: DeployTarget;
@@ -69,6 +82,11 @@ export const AI_OPTIONS: { id: AiProvider; label: string; note: string }[] = [
   { id: "openai", label: "OpenAI-compatible", note: "OpenAI / OpenRouter / DeepSeek / Groq" },
   { id: "anthropic", label: "Anthropic", note: "Claude" },
   { id: "gemini", label: "Google Gemini", note: "Gemini" },
+  { id: "mistral", label: "Mistral", note: "Mistral AI (OpenAI-compatible)" },
+  { id: "cohere", label: "Cohere", note: "Cohere (OpenAI-compatible)" },
+  { id: "xai", label: "xAI Grok", note: "xAI Grok (OpenAI-compatible)" },
+  { id: "perplexity", label: "Perplexity", note: "Perplexity (OpenAI-compatible)" },
+  { id: "ollama", label: "Ollama (local)", note: "Self-hosted, OpenAI-compatible" },
 ];
 
 export const FEATURE_OPTIONS: { id: Feature; label: string; note: string }[] = [
@@ -128,6 +146,11 @@ export const STYLE_OPTIONS: { id: StyleId; label: string; note: string }[] = [
   { id: "slate", label: "Slate", note: "Light · cool blue · crisp" },
   { id: "candy", label: "Candy", note: "Light · pastel pink / violet · soft" },
   { id: "sand", label: "Sand", note: "Light · warm terracotta" },
+  { id: "y2k", label: "Y2K", note: "Light · chrome · bubblegum cyan/pink" },
+  { id: "pixel", label: "Pixel", note: "Dark · neon lime/amber · blocky" },
+  { id: "neon", label: "Neon", note: "Dark · electric cyan/fuchsia · glow" },
+  { id: "glass", label: "Glass", note: "Light · frosted violet/sky · glow" },
+  { id: "retro", label: "Retro", note: "Light · warm orange/teal · dots" },
 ];
 
 export const SKILL_OPTIONS: { id: SkillId; label: string; note: string }[] = [
@@ -196,7 +219,7 @@ export const SKILL_OPTIONS: { id: SkillId; label: string; note: string }[] = [
 export const DEFAULT_CONFIG: BuilderConfig = {
   appName: "my-saas",
   auth: ["google", "github"],
-  payment: "creem",
+  payment: ["creem"],
   ai: ["openai"],
   features: ["landing", "dashboard", "account", "admin", "premium"],
   deploy: "vercel",
