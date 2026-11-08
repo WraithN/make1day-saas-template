@@ -21,7 +21,7 @@ type Palette = {
   /** Corner radius used by cards / buttons (CSS length). */
   radius: string;
   /** Decorative surface texture for the live preview. */
-  texture: "grid" | "dots" | "glow" | "none";
+  texture: "grid" | "dots" | "glow" | "pixel" | "none";
 };
 
 export const PALETTES: Record<StyleId, Palette> = {
@@ -173,6 +173,72 @@ export const PALETTES: Record<StyleId, Palette> = {
     radius: "0.75rem",
     texture: "none",
   },
+  // ── Scene styles (added 2026-11-08) ────────────────────────
+  y2k: {
+    scheme: "light",
+    bg: "245 240 255",
+    surface: "255 255 255",
+    line: "221 214 240",
+    accent: "236 72 153",
+    accent2: "34 211 238",
+    ink: "31 18 45",
+    inkSoft: "82 64 104",
+    muted: "140 122 168",
+    radius: "1.5rem",
+    texture: "glow",
+  },
+  pixel: {
+    scheme: "dark",
+    bg: "12 14 18",
+    surface: "20 23 30",
+    line: "40 46 58",
+    accent: "132 204 22",
+    accent2: "250 204 21",
+    ink: "230 240 220",
+    inkSoft: "170 186 158",
+    muted: "120 134 110",
+    radius: "0px",
+    texture: "pixel",
+  },
+  neon: {
+    scheme: "dark",
+    bg: "7 8 18",
+    surface: "14 16 32",
+    line: "34 38 64",
+    accent: "34 211 238",
+    accent2: "217 70 239",
+    ink: "236 244 255",
+    inkSoft: "188 200 228",
+    muted: "124 142 180",
+    radius: "0.75rem",
+    texture: "glow",
+  },
+  glass: {
+    scheme: "light",
+    bg: "241 245 249",
+    surface: "255 255 255",
+    line: "214 222 235",
+    accent: "139 92 246",
+    accent2: "56 189 248",
+    ink: "23 23 42",
+    inkSoft: "71 71 104",
+    muted: "120 124 150",
+    radius: "1.5rem",
+    texture: "glow",
+  },
+  retro: {
+    scheme: "light",
+    bg: "250 246 237",
+    surface: "255 253 247",
+    line: "226 214 193",
+    accent: "217 119 6",
+    accent2: "13 148 136",
+    ink: "44 30 18",
+    inkSoft: "96 74 52",
+    muted: "150 128 100",
+    radius: "0.5rem",
+    texture: "dots",
+  },
 };
 
 export function isLight(style: StyleId): boolean {
@@ -227,6 +293,13 @@ export function textureStyle(style: StyleId): Record<string, string> {
         backgroundImage: `radial-gradient(120% 80% at 50% -10%, ${a} 0%, transparent 60%), radial-gradient(80% 60% at 90% 110%, ${a2} 0%, transparent 55%)`,
         backgroundSize: "auto",
         backgroundRepeat: "no-repeat",
+      };
+    case "pixel":
+      return {
+        backgroundImage: `linear-gradient(45deg, ${a} 25%, transparent 25%, transparent 75%, ${a} 75%), linear-gradient(45deg, ${a} 25%, transparent 25%, transparent 75%, ${a} 75%)`,
+        backgroundSize: "16px 16px",
+        backgroundPosition: "0 0, 8px 8px",
+        backgroundRepeat: "repeat",
       };
     default:
       return {

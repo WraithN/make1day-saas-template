@@ -10,7 +10,7 @@ export type StyleItem = {
   note: string;
   scheme: "dark" | "light";
   radius: string;
-  texture: "grid" | "dots" | "glow" | "none";
+  texture: "grid" | "dots" | "glow" | "pixel" | "none";
   vars: Record<string, string>;
   textureStyle: Record<string, string>;
 };
@@ -131,6 +131,8 @@ export function StylePlayground({ items }: { items: StyleItem[] }) {
         return t("styles.dots");
       case "glow":
         return t("styles.glow");
+      case "pixel":
+        return t("styles.pixel");
       default:
         return t("styles.none");
     }

@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Styles — make1day design system",
   description:
-    "Preview all eleven make1day themes — including the hand-drawn Doodle palette — every template ships with a full set of CSS variables. Pick a look, then carry it into the builder.",
+    "Preview all sixteen make1day themes — including the hand-drawn Doodle palette, Y2K, pixel and neon — every template ships with a full set of CSS variables. Pick a look, then carry it into the builder.",
   robots: { index: true, follow: true },
   alternates: { canonical: "/styles" },
 };
