@@ -6,7 +6,12 @@ export type AiProviderKey =
   | "deepseek"
   | "groq"
   | "anthropic"
-  | "gemini";
+  | "gemini"
+  | "mistral"
+  | "cohere"
+  | "xai"
+  | "perplexity"
+  | "ollama";
 
 export type ProviderConfig =
   | { kind: "openai-compatible"; apiKey: string; baseURL: string; model: string }
@@ -44,6 +49,41 @@ export function resolveAiConfig(key: string): ProviderConfig {
       return { kind: "anthropic", apiKey: env.anthropicApiKey(), model: env.anthropicModel() };
     case "gemini":
       return { kind: "gemini", apiKey: env.geminiApiKey(), model: env.geminiModel() };
+    case "mistral":
+      return {
+        kind: "openai-compatible",
+        apiKey: env.mistralApiKey(),
+        baseURL: env.mistralBaseUrl(),
+        model: env.mistralModel(),
+      };
+    case "cohere":
+      return {
+        kind: "openai-compatible",
+        apiKey: env.cohereApiKey(),
+        baseURL: env.cohereBaseUrl(),
+        model: env.cohereModel(),
+      };
+    case "xai":
+      return {
+        kind: "openai-compatible",
+        apiKey: env.xaiApiKey(),
+        baseURL: env.xaiBaseUrl(),
+        model: env.xaiModel(),
+      };
+    case "perplexity":
+      return {
+        kind: "openai-compatible",
+        apiKey: env.perplexityApiKey(),
+        baseURL: env.perplexityBaseUrl(),
+        model: env.perplexityModel(),
+      };
+    case "ollama":
+      return {
+        kind: "openai-compatible",
+        apiKey: env.ollamaApiKey(),
+        baseURL: env.ollamaBaseUrl(),
+        model: env.ollamaModel(),
+      };
     case "openai":
     default:
       return {
@@ -62,4 +102,9 @@ export const AI_PROVIDER_LABELS: Record<AiProviderKey, string> = {
   groq: "Groq",
   anthropic: "Anthropic",
   gemini: "Google Gemini",
+  mistral: "Mistral",
+  cohere: "Cohere",
+  xai: "xAI Grok",
+  perplexity: "Perplexity",
+  ollama: "Ollama",
 };
