@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { TopProgressBar } from "@/components/TopProgressBar";
 import { CookieConsent } from "@/components/CookieConsent";
 import { LanguageProvider } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
@@ -109,6 +110,7 @@ export default async function RootLayout({
       <body className="min-h-screen flex flex-col">
         <LanguageProvider initialLang={lang}>
           <SeoLinks />
+          <TopProgressBar />
           <Nav />
           <main className="flex-1">{children}</main>
           <Footer />

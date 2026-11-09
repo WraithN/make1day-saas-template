@@ -260,6 +260,40 @@ pre {
     box-shadow: 6px 6px 0 var(--doodle-ink);
   }
 
+  /* Plain `.btn` — the generic secondary (outline) button used by the Builder
+     preview action and the login submit. Without this rule those buttons fell
+     back to the browser default with no hover/active feedback. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.625rem 1.1rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--doodle-ink);
+    background: rgb(var(--surface));
+    border: var(--doodle-stroke) solid var(--doodle-ink);
+    border-radius: var(--radius);
+    box-shadow: var(--doodle-shadow-sm);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .btn:hover:not(:disabled) {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--doodle-ink);
+  }
+  .btn:active:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--doodle-ink);
+  }
+  .btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 2px 2px 0 var(--doodle-ink);
+  }
+
   .input {
     /* 16px on mobile prevents iOS Safari from auto-zooming on focus. */
     width: 100%;
@@ -307,6 +341,54 @@ pre {
   padding: 3px 11px;
   font-weight: 800;
   transform: rotate(-2deg);
+}
+
+/* ── Nav link feedback ──────────────────────────────────────────────────
+   Bare text links need explicit feedback: a hover/active colour shift plus a
+   clear "you are here" state so a click never feels like it did nothing. */
+.nav-link {
+  color: rgb(var(--ink-soft));
+  transition: color 0.15s ease, opacity 0.12s ease;
+}
+.nav-link:hover {
+  color: rgb(var(--ink));
+}
+.nav-link:active {
+  opacity: 0.7;
+}
+.nav-link-active,
+.nav-link-active:hover {
+  color: rgb(var(--ink));
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: rgb(var(--accent));
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+/* The Black Friday pill is already loud (pulse); when active give it a ring
+   instead of a colour change so it still reads as "the promo page". */
+.nav-bf-pill-active {
+  outline: 2px solid var(--doodle-ink);
+  outline-offset: 2px;
+}
+
+/* ── Route-transition progress bar ─────────────────────────────────────
+   Appears at the very top while a client-side navigation is in flight, so a
+   <Link> click always shows something is happening (no "stuck" feeling). */
+.sk-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 60;
+  pointer-events: none;
+}
+.sk-progress-bar {
+  height: 100%;
+  background: rgb(var(--accent));
+  box-shadow: 0 0 8px rgb(var(--accent) / 0.6);
+  transition: width 0.3s ease;
 }
 
 /* Highlighter colour blocks — the C-graded palette used as card surfaces.

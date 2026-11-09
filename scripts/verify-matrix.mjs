@@ -248,6 +248,9 @@ const SITE_MARKETING_FILES = [
   "components/home/FeatureMatrix.tsx",
   "components/home/BlogTeaser.tsx",
   "components/home/HandDrawnDeco.tsx",
+  "app/showcase/page.tsx",
+  "components/home/ShowcaseSection.tsx",
+  "components/home/FaqSection.tsx",
 ];
 // The generator itself must never ship: one purchase would otherwise mean
 // unlimited generations (and resales) of the product that was just paid for.

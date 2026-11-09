@@ -59,15 +59,29 @@ export function Nav() {
   const blackFridayActive =
     process.env.NEXT_PUBLIC_BLACK_FRIDAY_ACTIVE === "true";
 
-  const links = [
-    { href: "/blog", label: t("nav.blog") },
-    { href: "/styles", label: t("nav.styles") },
+  // A link is "active" when we're on its route (or a sub-route, e.g. /blog/x).
+  // This is the post-click feedback that tells the visitor "you landed here".
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+  const accountActive = loggedIn
+    ? pathname.startsWith("/account")
+    : pathname === "/login";
+
+  // Product navigation, in the order the brand story tells: Home (the door)
+  // → Generator (the core conversion entry) → Themes (second revenue line)
+  // → Showcase (social proof) → Blog (learning) → Support (care). Language /
+  // theme switches and Pricing / Account are rendered separately, to the right,
+  // so they never interrupt the product flow.
+  const productLinks = [
+    { href: "/", label: t("nav.home") },
     { href: "/builder", label: t("nav.builder") },
+    { href: "/styles", label: t("nav.styles") },
+    { href: "/showcase", label: t("nav.showcase") },
+    { href: "/blog", label: t("nav.blog") },
     { href: "/support", label: t("nav.support") },
     ...(blackFridayActive
       ? [{ href: "/black-friday", label: t("nav.blackfriday") }]
       : []),
-    { href: "/pricing", label: t("nav.pricing") },
   ];
 
   const account = {
@@ -92,23 +106,57 @@ export function Nav() {
 
         {/* ── Desktop (>= md) ── */}
         <div className="hidden items-center gap-4 text-sm text-ink-soft md:flex">
+          {productLinks.map((l) => {
+            const active = isActive(l.href);
+            const bf = l.href === "/black-friday";
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                data-cta={`nav-${l.href.replace("/", "") || "home"}`}
+                aria-current={active ? "page" : undefined}
+                className={
+                  bf
+                    ? active
+                      ? "nav-bf-pill nav-bf-pill-active"
+                      : "nav-bf-pill"
+                    : active
+                      ? "nav-link nav-link-active"
+                      : "nav-link"
+                }
+              >
+                {l.label === t("nav.builder") && (
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                    className="mr-1 -mt-0.5 inline-block"
+                  >
+                    <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" />
+                  </svg>
+                )}
+                {l.label}
+              </Link>
+            );
+          })}
           <LanguageSwitcher />
           <ThemeToggle />
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              data-cta={`nav-${l.href.replace("/", "")}`}
-              className={
-                l.href === "/black-friday" ? "nav-bf-pill" : "hover:text-ink"
-              }
-            >
-              {l.label}
-            </Link>
-          ))}
+          <Link
+            href="/pricing"
+            data-cta="nav-pricing"
+            aria-current={isActive("/pricing") ? "page" : undefined}
+            className={
+              isActive("/pricing") ? "nav-link nav-link-active" : "nav-link"
+            }
+          >
+            {t("nav.pricing")}
+          </Link>
           <Link
             href={account.href}
             data-cta={account.solid ? "nav-account" : "nav-login"}
+            aria-current={accountActive ? "page" : undefined}
             className={accountClass(account.solid)}
           >
             {account.label}
@@ -143,26 +191,61 @@ export function Nav() {
       {open && (
         <div id="mobile-menu" className="border-t border-line bg-bg md:hidden">
           <div className="wrap flex flex-col gap-1 py-3">
-            {links.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                data-cta={`nav-${l.href.replace("/", "")}`}
-                onClick={() => setOpen(false)}
-                className={
-                  l.href === "/black-friday"
-                    ? "nav-bf-pill my-1"
-                    : "flex min-h-[44px] items-center rounded-lg px-3 text-ink-soft transition-colors hover:bg-surface hover:text-ink"
-                }
-              >
-                {l.label}
-              </Link>
-            ))}
+            {productLinks.map((l) => {
+              const active = isActive(l.href);
+              const bf = l.href === "/black-friday";
+              return (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  data-cta={`nav-${l.href.replace("/", "") || "home"}`}
+                  onClick={() => setOpen(false)}
+                  aria-current={active ? "page" : undefined}
+                  className={
+                    bf
+                      ? active
+                        ? "nav-bf-pill nav-bf-pill-active my-1"
+                        : "nav-bf-pill my-1"
+                      : active
+                        ? "flex min-h-[44px] items-center rounded-lg px-3 font-semibold text-ink transition-colors active:opacity-70 bg-surface"
+                        : "flex min-h-[44px] items-center rounded-lg px-3 text-ink-soft transition-colors hover:bg-surface hover:text-ink active:opacity-70"
+                  }
+                >
+                  {l.label === t("nav.builder") && (
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                      className="mr-1 inline-block"
+                    >
+                      <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" />
+                    </svg>
+                  )}
+                  {l.label}
+                </Link>
+              );
+            })}
+            <Link
+              href="/pricing"
+              data-cta="nav-pricing"
+              onClick={() => setOpen(false)}
+              aria-current={isActive("/pricing") ? "page" : undefined}
+              className={
+                isActive("/pricing")
+                  ? "flex min-h-[44px] items-center rounded-lg px-3 font-semibold text-ink transition-colors active:opacity-70 bg-surface"
+                  : "flex min-h-[44px] items-center rounded-lg px-3 text-ink-soft transition-colors hover:bg-surface hover:text-ink active:opacity-70"
+              }
+            >
+              {t("nav.pricing")}
+            </Link>
             <div className="mt-2">
               <Link
                 href={account.href}
                 data-cta={account.solid ? "nav-account" : "nav-login"}
                 onClick={() => setOpen(false)}
+                aria-current={accountActive ? "page" : undefined}
                 className={accountClass(account.solid)}
               >
                 {account.label}

@@ -5,6 +5,8 @@ import { ThemePreviewSection } from "@/components/home/ThemePreviewSection";
 import { FeatureMatrix } from "@/components/home/FeatureMatrix";
 import { BlogTeaser } from "@/components/home/BlogTeaser";
 import { HandDrawnDeco } from "@/components/home/HandDrawnDeco";
+import { ShowcaseSection } from "@/components/home/ShowcaseSection";
+import { FaqSection } from "@/components/home/FaqSection";
 import { PricingCards, type Plan } from "@/components/PricingCards";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
@@ -93,31 +95,41 @@ export default async function HomePage() {
               <Trans k="hero.getStarted" lang={lang} />
             </Link>
             <Link
-              href="/#boundaries"
+              href="/styles"
               className="btn-ghost w-full text-[16px] sm:w-auto"
             >
-              <Trans k="hero.boundaries" lang={lang} />
+              <Trans k="hero.browseThemes" lang={lang} />
             </Link>
           </div>
-          <div className="mt-6 font-mono text-[12px] text-muted">
+          <div className="mt-6 flex flex-col items-center gap-2 font-mono text-[12px] text-muted">
             <Trans k="hero.meta" lang={lang} />
+            <span className="text-ink-soft">
+              <Trans k="hero.tryFree" lang={lang} />
+            </span>
           </div>
         </div>
       </section>
 
-      {/* T1 — HONEST BOUNDARY: the differentiator, visually dominant */}
+      {/* 价值简介 / 信任 — what the generator does & the honest boundaries */}
       <BoundarySection lang={lang} />
-
-      {/* T2 — REAL LAUNCH PITFALLS: evidence that the boundaries are real */}
       <PitfallSection lang={lang} />
 
-      {/* T2 — THEME SYSTEM: the exportable design-asset value */}
-      <ThemePreviewSection lang={lang} />
-
-      {/* T3 — CAPABILITY MATRIX: differentiators enlarged, commodity shrunk */}
+      {/* 功能亮点 — generator capability highlights */}
       <FeatureMatrix lang={lang} />
 
-      {/* T4 — PRICING: weighted — Buyout highlighted, Free quiet, Care = upkeep */}
+      {/* 模板预览 — curated themes → /styles */}
+      <ThemePreviewSection lang={lang} />
+
+      {/* 案例墙 — social proof of what gets built */}
+      <ShowcaseSection lang={lang} />
+
+      {/* 博客精选 / 教程 */}
+      <BlogTeaser lang={lang} />
+
+      {/* FAQ */}
+      <FaqSection />
+
+      {/* 定价预览 — Buyout highlighted, Free quiet, Care = upkeep */}
       <section className="sk-font wrap py-14 sm:py-20">
         <p className="eyebrow mb-3">
           <Trans k="homePricing.eyebrow" lang={lang} />
@@ -132,9 +144,6 @@ export default async function HomePage() {
           <PricingCards plans={plans} />
         </div>
       </section>
-
-      {/* T4 — BLOG: tutorial vs comparison tags, unequal cards */}
-      <BlogTeaser lang={lang} />
 
       {/* CTA */}
       <section className="sk-font wrap py-10 text-center sm:py-16">

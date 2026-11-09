@@ -275,6 +275,11 @@ const SITE_MARKETING_FILES = [
   // Hero-only hand-drawn decoration + motion switch. The home page is
   // regenerated from the customer's config, so this import never survives.
   "components/home/HandDrawnDeco.tsx",
+  // Case wall + home FAQ are make1day-owned marketing sections; the customer
+  // home page is regenerated from their own config and imports neither.
+  "app/showcase/page.tsx",
+  "components/home/ShowcaseSection.tsx",
+  "components/home/FaqSection.tsx",
 ];
 
 // The generator itself.

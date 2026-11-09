@@ -493,7 +493,12 @@ export function customerNav(source: string): string {
     .replace(/\s*\{ href: "\/builder", label: t\("nav\.builder"\) \},/, "")
     // /support is a make1day-site-only page. Strip its nav item so the
     // generated project never links to a route that is absent from the ZIP.
-    .replace(/\s*\{ href: "\/support", label: t\("nav\.support"\) \},/, "");
+    .replace(/\s*\{ href: "\/support", label: t\("nav\.support"\) \},/, "")
+    // /showcase (case wall) and /black-friday (promo) are make1day-owned
+    // marketing pages; neither ships in a customer ZIP, so their nav entries
+    // must be removed or every generated app gets a dead link.
+    .replace(/\s*\{ href: "\/showcase", label: t\("nav\.showcase"\) \},/, "")
+    .replace(/\s*\{ href: "\/black-friday", label: t\("nav\.blackfriday"\) \},/, "");
 }
 
 /** Replace the make1day wordmark in Nav with the app name. */
