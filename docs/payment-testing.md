@@ -175,3 +175,51 @@ For each gateway, run **the same six assertions**:
   which silently prevents license issuance — assertion #4 catches it.
 - No automated payment tests currently exist in `npm run smoke`; adding the
   probe to CI is a manual step.
+
+## 8. Creem runbook (test mode, zero real money)
+
+Test mode is a fully isolated environment (separate keys, separate
+`test-api.creem.io` endpoint, separate webhooks). Nothing is charged.
+
+### Cards (any future expiry, any CVV, any billing info)
+
+| Card | Behaviour |
+|---|---|
+| `4111 1111 1111 1111` | success |
+| `4507 9900 0000 0028` | declined |
+| `4507 9900 0000 0010` | insufficient funds |
+| `4507 9900 0000 0044` | incorrect CVC |
+
+### Preconditions
+
+- `CREEM_ENV=test`, the TEST `CREEM_API_KEY` and the **test-mode** webhook's
+  `CREEM_WEBHOOK_SECRET` (register `https://<domain>/api/webhook` while the
+  dashboard is in Test Mode — test events only go to test webhooks)
+- six test products mapped to `CREEM_PRICE_ID_*` (incl. `_BF` / `_MGM`)
+- redeploy after env changes (Vercel snapshots env per deployment)
+
+### Cases
+
+1. Checkout: /black-friday → Buy → Creem hosted checkout shows the TEST badge.
+2. Success: 4111… → paid → redirect → key visible at /account/licenses.
+3. Durability: `licenses`/`orders`/`webhook_events` each +1 row; replay the
+   same event from the dashboard → no second license (dedupe on (type,id)).
+4. Delivery: mail contains `SK1.…` (Resend verified) else a `mail_outbox`
+   row (cron retries); `delivery_events` hash present.
+5. Gate: incognito POST /api/generate without key → 402; with the SK1 key → 200 ZIP.
+6. Declines: 4507…0028 / 0010 / 0044 → checkout error; no license/order rows.
+7. Care: 4111… on the monthly product → `subscriptions` active; the first
+   `subscription.payment_succeeded` must NOT double-grant (ignored by design).
+8. Claim: pay with an email different from the signed-in account →
+   /api/license/claim flow works.
+9. Console: /admin licenses + orders show the rows; traffic funnel counts the
+   conversion.
+
+### Live (real money) — optional, once, before launch
+
+Not required for functional testing. For a single live sanity check: create a
+**$1 live product**, temporarily point `CREEM_PRICE_ID_BUYOUT_BF` at it, pay
+with a real card, refund from the Creem dashboard afterwards (MoR refunds).
+Net cost ≈ 0 (processing fees may be non-refundable). Creem's live account
+review requires the store on its **own custom domain** — bind www.make1day.dev
+before requesting live keys.
