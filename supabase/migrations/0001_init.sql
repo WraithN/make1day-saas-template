@@ -19,8 +19,7 @@ create policy "profiles self read"
   on public.profiles for select
   using (auth.uid() = id);
 
-drop policy if exists "profiles self update" on public.profiles for update
-  on public.profiles;
+drop policy if exists "profiles self update" on public.profiles;
 create policy "profiles self update"
   on public.profiles for update
   using (auth.uid() = id);

@@ -11,7 +11,8 @@
 # Required repository secrets (Settings → Secrets and variables → Actions):
 #   SUPABASE_ACCESS_TOKEN   https://supabase.com/dashboard/account/tokens
 #   SUPABASE_PROJECT_REF    the <ref> in https://<ref>.supabase.co
-#   SUPABASE_DB_PASSWORD    database password chosen at project creation
+#   SUPABASE_DB_PASSWORD    not used by CI anymore (migrations travel over the
+#                           Supabase MCP endpoint); kept for local debugging
 #   VERCEL_TOKEN            https://vercel.com/account/tokens
 #   VERCEL_ORG_ID           .vercel/project.json after `vercel link`, or the
 #   VERCEL_PROJECT_ID       Vercel dashboard project URL
@@ -69,20 +70,21 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: supabase/setup-cli@v1
+      - uses: actions/setup-node@v4
         if: steps.cfg.outputs.ready == 'true'
         with:
-          version: latest
+          node-version: 22
 
-      - name: Link project and push migrations
+      # The project's direct Postgres host is IPv6-only while GitHub runners
+      # are IPv4-only, so `supabase db push` cannot reach it from CI. The MCP
+      # endpoint is IPv4-friendly and records history in supabase_migrations
+      # exactly like the CLI (idempotent with local `supabase db push`).
+      - name: Apply migrations via Supabase MCP
         if: steps.cfg.outputs.ready == 'true'
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
-          DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: |
-          supabase link --project-ref "$PROJECT_REF"
-          supabase db push --remote --password "$DB_PASSWORD"
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: node scripts/supabase-migrate-mcp.mjs
 
   vercel-deploy:
     name: Vercel production deploy
