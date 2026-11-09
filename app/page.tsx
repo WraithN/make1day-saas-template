@@ -5,7 +5,7 @@ import { ThemePreviewSection } from "@/components/home/ThemePreviewSection";
 import { FeatureMatrix } from "@/components/home/FeatureMatrix";
 import { BlogTeaser } from "@/components/home/BlogTeaser";
 import { HandDrawnDeco } from "@/components/home/HandDrawnDeco";
-import { ShowcaseSection } from "@/components/home/ShowcaseSection";
+import { TemplateGallerySection } from "@/components/home/TemplateGallerySection";
 import { FaqSection } from "@/components/home/FaqSection";
 import { PricingCards, type Plan } from "@/components/PricingCards";
 import { Trans } from "@/lib/i18n";
@@ -120,8 +120,8 @@ export default async function HomePage() {
       {/* 模板预览 — curated themes → /styles */}
       <ThemePreviewSection lang={lang} />
 
-      {/* 案例墙 — social proof of what gets built */}
-      <ShowcaseSection lang={lang} />
+      {/* 样板间 — live previews of generated template sites */}
+      <TemplateGallerySection lang={lang} />
 
       {/* 博客精选 / 教程 */}
       <BlogTeaser lang={lang} />

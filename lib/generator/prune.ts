@@ -164,15 +164,13 @@ const SITE_ONLY_FILES = [
   "app/llms.txt/route.ts",
   "app/llms-full.txt/route.ts",
   "app/openapi.json/route.ts",
-  // MCP endpoint and the agent-ready landing page describe make1day itself,
-  // not the customer's product. Their imports would also break pruned builds.
+  // MCP endpoint describes make1day itself, not the customer's product. Its
+  // imports would also break pruned builds.
   "app/api/mcp/route.ts",
   // GEO: ?format=md rewrite target and the agent-card descriptor describe
   // the operator site, not the customer's product.
   "app/api/markdown/route.ts",
   "app/.well-known/agent-card.json/route.ts",
-  "app/agent-ready/page.tsx",
-  "lib/content/agent-ready.ts",
   // Style Playground is a make1day-site marketing page. It imports the site's
   // own generator (lib/generator/themes) which never ships, so leaving it in
   // a customer project would be wrong branding AND break `tsc`.
@@ -275,10 +273,14 @@ const SITE_MARKETING_FILES = [
   // Hero-only hand-drawn decoration + motion switch. The home page is
   // regenerated from the customer's config, so this import never survives.
   "components/home/HandDrawnDeco.tsx",
-  // Case wall + home FAQ are make1day-owned marketing sections; the customer
-  // home page is regenerated from their own config and imports neither.
-  "app/showcase/page.tsx",
-  "components/home/ShowcaseSection.tsx",
+  // Template gallery + sample-site previews are make1day-owned marketing
+  // sections; the customer home page is regenerated from their own config.
+  "app/templates/page.tsx",
+  "app/templates/[slug]/preview/page.tsx",
+  "components/home/TemplateGallerySection.tsx",
+  "components/TemplateSite.tsx",
+  "components/TemplateCard.tsx",
+  "lib/content/templates.ts",
   "components/home/FaqSection.tsx",
 ];
 
@@ -426,6 +428,15 @@ export function getPaymentProvider(): PaymentProvider {
   if (_provider) return _provider;
   _provider = noneProvider;
   return _provider;
+}
+
+/**
+ * All payment providers enabled in this build. Payments are disabled, so the
+ * list holds only the none stub — the webhook verifier skips it and returns
+ * 400 for any inbound payload, which is the correct behaviour with no gateway.
+ */
+export function getPaymentProviders(): PaymentProvider[] {
+  return [getPaymentProvider()];
 }
 
 /** Label of the active provider, for UI copy. */
@@ -950,18 +961,6 @@ export function pruneTicketsNav(source: string): string {
  * contain those literals.
  */
 /**
- * The agent-ready landing page is a make1day-site asset and is pruned from
- * customer projects. Remove its footer link too, or every generated app gets
- * a dead /agent-ready navigation item.
- */
-export function pruneAgentReadyLink(source: string): string {
-  return source.replace(
-    /\s*<Link href="\/agent-ready"[\s\S]*?<\/Link>/,
-    "",
-  );
-}
-
-/**
  * The Style Playground (/styles) is a make1day-site marketing page. Remove its
  * Nav entry from generated projects, or every customer app links to a 404.
  */
@@ -975,6 +974,11 @@ export function pruneStylesLink(source: string): string {
 /** Drop the site-only /styles entry from the generated sitemap. */
 export function pruneStylesSitemap(source: string): string {
   return source.replace(/\s*\{ path: "\/styles", priority: 0\.7 \},/, "");
+}
+
+/** Drop the site-only /templates entry from the generated sitemap. */
+export function pruneTemplatesSitemap(source: string): string {
+  return source.replace(/\s*\{ path: "\/templates", priority: 0\.6 \},/, "");
 }
 
 // ── Generator removal ──────────────────────────────────────────────────────

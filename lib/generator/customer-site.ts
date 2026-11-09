@@ -494,10 +494,10 @@ export function customerNav(source: string): string {
     // /support is a make1day-site-only page. Strip its nav item so the
     // generated project never links to a route that is absent from the ZIP.
     .replace(/\s*\{ href: "\/support", label: t\("nav\.support"\) \},/, "")
-    // /showcase (case wall) and /black-friday (promo) are make1day-owned
+    // /templates (sample sites) and /black-friday (promo) are make1day-owned
     // marketing pages; neither ships in a customer ZIP, so their nav entries
     // must be removed or every generated app gets a dead link.
-    .replace(/\s*\{ href: "\/showcase", label: t\("nav\.showcase"\) \},/, "")
+    .replace(/\s*\{ href: "\/templates", label: t\("nav\.templates"\) \},/, "")
     .replace(/\s*\{ href: "\/black-friday", label: t\("nav\.blackfriday"\) \},/, "");
 }
 
@@ -516,9 +516,13 @@ export function customerFooter(source: string, appName: string): string {
   const safe = JSON.stringify(appName);
   return source
     .replace(/\s*<Link href="\/blog"[\s\S]*?<\/Link>/, "")
-    .replace(/\s*<Link href="\/agent-ready"[\s\S]*?<\/Link>/, "")
     // /support is make1day-site-only — remove its footer link too.
     .replace(/\s*<Link href="\/support"[\s\S]*?<\/Link>/, "")
+    // /builder, /styles and /templates are make1day-site-only (pruned from the
+    // customer ZIP), so their footer links must be stripped too.
+    .replace(/\s*<Link href="\/builder"[\s\S]*?<\/Link>/, "")
+    .replace(/\s*<Link href="\/styles"[\s\S]*?<\/Link>/, "")
+    .replace(/\s*<Link href="\/templates"[\s\S]*?<\/Link>/, "")
     .replace(/\s*<a\s+href="https:\/\/github\.com\/uncorne\/shipkit"[\s\S]*?<\/a>/, "")
     // Matches the single-brand footer line (product — tagline). The site no
     // longer repeats the company name twice, so the old "…<span>make1day</span>."

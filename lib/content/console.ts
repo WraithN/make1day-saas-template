@@ -1,6 +1,6 @@
 // Five-language copy for the two consoles: /account (end users) and /admin
 // (operators). Kept in a dedicated content module, like lib/content/faq.ts and
-// lib/content/agent-ready.ts, so the big site dictionary stays focused on
+// lib/content/templates.ts, so the big site dictionary stays focused on
 // marketing pages. Every locale is complete — no en-only fallback strings.
 
 import type { Lang } from "@/lib/i18n-core";

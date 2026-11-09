@@ -71,7 +71,7 @@ make1day 的 $99 处于最低付费档，但功能密度接近 $299 档——这
    这是 VibeReady 也没有的（它有 AGENTS.md 但没有"按视觉风格生成的设计系统说明书"）。P0 之后还多了
    scoped rules、12 skills、Cursor/Claude Code 适配与 `npm run ai:docs` 确定性重建。
 3. **机器可读分发**：llms.txt / llms-full.txt / OpenAPI 3.1 / MCP `scaffold_project` /
-   `/agent-ready` + FAQ/Compare/Blog 结构化数据 + JSON-LD，面向"AI agent 替人选型"的新渠道。
+   `/templates` 样板间 + FAQ/Compare/Blog 结构化数据 + JSON-LD，面向"AI agent 替人选型"的新渠道。
 4. **内置可运行的混合 RAG**（BM25 + embedding + RRF，无 key 自动降级），不是文案里的"RAG boilerplate"。
 5. **四语 i18n + 合规/SEO 包**，而横评里最强的 VibeReady 恰恰明确「No i18n」，ShipFast 也无。
 6. **MoR 支付（Waffo Pancake）**：无需公司实体即可全球收款、代缴税，对独立开发者是真痛点，竞品清一色 Stripe 系。
@@ -108,7 +108,7 @@ make1day 的 $99 处于最低付费档，但功能密度接近 $299 档——这
 |---|---|---|
 | **用户后台 + 管理员后台**（2026-11-05 追加） | 站点 `/account`（概览/账单/授权/设置）与 `/admin`（概览/用户/授权/流量/系统）共 9 个四语页面；共享 `components/console/*`、`lib/console.ts`、`lib/content/console.ts`；`middleware.ts` 分别做会话门与 Basic Auth + `ADMIN_EMAILS` 角色白名单；Builder 新增 `account` / `admin` 两个可勾选 feature，按选项真剪枝并改写 Nav/登录后跳转/后台快捷入口杜绝死链；`account`/`admin` 两条条件 scoped rule；矩阵新增 `account-only` / `admin-only`。详见 `docs/consoles.md` | 两套后台均为只读起步版：无资料修改接口、无 org/RBAC 表、无客户账单门户；`/admin` 未设密码时仍公开；用户列表无 service role key 时由订单推导且不完整 |
 | **P0 Agent-Native Delivery**（2026-11-05 追加） | 根 `AGENTS.md`（取代小写 `agents.md`，避免大小写文件系统冲突）、`design.md`、**12 个 skills**（新增 auth/payments/database/rag/i18n/deploy/agents）、`ai/rules/*.md` scoped rules（最多 11 条模块规则：7 常驻 + payments/rag/account/admin 条件规则，再加每 skill 一条，带 globs）、`.cursor/rules/*.mdc`、`CLAUDE.md`、`skills/README.md` 动态索引；**单一真源** `scripts/lib/ai-docs.mjs` + `ai/doc-spec.json`，站点 `pack.ts` 与客户工程 `npm run ai:docs` 共用；`npm run ai:setup --tool cursor\|claude\|all`；`verify-matrix` 17 组全部增加文档断言。详见 `docs/agent-native.md` | lint 层面的规则强制（目前只是文字约定）、客户端是否自动加载 `.cursor/rules` / `CLAUDE.md` 取决于工具版本、白标清理（P2） |
-| **P0 GEO / Agent Discovery**（2026-11-05 追加） | `llms.txt` / `llms-full.txt` / OpenAPI 3.1；**本轮补齐** `/api/mcp`（4 个 JSON-RPC 工具，含 `scaffold_project`，`includeZip` 走同一 license gate）、`scripts/mcp-server.mjs` stdio 桥接 Cursor/Claude Code、`docs/mcp.md`、**`/agent-ready` 四语独立落地页**（TechArticle JSON-LD、sitemap/robots/Footer 入口） | MCP 无状态（无 sampling/prompts/订阅/SSE）、站点实时通过率页、build matrix 每组跑 `next build` |
+| **P0 GEO / Agent Discovery**（2026-11-05 追加） | `llms.txt` / `llms-full.txt` / OpenAPI 3.1；**本轮补齐** `/api/mcp`（4 个 JSON-RPC 工具，含 `scaffold_project`，`includeZip` 走同一 license gate）、`scripts/mcp-server.mjs` stdio 桥接 Cursor/Claude Code、`docs/mcp.md`、**`/templates` 样板间**（真实生成的模板演示站 + 画廊，sitemap/robots/Nav/Footer 入口） | MCP 无状态（无 sampling/prompts/订阅/SSE）、站点实时通过率页、build matrix 每组跑 `next build` |
 | **P0 GEO / Agent Discovery**（上一轮） | `llms-full.txt`（含完整 BuilderConfig 枚举、剪枝规则、RAG 参数、支付协议、gate 顺序、诚实限制）、标准 **OpenAPI 3.1** `/openapi.json`、`docs/agent-discovery.md`；robots 显式放行 AI 爬虫与 `/builder`、sitemap 列出机器可读端点；`llms.txt`、对比页（EN/ZH 各 2 行）、README 同步；4 个站点专属端点加入 `SITE_ONLY_FILES`，不进客户 ZIP | MCP server / `scaffold_project` 工具、`/.well-known/agents.md`（非通用标准，暂不引入）、独立落地页 |
 | **P1 Build Matrix CI** | `.github/workflows/generated-matrix.yml` + `scripts/verify-matrix.mjs`：**17 组**（≥12 达标），覆盖 6 支付商 / 10 风格 / 3 部署目标、RAG/dashboard/skills 与两套后台开关；每组下载真实 ZIP → 断言剪枝 → 在解压工程内跑 `tsc --noEmit`；对比页新增"生成产物构建矩阵"行；`docs/build-matrix.md` | 每组跑 `next build`（当前只跑 `tsc`）、站点展示实时通过率与产物体积 |
 | **A（支付上线）** | `docs/waffo-launch-checklist.md`、`.env.waffo-pancake.example`、`scripts/waffo-preflight.mjs --strict`；`docs/waffo.md` 与 README 挂入口 | 真实 Waffo 商户后台联调、Acquiring 下单 payload（依赖合同字段） |

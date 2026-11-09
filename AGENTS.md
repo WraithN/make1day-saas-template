@@ -17,7 +17,7 @@ make1day is one codebase serving two purposes:
 | --- | --- |
 | Generator | `lib/generator/{config,spec,pack,prune,templates,themes}.ts`, `scripts/lib/ai-docs.mjs` |
 | Agent docs (single source of truth) | `scripts/lib/ai-docs.mjs` → `AGENTS.md`, `design.md`, `ai/rules/*`, `.cursor/rules/*`, `CLAUDE.md`, `skills/README.md` inside every ZIP |
-| Machine-readable discovery | `app/llms.txt/route.ts`, `app/llms-full.txt/route.ts`, `app/openapi.json/route.ts`, `app/api/mcp/route.ts`, `app/agent-ready/page.tsx` |
+| Machine-readable discovery | `app/llms.txt/route.ts`, `app/llms-full.txt/route.ts`, `app/openapi.json/route.ts`, `app/api/mcp/route.ts` |
 | Payments | `lib/payments/*`, `app/api/checkout/route.ts`, `app/api/webhook/route.ts`, `lib/license.ts` |
 | RAG (hybrid) | `lib/rag/*`, `supabase/migrations/0002_rag.sql` |
 | i18n (5 locales) | `lib/i18n-core.ts`, `lib/i18n.tsx`, `lib/i18n-server.ts`, `middleware.ts` |

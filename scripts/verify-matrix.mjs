@@ -185,8 +185,6 @@ const SITE_ONLY_FILES = [
   "app/api/mcp/route.ts",
   "app/api/markdown/route.ts",
   "app/.well-known/agent-card.json/route.ts",
-  "app/agent-ready/page.tsx",
-  "lib/content/agent-ready.ts",
   // make1day-site operational features (mail / support / auth recovery).
   // Pruned by lib/generator/prune.ts SITE_ONLY_FILES; the absence assertions
   // below keep them out of every generated ZIP without adding matrix cases.
@@ -248,8 +246,12 @@ const SITE_MARKETING_FILES = [
   "components/home/FeatureMatrix.tsx",
   "components/home/BlogTeaser.tsx",
   "components/home/HandDrawnDeco.tsx",
-  "app/showcase/page.tsx",
-  "components/home/ShowcaseSection.tsx",
+  "app/templates/page.tsx",
+  "app/templates/[slug]/preview/page.tsx",
+  "components/home/TemplateGallerySection.tsx",
+  "components/TemplateSite.tsx",
+  "components/TemplateCard.tsx",
+  "lib/content/templates.ts",
   "components/home/FaqSection.tsx",
 ];
 // The generator itself must never ship: one purchase would otherwise mean
@@ -494,7 +496,6 @@ async function verifyCase(entry, doBuild) {
     const src = await read(rel);
     for (const dead of [
       "/builder",
-      "/agent-ready",
       "/styles",
       '"/blog"',
       '"/compare"',

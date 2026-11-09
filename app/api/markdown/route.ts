@@ -70,17 +70,6 @@ const PAGE_DIGESTS: Record<string, Digest> = {
       "Only the chosen stylesheet ships in the customer ZIP.",
     ],
   },
-  "/agent-ready": {
-    title: "Agent-native and answer-engine surfaces",
-    summary:
-      "Machine-readable entry points for coding agents, crawlers and answer engines.",
-    facts: [
-      "/llms.txt and /llms-full.txt describe the product and its honest limits.",
-      "/openapi.json is an OpenAPI 3.1 contract; /api/mcp exposes JSON-RPC tools.",
-      "Every article has a /blog/<slug>/md Markdown variant, and any public page supports ?format=md.",
-      "/.well-known/agent-card.json advertises the agent-facing capabilities.",
-    ],
-  },
   "/license": {
     title: "Redeem or recover a license key",
     summary:

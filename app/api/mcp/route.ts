@@ -173,7 +173,7 @@ function productInfo() {
       "Mail, support tickets and auth recovery are make1day-site-only: they are pruned from every generated customer ZIP, whose nav/footer/login/admin links are rewritten out",
       "Local SQLite auth recovery is real but NOT equivalent to Supabase Auth: no local password sign-in consumer, no MFA, no OAuth, no session rotation",
     ],
-    machineReadable: ["/llms.txt", "/llms-full.txt", "/openapi.json", "/api/mcp", "/agent-ready"],
+    machineReadable: ["/llms.txt", "/llms-full.txt", "/openapi.json", "/api/mcp"],
     // make1day-site HTTP surface beyond the generator. Auth notes are explicit
     // so an agent never assumes an endpoint is public when it is not.
     siteOnlyHttpApi: [
@@ -463,7 +463,7 @@ export function GET() {
       },
       agentCard: "/.well-known/agent-card.json",
       markdown: "Append ?format=md to a public page or use /blog/<slug>/md",
-      docs: ["/agent-ready", "/llms-full.txt", "/openapi.json", "docs/mcp.md"],
+      docs: ["/llms-full.txt", "/openapi.json", "docs/mcp.md"],
       note: "scaffold_project with includeZip=true is subject to the same license gate as /api/generate.",
     },
     { headers: { "Cache-Control": "public, max-age=3600" } },

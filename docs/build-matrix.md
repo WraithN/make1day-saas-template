@@ -51,7 +51,7 @@ node scripts/verify-matrix.mjs --case default-waffo-midnight --build --publish
 
 - 必需存在：`package.json`、`tsconfig.json`、`.env.example`、`README.md`、`LICENSE`、`shipkit.config.json`、`design.md`、**`AGENTS.md`**、`CLAUDE.md`、`ai/doc-spec.json`、`ai/README.md`、`ai/rules/README.md`、`ai/rules/core.md`、`.cursor/rules/core.mdc`、`scripts/lib/ai-docs.mjs`、`scripts/ai-docs.mjs`、`scripts/ai-setup.mjs`
 - **旧的小写 `agents.md` 不得出现**（大小写不敏感文件系统会与 `AGENTS.md` 冲突）
-- 站点专属端点**不得**出现在客户 ZIP：`payments/self-check`、`llms.txt`、`llms-full.txt`、`openapi.json`、`api/mcp`、`agent-ready/page.tsx`、`lib/content/agent-ready.ts`（`SITE_ONLY_FILES`）
+- 站点专属端点**不得**出现在客户 ZIP：`payments/self-check`、`llms.txt`、`llms-full.txt`、`openapi.json`、`api/mcp`（`SITE_ONLY_FILES`）；站点营销页 `templates/page.tsx`、`templates/[slug]/preview/page.tsx`、`components/TemplateSite.tsx`、`components/TemplateCard.tsx`、`components/home/TemplateGallerySection.tsx`、`lib/content/templates.ts` 同样不得出现（`SITE_MARKETING_FILES`）
 - 支付适配器只保留选中的那一个；`payment=none` 时五个全剪且生成 `lib/payments/none.ts`
 - `rag` / `dashboard` 未选时对应文件必须消失；未选的 12 个 `skills/*.md` 必须消失
 - **两套后台**：`app/account/page.tsx` / `app/admin/users/page.tsx` 与勾选状态严格一致；共享层（`lib/console.ts`、`lib/content/console.ts`）在且仅在至少一个后台被选时存在

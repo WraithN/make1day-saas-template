@@ -31,7 +31,7 @@ const BASE = EXTERNAL_BASE || `http://127.0.0.1:${APP_PORT}`;
 const CONFIG = {
   appName: "Gate Smoke App",
   auth: ["email"],
-  payment: "waffo",
+  payment: ["waffo"],
   ai: ["openai"],
   features: ["landing", "dashboard", "account", "admin"],
   deploy: "vercel",
@@ -286,7 +286,7 @@ async function runChecks() {
     );
     check(
       "generated sitemap has no dead links",
-      !["/builder", "/agent-ready", "/styles", "/blog", "/compare", "/faq", "/license"].some(
+      !["/builder", "/styles", "/blog", "/compare", "/faq", "/license"].some(
         (p) => sitemap.includes(`"${p}"`) || sitemap.includes(`'${p}'`),
       ),
       "",

@@ -18,21 +18,34 @@ export async function Footer() {
             <Trans k="footer.tagline" lang={lang} />
           </span>
         </div>
+        {/* Mirrors the top-nav IA so the footer and nav tell the same story:
+            home → generator → themes → templates → blog → support → resources
+            → legal. The four product links reuse nav.* keys (kept in lockstep
+            with the nav), the rest are footer-scoped keys. */}
         <div className="flex flex-wrap gap-5">
+          <Link href="/" className="hover:text-ink">
+            {tr(lang, "nav.home")}
+          </Link>
+          <Link href="/builder" className="hover:text-ink">
+            {tr(lang, "nav.builder")}
+          </Link>
+          <Link href="/styles" className="hover:text-ink">
+            {tr(lang, "nav.styles")}
+          </Link>
+          <Link href="/templates" className="hover:text-ink">
+            {tr(lang, "nav.templates")}
+          </Link>
           <Link href="/blog" className="hover:text-ink">
             <Trans k="footer.blog" lang={lang} />
           </Link>
-          <Link href="/agent-ready" className="hover:text-ink">
-            <Trans k="footer.agentReady" lang={lang} />
+          <Link href="/support" className="hover:text-ink">
+            <Trans k="footer.support" lang={lang} />
           </Link>
           <Link href="/pricing" className="hover:text-ink">
             <Trans k="footer.pricing" lang={lang} />
           </Link>
           <Link href="/login" className="hover:text-ink">
             <Trans k="footer.login" lang={lang} />
-          </Link>
-          <Link href="/support" className="hover:text-ink">
-            <Trans k="footer.support" lang={lang} />
           </Link>
           <Link href="/privacy" className="hover:text-ink">
             <Trans k="footer.privacy" lang={lang} />

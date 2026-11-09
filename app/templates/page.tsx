@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
-import { ShowcaseSection } from "@/components/home/ShowcaseSection";
+import { TEMPLATES } from "@/lib/content/templates";
+import { TemplateCard } from "@/components/TemplateCard";
 
 export async function generateMetadata({
   searchParams,
@@ -10,30 +11,27 @@ export async function generateMetadata({
   searchParams: Promise<{ lang?: string }>;
 }): Promise<Metadata> {
   const { lang = "en" } = await searchParams;
-  const title =
-    lang === "zh"
-      ? "案例墙 · make1day"
-      : "Showcase · make1day";
+  const title = lang === "zh" ? "样板间 · make1day" : "Templates · make1day";
   const description =
     lang === "zh"
-      ? "看看创作者用 make1day 生成器与主题做出的真实站点示例。"
-      : "See example sites makers build with the make1day generator and themes.";
+      ? "看看每个 make1day 模板真实生成的站点——点击即可在线预览。"
+      : "See a live preview of the site each make1day template generates — click to open it.";
   return {
     title,
     description,
     alternates: {
       languages: {
-        en: "/showcase",
-        zh: "/showcase?lang=zh",
-        ja: "/showcase?lang=ja",
-        fr: "/showcase?lang=fr",
-        de: "/showcase?lang=de",
+        en: "/templates",
+        zh: "/templates?lang=zh",
+        ja: "/templates?lang=ja",
+        fr: "/templates?lang=fr",
+        de: "/templates?lang=de",
       },
     },
   };
 }
 
-export default async function ShowcasePage() {
+export default async function TemplatesPage() {
   const lang = await getLang();
 
   return (
@@ -42,32 +40,38 @@ export default async function ShowcasePage() {
         <div className="tech-grid pointer-events-none absolute inset-0" />
         <div className="wrap relative z-10 py-14 text-center doodle-rise sm:py-20">
           <div className="eyebrow mb-4">
-            <Trans k="showcase.eyebrow" lang={lang} />
+            <Trans k="templates.eyebrow" lang={lang} />
           </div>
           <h1 className="doodle-headline mx-auto max-w-3xl text-[30px] leading-[1.35] text-ink sm:text-[42px]">
-            <Trans k="showcase.title" lang={lang} />
+            <Trans k="templates.title" lang={lang} />
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-[14px] leading-relaxed text-ink-soft">
-            <Trans k="showcase.subtitle" lang={lang} />
+            <Trans k="templates.subtitle" lang={lang} />
           </p>
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
             <Link
               href="/builder"
               className="btn-solid btn-hero w-full text-[16px] sm:w-auto"
             >
-              <Trans k="showcase.ctaGenerator" lang={lang} />
+              <Trans k="templates.ctaGenerator" lang={lang} />
             </Link>
             <Link
               href="/styles"
               className="btn-ghost w-full text-[16px] sm:w-auto"
             >
-              <Trans k="showcase.ctaThemes" lang={lang} />
+              <Trans k="templates.ctaThemes" lang={lang} />
             </Link>
           </div>
         </div>
       </section>
 
-      <ShowcaseSection lang={lang} withCta={false} />
+      <section className="wrap pb-20">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {TEMPLATES.map((tpl) => (
+            <TemplateCard key={tpl.slug} tpl={tpl} lang={lang} />
+          ))}
+        </div>
+      </section>
     </>
   );
 }

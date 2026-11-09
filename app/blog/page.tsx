@@ -125,9 +125,6 @@ export default async function BlogIndex() {
         <Link href="/compare" className="text-accent hover:underline">
           Compare starters
         </Link>
-        <Link href="/agent-ready" className="text-accent hover:underline">
-          Agent-ready docs
-        </Link>
         <Link href="/pricing" className="text-accent hover:underline">
           Pricing
         </Link>

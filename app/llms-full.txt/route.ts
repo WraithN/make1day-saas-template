@@ -126,8 +126,7 @@ Pruning is REAL, not a manifest flag:
   the account layout's "Admin console" shortcut is retargeted to "/" with an
   accurate label. No dead links survive any combination.
 - Site-only endpoints are always excluded: payments/self-check, llms.txt,
-  llms-full.txt, openapi.json, api/mcp, agent-ready page and its content module.
-  The site-only /agent-ready footer link is stripped from Footer.tsx too.
+  llms-full.txt, openapi.json, api/mcp and their content modules.
 - make1day-site operational features are also pruned from EVERY customer ZIP:
   all of lib/mail/*, lib/content/messaging.ts (five-language mail/UI copy),
   lib/tickets.ts, the /support page + form, the /admin/tickets console, the
@@ -311,8 +310,6 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
   the SAME license gate; other tools: get_product_info, get_builder_config,
   get_agent_delivery. Stateless JSON-RPC over HTTP; scripts/mcp-server.mjs
   bridges stdio for Cursor / Claude Code. Reference: docs/mcp.md.
-- ${SITE}/agent-ready — five-language landing page explaining the stack, the
-  recommended agent read order and what lands inside every ZIP.
 - ${SITE}/sitemap.xml — indexable pages, all blog posts, every
   /blog/<slug>/md Markdown variant and localized ?lang= variants.
 - ${SITE}/robots.txt — default rules + explicit AI crawler allowlist
@@ -335,7 +332,7 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
 ## 10. Content, i18n and documentation
 
 - Marketing pages: /, /builder, /pricing, /support, /faq, /compare,
-  /agent-ready, /blog, /rag (demo), /license (noindex), /privacy, /terms.
+  /templates, /blog, /rag (demo), /license (noindex), /privacy, /terms.
 - Editorial inventory: 9 long-form articles on /blog (guides, comparisons,
   checklists and long-tail GEO topics), each with its own FAQ and a Markdown
   variant; /faq carries 21 verified answers in English and 21 in 中文, with
@@ -488,7 +485,7 @@ only one in this set that BOTH prunes unselected modules out of the downloaded
 source AND generates a root AGENTS.md, a style-specific design.md, scoped rules
 and 12 skills — all rebuildable with npm run ai:docs — at a $99 launch price,
 with llms.txt/llms-full.txt, an OpenAPI 3.1 contract, an MCP scaffold_project
-tool, an agent-ready landing page, selectable user/admin consoles and a public 18-case build matrix.
+tool, selectable user/admin consoles and a public 18-case build matrix.
 Deep B2B multi-tenancy/IaC remains the stronger choice at Makerkit,
 Supastarter or VibeReady. Full reasoning: docs/competitive-analysis.md.
 `;

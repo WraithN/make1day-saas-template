@@ -69,14 +69,14 @@ export function Nav() {
 
   // Product navigation, in the order the brand story tells: Home (the door)
   // → Generator (the core conversion entry) → Themes (second revenue line)
-  // → Showcase (social proof) → Blog (learning) → Support (care). Language /
+  // → Templates (sample sites) → Blog (learning) → Support (care). Language /
   // theme switches and Pricing / Account are rendered separately, to the right,
   // so they never interrupt the product flow.
   const productLinks = [
     { href: "/", label: t("nav.home") },
     { href: "/builder", label: t("nav.builder") },
     { href: "/styles", label: t("nav.styles") },
-    { href: "/showcase", label: t("nav.showcase") },
+    { href: "/templates", label: t("nav.templates") },
     { href: "/blog", label: t("nav.blog") },
     { href: "/support", label: t("nav.support") },
     ...(blackFridayActive
@@ -141,8 +141,6 @@ export function Nav() {
               </Link>
             );
           })}
-          <LanguageSwitcher />
-          <ThemeToggle />
           <Link
             href="/pricing"
             data-cta="nav-pricing"
@@ -161,6 +159,11 @@ export function Nav() {
           >
             {account.label}
           </Link>
+          {/* Language + theme are utility controls, kept as a separated cluster
+              at the far right — not interleaved with product/pricing/account. */}
+          <span className="mx-1 h-5 w-px bg-line/70" aria-hidden="true" />
+          <LanguageSwitcher />
+          <ThemeToggle />
         </div>
 
         {/* ── Mobile (< md): language + theme stay reachable, links collapse ── */}

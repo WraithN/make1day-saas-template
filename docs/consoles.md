@@ -211,7 +211,7 @@ node scripts/export-local-profiles.mjs --sql
 - `pruneAdminLink()`：只保留用户后台时，「管理员后台」快捷入口改指 `/` 并换成「返回站点」文案，不留死链。
 - `pruneStylesLink()` / `pruneStylesSitemap()`：`/styles` 是 make1day 站点自有的营销页（导入站点自己的 `lib/generator/themes`，不进模板），从生成的 `Nav.tsx` 与 `sitemap.ts` 中剪掉，避免每个客户工程出现指向 404 的导航项。
 - `app/api/profile/route.ts` 随 `account` 剪枝；`app/api/admin/users/route.ts` 随 `admin` 剪枝（见 `ACCOUNT_FILES` / `ADMIN_FILES`）。
-- `app/styles/page.tsx` 与 `components/StylePlayground.tsx` 列入 `SITE_ONLY_FILES`，与 `app/agent-ready/page.tsx` 同等处理。
+- `app/templates/page.tsx` 与 `components/TemplateSite.tsx` 列入 `SITE_MARKETING_FILES`，与 `app/styles/page.tsx` 同等处理（站点营销页，不进客户 ZIP）。
 - `scripts/lib/ai-docs.mjs` 增加 `account` / `admin` 两条条件 scoped rule，`AGENTS.md` 按选项目动写明两套后台是否存在。
 
 `scripts/verify-matrix.mjs` 的 18 组矩阵包含 `account-only`、`admin-only` 与两者皆无的组合，

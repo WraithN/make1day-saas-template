@@ -24,12 +24,12 @@ import {
   pruneNav,
   pruneDemoRoute,
   prunePostLoginRedirects,
-  pruneAgentReadyLink,
   pruneAdminLink,
   pruneWorkspacesLink,
   pruneTicketsNav,
   pruneStylesLink,
   pruneStylesSitemap,
+  pruneTemplatesSitemap,
   pruneBuilderNav,
   pruneBuilderCta,
   pruneBuilderSitemap,
@@ -274,7 +274,7 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     );
     zip.file(
       "components/Footer.tsx",
-      customerFooter(pruneAgentReadyLink(footerSrc), config.appName),
+      customerFooter(footerSrc, config.appName),
     );
   } catch {
     /* ignore */
@@ -354,7 +354,7 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
   // Drop the site-only /styles and /builder entries from the sitemap, and
   // the /builder path from robots.txt.
   await rewrite("app/sitemap.ts", (s) =>
-    pruneBuilderSitemap(pruneStylesSitemap(s)),
+    pruneBuilderSitemap(pruneStylesSitemap(pruneTemplatesSitemap(s))),
   );
   await rewrite("app/robots.ts", pruneBuilderRobots);
 

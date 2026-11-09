@@ -19,7 +19,7 @@ explains almost every strength and every sharp edge below.
 └────────────────────────────────────────────────────────────────────┘
 ┌─ Presentation ─────────────────────────────────────────────────────┐
 │ components/*  ·  lib/i18n-core.ts (en/zh/ja/fr/de)  ·  globals.css   │
-│ lib/content/* (console, faq, blog, compare, messaging, agent-ready)  │
+│ lib/content/* (console, faq, blog, compare, messaging, templates)  │
 └────────────────────────────────────────────────────────────────────┘
 ┌─ Domain ───────────────────────────────────────────────────────────┐
 │ lib/payments/* — PaymentProvider interface + 5 adapters + none stub  │
@@ -36,7 +36,7 @@ explains almost every strength and every sharp edge below.
 │ lib/mail/*, /support, /api/support/*, /admin/tickets                 │
 │ password reset + email verification, /admin console                  │
 │ machine-readable docs: llms.txt, llms-full.txt, openapi.json, /mcp   │
-│ marketing: /blog, /compare, /faq, /license, /agent-ready, /styles    │
+│ marketing: /blog, /compare, /faq, /license, /templates, /styles    │
 └────────────────────────────────────────────────────────────────────┘
 ┌─ Factory (never shipped in a customer ZIP) ─────────────────────────┐
 │ /builder + components/Builder.tsx + /api/generate[/preview]         │
