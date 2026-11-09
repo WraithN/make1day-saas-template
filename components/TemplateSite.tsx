@@ -23,6 +23,9 @@ export function TemplateSite({
   const name = tpl.name[lang] ?? tpl.name.en;
   const category = tpl.category[lang] ?? tpl.category.en;
   const cta = tpl.primaryCta[lang] ?? tpl.primaryCta.en;
+  // Prefill the Builder with this template's palette — "start from it in the
+  // builder" must actually start from it.
+  const builderHref = `/builder?style=${tpl.styleId}`;
 
   return (
     <div
@@ -44,7 +47,7 @@ export function TemplateSite({
             <a href="#features" className="hidden sm:inline hover:text-[rgb(var(--accent))]">{tr(lang, "templates.features")}</a>
             <a href="#pricing" className="hidden sm:inline hover:text-[rgb(var(--accent))]">{tr(lang, "templates.pricing")}</a>
             <Link
-              href="/builder"
+              href={builderHref}
               className="btn-solid !min-h-9 !px-3 !py-1.5 !text-[13px]"
             >
               {cta}
@@ -62,7 +65,7 @@ export function TemplateSite({
             {tpl.heroSubtitle[lang] ?? tpl.heroSubtitle.en}
           </p>
           <div className="mt-7 flex justify-center">
-            <Link href="/builder" className="btn-solid text-[15px]">
+            <Link href={builderHref} className="btn-solid text-[15px]">
               {cta}
             </Link>
           </div>
@@ -98,7 +101,7 @@ export function TemplateSite({
               {tpl.pricingPrice}
             </div>
             <Link
-              href="/builder"
+              href={builderHref}
               className="btn-solid mt-4 w-full text-[15px]"
             >
               {cta}

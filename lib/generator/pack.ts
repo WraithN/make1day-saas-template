@@ -206,11 +206,22 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     // The matrix asserts package.json / README / LICENSE carry no brand leak.
     pkg.description = `${slug} — an AI SaaS starter. Configure your stack and ship.`;
     // scripts/ is site-only (not packed), so its npm aliases must not survive
-    // in the customer's package.json. verify-matrix asserts this.
+    // in the customer's package.json — a surviving alias is a dead entry whose
+    // target file does not exist in the ZIP. verify-matrix asserts this list.
+    const SITE_ONLY_SCRIPTS = [
+      "waffo:preflight",
+      "verify:matrix",
+      "probe:webhook",
+      "smoke",
+      "smoke:gate",
+      "smoke:ai:quota",
+      "smoke:ai:quota:supabase",
+      "smoke:ai:stream",
+      "rag:bench",
+    ];
     const scripts = (pkg.scripts as Record<string, string> | undefined) ?? {};
     const next = { ...scripts };
-    delete next["waffo:preflight"];
-    delete next["verify:matrix"];
+    for (const name of SITE_ONLY_SCRIPTS) delete next[name];
     // The downloaded project owns its AI docs: one command rebuilds every
     // contract file, another refreshes Cursor / Claude Code integrations.
     next["ai:docs"] = "node scripts/ai-docs.mjs";

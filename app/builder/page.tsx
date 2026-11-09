@@ -8,7 +8,10 @@ export const metadata: Metadata = {
   title: "SaaS Template Generator",
   description:
     "Pick your stack, auth, payments and AI providers, then download a production-ready AI SaaS starter.",
-  robots: { index: false, follow: false },
+  // Indexable on purpose: /builder is the main conversion page. robots.ts
+  // explicitly allows it and sitemap.ts ranks it 0.9 — a page-level noindex
+  // here would silently override both.
+  robots: { index: true, follow: true },
 };
 
 export default async function BuilderPage({

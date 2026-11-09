@@ -751,8 +751,21 @@ async function verifyCase(entry, doBuild) {
 
   const pkg = JSON.parse(await read("package.json"));
   assert(pkg.name === "matrix-app", `package name mismatch: ${pkg.name}`);
-  assert(!pkg.scripts?.["waffo:preflight"], "site-only script leaked into package.json");
-  assert(!pkg.scripts?.["verify:matrix"], "site-only script leaked into package.json");
+  // Every alias whose target file lives in the site-only scripts/ tree must be
+  // stripped by pack.ts — keep in sync with SITE_ONLY_SCRIPTS there.
+  for (const dead of [
+    "waffo:preflight",
+    "verify:matrix",
+    "probe:webhook",
+    "smoke",
+    "smoke:gate",
+    "smoke:ai:quota",
+    "smoke:ai:quota:supabase",
+    "smoke:ai:stream",
+    "rag:bench",
+  ]) {
+    assert(!pkg.scripts?.[dead], `site-only script leaked into package.json: ${dead}`);
+  }
   assert(
     pkg.scripts?.["ai:docs"] === "node scripts/ai-docs.mjs",
     "generated project is missing npm run ai:docs",

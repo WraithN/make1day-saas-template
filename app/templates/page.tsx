@@ -11,7 +11,8 @@ export async function generateMetadata({
   searchParams: Promise<{ lang?: string }>;
 }): Promise<Metadata> {
   const { lang = "en" } = await searchParams;
-  const title = lang === "zh" ? "样板间 · make1day" : "Templates · make1day";
+  // The root layout's title template appends "· make1day" — don't add it here.
+  const title = lang === "zh" ? "样板间" : "Templates";
   const description =
     lang === "zh"
       ? "看看每个 make1day 模板真实生成的站点——点击即可在线预览。"
