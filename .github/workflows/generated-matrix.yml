@@ -37,7 +37,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Node 22+: the local store uses built-in `node:sqlite` (22.5+).
+          # Node 20 makes /api/generate throw 500 ("needs Node.js 22.5+").
+          node-version: 22
           cache: npm
       - name: Install dependencies
         run: npm ci
@@ -69,4 +71,8 @@ jobs:
             cat /tmp/shipkit-dev.log
             exit 1
           fi
-          node scripts/verify-matrix.mjs --case "${{ matrix.case }}" --base http://127.0.0.1:3000
+          node scripts/verify-matrix.mjs --case "${{ matrix.case }}" --base http://127.0.0.1:3000 || {
+            echo "── dev server log (tail) ──"
+            tail -n 120 /tmp/shipkit-dev.log || true
+            exit 1
+          }

@@ -2,6 +2,9 @@
   "name": "make1day",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.5.0"
+  },
   "description": "make1day — configurable AI SaaS starter and source generator. Auth, subscriptions, a real AI feature, an admin console, and white-label ZIP delivery.",
   "scripts": {
     "dev": "next dev",

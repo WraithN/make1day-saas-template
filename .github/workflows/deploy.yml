@@ -106,7 +106,8 @@ jobs:
       - uses: actions/setup-node@v4
         if: steps.cfg.outputs.ready == 'true'
         with:
-          node-version: 20
+          # Keep in sync with package.json engines.node (node:sqlite needs 22.5+).
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
