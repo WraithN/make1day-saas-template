@@ -81,8 +81,8 @@ jobs:
           PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
           DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          supabase link --project-ref "$PROJECT_REF" --password "$DB_PASSWORD"
-          supabase db push --password "$DB_PASSWORD"
+          supabase link --project-ref "$PROJECT_REF"
+          supabase db push --remote --password "$DB_PASSWORD"
 
   vercel-deploy:
     name: Vercel production deploy
