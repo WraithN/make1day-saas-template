@@ -370,6 +370,25 @@ pre {
   );
 }
 
+/* Route-transition progress bar, rendered by components/TopProgressBar.tsx.
+   This component ships with customer builds, so its styling must ship too. */
+.sk-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.sk-progress-bar {
+  height: 100%;
+  background: rgb(var(--accent));
+  box-shadow: 0 0 8px rgb(var(--accent) / 0.6);
+  transition: width 0.3s ease;
+}
+
 @layer components {
   .wrap {
     @apply mx-auto w-full max-w-6xl px-4 sm:px-5;
