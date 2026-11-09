@@ -4,6 +4,26 @@
 > `docs/waffo-launch-checklist.md`、`docs/payment-testing.md`、`docs/email.md`、
 > `docs/legal-data-map.md`。本文是「离上线还差什么 + 竞品最新变化 + 分阶段执行计划」。
 
+## 0. 部署实况（2026-11-09 晚更新）
+
+**软上线已完成**：`https://make1day-saas-template.vercel.app`（Vercel + Supabase
+`UncorneBiz` us-east-2，12 迁移 / 18 表 / RLS）。管线：push → matrix 18/18 →
+Deploy（迁移走 `scripts/supabase-migrate-mcp.mjs` 经 Supabase MCP，绕开直连库
+仅 IPv6 而 CI 仅 IPv4 的死路；Vercel 构建部署）。已验证：health ok/supabase、
+license 门禁 402/200+ZIP、cron Bearer 鉴权、/admin、运行时落库、邮件与支付
+self-check 接线。
+
+**已拍板/已配**：支付网关 = **Creem**（`PAYMENT_PROVIDER=creem`，仓库代码默认
+仍是 waffo，MoR 场景保留）；邮件 = **Resend**（`MAIL_FROM=noreply@mail.uncorne.com`、
+reply-to `support@uncorne.com`；发信子域 `mail.uncorne.com` 待 Resend 控制台验证
++ Cloudflare 加 DNS）；`SQLITE_PATH=/tmp/shipkit.db` 仅作 Supabase 不可用时的降级；
+Vercel 环境变量是**部署快照**——改完必须重新部署才生效。
+
+**仍缺（按序）**：① Creem test key + webhook secret + 6 个产品价格 ID → 沙箱演练 →
+live；② Resend 域名 DNS 验证；③ 正式域名（make1day.dev 无 DNS / uncorne.com 在
+Cloudflare）切换 `NEXT_PUBLIC_SITE_URL` 并重部署；④ LICENSE 口径、Care 文案的
+Discord 承诺、BF 后定价锚点三个商务决策。
+
 ---
 
 ## 1. 现状快照（代码 vs 商业）
