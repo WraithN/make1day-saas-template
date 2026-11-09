@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { BoundarySection } from "@/components/home/BoundarySection";
 import { PitfallSection } from "@/components/home/PitfallSection";
 import { ThemePreviewSection } from "@/components/home/ThemePreviewSection";
@@ -11,6 +12,15 @@ import { PricingCards, type Plan } from "@/components/PricingCards";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
 import { priceForPlan } from "@/lib/env";
+
+export const metadata: Metadata = {
+  // Root-path language cluster lives in the sitemap's xhtml:link cluster:
+  // Next drops `?lang=` from metadata alternates when the path is "/", which
+  // would emit five identical hreflang tags here.
+  alternates: {
+    canonical: "/",
+  },
+};
 
 export default async function HomePage() {
   const lang = await getLang();

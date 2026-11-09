@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { langAlternatePaths } from "@/lib/seo-alternates";
 import Link from "next/link";
 import { getLang, tr } from "@/lib/i18n-server";
 import { getAllPosts, postField } from "@/lib/content/blog";
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
     "ShipFast alternative",
     "best Next.js SaaS boilerplate 2026",
   ],
-  alternates: { canonical: "/blog" },
+  alternates: { canonical: "/blog", languages: langAlternatePaths("/blog") },
 };
 
 export default async function BlogIndex() {

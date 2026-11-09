@@ -551,11 +551,6 @@ export function customerLoginLinks(source: string): string {
   return source.replace(/\s*<a\s+href="\/forgot-password"[\s\S]*?<\/a>/, "");
 }
 
-/** Remove the hard-coded make1day domain fallback from the SEO helper. */
-export function customerSeoLinks(source: string): string {
-  return source.replaceAll("https://make1day.com", "http://localhost:3000");
-}
-
 /**
  * Replace our product/company names in files the customer keeps. Applied only
  * to a fixed list of source files — never to the whole ZIP, because LICENSE

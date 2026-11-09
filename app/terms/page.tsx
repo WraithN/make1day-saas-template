@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { langAlternatePaths } from "@/lib/seo-alternates";
 import Link from "next/link";
 import { env } from "@/lib/env";
 
@@ -10,6 +11,10 @@ const UPDATED = env.legalUpdatedAt();
 const JURISDICTION = env.legalJurisdiction();
 
 export const metadata: Metadata = {
+  alternates: {
+    canonical: "/terms",
+    languages: langAlternatePaths("/terms"),
+  },
   title: "Terms of Service",
   description: `The terms governing use of the ${PRODUCT} website and the generated project.`,
 };

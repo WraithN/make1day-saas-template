@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { langAlternatePaths } from "@/lib/seo-alternates";
 import { FaqContent } from "@/components/FaqContent";
 
 export const metadata: Metadata = {
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
     "Next.js boilerplate multi-tenancy",
     "AGENTS.md boilerplate",
   ],
-  alternates: { canonical: "/faq" },
+  alternates: { canonical: "/faq", languages: langAlternatePaths("/faq") },
   openGraph: {
     type: "website",
     title: "FAQ — make1day AI SaaS starter",

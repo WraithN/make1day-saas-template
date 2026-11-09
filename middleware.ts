@@ -19,6 +19,29 @@ function adminAllowlist(): string[] {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Canonical-host enforcement (production only, self-gating): the Vercel
+  // deployment hostname and the bare apex 301 to NEXT_PUBLIC_SITE_URL's host
+  // once a custom domain is live. While SITE_URL still equals the vercel.app
+  // host (pre-switch) nothing redirects, so preview URLs keep working.
+  if (process.env.NODE_ENV === "production") {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+    const canonHost = siteUrl ? new URL(siteUrl).host : "";
+    const host = request.headers.get("host") ?? "";
+    const apex = canonHost.replace(/^www\./, "");
+    if (
+      canonHost &&
+      host &&
+      host !== canonHost &&
+      (host.endsWith(".vercel.app") ||
+        (host === apex && canonHost.startsWith("www.")))
+    ) {
+      const url = request.nextUrl.clone();
+      url.protocol = "https:";
+      url.host = canonHost;
+      return NextResponse.redirect(url, 301);
+    }
+  }
+
   // GEO: `?format=md` on any public page returns a plain-text representation
   // of that exact URL. Restricted to public GET pages so the rewrite can
   // never be used to bypass a console guard or an API same-origin check.

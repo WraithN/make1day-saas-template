@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { langAlternatePaths } from "@/lib/seo-alternates";
 import Link from "next/link";
 import { env } from "@/lib/env";
 
@@ -15,6 +16,10 @@ const JURISDICTION = env.legalJurisdiction();
 const DPA_URL = env.dpaUrl();
 
 export const metadata: Metadata = {
+  alternates: {
+    canonical: "/privacy",
+    languages: langAlternatePaths("/privacy"),
+  },
   title: "Privacy Policy",
   description: `What personal data ${PRODUCT} collects, where it is stored, who receives it and how to exercise your rights.`,
 };

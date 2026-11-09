@@ -52,7 +52,6 @@ import {
   customerFooter,
   customerLicenseLinks,
   customerLoginLinks,
-  customerSeoLinks,
   neutralizeBrand,
 } from "./customer-site";
 // Single source of truth for AGENTS.md / design.md / scoped rules. The very
@@ -435,7 +434,6 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
   await rewrite("app/layout.tsx", (s) =>
     neutralizeRootLayout(s, config.appName),
   );
-  await rewrite("components/SeoLinks.tsx", customerSeoLinks);
   await rewrite("app/account/licenses/page.tsx", customerLicenseLinks);
   // Files that stay but still mention our product in prose / metadata.
   // lib/env.ts carries the productName() default, so it needs the same wash.

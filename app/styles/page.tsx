@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { langAlternatePaths } from "@/lib/seo-alternates";
 import { getLang, tr } from "@/lib/i18n-server";
 import { STYLE_OPTIONS, type StyleId } from "@/lib/generator/config";
 import { PALETTES, themeVars, textureStyle } from "@/lib/generator/themes";
@@ -11,7 +12,10 @@ export const metadata: Metadata = {
   description:
     "Preview all sixteen make1day themes — including the hand-drawn Doodle palette, Y2K, pixel and neon — every template ships with a full set of CSS variables. Pick a look, then carry it into the builder.",
   robots: { index: true, follow: true },
-  alternates: { canonical: "/styles" },
+  alternates: {
+    canonical: "/styles",
+    languages: langAlternatePaths("/styles"),
+  },
 };
 
 export default async function StylesPage() {

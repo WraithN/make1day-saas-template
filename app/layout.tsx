@@ -6,12 +6,11 @@ import { TopProgressBar } from "@/components/TopProgressBar";
 import { CookieConsent } from "@/components/CookieConsent";
 import { LanguageProvider } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
-import { SeoLinks } from "@/components/SeoLinks";
 import { Analytics } from "@/components/Analytics";
 import { PageviewTracker } from "@/components/PageviewTracker";
 
 // Deploy-time domain placeholder. Keep this literal stable: the generator's
-// customerSeoLinks()/neutralizeBrand() rewrites exactly this string to
+// neutralizeBrand() rewrites exactly this string to
 // localhost in customer ZIPs. Replace it with the real domain via env at launch.
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com";
 
@@ -109,7 +108,6 @@ export default async function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col">
         <LanguageProvider initialLang={lang}>
-          <SeoLinks />
           <TopProgressBar />
           <Nav />
           <main className="flex-1">{children}</main>

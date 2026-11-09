@@ -12,8 +12,11 @@ make1day project. make1day is built SEO-first — keep it that way.
 - Every route exports `metadata` (or `generateMetadata`) with `title`,
   `description`, and `keywords`.
 - `metadataBase` is set globally; use relative `alternates.canonical` per page.
-- For localized pages, render canonical + hreflang **manually in `<head>`**
-  (Next strips `?lang=` from metadata alternates). See `components/SeoLinks.tsx`.
+- For localized pages, set `alternates.languages` via
+  `langAlternatePaths(path)` (`lib/seo-alternates.ts`) — server-rendered
+  `<link rel="alternate" hrefLang>` tags, plus the `xhtml:link` clusters in
+  `app/sitemap.ts`. Never emit SEO links from a client component: crawlers
+  must see them in SSR HTML.
 
 ## Multilingual (5 langs: en/zh/ja/fr/de)
 - Server content uses `lib/i18n-server` (`getLang`, `tr`).

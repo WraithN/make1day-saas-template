@@ -85,27 +85,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       });
     }
 
-    // Markdown variants are a separate, agent-readable surface. They are
-    // linked from each article's metadata alternates and footer, and are
-    // explicitly allowed in robots.txt for both generic and AI crawlers.
-    const mdPath = `${path}/md`;
-    entries.push({
-      url: `${BASE}${mdPath}`,
-      lastModified: modified,
-      changeFrequency: "monthly",
-      priority: 0.4,
-      alternates: langSet(mdPath),
-    });
-    for (const l of LANGS) {
-      if (l === "en") continue;
-      entries.push({
-        url: `${BASE}${mdPath}?lang=${l}`,
-        lastModified: modified,
-        changeFrequency: "monthly",
-        priority: 0.3,
-        alternates: langSet(mdPath),
-      });
-    }
+    // Markdown variants stay OUT of the sitemap and carry X-Robots-Tag:
+    // noindex — they are an agent-readable GEO surface (llms.txt, article
+    // metadata alternates, robots.txt Allow). Indexing them in Google would
+    // only create duplicate-content pairs with the HTML articles.
   }
 
   // Machine-readable endpoints for AI agents / answer engines. These are not

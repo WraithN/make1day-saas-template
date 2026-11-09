@@ -29,7 +29,10 @@ export async function GET(
   const notFound = (body: string) =>
     new Response(body, {
       status: 404,
-      headers: { "Content-Type": "text/markdown; charset=utf-8" },
+      headers: {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "X-Robots-Tag": "noindex",
+      },
     });
   if (!post) return notFound("# Not found\n");
 
@@ -42,6 +45,10 @@ export async function GET(
       "Content-Type": "text/markdown; charset=utf-8",
       "Content-Language": contentLang,
       "Cache-Control": "public, max-age=3600",
+      // GEO surface for AI crawlers, not a search-result page: keep it out
+      // of Google's index and out of the sitemap to avoid duplicating the
+      // HTML article.
+      "X-Robots-Tag": "noindex",
     },
   });
 }

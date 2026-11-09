@@ -185,9 +185,11 @@ localised structured FAQ, aliases for legacy slugs and an `updated` date) and
 `lib/content/faq.ts` holds 21 EN + 21 ZH answers. `app/blog/[slug]/page.tsx`
 emits BlogPosting + FAQPage + BreadcrumbList JSON-LD; `app/blog/page.tsx` emits
 CollectionPage + ItemList; `app/blog/[slug]/md/route.ts` serves `text/markdown`
-variants that are linked as metadata alternates, listed in `app/sitemap.ts`
-(canonical slugs only — aliases stay out to avoid duplicate-content signals)
-and explicitly allowed in `app/robots.ts`. All three routes and both content
+variants that are linked as metadata alternates, kept OUT of `app/sitemap.ts`
+and served with `X-Robots-Tag: noindex` (they target AI crawlers; indexing them
+in Google would duplicate the HTML articles — legacy aliases stay out of the
+sitemap for the same duplicate-content reason) and explicitly allowed in
+`app/robots.ts`. All three routes and both content
 modules are site-only: **`app/blog/[slug]/md/route.ts` MUST stay in
 `SITE_MARKETING_FILES`** in both `lib/generator/prune.ts` and
 `scripts/verify-matrix.mjs`, otherwise it imports the pruned blog module and

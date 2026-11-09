@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { langAlternatePaths } from "@/lib/seo-alternates";
 import { getLang, tr } from "@/lib/i18n-server";
 import { msgCopy } from "@/lib/content/messaging";
 import { env } from "@/lib/env";
@@ -7,6 +8,10 @@ import { SupportForm } from "@/components/SupportForm";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
+  alternates: {
+    canonical: "/support",
+    languages: langAlternatePaths("/support"),
+  },
   title: "Contact support",
   description:
     "Send the make1day team a support message, or reach us by email / a 1:1 call.",

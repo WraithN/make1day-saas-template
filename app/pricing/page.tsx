@@ -1,9 +1,18 @@
 import { CustomService } from "@/components/CustomService";
+import type { Metadata } from "next";
+import { langAlternatePaths } from "@/lib/seo-alternates";
 import { PricingCards, type Plan } from "@/components/PricingCards";
 import { env, priceForPlan } from "@/lib/env";
 import { paymentProviderLabel } from "@/lib/payments";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/pricing",
+    languages: langAlternatePaths("/pricing"),
+  },
+};
 
 // Keep the structured-data amounts in sync with the cards below.
 const BUYOUT_PRICE = "99";
