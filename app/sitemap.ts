@@ -4,6 +4,21 @@ import { POSTS } from "@/lib/content/blog";
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com";
 const LANGS = ["en", "zh", "ja", "fr", "de"];
 
+/**
+ * hreflang cluster for one logical page: every language variant (plus
+ * x-default → EN) cross-references the others. Emitted as xhtml:link
+ * alternates in the sitemap, which covers pages whose HTML head does not
+ * carry alternates and keeps the cluster definition in exactly one place.
+ */
+function langSet(path: string) {
+  const href = (l: string) =>
+    l === "en" ? `${BASE}${path || "/"}` : `${BASE}${path || "/"}?lang=${l}`;
+  const languages: Record<string, string> = {};
+  for (const l of LANGS) languages[l] = href(l);
+  languages["x-default"] = href("en");
+  return { languages };
+}
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
@@ -32,6 +47,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: r.path === "" ? "weekly" : "monthly",
       priority: r.priority,
+      alternates: langSet(r.path),
     });
     for (const l of LANGS) {
       if (l === "en") continue;
@@ -40,6 +56,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: now,
         changeFrequency: r.path === "" ? "weekly" : "monthly",
         priority: r.priority - 0.1,
+        alternates: langSet(r.path),
       });
     }
   }
@@ -55,6 +72,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: modified,
       changeFrequency: "monthly",
       priority: 0.6,
+      alternates: langSet(path),
     });
     for (const l of LANGS) {
       if (l === "en") continue;
@@ -63,6 +81,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: modified,
         changeFrequency: "monthly",
         priority: 0.5,
+        alternates: langSet(path),
       });
     }
 
@@ -75,6 +94,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: modified,
       changeFrequency: "monthly",
       priority: 0.4,
+      alternates: langSet(mdPath),
     });
     for (const l of LANGS) {
       if (l === "en") continue;
@@ -83,6 +103,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified: modified,
         changeFrequency: "monthly",
         priority: 0.3,
+        alternates: langSet(mdPath),
       });
     }
   }
