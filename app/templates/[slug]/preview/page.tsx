@@ -36,6 +36,33 @@ export default async function TemplatePreviewPage({
   if (!tpl) notFound();
   const lang = await getLang();
 
+  // Chrome strings for the client-side surface switcher.
+  const t = {
+    tabLanding: tr(lang, "templates.tab.landing"),
+    tabPricing: tr(lang, "templates.tab.pricing"),
+    tabLogin: tr(lang, "templates.tab.login"),
+    tabChat: tr(lang, "templates.tab.chat"),
+    tabRag: tr(lang, "templates.tab.rag"),
+    tabAdmin: tr(lang, "templates.tab.admin"),
+    email: tr(lang, "templates.demo.email"),
+    password: tr(lang, "templates.demo.password"),
+    signIn: tr(lang, "templates.demo.signIn"),
+    forgot: tr(lang, "templates.demo.forgot"),
+    orSocial: tr(lang, "templates.demo.orSocial"),
+    chatPlaceholder: tr(lang, "templates.demo.chatPlaceholder"),
+    send: tr(lang, "templates.demo.send"),
+    ragPlaceholder: tr(lang, "templates.demo.ragPlaceholder"),
+    sources: tr(lang, "templates.demo.sources"),
+    statUsers: tr(lang, "templates.demo.statUsers"),
+    statLicenses: tr(lang, "templates.demo.statLicenses"),
+    statRevenue: tr(lang, "templates.demo.statRevenue"),
+    statTickets: tr(lang, "templates.demo.statTickets"),
+    activity: tr(lang, "templates.demo.activity"),
+    perMonth: tr(lang, "templates.demo.perMonth"),
+    oneTime: tr(lang, "templates.demo.oneTime"),
+    choose: tr(lang, "templates.demo.choose"),
+  };
+
   return (
     <div className="min-h-screen bg-bg">
       <div className="sticky top-0 z-50 border-b border-line bg-bg/90 backdrop-blur">
@@ -52,7 +79,7 @@ export default async function TemplatePreviewPage({
         </div>
       </div>
 
-      <TemplateSite tpl={tpl} lang={lang} />
+      <TemplateSite tpl={tpl} lang={lang} t={t} />
 
       <p className="wrap py-6 text-center text-[13px] text-muted">
         {tr(lang, "templates.livePreviewNote")}
