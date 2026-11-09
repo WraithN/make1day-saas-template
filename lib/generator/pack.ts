@@ -85,6 +85,27 @@ const SKIP_DIRS = new Set([
   ".workbuddy",
 ]);
 
+/**
+ * White-label favicon: the site's doodle badge (paper card + highlighter
+ * swipe + brick underline) with the generated app's initial in place of the
+ * make1day wordmark, so customer tabs never carry our brand.
+ */
+export function buildCustomerIcon(appName: string): string {
+  const cleaned = appName.replace(/[^\p{L}\p{N}]/gu, "");
+  const initial = (cleaned.charAt(0) || "A").toUpperCase();
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="3" y="3" width="58" height="58" rx="14" fill="#fff8e7" stroke="#111111" stroke-width="5"/>
+  <g transform="rotate(-4 32 32)">
+    <rect x="14" y="18" width="36" height="28" rx="6" fill="#ffd93d"/>
+    <text x="32" y="41" text-anchor="middle"
+          font-family="ui-rounded, 'Segoe UI', system-ui, sans-serif"
+          font-size="30" font-weight="900" fill="#111111">${initial}</text>
+  </g>
+  <path d="M15 50 Q 32 56 49 50" fill="none" stroke="#c9503a" stroke-width="4" stroke-linecap="round"/>
+</svg>
+`;
+}
+
 async function walk(
   absDir: string,
   relBase: string,
@@ -245,6 +266,9 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     }
     pkg.scripts = next;
     zip.file("package.json", JSON.stringify(pkg, null, 2) + "\n");
+    // White-label favicon: same doodle badge but the app's initial instead of
+    // the make1day wordmark — a customer's browser tab must not advertise us.
+    zip.file("app/icon.svg", buildCustomerIcon(config.appName));
   } catch {
     /* ignore */
   }

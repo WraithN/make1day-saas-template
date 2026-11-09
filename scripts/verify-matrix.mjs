@@ -555,6 +555,13 @@ async function verifyCase(entry, doBuild) {
       `legacy ShipKit string leaked into customer ${rel}`,
     );
   }
+  // The favicon is regenerated per app (buildCustomerIcon in pack.ts); the
+  // make1day wordmark must never ship in a customer tab icon.
+  const shippedIcon = await read("app/icon.svg");
+  assert(
+    !/1day/i.test(shippedIcon),
+    "customer favicon carries the make1day wordmark",
+  );
   // The sitemap must only reference routes that exist in this build.
   const shippedSitemap = await read("app/sitemap.ts");
   assert(
