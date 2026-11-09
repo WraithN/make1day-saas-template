@@ -16,14 +16,7 @@ function authorized(req: Request): boolean {
   return (req.headers.get("authorization") ?? "") === `Bearer ${secret}`;
 }
 
-export async function GET(req: Request) {
-  if (!authorized(req)) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-  return NextResponse.json(await outboxStats());
-}
-
-export async function POST(req: Request) {
+async function flush(req: Request) {
   if (!authorized(req)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
@@ -34,4 +27,15 @@ export async function POST(req: Request) {
   );
   const result = await flushMailOutbox(limit);
   return NextResponse.json({ ok: true, ...result, ...(await outboxStats()) });
+}
+
+// Vercel Cron calls the path with GET + `Authorization: Bearer $CRON_SECRET`,
+// so GET must FLUSH the queue (stats-only GET would make cron a no-op).
+// POST stays for manual / GitHub-Actions triggers.
+export async function GET(req: Request) {
+  return flush(req);
+}
+
+export async function POST(req: Request) {
+  return flush(req);
 }

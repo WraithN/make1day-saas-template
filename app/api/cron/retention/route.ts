@@ -11,7 +11,7 @@ function authorized(req: Request): boolean {
   return (req.headers.get("authorization") ?? "") === `Bearer ${secret}`;
 }
 
-export async function POST(req: Request) {
+async function run(req: Request) {
   if (!authorized(req)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
@@ -22,4 +22,14 @@ export async function POST(req: Request) {
   );
   const report = runRetention(days);
   return NextResponse.json({ ok: true, days, ...report });
+}
+
+// Vercel Cron calls the path with GET + `Authorization: Bearer $CRON_SECRET`;
+// POST stays for manual / GitHub-Actions triggers.
+export async function GET(req: Request) {
+  return run(req);
+}
+
+export async function POST(req: Request) {
+  return run(req);
 }

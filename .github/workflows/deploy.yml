@@ -1,0 +1,143 @@
+# Production deploy: Supabase migrations first, then Vercel.
+#
+# Trigger model (AGENTS.md rule 7 — verify before claiming done):
+#   - push to master runs the generated-template matrix; this workflow chains
+#     off its SUCCESS via workflow_run, so a red matrix never reaches prod.
+#   - workflow_dispatch allows a manual (re)deploy of the current master.
+#
+# Every job degrades to a clearly-logged SKIP when its secrets are missing,
+# so the pipeline is safe to enable before the credentials exist.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_ACCESS_TOKEN   https://supabase.com/dashboard/account/tokens
+#   SUPABASE_PROJECT_REF    the <ref> in https://<ref>.supabase.co
+#   SUPABASE_DB_PASSWORD    database password chosen at project creation
+#   VERCEL_TOKEN            https://vercel.com/account/tokens
+#   VERCEL_ORG_ID           .vercel/project.json after `vercel link`, or the
+#   VERCEL_PROJECT_ID       Vercel dashboard project URL
+#
+# Runtime env for the deployed SITE (Vercel dashboard → Project → Settings →
+# Environment Variables, NOT GitHub secrets): NEXT_PUBLIC_SITE_URL,
+# NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
+# SUPABASE_SERVICE_ROLE_KEY, LICENSE_SECRET (same value as local — already
+# issued keys must keep verifying), LICENSE_GATE=auto, ADMIN_USER,
+# ADMIN_PASSWORD, ADMIN_EMAILS, CRON_SECRET, NEXT_PUBLIC_CONTACT_EMAIL,
+# payment + mail keys (see docs/waffo-launch-checklist.md, docs/email.md).
+# `vercel pull` fetches these into the CI build automatically.
+
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["Generated template build matrix"]
+    types: [completed]
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  supabase-migrations:
+    name: Supabase migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Check Supabase credentials
+        id: cfg
+        env:
+          TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$REF" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::SUPABASE_ACCESS_TOKEN / SUPABASE_PROJECT_REF not configured — skipping migrations."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: supabase/setup-cli@v1
+        if: steps.cfg.outputs.ready == 'true'
+        with:
+          version: latest
+
+      - name: Link project and push migrations
+        if: steps.cfg.outputs.ready == 'true'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          supabase link --project-ref "$PROJECT_REF" --password "$DB_PASSWORD"
+          supabase db push --password "$DB_PASSWORD"
+
+  vercel-deploy:
+    name: Vercel production deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: supabase-migrations
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Check Vercel credentials
+        id: cfg
+        env:
+          TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          ORG: ${{ secrets.VERCEL_ORG_ID }}
+          PROJECT: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$ORG" ] || [ -z "$PROJECT" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::VERCEL_TOKEN / VERCEL_ORG_ID / VERCEL_PROJECT_ID not configured — skipping deploy."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.cfg.outputs.ready == 'true'
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.cfg.outputs.ready == 'true'
+        run: |
+          npm ci
+          npm i -g vercel@latest
+
+      # Pull the project's production env (incl. NEXT_PUBLIC_* that must be
+      # baked in at build time) from the Vercel dashboard into CI.
+      - name: Pull Vercel environment
+        if: steps.cfg.outputs.ready == 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Build production bundle
+        if: steps.cfg.outputs.ready == 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy to production
+        if: steps.cfg.outputs.ready == 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"

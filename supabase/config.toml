@@ -1,0 +1,5 @@
+# Minimal Supabase project config so `supabase link` / `supabase db push`
+# work in CI and locally without `supabase init`. Missing keys fall back to
+# CLI defaults. The real project ref comes from `supabase link --project-ref`
+# (CI reads it from the SUPABASE_PROJECT_REF secret), not from this file.
+project_id = "make1day"
