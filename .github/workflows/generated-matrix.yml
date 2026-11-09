@@ -74,5 +74,18 @@ jobs:
           node scripts/verify-matrix.mjs --case "${{ matrix.case }}" --base http://127.0.0.1:3000 || {
             echo "── dev server log (tail) ──"
             tail -n 120 /tmp/shipkit-dev.log || true
+            echo "── runtime versions ──"
+            node --version; npm --version
+            node node_modules/typescript/bin/tsc --version || true
+            echo "── dependency probe ──"
+            node -e "for (const p of ['cookie','@types/cookie','@supabase/ssr','next','typescript']) { try { console.log(p, require('./node_modules/' + p + '/package.json').version) } catch { console.log(p, 'MISSING') } }" || true
+            echo "@types dir:"; ls node_modules/@types/ 2>/dev/null | head -40 || true
+            echo "── ROOT tsc (same machine, site source) ──"
+            node node_modules/typescript/bin/tsc --noEmit 2>&1 | head -25 || true
+            echo "── extracted project probe ──"
+            ls ".matrix-out/${{ matrix.case }}" 2>/dev/null | head -25 || true
+            sed -n '1,20p' ".matrix-out/${{ matrix.case }}/lib/supabase/server.ts" 2>/dev/null || true
+            echo "── resolution trace (@supabase/ssr / cookie) ──"
+            node node_modules/typescript/bin/tsc --noEmit -p ".matrix-out/${{ matrix.case }}/tsconfig.json" --traceResolution 2>&1 | grep -E "Resolving module '(@supabase/ssr|cookie)'|Module name '(@supabase/ssr|cookie)' was" | head -40 || true
             exit 1
           }
