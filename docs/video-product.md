@@ -1,7 +1,9 @@
-﻿# Video Studio（网红视频模板 + AI 换脸）— 产品设计与护栏
+﻿# Video Studio（网红视频模板 + AI 换脸）— 模块设计与护栏
 
-> 状态：设计稿（2026-11-10）。订阅专属（Care 权益），未开始编码；
-> 开工前置决策见 §6。定价口径见 `lib/pricing.ts`（Care 含每月视频额度）。
+> 状态：**已入生成器**（2026-11-10，feature `video` + skill `video`，19 组矩阵含
+> `creem-aurora-video` 用例）。购买 make1day 且勾选该 feature 的客户拿到合规就绪的
+> 视频站骨架——"想做换脸视频站的人"是本模块的目标客群。站点自身（/video）即 dogfood。
+> 定价口径见 `lib/pricing.ts`（Care 含每月视频额度）。
 
 ## 1. 产品定义
 
@@ -39,8 +41,8 @@
   retention cron）。
 - 页面：`/video`（-gallery，登录可见）与 `/video/studio`（订阅门，上传+进度+结果），
   middleware 会话门复用 `/dashboard` 模式；五语 i18n；JSON-LD 不上（工具页 noindex）。
-- 生成器侧：**v1 不进 Builder 选项**（站点产品先跑通商业与合规闭环）；phase 2 再
-  作为 `video` Feature 进模板（届时遵守 AGENTS.md 规则 2/3：prune + schema + matrix）。
+- 生成器侧：**已作为 `video` Feature 进 Builder**（feature + skill + scoped rule +
+  迁移 + 矩阵用例全接线）；客户勾选即得整套骨架，未勾选则整体剪枝。
 
 ## 4. 成本与额度（2026-11 调研）
 
@@ -62,14 +64,11 @@
 - webhook 验签纪律复用 payments 的 raw-body 签名模式（§AGENTS 规则 4）；
 - 样板间 phase 2 可加一支 "video studio" 模板面（静态演示）。
 
-## 6. 开工前置决策（需 owner 拍板）
+## 6. 已拍板与仍开放
 
-| # | 决策 | 建议 |
-|---|---|---|
-| D1 | provider：fal.ai / Replicate | **fal.ai**（同模型便宜 ~2x，queue API 成熟）；需注册并给 API key |
-| D2 | 同意模型：仅本人 / 任意脸+声明 | **仅本人**（v1），合规成本最低 |
-| D3 | 范围：站点产品 / 同时进生成器 | **站点产品先**（本 doc §3），生成器 phase 2 |
-| D4 | 额度/分辨率默认 | 480p 6 credits/月（§4），黑五首月 3 |
-
-决策齐 + fal key 到位后，预计 3–5 个_AGENT_工作日可交付 MVP（含迁移、门禁、
-水印、五语 UI、matrix/审计脚本同步）。
+已拍板（2026-11-10）：D2 仅本人同意模型（v1）；D3 直接进生成器（feature `video`）；
+D4 480p 6 credits/月、黑五首月 3。
+仍开放：D1 provider 账户——模块默认 fal.ai，客户自备 `FAL_KEY`；make1day 站点 dogfood
+需要一个 fal 账户 key（可选，不阻塞客户使用）。
+phase 2：结果落 Supabase Storage/S3（7 天保留并入 retention cron）、自拍上传替代 URL
+输入、加量包、样板间 video 模板面。
