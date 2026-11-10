@@ -48,6 +48,16 @@ export default async function VideoGalleryPage() {
             <div className="mt-1 text-[13px] text-ink-soft">
               {t.tag[lang] ?? t.tag.en}
             </div>
+            <div className="mt-2 flex gap-1.5">
+              {t.aspects.map((a) => (
+                <span
+                  key={a}
+                  className="rounded-full border border-line px-2 py-0.5 text-[11px] text-muted"
+                >
+                  {a}
+                </span>
+              ))}
+            </div>
             <div className="mt-auto pt-4 text-[12px] text-muted">
               {templateSourceUrl(t) ? "✓" : "—"}{" "}
               {tr(lang, "video.templateLabel")}

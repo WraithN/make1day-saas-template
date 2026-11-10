@@ -6,6 +6,7 @@ export interface VideoJob {
   user_id: string;
   template_id: string;
   resolution: string;
+  aspect: string;
   status: "queued" | "running" | "done" | "failed";
   provider_job_id: string | null;
   status_url: string | null;
@@ -27,6 +28,7 @@ function mapRow(r: Row): VideoJob {
     user_id: String(r.user_id),
     template_id: String(r.template_id),
     resolution: String(r.resolution),
+    aspect: String(r.aspect ?? "9:16"),
     status: (r.status as VideoJob["status"]) ?? "queued",
     provider_job_id: (r.provider_job_id as string) ?? null,
     status_url: (r.status_url as string) ?? null,
@@ -64,14 +66,15 @@ export async function insertJob(
       `vj_${Date.now()}_${Math.random().toString(36).slice(2)}`);
   getDb()
     .prepare(
-      `INSERT INTO video_jobs (id, user_id, template_id, resolution, status, provider_job_id, status_url, response_url, input_image_url, source_video_url, output_url, credits, consent_at, error)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO video_jobs (id, user_id, template_id, resolution, aspect, status, provider_job_id, status_url, response_url, input_image_url, source_video_url, output_url, credits, consent_at, error)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .run(
       id,
       job.user_id,
       job.template_id,
       job.resolution,
+      job.aspect,
       job.status,
       job.provider_job_id,
       job.status_url,

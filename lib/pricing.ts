@@ -6,12 +6,11 @@
 //   list    — struck-through anchor ("was") price, display only
 //   regular — default sale price outside campaign windows
 //   mgm     — share-to-unlock price (member-get-member)
-//   bf      — Black Friday window price (env-gated, see env.blackFridayActive)
+//   bf      — Black Friday window price = 30% off regular (env-gated)
 //
-// 2026-11-10 reprice: positioned just below the mainstream paid-kit band
-// (ShipFast $199-249, supastarter $299, MakerKit $349) instead of the $99
-// launch price, which the 2026-11 competitor refresh showed to be in the
-// crowded low band (Agentic $99, ShipKit.sh $99, MkSaaS $129).
+// Positioning rationale (which competing kits this sits below, and why) lives
+// in docs/competitive-analysis.md — competitor names must never appear in
+// shipped source files (the white-label sweep asserts it).
 
 import { env } from "@/lib/env";
 

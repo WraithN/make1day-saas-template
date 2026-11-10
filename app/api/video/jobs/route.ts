@@ -59,6 +59,7 @@ export async function POST(req: Request) {
       templateId: z.string().min(1).max(60),
       imageUrl: z.string().min(1).max(2048),
       resolution: z.enum(["480p", "720p", "1080p"]).default("480p"),
+      aspect: z.enum(["9:16", "16:9", "1:1"]).default("9:16"),
       // The UI only enables submit after the user ticks the portrait-rights
       // attestation; the server records the timestamp as the audit trail.
       consent: z.literal(true),
@@ -70,7 +71,7 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
-  const { templateId, imageUrl, resolution } = parsed.data;
+  const { templateId, imageUrl, resolution, aspect } = parsed.data;
 
   const template = getVideoTemplate(templateId);
   if (!template) {
@@ -106,12 +107,13 @@ export async function POST(req: Request) {
   }
 
   try {
-    const handles = await submitFaceSwap({ videoUrl: sourceUrl, imageUrl });
+    const handles = await submitFaceSwap({ videoUrl: sourceUrl, imageUrl, aspect, resolution });
     const job = await insertJob({
       id: "",
       user_id: userId,
       template_id: templateId,
       resolution,
+      aspect,
       status: "queued",
       provider_job_id: handles.request_id,
       status_url: handles.status_url,

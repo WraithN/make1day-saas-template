@@ -7,6 +7,7 @@ create table if not exists public.video_jobs (
   user_id uuid not null references auth.users (id) on delete cascade,
   template_id text not null,
   resolution text not null default '480p',
+  aspect text not null default '9:16',
   status text not null default 'queued',
   provider_job_id text,
   status_url text,

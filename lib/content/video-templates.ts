@@ -7,29 +7,36 @@
 
 import type { Lang } from "@/lib/i18n-core";
 
+/** Screen formats an influencer template can render (vertical-first). */
+export type VideoAspect = "9:16" | "16:9" | "1:1";
+
 export interface VideoTemplate {
   id: string;
   name: Record<Lang, string>;
   tag: Record<Lang, string>;
   durationSec: number;
+  aspects: VideoAspect[];
 }
 
 export const VIDEO_TEMPLATES: VideoTemplate[] = [
   {
     id: "dance-hook",
     durationSec: 15,
+    aspects: ["9:16", "1:1"],
     name: { en: "Dance hook", zh: "舞蹈开场", ja: "ダンスフック", fr: "Accroche danse", de: "Tanz-Hook" },
     tag: { en: "High-energy opener", zh: "高能量开场", ja: "高エネルギー開幕", fr: "Ouverture énergique", de: "Energetischer Opener" },
   },
   {
     id: "unboxing",
     durationSec: 20,
+    aspects: ["9:16", "16:9"],
     name: { en: "Unboxing", zh: "开箱种草", ja: "開封レビュー", fr: "Unboxing", de: "Unboxing" },
     tag: { en: "Product showcase", zh: "产品展示", ja: "商品紹介", fr: "Vitrine produit", de: "Produkt-Showcase" },
   },
   {
     id: "talking-head",
     durationSec: 25,
+    aspects: ["9:16", "16:9", "1:1"],
     name: { en: "Talking head", zh: "口播讲解", ja: "トークヘッド", fr: "Face caméra", de: "Talking Head" },
     tag: { en: "Explainer / opinion", zh: "讲解/观点", ja: "解説／意見", fr: "Explication / avis", de: "Erklärer / Meinung" },
   },

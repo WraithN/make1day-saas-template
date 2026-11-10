@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/lib/i18n";
+import {
+  VIDEO_TEMPLATES,
+  getVideoTemplate,
+  type VideoAspect,
+} from "@/lib/content/video-templates";
 
 type Job = {
   id: string;
@@ -17,8 +22,12 @@ type Job = {
 export default function VideoStudioPage() {
   const { t } = useLanguage();
   const [templateId, setTemplateId] = useState("dance-hook");
+  const [aspect, setAspect] = useState<VideoAspect>("9:16");
   const [imageUrl, setImageUrl] = useState("");
   const [resolution, setResolution] = useState<"480p" | "720p" | "1080p">("480p");
+  const { lang } = useLanguage();
+  const template = getVideoTemplate(templateId);
+  const aspects = template?.aspects ?? (["9:16"] as VideoAspect[]);
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +56,7 @@ export default function VideoStudioPage() {
       const res = await fetch("/api/video/jobs", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ templateId, imageUrl, resolution, consent: true }),
+        body: JSON.stringify({ templateId, imageUrl, resolution, aspect, consent: true }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -85,11 +94,35 @@ export default function VideoStudioPage() {
             <select
               className="mt-1 w-full rounded-lg border border-line bg-bg px-3 py-2"
               value={templateId}
-              onChange={(e) => setTemplateId(e.target.value)}
+              onChange={(e) => {
+                setTemplateId(e.target.value);
+                const next = getVideoTemplate(e.target.value);
+                if (next && !next.aspects.includes(aspect)) {
+                  setAspect(next.aspects[0]);
+                }
+              }}
             >
-              <option value="dance-hook">Dance hook</option>
-              <option value="unboxing">Unboxing</option>
-              <option value="talking-head">Talking head</option>
+              {VIDEO_TEMPLATES.map((tp) => (
+                <option key={tp.id} value={tp.id}>
+                  {tp.name[lang] ?? tp.name.en} · {tp.aspects.join(" / ")}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="block text-[13px] font-medium">
+            {t("video.aspectLabel")}
+            <select
+              className="mt-1 w-full rounded-lg border border-line bg-bg px-3 py-2"
+              value={aspect}
+              onChange={(e) => setAspect(e.target.value as VideoAspect)}
+            >
+              {aspects.map((a) => (
+                <option key={a} value={a}>
+                  {a}
+                  {a === "9:16" ? " · vertical" : a === "16:9" ? " · wide" : " · square"}
+                </option>
+              ))}
             </select>
           </label>
 

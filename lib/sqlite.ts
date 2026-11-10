@@ -257,6 +257,7 @@ CREATE TABLE IF NOT EXISTS video_jobs (
   user_id          TEXT NOT NULL,
   template_id      TEXT NOT NULL,
   resolution       TEXT NOT NULL DEFAULT '480p',
+  aspect           TEXT NOT NULL DEFAULT '9:16',
   status           TEXT NOT NULL DEFAULT 'queued',
   provider_job_id  TEXT,
   status_url       TEXT,

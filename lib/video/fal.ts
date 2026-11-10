@@ -33,6 +33,8 @@ export interface FalQueueHandles {
 export async function submitFaceSwap(input: {
   videoUrl: string;
   imageUrl: string;
+  aspect: string;
+  resolution: string;
 }): Promise<FalQueueHandles> {
   const res = await fetch(`https://queue.fal.run/${faceSwapModel()}`, {
     method: "POST",
@@ -43,6 +45,8 @@ export async function submitFaceSwap(input: {
     body: JSON.stringify({
       video_url: input.videoUrl,
       image_url: input.imageUrl,
+      aspect_ratio: input.aspect,
+      resolution: input.resolution,
     }),
   });
   if (!res.ok) throw new Error(`fal submit failed: HTTP ${res.status}`);
