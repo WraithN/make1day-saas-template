@@ -11,7 +11,7 @@ export function ConsoleSection({
 }: {
   title: string;
   desc?: string;
-  children: ReactNode;
+  children?: ReactNode;
   action?: ReactNode;
 }) {
   return (
@@ -23,7 +23,7 @@ export function ConsoleSection({
         </div>
         {action}
       </div>
-      <div className="mt-5">{children}</div>
+      {children ? <div className="mt-5">{children}</div> : null}
     </section>
   );
 }

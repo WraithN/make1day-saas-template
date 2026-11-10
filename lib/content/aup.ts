@@ -111,6 +111,46 @@ export const AUP_SECTIONS: AucSection[] = [
     ],
   },
   {
+    id: "integration",
+    title: {
+      en: "Where screening happens (integration map)",
+      zh: "审查接入点（集成地图）",
+      ja: "スクリーニング実装箇所（統合マップ）",
+      fr: "Où le criblage s'applique (carte d'intégration)",
+      de: "Wo gescreent wird (Integrationskarte)",
+    },
+    bullets: [
+      {
+        en: "POST /api/ai — the chat message is screened before any model call; blocks return 400 prompt_rejected / prompt_flagged, screener outages return 503 moderation_unavailable (nothing generates).",
+        zh: "POST /api/ai——聊天消息在任何模型调用前受审；拦截返回 400 prompt_rejected / prompt_flagged，审查服务不可用返回 503 moderation_unavailable（不会生成）。",
+        ja: "POST /api/ai — チャットメッセージはモデル呼び出し前に審査。遮断は 400 prompt_rejected / prompt_flagged、審査不能は 503 moderation_unavailable（生成なし）。",
+        fr: "POST /api/ai — le message est criblé avant tout appel au modèle ; blocages en 400 prompt_rejected / prompt_flagged, modération injoignable en 503 moderation_unavailable (rien n'est généré).",
+        de: "POST /api/ai — die Chat-Nachricht wird vor jedem Modellaufruf gescreent; Blocks liefern 400 prompt_rejected / prompt_flagged, Ausfall 503 moderation_unavailable (nichts wird erzeugt).",
+      },
+      {
+        en: "POST /api/rag/query — the question is screened before retrieval-augmented generation runs.",
+        zh: "POST /api/rag/query——问题在检索增强生成运行前受审。",
+        ja: "POST /api/rag/query — 質問は検索拡張生成の実行前に審査されます。",
+        fr: "POST /api/rag/query — la question est criblée avant la génération augmentée.",
+        de: "POST /api/rag/query — die Frage wird vor der Retrieval-Generierung gescreent.",
+      },
+      {
+        en: "POST /api/video/jobs — Video Studio accepts no free-text prompt; the only user-controlled string entering the face-swap pipeline (the hosted input URL) is screened before credits, queueing or the provider call. Extra layers: portrait-rights attestation, provider-side safety filters, visible AI label on every render.",
+        zh: "POST /api/video/jobs——Video Studio 不接受自由文本 prompt；进入换脸管线的唯一用户可控字符串（托管输入 URL）在扣额度、入队、调用供应商之前受审。附加层：肖像权声明、供应商侧安全过滤、每条成片的可见 AI 标识。",
+        ja: "POST /api/video/jobs — Video Studio に自由文本プロンプトはなく、顔スワップ設計に入る唯一のユーザー制御文字列（ホスト入力 URL）をクレジット・キュー・プロバイダ呼び出しの前に審査。追加層：肖像権確認、プロバイダ側安全フィルタ、全出力の可視 AI ラベル。",
+        fr: "POST /api/video/jobs — le Studio Vidéo n'accepte aucun prompt libre ; la seule chaîne contrôlée par l'utilisateur entrant dans le pipeline (l'URL d'entrée hébergée) est criblée avant crédits, file et appel prestataire. Couches supplémentaires : attestation de droits à l'image, filtres du prestataire, label IA visible.",
+        de: "POST /api/video/jobs — das Video-Studio nimmt keinen Freitext-Prompt an; der einzige nutzerkontrollierte String in der Pipeline (die gehostete Eingabe-URL) wird vor Credits, Queue und Provider-Aufruf gescreent. Zusätzliche Ebenen: Bildrechte-Bestätigung, Provider-Safety-Filter, sichtbares KI-Label.",
+      },
+      {
+        en: "Screening runs on every deployment: via the Creem Moderation API when a Creem key is configured, otherwise via the local prohibited-content blocklist described above. There is no code path from user input to a generation model without a preceding screen.",
+        zh: "所有部署都执行审查：配置 Creem key 时走 Creem Moderation API，否则走上述本地违禁词表。从用户输入到生成模型不存在任何绕过审查的代码路径。",
+        ja: "全デプロイで審査を実行：Creem キー設定時は Creem Moderation API、それ以外は上記ローカル禁止リスト。ユーザー入力から生成モデルへ審査を bypass する経路は存在しません。",
+        fr: "Le criblage s'exécute sur chaque déploiement : API de modération Creem si une clé est configurée, sinon liste locale ci-dessus. Aucun chemin de code ne relie une entrée utilisateur à un modèle sans criblage préalable.",
+        de: "Screening läuft auf jedem Deployment: Creem-Moderations-API bei konfiguriertem Key, sonst lokale Sperrliste oben. Kein Codepfad führt von Nutzereingabe zu einem Modell ohne vorheriges Screening.",
+      },
+    ],
+  },
+  {
     id: "enforcement",
     title: {
       en: "Enforcement, appeals & reporting",

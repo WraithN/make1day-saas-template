@@ -67,10 +67,8 @@ export default async function AccountSettingsPage() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <ConsoleSection title={c["account.settings.language"]} desc={c["account.settings.languageDesc"]}>
-          <Notice>sk_lang · en / zh / ja / fr / de</Notice>
         </ConsoleSection>
         <ConsoleSection title={c["account.settings.theme"]} desc={c["account.settings.themeDesc"]}>
-          <Notice>sk_theme · dark / light</Notice>
         </ConsoleSection>
       </div>
 
