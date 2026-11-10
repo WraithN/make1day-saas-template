@@ -168,8 +168,8 @@ One renderer, one spec, zero drift:
 - .cursor/rules/*.mdc — the same rules in Cursor's native format.
 - CLAUDE.md — Claude Code entry point importing AGENTS.md, design.md, all
   rules and all selected skills with @path references.
-- skills/*.md — 12 playbooks: frontend, UI, backend, testing, SEO, auth,
-  payments, database, RAG, i18n, deploy, agent workflow.
+- skills/*.md — 13 playbooks: frontend, UI, backend, testing, SEO, auth,
+  payments, database, RAG, i18n, deploy, agent workflow, video.
 - npm run ai:docs — deterministic rebuild of ALL documents from
   shipkit.config.json + ai/doc-spec.json; npm run ai:setup refreshes only
   Cursor / Claude Code integrations (--tool all|cursor|claude). --dry-run

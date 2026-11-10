@@ -59,7 +59,7 @@ node scripts/verify-matrix.mjs --case default-waffo-midnight --build --publish
 - `shipkit.config.json` 与 `ai/doc-spec.json` 的 style/payment/deploy/skills 与请求一致
 - 站点专用 npm scripts（`waffo:preflight`、`verify:matrix`）不得进入客户 `package.json`；`ai:docs` / `ai:setup` **必须存在**
 - `design.md` 非空、`AGENTS.md` >2000 字符且含本构建 style 与 `npm run ai:docs`；`CLAUDE.md` 含 `@AGENTS.md` / `@design.md`
-- scoped rules **精确等于** `7 常驻 + payment(启用时) + rag + account + admin(各自选中时) + 选中 skills 数`，`.cursor/rules/*.mdc` 数量与 `ai/rules/*.md` 完全一致；`skills/README.md` 显示「N of 12」
+- scoped rules **精确等于** `7 常驻 + payment(启用时) + rag + account + admin(各自选中时) + 选中 skills 数`，`.cursor/rules/*.mdc` 数量与 `ai/rules/*.md` 完全一致；`skills/README.md` 显示「N of 13」
 - 生成工程 `tsc --noEmit` 退出码为 0
 
 失败时解压产物保留在 `.matrix-out/<case>`，可直接进去复现。

@@ -753,14 +753,14 @@ async function verifyCase(entry, doBuild) {
   const docSpec = JSON.parse(await read("ai/doc-spec.json"));
   assert(docSpec.config?.style === config.style, "ai/doc-spec.json style mismatch");
   assert(docSpec.labels?.skills?.length === config.skills.length, "doc-spec skill count mismatch");
-  assert(docSpec.catalog?.skills?.length === 12, "doc-spec catalogue must contain all 12 skills");
+  assert(docSpec.catalog?.skills?.length === 13, "doc-spec catalogue must contain all 13 skills");
   assert(
     Object.keys(docSpec.catalog?.styles ?? {}).length === 16,
     "doc-spec catalogue must contain all 16 palettes",
   );
   const skillsIndex = await read("skills/README.md");
   assert(
-    skillsIndex.includes(`${config.skills.length} of 12`),
+    skillsIndex.includes(`${config.skills.length} of 13`),
     "skills/README.md was not regenerated for this build",
   );
 

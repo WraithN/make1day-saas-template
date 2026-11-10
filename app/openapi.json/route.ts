@@ -28,7 +28,7 @@ export function GET() {
       version: "1.0.0",
       summary: "Configurable Next.js SaaS starter generator, licensing and payments",
       description:
-        "make1day sells a configurable Next.js 15 SaaS starter. The Builder posts a selection to /api/generate and receives a pruned, buildable, agent-native ZIP containing AGENTS.md, design.md, scoped rules, Cursor rules, CLAUDE.md and up to 12 skills. An MCP endpoint lets coding agents assemble a valid configuration programmatically. Source downloads are gated by an offline license key or an active subscription / email claim — the source ZIP is the product, so anonymous visitors never receive it. A source-free preview package is available without a license. Full human/agent-readable overview: /llms-full.txt. Go-live notes: docs/waffo-launch-checklist.md.",
+        "make1day sells a configurable Next.js 15 SaaS starter. The Builder posts a selection to /api/generate and receives a pruned, buildable, agent-native ZIP containing AGENTS.md, design.md, scoped rules, Cursor rules, CLAUDE.md and up to 13 skills. An MCP endpoint lets coding agents assemble a valid configuration programmatically. Source downloads are gated by an offline license key or an active subscription / email claim — the source ZIP is the product, so anonymous visitors never receive it. A source-free preview package is available without a license. Full human/agent-readable overview: /llms-full.txt. Go-live notes: docs/waffo-launch-checklist.md.",
     },
     servers: [{ url: SITE, description: "make1day site" }],
     tags: [

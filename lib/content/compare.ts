@@ -47,7 +47,7 @@ export const compareContent: Record<
       { feature: "Updates after launch", shipkit: "Care subscription (drift-proof)", shipfast: "Community", makerkit: "Tiers", supastarter: "Tiers" },
       { feature: "Configurable generator (real pruning)", shipkit: "Yes — unselected modules are removed", shipfast: "No", makerkit: "No", supastarter: "No" },
       { feature: "AGENTS.md + design.md for AI coding", shipkit: "Root AGENTS.md + style-locked design.md", shipfast: "No", makerkit: "AGENTS.md + Cursor rules", supastarter: "AGENTS.md + .cursorrules" },
-      { feature: "Scoped rules + skills in every ZIP", shipkit: "ai/rules/* + .cursor/rules/* + CLAUDE.md + 12 skills", shipfast: "No", makerkit: "Cursor rules only", supastarter: ".cursorrules only" },
+      { feature: "Scoped rules + skills in every ZIP", shipkit: "ai/rules/* + .cursor/rules/* + CLAUDE.md + 13 skills", shipfast: "No", makerkit: "Cursor rules only", supastarter: ".cursorrules only" },
       { feature: "Config change → AI docs rebuild", shipkit: "npm run ai:docs, one shared renderer", shipfast: "No", makerkit: "No", supastarter: "No" },
       { feature: "MCP tool for agent scaffolding", shipkit: "scaffold_project + llms.txt / OpenAPI / MCP", shipfast: "No", makerkit: "No", supastarter: "No" },
       { feature: "llms.txt / agent-readable SEO", shipkit: "Yes, plus JSON-LD", shipfast: "No", makerkit: "Not emphasised", supastarter: "Not emphasised" },
@@ -59,7 +59,7 @@ export const compareContent: Record<
       { feature: "User console + admin console", shipkit: "Both included, five-language, selectable and fully pruned when unchecked", shipfast: "Account page only", makerkit: "Admin + RBAC", supastarter: "Admin basics" },
     ],
     verdict:
-      "Pick make1day if you build with an AI coding agent: it is the only starter here that generates AGENTS.md AND a style-specific design.md, prunes modules you did not select, ships working hybrid RAG, five-language i18n and agent-readable llms.txt — at the lowest price in the category. Choose ShipFast for the biggest community, Makerkit for deep B2B multi-tenancy, Supastarter for maximum breadth, or VibeReady ($149–399) if enforced commit-time quality gates and Terraform matter more than i18n and a visual generator. make1day also ships scoped rules, 12 skills, `npm run ai:docs` for deterministic regeneration, an MCP `scaffold_project` tool, an OpenAPI 3.1 contract and a public 18-case build matrix, plus selectable /account and /admin consoles in every generated project, so an agent can both assemble a project and verify that its ZIP type-checks instead of trusting a README.",
+      "Pick make1day if you build with an AI coding agent: it is the only starter here that generates AGENTS.md AND a style-specific design.md, prunes modules you did not select, ships working hybrid RAG, five-language i18n and agent-readable llms.txt — at the lowest price in the category. Choose ShipFast for the biggest community, Makerkit for deep B2B multi-tenancy, Supastarter for maximum breadth, or VibeReady ($149–399) if enforced commit-time quality gates and Terraform matter more than i18n and a visual generator. make1day also ships scoped rules, 13 skills, `npm run ai:docs` for deterministic regeneration, an MCP `scaffold_project` tool, an OpenAPI 3.1 contract and a public 19-case build matrix, plus selectable /account and /admin consoles in every generated project, so an agent can both assemble a project and verify that its ZIP type-checks instead of trusting a README.",
   },
   zh: {
     eyebrow: "对比",
@@ -84,7 +84,7 @@ export const compareContent: Record<
       { feature: "上线后更新", shipkit: "Care 订阅（抗漂移）", shipfast: "社区", makerkit: "分级", supastarter: "分级" },
       { feature: "可配置生成器（真实剪枝）", shipkit: "是——未选模块从 ZIP 中移除", shipfast: "否", makerkit: "否", supastarter: "否" },
       { feature: "面向 AI coding 的 AGENTS.md + design.md", shipkit: "根 AGENTS.md + 锁定风格 design.md", shipfast: "否", makerkit: "AGENTS.md + Cursor rules", supastarter: "AGENTS.md + .cursorrules" },
-      { feature: "每个 ZIP 的 scoped rules 与 skills", shipkit: "ai/rules/* + .cursor/rules/* + CLAUDE.md + 12 skills", shipfast: "否", makerkit: "仅 Cursor rules", supastarter: "仅 .cursorrules" },
+      { feature: "每个 ZIP 的 scoped rules 与 skills", shipkit: "ai/rules/* + .cursor/rules/* + CLAUDE.md + 13 skills", shipfast: "否", makerkit: "仅 Cursor rules", supastarter: "仅 .cursorrules" },
       { feature: "改配置 → AI 文档重建", shipkit: "npm run ai:docs，单一渲染器", shipfast: "否", makerkit: "否", supastarter: "否" },
       { feature: "供智能体搭建工程的 MCP 工具", shipkit: "scaffold_project + llms.txt / OpenAPI / MCP", shipfast: "否", makerkit: "否", supastarter: "否" },
       { feature: "llms.txt / 面向智能体的 SEO", shipkit: "有，并含 JSON-LD", shipfast: "否", makerkit: "未强调", supastarter: "未强调" },

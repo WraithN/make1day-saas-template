@@ -82,9 +82,9 @@ if (mode === "full") {
   for (const p of ["lib/payments/waffo.ts", "lib/payments/creem.ts", "lib/payments/paypal.ts", "lib/payments/lemonsqueezy.ts"]) {
     check(!has(p), `full: unselected gateway pruned ${p}`);
   }
-  const skillCount = ["frontend-dev", "ui-design", "backend-api", "testing-qa", "seo-content", "auth-security", "payments", "database", "rag", "i18n", "deploy", "agent-workflow"]
+  const skillCount = ["frontend-dev", "ui-design", "backend-api", "testing-qa", "seo-content", "auth-security", "payments", "database", "rag", "i18n", "deploy", "agent-workflow", "video"]
     .filter((s) => has(`skills/${s}.md`)).length;
-  check(skillCount === 12, `full: 12 skills present (got ${skillCount})`);
+  check(skillCount === 13, `full: 12 skills present (got ${skillCount})`);
   for (const r of ["ai/rules/core.md", "ai/rules/style.md", "ai/rules/payments.md", "ai/rules/rag.md", "ai/rules/account.md", "ai/rules/admin.md"]) {
     check(has(r), `full: rule ${r}`);
   }
