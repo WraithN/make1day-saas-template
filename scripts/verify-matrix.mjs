@@ -289,7 +289,7 @@ function assert(condition, message) {
 
 // Guard the documented case count: adding/removing a case means the README,
 // CI workflow and machine-readable docs numbers must be updated too.
-assert(CASES.length === 18, `expected 18 matrix cases, got ${CASES.length}`);
+assert(CASES.length === 19, `expected 19 matrix cases, got ${CASES.length}`);
 
 function dirSizeKb(dir) {
   let total = 0;

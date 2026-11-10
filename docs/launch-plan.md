@@ -7,7 +7,7 @@
 ## 0. 部署实况（2026-11-09 晚更新）
 
 **软上线已完成**：`https://make1day-saas-template.vercel.app`（Vercel + Supabase
-`UncorneBiz` us-east-2，12 迁移 / 18 表 / RLS）。管线：push → matrix 18/18 →
+`UncorneBiz` us-east-2，12 迁移 / 18 表 / RLS）。管线：push → matrix 19/19 →
 Deploy（迁移走 `scripts/supabase-migrate-mcp.mjs` 经 Supabase MCP，绕开直连库
 仅 IPv6 而 CI 仅 IPv4 的死路；Vercel 构建部署）。已验证：health ok/supabase、
 license 门禁 402/200+ZIP、cron Bearer 鉴权、/admin、运行时落库、邮件与支付

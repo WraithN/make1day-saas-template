@@ -214,7 +214,7 @@ node scripts/export-local-profiles.mjs --sql
 - `app/templates/page.tsx` 与 `components/TemplateSite.tsx` 列入 `SITE_MARKETING_FILES`，与 `app/styles/page.tsx` 同等处理（站点营销页，不进客户 ZIP）。
 - `scripts/lib/ai-docs.mjs` 增加 `account` / `admin` 两条条件 scoped rule，`AGENTS.md` 按选项目动写明两套后台是否存在。
 
-`scripts/verify-matrix.mjs` 的 18 组矩阵包含 `account-only`、`admin-only` 与两者皆无的组合，
+`scripts/verify-matrix.mjs` 的 19 组矩阵包含 `account-only`、`admin-only` 与两者皆无的组合，
 逐组断言 ZIP 内文件存在性、共享层存活、Nav/回调无死链，并在解压工程里跑 `tsc --noEmit`。
 
 ## 6. 上线配置

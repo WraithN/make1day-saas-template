@@ -58,7 +58,7 @@ const PAGE_DIGESTS: Record<string, Digest> = {
       "The differentiator is configuration-driven pruning plus white-label ZIP delivery, not a longer list of AI features.",
     facts: [
       "Streaming chat, multi-provider models, token quotas, RAG, MCP and llms.txt are baseline in the 2026 AI-starter category.",
-      "This product adds 18-case real pruning, six gateways, five languages, dual backends and a fail-safe paid gate.",
+      "This product adds 19-case real pruning, six gateways, five languages, dual backends and a fail-safe paid gate.",
     ],
   },
   "/styles": {

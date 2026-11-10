@@ -153,9 +153,9 @@ function productInfo() {
     realDifferentiators: [
       "Unselected modules are genuinely pruned from the ZIP, not hidden behind flags",
       "A style-locked design.md plus a root AGENTS.md generated per configuration",
-      "Scoped rules with globs, 12 skills, .cursor/rules/*.mdc and CLAUDE.md in every download",
+      "Scoped rules with globs, 13 skills, .cursor/rules/*.mdc and CLAUDE.md in every download",
       "npm run ai:docs rebuilds every AI document after a config change",
-      "18-case build matrix type-checks each extracted ZIP and asserts console pruning",
+      "19-case build matrix type-checks each extracted ZIP and asserts console pruning",
       "Selectable five-language user console (/account) and admin console (/admin) ship in every default generated project",
       "llms.txt + llms-full.txt + OpenAPI 3.1 + MCP endpoint for agent discovery",
       `Working hybrid RAG (BM25 + embeddings + RRF), five-language i18n, checkout via ${PROVIDER_LABEL}`,
