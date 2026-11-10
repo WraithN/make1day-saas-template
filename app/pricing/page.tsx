@@ -2,7 +2,7 @@ import { CustomService } from "@/components/CustomService";
 import type { Metadata } from "next";
 import { langAlternatePaths } from "@/lib/seo-alternates";
 import { PricingCards, type Plan } from "@/components/PricingCards";
-import { env, priceForPlan } from "@/lib/env";
+import { env, priceForPlan, primaryPaymentsReady } from "@/lib/env";
 import { paymentProviderLabel } from "@/lib/payments";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
@@ -145,7 +145,7 @@ export default async function PricingPage() {
       </div>
 
       <div className="mt-10">
-        <PricingCards plans={plans} />
+        <PricingCards plans={plans} paymentsReady={primaryPaymentsReady()} />
       </div>
 
       <CustomService

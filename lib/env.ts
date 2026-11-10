@@ -583,6 +583,18 @@ export function paymentProviderMissingVars(provider: string): string[] {
 }
 
 /**
+ * True when the primary gateway has both its credentials AND at least one
+ * product price configured. Buy buttons flip to a "coming soon" state while
+ * this is false (e.g. during a Merchant-of-Record approval), and flip back
+ * automatically once the env is complete — no code change at go-live.
+ */
+export function primaryPaymentsReady(): boolean {
+  const provider = env.paymentProvider().split(",")[0].trim();
+  if (paymentProviderMissingVars(provider).length > 0) return false;
+  return priceForPlan("buyout") !== null || priceForPlan("care") !== null;
+}
+
+/**
  * Operator-side settings that a payment provider's own self-check cannot see.
  * These are the ones that silently break a launch when forgotten: no license
  * can be signed, admin cookies cannot be verified, cron endpoints stay closed,

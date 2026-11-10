@@ -1,6 +1,6 @@
 import { BlackFridayCountdown } from "@/components/BlackFridayCountdown";
 import { BlackFridayPlans, type BfPlan } from "@/components/BlackFridayPlans";
-import { env, priceForPlanBf } from "@/lib/env";
+import { env, priceForPlanBf, primaryPaymentsReady } from "@/lib/env";
 import { Trans } from "@/lib/i18n";
 import { getLang, tr } from "@/lib/i18n-server";
 import Link from "next/link";
@@ -160,7 +160,12 @@ export default async function BlackFridayPage() {
       </div>
 
       <div className="mt-10">
-        <BlackFridayPlans plans={plans} shareUrl={shareUrl} shareText={shareText} />
+        <BlackFridayPlans
+          plans={plans}
+          shareUrl={shareUrl}
+          shareText={shareText}
+          paymentsReady={primaryPaymentsReady()}
+        />
       </div>
 
       <div className="card mx-auto mt-10 max-w-3xl sm:p-6">

@@ -44,7 +44,15 @@ function Spinner() {
   );
 }
 
-export function PricingCards({ plans }: { plans: Plan[] }) {
+export function PricingCards({
+  plans,
+  paymentsReady = true,
+}: {
+  plans: Plan[];
+  /** False while the payment provider is unconfigured (e.g. pending
+   *  approval): paid CTAs render as a disabled "coming soon" button. */
+  paymentsReady?: boolean;
+}) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const { t } = useLanguage();
 
@@ -76,6 +84,7 @@ export function PricingCards({ plans }: { plans: Plan[] }) {
   const tones = ["", "card-yellow", "card-mint"];
 
   return (
+    <>
     <div className="grid gap-4 sm:gap-5 lg:grid-cols-3">
       {plans.map((plan, idx) => (
         <div
@@ -145,7 +154,15 @@ export function PricingCards({ plans }: { plans: Plan[] }) {
           {/* mt-auto pins every CTA to the same baseline across the three
               equal-height cards, regardless of feature-list length. */}
           <div className="mt-auto pt-6">
-            {plan.priceId ? (
+            {!paymentsReady && (plan.once || plan.monthly) ? (
+              <button
+                className="btn-solid w-full cursor-not-allowed opacity-60"
+                data-cta={`pricing-${plan.id}-soon`}
+                disabled
+              >
+                {t("pricing.comingSoon")}
+              </button>
+            ) : plan.priceId ? (
               <button
                 className="btn-solid w-full"
                 data-cta={`pricing-${plan.id}`}
@@ -175,5 +192,11 @@ export function PricingCards({ plans }: { plans: Plan[] }) {
         </div>
       ))}
     </div>
+    {!paymentsReady && (
+      <p className="mt-5 text-center text-[13px] text-muted">
+        {t("pricing.comingSoonNote")}
+      </p>
+    )}
+    </>
   );
 }

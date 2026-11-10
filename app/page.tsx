@@ -11,7 +11,7 @@ import { FaqSection } from "@/components/home/FaqSection";
 import { PricingCards, type Plan } from "@/components/PricingCards";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
-import { priceForPlan } from "@/lib/env";
+import { priceForPlan, primaryPaymentsReady } from "@/lib/env";
 
 export const metadata: Metadata = {
   // Root-path language cluster lives in the sitemap's xhtml:link cluster:
@@ -151,7 +151,7 @@ export default async function HomePage() {
           <Trans k="homePricing.note" lang={lang} />
         </p>
         <div className="mt-8">
-          <PricingCards plans={plans} />
+          <PricingCards plans={plans} paymentsReady={primaryPaymentsReady()} />
         </div>
       </section>
 

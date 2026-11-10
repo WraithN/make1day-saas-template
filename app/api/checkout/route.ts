@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getPaymentProvider } from "@/lib/payments";
-import { env } from "@/lib/env";
+import { env, primaryPaymentsReady } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { recordTrafficEvent } from "@/lib/traffic";
 import { resolveIdentity } from "@/lib/visitor-id";
@@ -11,6 +11,12 @@ import { resolveIdentity } from "@/lib/visitor-id";
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  // While the payment provider is unconfigured (e.g. Creem approval pending)
+  // the buy buttons render as "coming soon"; this guard makes the API agree
+  // instead of failing deep inside the provider adapter.
+  if (!primaryPaymentsReady()) {
+    return NextResponse.json({ error: "checkout_unavailable" }, { status: 503 });
+  }
   const blocked = await guardApiWrite(req, {
     bucket: "checkout",
     limit: 30,

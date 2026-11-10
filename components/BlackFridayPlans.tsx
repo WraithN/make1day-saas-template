@@ -57,10 +57,14 @@ export function BlackFridayPlans({
   plans,
   shareUrl,
   shareText,
+  paymentsReady = true,
 }: {
   plans: BfPlan[];
   shareUrl: string;
   shareText: string;
+  /** False while the payment provider is unconfigured (e.g. pending
+   *  approval): paid CTAs render as a disabled "coming soon" button. */
+  paymentsReady?: boolean;
 }) {
   const { t } = useLanguage();
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -226,7 +230,15 @@ export function BlackFridayPlans({
             )}
 
             <div className="mt-auto pt-6">
-              {plan.priceId ? (
+              {!paymentsReady && (plan.once || plan.monthly) ? (
+                <button
+                  className="btn-solid w-full cursor-not-allowed opacity-60"
+                  data-cta={`bf-${plan.id}-soon`}
+                  disabled
+                >
+                  {t("pricing.comingSoon")}
+                </button>
+              ) : plan.priceId ? (
                 <button
                   className="btn-solid w-full"
                   data-cta={`bf-${plan.id}`}
