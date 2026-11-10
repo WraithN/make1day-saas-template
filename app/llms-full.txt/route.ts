@@ -80,7 +80,7 @@ pruned, buildable Next.js project pre-configured to those exact selections.
 |---|---|---|
 | Free demo | $0 | Browse the site, configure any build and download a source-free preview (file inventory + design tokens, never source code). Full source ZIP is 402 without entitlement |
 | Buyout | $249 one-time ($174 Black Friday) | Full source, permanent offline license key, 12 months free updates then Care, license for your own products (no resale/redistribution as template) |
-| Care | $19/mo ($13/mo Black Friday) | Upstream patches, security & dependency updates, official components, monthly video-studio credits, priority support; key expires with the period |
+| Care | $19/mo ($13/mo Black Friday) | Consumption + adaptation: monthly video-render credits, Care-first modules (Video Studio included), monthly-recast agent contract (skills/rules/AGENTS.md), upstream merge patches as mergeable diffs, 12h first-response SLA; key expires with the period |
 | Custom 1:1 | Fixed quote after a free 30-minute call | Custom components/themes, private deployment, SSO, RAG on own data, audits |
 
 Checkout on this site is processed by ${PROVIDER} (PAYMENT_PROVIDER=${PROVIDER_KEY}). Custom work is

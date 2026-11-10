@@ -222,7 +222,11 @@ FREE_GENERATIONS_PER_DAY、NEXT_PUBLIC_CONTACT_EMAIL），意味着：
 - **Affiliate 计划**（30% 佣金）：ShipFast/MakerKit 生态里大量 KOL 靠联盟吃饭，是最便宜的
   增量渠道；用现有 license 体系加 referral 参数即可。
 - 模板样板间 6 → 12 套（第二条变现线：主题包/垂类模板可单独定价）。
-- Care 转化动作：buyout 用户 30 天邮件序列 → Care 试用 offer（$9/月，首月免费）。
+- Care 转化动作：buyout 用户 30 天邮件序列 → Care 试用 offer（$19/月、首月 $13）。
+  卖点框架（2026-11-10 定稿）：**消耗 + 适配，不卖保险**——① 每月视频渲染额度
+  （不用即重置）② 新模块 Care 首发（video 已适用；买断 6 个月后解锁或单购）
+  ③ agent 契约每月重铸 ④ 上游合并补丁 ⑤ 12h 首响 SLA。文案已落 pricing 五语 +
+  llms.txt/llms-full；Discord 承诺删除（50 付费用户前不建社区）。
 - 日语市场试水：/styles 与 /templates 的 ja 落地内容 + note.com/Zenn 发文（五语资产的
   独家变现，几乎无竞争）。
 

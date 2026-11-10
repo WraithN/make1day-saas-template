@@ -35,10 +35,15 @@ export default async function AccountLayout({
     { href: "/account/billing", label: c["account.nav.billing"] },
     { href: "/account/licenses", label: c["account.nav.licenses"] },
     { href: "/account/settings", label: c["account.nav.settings"] },
-    ...(env.showWorkspaces()
-      ? [{ href: WORKSPACES_HREF, label: c["account.nav.workspaces"] }]
-      : []),
+    { href: WORKSPACES_HREF, label: c["account.nav.workspaces"] },
   ];
+  // Ops gate: hide the org UI where tenancy is not productised (make1day's
+  // own site sets SHOW_WORKSPACES=false). Filtering by the literal — not the
+  // constant — keeps the multitenancy-prune rewrite in prune.ts (which drops
+  // the item line and the constant) compiling cleanly.
+  const visible = env.showWorkspaces()
+    ? items
+    : items.filter((i) => i.href !== "/account/workspaces");
 
   const badge = snap.email
     ? `${c["console.signedInAs"]} · ${snap.email}`
@@ -52,7 +57,7 @@ export default async function AccountLayout({
   return (
     <>
       <ConsoleNav
-        items={items}
+        items={visible}
         eyebrow={c["account.eyebrow"]}
         title={c["account.title"]}
         subtitle={c["account.subtitle"]}
