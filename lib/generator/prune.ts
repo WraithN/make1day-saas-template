@@ -40,6 +40,7 @@ const SKILL_FILES: Record<SkillId, string> = {
   i18n: "skills/i18n.md",
   deploy: "skills/deploy.md",
   agents: "skills/agent-workflow.md",
+  video: "skills/video.md",
 };
 
 /** Skill id → globs used by the generated scoped rules. */
@@ -56,6 +57,7 @@ export const SKILL_GLOBS: Record<SkillId, string[]> = {
   i18n: ["lib/i18n*.ts", "lib/i18n*.tsx", "components/LanguageSwitcher.tsx"],
   deploy: ["next.config.mjs", "wrangler.toml", "middleware.ts"],
   agents: ["AGENTS.md", "design.md", "ai/**", "skills/**"],
+  video: ["lib/video/**", "app/video/**", "app/api/video/**"],
 };
 
 /** Skill id → filename, exposed so the doc generator can build a real index. */
@@ -135,6 +137,23 @@ const CONSOLE_SHARED_FILES = [
 const PREMIUM_FILES = [
   "app/premium/page.tsx",
   "components/Paywall.tsx",
+];
+
+// Video studio (face-swap) module: consent-gated fal.ai jobs, subscription
+// credits, deep-synthesis labeling. Pruned whole when unselected.
+const VIDEO_FILES = [
+  "app/video/page.tsx",
+  "app/video/studio/page.tsx",
+  "app/api/video/jobs/route.ts",
+  "app/api/video/jobs/[id]/route.ts",
+  "app/api/video/webhook/route.ts",
+  "lib/video/fal.ts",
+  "lib/video/quota.ts",
+  "lib/video/store.ts",
+  "lib/content/video-templates.ts",
+  "supabase/migrations/0013_video.sql",
+  "skills/video.md",
+  "ai/rules/video.md",
 ];
 
 // Multi-tenancy: when OFF, drop the workspace UI + its API routes + helpers so
@@ -363,6 +382,12 @@ export function computeSkip(config: BuilderConfig): Set<string> {
   // isn't selected. lib/paywall.ts (the interception engine) stays.
   if (!config.features.includes("premium")) {
     for (const f of PREMIUM_FILES) skip.add(f);
+  }
+
+  // Video studio (face-swap) module: consent-gated fal.ai jobs, subscription
+  // credits, deep-synthesis labeling. Pruned whole when unselected.
+  if (!config.features.includes("video")) {
+    for (const f of VIDEO_FILES) skip.add(f);
   }
 
   // Multi-tenancy: drop the workspace UI + API routes + helper when OFF, or

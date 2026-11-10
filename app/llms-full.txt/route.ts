@@ -1,4 +1,4 @@
-// llms-full.txt — the LONG form of llms.txt for AI agents / answer engines.
+﻿// llms-full.txt — the LONG form of llms.txt for AI agents / answer engines.
 // Self-contained on purpose: it must not import modules that the generator
 // prunes, because this route is excluded from customer ZIPs (SITE_ONLY_FILES).
 import { env } from "@/lib/env";
@@ -79,8 +79,8 @@ pruned, buildable Next.js project pre-configured to those exact selections.
 | Plan | Price | What the buyer gets |
 |---|---|---|
 | Free demo | $0 | Browse the site, configure any build and download a source-free preview (file inventory + design tokens, never source code). Full source ZIP is 402 without entitlement |
-| Buyout | $249 one-time ($189 Black Friday) | Full source, permanent offline license key, 12 months free updates then Care, license for your own products (no resale/redistribution as template) |
-| Care | $19/mo ($12/mo Black Friday) | Upstream patches, security & dependency updates, official components, monthly video-studio credits, priority support; key expires with the period |
+| Buyout | $249 one-time ($174 Black Friday) | Full source, permanent offline license key, 12 months free updates then Care, license for your own products (no resale/redistribution as template) |
+| Care | $19/mo ($13/mo Black Friday) | Upstream patches, security & dependency updates, official components, monthly video-studio credits, priority support; key expires with the period |
 | Custom 1:1 | Fixed quote after a free 30-minute call | Custom components/themes, private deployment, SSO, RAG on own data, audits |
 
 Checkout on this site is processed by ${PROVIDER} (PAYMENT_PROVIDER=${PROVIDER_KEY}). Custom work is
@@ -98,12 +98,12 @@ POST /api/generate accepts this JSON (all fields required except licenseKey):
   {
     "appName": string (1-60 chars, slugified into package name),
     "auth": ("email"|"google"|"github"|"apple"|"microsoft")[] (max 5),
-    "payment": "none"|"stripe"|"creem"|"paypal"|"waffo"|"lemonsqueezy",
-    "ai": ("openai"|"anthropic"|"gemini")[] (max 3),
-    "features": ("landing"|"dashboard"|"rag"|"multitenancy"|"account"|"admin")[] (max 6),
+    "payment": ("none"|"stripe"|"creem"|"paypal"|"waffo"|"lemonsqueezy")[] (max 6, "none" exclusive),
+    "ai": ("openai"|"anthropic"|"gemini"|"mistral"|"cohere"|"xai"|"perplexity"|"ollama")[] (max 8),
+    "features": ("landing"|"dashboard"|"rag"|"multitenancy"|"account"|"admin"|"premium"|"video")[] (max 8),
     "deploy": "vercel"|"selfhost"|"cloudflare",
-    "style": "doodle"|"midnight"|"paper"|"aurora"|"emerald"|"sunset"|"ocean"|"mono"|"slate"|"candy"|"sand",
-    "skills": ("frontend"|"ui"|"backend"|"testing"|"seo"|"auth"|"payments"|"database"|"rag"|"i18n"|"deploy"|"agents")[] (max 12),
+    "style": "doodle"|"midnight"|"paper"|"aurora"|"emerald"|"sunset"|"ocean"|"mono"|"slate"|"candy"|"sand"|"y2k"|"pixel"|"neon"|"glass"|"retro",
+    "skills": ("frontend"|"ui"|"backend"|"testing"|"seo"|"auth"|"payments"|"database"|"rag"|"i18n"|"deploy"|"agents"|"video")[] (max 13),
     "licenseKey": string (optional, "SK1.<payload>.<mac>")
   }
 

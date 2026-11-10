@@ -1,4 +1,4 @@
-# make1day
+﻿# make1day
 
 > Ship your AI SaaS MVP in days, not months.
 > An AI SaaS MVP starter by **make1day** — auth, subscriptions, one real AI feature, a signed-in user console and an operator admin console. Clone it, reskin it, launch.
@@ -248,8 +248,8 @@ gateway with `PAYMENT_PROVIDER` (`waffo` | `stripe` | `creem` | `paypal` |
 > notes: [`docs/waffo.md`](docs/waffo.md).
 
 **Waffo Pancake (default)**
-1. Create a **one-time** product for Buyout ($249; Black Friday $189) and a **monthly** product for
-   Care ($19/mo; Black Friday $12/mo). In Pancake the **product id IS the price id** → set
+1. Create a **one-time** product for Buyout ($249; Black Friday $174) and a **monthly** product for
+   Care ($19/mo; Black Friday $13/mo). In Pancake the **product id IS the price id** → set
    `WAFFO_PRICE_ID_BUYOUT` / `WAFFO_PRICE_ID_CARE` (legacy `_PRO`/`_SCALE` are
    fallbacks).
 2. Set `WAFFO_STORE_SLUG` + `WAFFO_ENVIRONMENT=test|prod` for public auth, **or**

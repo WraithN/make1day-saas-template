@@ -107,6 +107,20 @@ const RULES_META = [
     ],
   },
   {
+    id: "video",
+    title: "Video studio & deep-synthesis compliance",
+    globs: ["lib/video/**", "app/api/video/**", "app/video/**"],
+    always: "video",
+    body: [
+      "Consent-first: a job may only be created with consent:true; consent_at is the audit trail. Own-face-or-written-consent only.",
+      "Every output carries the visible AI-generated label; never ship a watermark-removal path.",
+      "POST /api/video/webhook verifies HMAC-SHA256(raw body) under VIDEO_WEBHOOK_SECRET and fails closed without it.",
+      "Credits are reserved before submit and refunded on ANY provider failure; a dead job must never eat the monthly budget.",
+      "Template source clips are customer-hosted assets (VIDEO_TEMPLATE_<ID>_URL); never bundle binary media in the repo.",
+      "The studio is subscription-gated: an active Care plan (plan=care, status=active) or demo mode.",
+    ],
+  },
+  {
     id: "i18n",
     title: "Four-language copy",
     globs: ["lib/i18n*.ts", "lib/i18n*.tsx", "components/**/*.tsx"],

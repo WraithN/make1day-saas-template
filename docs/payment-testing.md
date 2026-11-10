@@ -1,4 +1,4 @@
-# How to test six payment gateways without going mad
+﻿# How to test six payment gateways without going mad
 
 > Configuration (keys, products, webhook URLs) lives in `docs/payments.md`.
 > This document is about **verification**.
@@ -202,10 +202,10 @@ Test mode is a fully isolated environment (separate keys, separate
   |---|---|---|---|
   | Buyout regular | one-time | $249 | `CREEM_PRICE_ID_BUYOUT` |
   | Buyout MGM | one-time | $219 | `CREEM_PRICE_ID_BUYOUT_MGM` |
-  | Buyout Black Friday | one-time | $189 | `CREEM_PRICE_ID_BUYOUT_BF` |
+  | Buyout Black Friday | one-time | $174 | `CREEM_PRICE_ID_BUYOUT_BF` |
   | Care regular | monthly | $19 | `CREEM_PRICE_ID_CARE` |
   | Care MGM | monthly | $15 | `CREEM_PRICE_ID_CARE_MGM` |
-  | Care Black Friday | monthly | $12 | `CREEM_PRICE_ID_CARE_BF` |
+  | Care Black Friday | monthly | $13 | `CREEM_PRICE_ID_CARE_BF` |
 - redeploy after env changes (Vercel snapshots env per deployment)
 
 ### Cases

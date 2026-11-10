@@ -1,4 +1,4 @@
-// Localized FAQ content. EN/ZH carry the full long-tail set; JA/FR/DE cover
+﻿// Localized FAQ content. EN/ZH carry the full long-tail set; JA/FR/DE cover
 // the 12 highest-intent questions and the page falls back to EN only for a
 // locale with no entry at all. `FaqContent.tsx` derives `inLanguage` from the
 // language of the rendered text, never from the UI locale. Answers must
@@ -34,7 +34,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "How do I get my license key after paying?",
-        a: "The full source ZIP requires a license — a **Buyout license ($249, or $189 during Black Friday)** or an **active Care plan**.\n\n**After a paid webhook**, the key is emailed to the checkout address automatically, idempotent per issued key. A failed send is queued in `mail_outbox` and retried by a cron endpoint.\n\n**You can also:**\n\n- Sign in with the email you paid with and open `/account/licenses`\n- Paste an offline key into `/license`\n- Use the claim form on `/license` to request a re-send if you checked out as a guest or used a different login email\n\nReal delivery still requires configuring a mail provider and a host scheduler — those are deployment steps, not missing code.\n\n**No license yet?** Download a free, source-free preview: the complete file inventory of your build plus the design tokens (no source code). The gate protects this site only; the project you download ships with it disabled.",
+        a: "The full source ZIP requires a license — a **Buyout license ($249, or $174 during Black Friday)** or an **active Care plan**.\n\n**After a paid webhook**, the key is emailed to the checkout address automatically, idempotent per issued key. A failed send is queued in `mail_outbox` and retried by a cron endpoint.\n\n**You can also:**\n\n- Sign in with the email you paid with and open `/account/licenses`\n- Paste an offline key into `/license`\n- Use the claim form on `/license` to request a re-send if you checked out as a guest or used a different login email\n\nReal delivery still requires configuring a mail provider and a host scheduler — those are deployment steps, not missing code.\n\n**No license yet?** Download a free, source-free preview: the complete file inventory of your build plus the design tokens (no source code). The gate protects this site only; the project you download ships with it disabled.",
       },
       {
         q: "What is a Next.js SaaS boilerplate?",
@@ -126,7 +126,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "付款后怎么拿到授权码？",
-        a: "完整源码 ZIP 需要授权：**买断授权（$249，黑五期间 $189）** 或 **有效的 Care 订阅**。**付费 Webhook 处理后**，密钥会写入买家账户——用下单邮箱登录并打开 `/account/licenses` 查看，或在 `/license` 粘贴离线密钥兑换。付费 Webhook 还会自动把 key 发到下单邮箱（按已签发 key 幂等）；发送失败会进入 `mail_outbox`，由 `/api/cron/mail-outbox` 重试。\n\n如果游客下单或登录邮箱与下单邮箱不一致，可在 `/license` 的找回表单要求重发。实际投递仍需运维方配置邮件服务与宿主机定时任务——这是部署工作，不是缺失的代码。\n\n**还没授权？** 可下载免费的无源码预览：所选构建的完整文件清单 + 设计令牌（不含源码）。这道门槛只保护本站，你下载到的工程里默认是关闭的。",
+        a: "完整源码 ZIP 需要授权：**买断授权（$249，黑五期间 $174）** 或 **有效的 Care 订阅**。**付费 Webhook 处理后**，密钥会写入买家账户——用下单邮箱登录并打开 `/account/licenses` 查看，或在 `/license` 粘贴离线密钥兑换。付费 Webhook 还会自动把 key 发到下单邮箱（按已签发 key 幂等）；发送失败会进入 `mail_outbox`，由 `/api/cron/mail-outbox` 重试。\n\n如果游客下单或登录邮箱与下单邮箱不一致，可在 `/license` 的找回表单要求重发。实际投递仍需运维方配置邮件服务与宿主机定时任务——这是部署工作，不是缺失的代码。\n\n**还没授权？** 可下载免费的无源码预览：所选构建的完整文件清单 + 设计令牌（不含源码）。这道门槛只保护本站，你下载到的工程里默认是关闭的。",
       },
       {
         q: "什么是 Next.js SaaS 模板？",

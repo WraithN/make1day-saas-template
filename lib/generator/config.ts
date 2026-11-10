@@ -26,7 +26,8 @@ export type Feature =
   | "multitenancy"
   | "account"
   | "admin"
-  | "premium";
+  | "premium"
+  | "video";
 export type DeployTarget = "vercel" | "selfhost" | "cloudflare";
 export type StyleId =
   | "doodle"
@@ -57,7 +58,8 @@ export type SkillId =
   | "rag"
   | "i18n"
   | "deploy"
-  | "agents";
+  | "agents"
+  | "video";
 
 export interface BuilderConfig {
   appName: string;
@@ -108,6 +110,11 @@ export const FEATURE_OPTIONS: { id: Feature; label: string; note: string }[] = [
     id: "premium",
     label: "Paid content (paywall)",
     note: "Edge-gated /premium route + reusable <Paywall> component",
+  },
+  {
+    id: "video",
+    label: "Video studio (face-swap)",
+    note: "Consent-gated template face-swap jobs via fal.ai, subscription credits, deep-synthesis labeling",
   },
 ];
 
@@ -213,6 +220,11 @@ export const SKILL_OPTIONS: { id: SkillId; label: string; note: string }[] = [
     id: "agents",
     label: "Agent Workflow",
     note: "AGENTS.md, scoped rules, definition of done",
+  },
+  {
+    id: "video",
+    label: "Video Studio",
+    note: "Consent-gated face-swap jobs, credits, deep-synthesis labeling",
   },
 ];
 

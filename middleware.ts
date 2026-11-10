@@ -115,7 +115,9 @@ export async function middleware(request: NextRequest) {
   //   /account/*  — end-user area, needs a signed-in user (or demo cookie).
   //   /admin/*    — operator area, locked behind the operator sign-in.
   const userArea =
-    pathname.startsWith("/account") || pathname.startsWith("/dashboard");
+    pathname.startsWith("/account") ||
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/video");
   const adminArea = pathname.startsWith("/admin");
 
   // The Edge runtime cannot reach SQLite, but it CAN verify the HMAC on the

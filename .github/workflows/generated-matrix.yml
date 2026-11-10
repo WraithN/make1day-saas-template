@@ -27,6 +27,7 @@ jobs:
           - waffo-sand-cloudflare
           - waffo-midnight-selfhost
           - stripe-candy-rag
+          - creem-aurora-video
           - none-slate-multitenancy
           - creem-mono-all-skills
           - account-only

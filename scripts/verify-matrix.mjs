@@ -92,6 +92,15 @@ const CASES = [
     }),
   },
   {
+    id: "creem-aurora-video",
+    config: c({
+      payment: ["creem"],
+      style: "aurora",
+      features: ["landing", "dashboard", "video"],
+      skills: ["video"],
+    }),
+  },
+  {
     id: "none-slate-multitenancy",
     config: c({
       payment: ["none"],
@@ -605,6 +614,14 @@ async function verifyCase(entry, doBuild) {
     "RAG files must be pruned exactly when rag is unchecked",
   );
   assert(
+    exists("lib/video/fal.ts") === config.features.includes("video"),
+    "video studio files must be pruned exactly when video is unchecked",
+  );
+  assert(
+    exists("skills/video.md") === config.skills.includes("video"),
+    "video skill must ship exactly when the video skill is selected",
+  );
+  assert(
     exists("app/dashboard/page.tsx") === config.features.includes("dashboard"),
     "dashboard route must be pruned exactly when dashboard is unchecked",
   );
@@ -715,12 +732,13 @@ async function verifyCase(entry, doBuild) {
     (f) => /^ai\/rules\/[^/]+\.md$/.test(f) && f !== "ai/rules/README.md",
   );
   const cursorFiles = [...files].filter((f) => /^\.cursor\/rules\/[^/]+\.mdc$/.test(f));
-  // 7 always-on module rules + payments (when enabled) + rag / account / admin
-  // (when selected) + exactly one rule per selected skill.
+  // 7 always-on module rules + payments (when enabled) + rag / video /
+  // account / admin (when selected) + exactly one rule per selected skill.
   const hasPayments = config.payment.length > 0 && !config.payment.includes("none");
   const expectedRules =
     7 + (hasPayments ? 1 : 0) +
     (config.features.includes("rag") ? 1 : 0) +
+    (config.features.includes("video") ? 1 : 0) +
     (hasAccount ? 1 : 0) + (hasAdmin ? 1 : 0) + config.skills.length;
   assert(
     ruleFiles.length === expectedRules,

@@ -49,9 +49,10 @@ export const builderConfigSchema = z.object({
         "account",
         "admin",
         "premium",
+        "video",
       ]),
     )
-    .max(7),
+    .max(8),
   deploy: z.enum(["vercel", "selfhost", "cloudflare"]),
   style: z.enum([
     "doodle",

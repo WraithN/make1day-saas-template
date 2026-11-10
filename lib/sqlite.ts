@@ -249,6 +249,35 @@ CREATE INDEX IF NOT EXISTS idx_support_tickets_created ON support_tickets(create
 CREATE INDEX IF NOT EXISTS idx_support_tickets_user ON support_tickets(user_id);
 CREATE INDEX IF NOT EXISTS idx_support_tickets_email ON support_tickets(email);
 
+-- Video studio (face-swap) module: job ledger + monthly credits (local mode).
+-- Mirrors supabase/migrations/0013_video.sql; consent_at is the deep-synthesis
+-- audit trail. Unused (pruned) when the "video" feature is not selected.
+CREATE TABLE IF NOT EXISTS video_jobs (
+  id               TEXT PRIMARY KEY,
+  user_id          TEXT NOT NULL,
+  template_id      TEXT NOT NULL,
+  resolution       TEXT NOT NULL DEFAULT '480p',
+  status           TEXT NOT NULL DEFAULT 'queued',
+  provider_job_id  TEXT,
+  status_url       TEXT,
+  response_url     TEXT,
+  input_image_url  TEXT NOT NULL,
+  source_video_url TEXT NOT NULL,
+  output_url       TEXT,
+  credits          INTEGER NOT NULL DEFAULT 1,
+  consent_at       TEXT NOT NULL,
+  error            TEXT,
+  created_at       TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_video_jobs_user ON video_jobs(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_video_jobs_provider ON video_jobs(provider_job_id);
+CREATE TABLE IF NOT EXISTS video_usage (
+  user_id TEXT NOT NULL,
+  month   TEXT NOT NULL,
+  used    INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, month)
+);
+
 -- One-time auth tokens for the LOCAL SQLite auth path. The raw token is NEVER
 -- stored: only its SHA-256 hash. The row is deleted on first use (one-time),
 -- and expires_at enforces a hard deadline. The Supabase path uses Supabase

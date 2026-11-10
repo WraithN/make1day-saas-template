@@ -1,4 +1,4 @@
-# Payments — Configuration Guide
+﻿# Payments — Configuration Guide
 
 make1day ships with a pluggable billing layer. In the **Builder → 03 · Payments**
 step you pick one provider; the generated scaffold reads that choice from
@@ -228,7 +228,7 @@ free products. You can switch to a real provider later by changing
 ## Plans and price IDs
 
 The pricing page sells two paid items — **Buyout** (one-time, $249 regular /
-$189 Black Friday) and **Care** (monthly, $19/mo regular / $12/mo Black Friday,
+$174 Black Friday) and **Care** (monthly, $19/mo regular / $13/mo Black Friday,
 includes video-studio credits) — plus a **custom 1:1 service** with
 no online checkout. Buyout includes 12 months of free updates; after that,
 continue with Care to keep receiving updates. The license lets you build and ship

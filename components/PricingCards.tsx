@@ -140,6 +140,11 @@ export function PricingCards({
             {plan.originalPrice && (
               <s className="text-sm text-muted">{plan.originalPrice}</s>
             )}
+            {plan.bf && plan.originalPrice && (
+              <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white">
+                {t("pricing.off30")}
+              </span>
+            )}
           </div>
           <ul className="mt-5 flex-1 space-y-2 text-sm text-ink-soft">
             {plan.features.map((f) => (

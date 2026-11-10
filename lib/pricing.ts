@@ -23,10 +23,13 @@ export interface PriceLadder {
 }
 
 export const PRICES: { buyout: PriceLadder; care: PriceLadder } = {
-  buyout: { list: 349, regular: 249, mgm: 219, bf: 189 },
-  // Care now includes the monthly video-studio credits (subscription-only
-  // product, see docs/video-product.md).
-  care: { list: 29, regular: 19, mgm: 15, bf: 12 },
+  // regular sits just below the mainstream paid-kit band (ShipFast $199-249,
+  // supastarter $299, MakerKit $349); bf = 30% off regular (七折) during the
+  // Black Friday window; list = struck anchor; mgm = share-to-unlock.
+  buyout: { list: 349, regular: 249, mgm: 219, bf: 174 },
+  // Care includes the monthly video-studio credits for the generated-module
+  // buyers who run their own video site (see docs/video-product.md).
+  care: { list: 29, regular: 19, mgm: 15, bf: 13 },
 };
 
 export type PricePlan = keyof typeof PRICES;

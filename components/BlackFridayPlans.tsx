@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -14,7 +14,7 @@ export type BfPlan = {
   name: string;
   originalPrice: string; // struck anchor, e.g. "$349"
   mgmPrice: string; // "$219"
-  bfPrice: string; // "$189" — what the CTA charges
+  bfPrice: string; // "$174" — what the CTA charges
   once?: boolean;
   monthly?: boolean;
   forever?: boolean;
