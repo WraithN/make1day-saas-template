@@ -31,9 +31,22 @@ export type TemplateChrome = {
   perMonth: string;
   oneTime: string;
   choose: string;
+  tabWorkspaces: string;
+  members: string;
+  owner: string;
+  member: string;
+  switch: string;
+  activeWs: string;
 };
 
-export type Surface = "landing" | "pricing" | "login" | "chat" | "rag" | "admin";
+export type Surface =
+  | "landing"
+  | "pricing"
+  | "login"
+  | "chat"
+  | "rag"
+  | "admin"
+  | "workspaces";
 
 const SURFACES: { id: Surface; key: keyof TemplateChrome }[] = [
   { id: "landing", key: "tabLanding" },
@@ -42,6 +55,7 @@ const SURFACES: { id: Surface; key: keyof TemplateChrome }[] = [
   { id: "chat", key: "tabChat" },
   { id: "rag", key: "tabRag" },
   { id: "admin", key: "tabAdmin" },
+  { id: "workspaces", key: "tabWorkspaces" },
 ];
 
 /**
@@ -339,6 +353,49 @@ export function TemplateSite({
                   </li>
                 ))}
               </ul>
+            </div>
+          </section>
+        )}
+
+        {/* ── Workspaces (multi-tenancy showcase) ── */}
+        {surface === "workspaces" && (
+          <section className="py-10">
+            <h2 className="text-[18px] font-semibold">{t.tabWorkspaces}</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {[
+                { org: `${name} HQ`, role: t.owner, members: 8, active: true },
+                { org: `${name} Studio`, role: t.member, members: 3, active: false },
+              ].map((o, i) => (
+                <div
+                  key={i}
+                  className={
+                    panel +
+                    (o.active
+                      ? " border-[rgb(var(--accent))] ring-1 ring-[rgb(var(--accent))]"
+                      : "")
+                  }
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[15px] font-semibold">{o.org}</span>
+                    {o.active && (
+                      <span className="tag" style={solidStyle}>
+                        {t.activeWs}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-1 text-[12px] text-[rgb(var(--muted))]">
+                    {o.role} · {o.members} {t.members}
+                  </div>
+                  <button
+                    type="button"
+                    className={(o.active ? ghostBtn : solidBtn) + " mt-3 w-full"}
+                    style={o.active ? undefined : solidStyle}
+                    disabled={o.active}
+                  >
+                    {o.active ? t.activeWs : t.switch}
+                  </button>
+                </div>
+              ))}
             </div>
           </section>
         )}

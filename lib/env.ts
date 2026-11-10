@@ -76,6 +76,12 @@ export const env = {
       .map((s) => s.trim().toLowerCase())
       .filter(Boolean),
 
+  // Workspace (multi-tenancy) UI visibility. Customer builds default ON so the
+  // consoles demonstrate the org/membership scaffolding; make1day's own site
+  // sets SHOW_WORKSPACES=false because its licenses/orders are per-user and
+  // the org UI would be a dead-end tab for buyers.
+  showWorkspaces: () => opt("SHOW_WORKSPACES", "true").toLowerCase() !== "false",
+
   // ── Payment provider (selects the active gateway) ────────────
   // Defaults to Waffo (Pancake), matching .env.example, the pricing copy and
   // the docs/waffo.md launch checklist. Flip PAYMENT_PROVIDER to creem /

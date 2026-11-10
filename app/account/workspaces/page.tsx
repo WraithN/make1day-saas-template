@@ -5,10 +5,15 @@ import { getCurrentUser } from "@/lib/subscriptions";
 import { getUserOrgs, getActiveOrgId } from "@/lib/org";
 import { ConsoleSection } from "@/components/console/ConsoleUI";
 import { WorkspaceManager } from "@/components/console/WorkspaceManager";
+import { env } from "@/lib/env";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function WorkspacesPage() {
+  // Ops can hide the org UI on deployments where tenancy is not productised
+  // (make1day's own site: SHOW_WORKSPACES=false). Customer builds default ON.
+  if (!env.showWorkspaces()) notFound();
   const lang = await getLang();
   const c = consoleCopy(lang);
   const snap = await getAccountSnapshot();

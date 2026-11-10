@@ -8,6 +8,7 @@ import { BlogTeaser } from "@/components/home/BlogTeaser";
 import { HandDrawnDeco } from "@/components/home/HandDrawnDeco";
 import { TemplateGallerySection } from "@/components/home/TemplateGallerySection";
 import { FaqSection } from "@/components/home/FaqSection";
+import { HreflangLinks } from "@/components/HreflangLinks";
 import { PricingCards, type Plan } from "@/components/PricingCards";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
@@ -81,6 +82,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <HreflangLinks path="/" />
       {/* HERO — opens with the honest promise, not a hype claim.
           Decoration layer is absolutely positioned at z-index 1; the copy sits
           above it at z-index 10 and keeps every click. */}

@@ -3,6 +3,7 @@ import { Builder } from "@/components/Builder";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
 import { STYLE_OPTIONS, type StyleId } from "@/lib/generator/config";
+import { HreflangLinks } from "@/components/HreflangLinks";
 
 export const metadata: Metadata = {
   title: "SaaS Template Generator",
@@ -28,6 +29,7 @@ export default async function BuilderPage({
 
   return (
     <section className="wrap py-10 sm:py-16">
+      <HreflangLinks path="/builder" />
       <div className="max-w-2xl">
         <div className="eyebrow mb-3">
           <Trans k="builderPage.eyebrow" lang={lang} />

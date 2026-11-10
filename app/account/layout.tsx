@@ -5,6 +5,7 @@ import { consoleCopy } from "@/lib/content/console";
 import { getAccountSnapshot } from "@/lib/console";
 import { canAccessAdmin, roleKey } from "@/lib/rbac";
 import { ConsoleNav } from "@/components/console/ConsoleNav";
+import { env } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,9 @@ export default async function AccountLayout({
     { href: "/account/billing", label: c["account.nav.billing"] },
     { href: "/account/licenses", label: c["account.nav.licenses"] },
     { href: "/account/settings", label: c["account.nav.settings"] },
-    { href: WORKSPACES_HREF, label: c["account.nav.workspaces"] },
+    ...(env.showWorkspaces()
+      ? [{ href: WORKSPACES_HREF, label: c["account.nav.workspaces"] }]
+      : []),
   ];
 
   const badge = snap.email

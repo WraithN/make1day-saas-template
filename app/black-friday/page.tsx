@@ -1,5 +1,6 @@
 import { BlackFridayCountdown } from "@/components/BlackFridayCountdown";
 import { BlackFridayPlans, type BfPlan } from "@/components/BlackFridayPlans";
+import { HreflangLinks } from "@/components/HreflangLinks";
 import { env, priceForPlanBf, primaryPaymentsReady } from "@/lib/env";
 import { PRICES } from "@/lib/pricing";
 import { Trans } from "@/lib/i18n";
@@ -33,6 +34,7 @@ export default async function BlackFridayPage() {
   if (!active) {
     return (
       <section className="wrap py-16 sm:py-24">
+        <HreflangLinks path="/black-friday" />
         <div className="mx-auto max-w-xl text-center">
           <div className="eyebrow mb-3">
             <Trans k="blackfriday.eyebrow" lang={lang} />
@@ -147,6 +149,7 @@ export default async function BlackFridayPage() {
 
   return (
     <section className="wrap py-12 sm:py-20">
+      <HreflangLinks path="/black-friday" />
       <div className="text-center">
         <div className="eyebrow mb-3">
           <Trans k="blackfriday.eyebrow" lang={lang} />
