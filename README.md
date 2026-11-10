@@ -50,7 +50,11 @@ drop in your own keys.
   user or an operator; query needs a signed-in user **with** an active
   subscription — every query runs a real LLM, so anonymous callers get `401`
   (not signed in) / `402` (no subscription) instead of a free pass. Demo mode
-  (no Supabase configured) counts as signed-in + subscribed.
+  (no Supabase configured) counts as signed-in + subscribed **in `next dev`**;
+  in production (`next start`) it is closed by design and requires BOTH
+  `NEXT_PUBLIC_ENABLE_DEMO=true` and `DEMO_IN_PRODUCTION=true` — a deployed
+  site must never have a one-cookie login backdoor. `NEXT_PUBLIC_ENABLE_DEMO`
+  is inlined at build time: rebuild (`npm run build`) after changing it.
 
 - **Two retrieval branches**: Okapi BM25 over Latin words + CJK unigrams/bigrams
   (`lib/rag/retrieve.ts`) and dense embeddings from any OpenAI-compatible

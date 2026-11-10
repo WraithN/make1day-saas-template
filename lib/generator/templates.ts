@@ -184,6 +184,10 @@ export function buildEnvExample(c: BuilderConfig): string {
   lines.push(``);
   lines.push(`# ── Demo / mock login ───────────────────────────────────────`);
   lines.push(`# Kept OFF. Once Supabase is configured demo mode is disabled anyway.`);
+  lines.push(`# In production (next start) the AI/RAG endpoints answer 401 until Supabase`);
+  lines.push(`# is configured OR both flags below are flipped on purpose (never do this`);
+  lines.push(`# on a real deployment - it is a one-cookie login backdoor).`);
+  lines.push(`# NEXT_PUBLIC_ENABLE_DEMO is inlined at BUILD time: rebuild after changing.`);
   lines.push(`NEXT_PUBLIC_ENABLE_DEMO=false`);
   lines.push(``);
   lines.push(`# ── License gate (source download paywall) ──────────────────────`);
@@ -336,7 +340,7 @@ export function buildReadme(c: BuilderConfig): string {
     lines.push(``);
     lines.push(`- \`POST /api/rag/ingest\` — body \`{ title, text }\`, splits + indexes a document (embeddings are generated when a key is available).`);
     lines.push(`- \`POST /api/rag/query\` — body \`{ question, provider? }\`, returns \`{ answer, citations, mode, retrieval }\`.`);
-    lines.push(`- Both endpoints are **authenticated**: ingest needs a signed-in user (or an operator), query needs a signed-in user with an active subscription (\`401\` / \`402\` otherwise) because every query runs a real LLM. Demo mode counts as signed-in + subscribed.`);
+    lines.push(`- Both endpoints are **authenticated**: ingest needs a signed-in user (or an operator), query needs a signed-in user with an active subscription (\`401\` / \`402\` otherwise) because every query runs a real LLM. In \`next dev\`, demo mode (no Supabase configured + the \`sk_demo=1\` cookie) counts as signed-in + subscribed. In \`next start\` (production) demo mode is closed by design — it requires BOTH \`NEXT_PUBLIC_ENABLE_DEMO=true\` and \`DEMO_IN_PRODUCTION=true\`, so a deployed site never has a one-cookie login backdoor; configuring Supabase is the intended path.`);
     lines.push(`- Open \`/rag\` for the demo UI (ask questions and ingest your own docs).`);
     lines.push(`- Retrieval is **hybrid**: Okapi BM25 (Latin words + CJK uni/bigrams) **plus** dense embeddings, combined with **Reciprocal Rank Fusion** (RRF, k=60) in \`lib/rag/hybrid.ts\`.`);
     lines.push(`- \`EMBEDDING_*\` (or \`OPENAI_API_KEY\`) enables the vector branch via an OpenAI-compatible \`/embeddings\` endpoint. Without a key it degrades to BM25-only — the demo still works.`);

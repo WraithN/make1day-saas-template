@@ -77,3 +77,9 @@ node scripts/verify-matrix.mjs --case default-waffo-midnight --build --publish
 - 矩阵验证的是**可编译性**，不验证运行时行为（支付回调、登录、RAG 检索质量）。
 - `.matrix-out/` 是本地临时产物，不应提交；CI 每次在干净 checkout 中运行。`public/build-matrix.json` 由 `--publish` 写入，是展示用快照，可被后续运行覆盖。
 - 站点 `/build-matrix` 页读取 `public/build-matrix.json` 展示最近一次发布结果（通过率、各 case 文件数、ZIP 体积、next build 耗时与产物体积）。
+
+## Promise-vs-delivery audit
+
+
+ode scripts/audit-template.mjs <extracted-zip-dir> <full|min> checks a generated ZIP against the marketing promises: every selected module/skill/rule/design token ships, every unselected one is pruned, no dead npm scripts or dead nav links, no brand leak, five locales intact. The CI matrix proves the ZIP compiles; this proves it matches what was sold.
+
