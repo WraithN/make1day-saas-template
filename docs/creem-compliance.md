@@ -25,6 +25,13 @@ timeout (5s) / unexpected status → **fail closed** with 503
 `moderation_unavailable`; nothing is generated. `external_id` carries the
 caller context (`ai:<user>`, `rag:query`, `videojob:<template>`).
 
+**Key routing:** moderation uses `CREEM_MODERATION_API_KEY` when set, else
+`CREEM_API_KEY`; the API environment follows the **key prefix**
+(`creem_test_*` → `test-api.creem.io`, `creem_*` → `api.creem.io`), never
+`CREEM_ENV`. This lets a merchant under review produce live moderation
+evidence in the dashboard while checkout stays in test mode. Deployments with
+no Creem key at all fall back to the local blocklist (AUP §NSFW).
+
 Video Studio carries three additional non-text controls the reviewer can test:
 the portrait-rights attestation checkbox (server-enforced `consent: true`),
 the subscription gate (402 without an active Care plan), and the visible
@@ -52,8 +59,9 @@ curl -X POST https://www.make1day.dev/api/video/jobs \
 
 Confirm in the Creem dashboard that moderation calls from
 `POST /v1/moderation/prompt` appear with matching `external_id` values, and
-that the production key (`creem_…`, not `creem_test_…`) is the one configured
-(`CREEM_API_KEY` + `CREEM_ENV=live` on Vercel).
+that a production-prefixed key (`creem_…`, not `creem_test_…`) is the one
+configured on Vercel — via `CREEM_MODERATION_API_KEY` (moderation-only,
+checkout may stay on the test key) or `CREEM_API_KEY`.
 
 ## 4. Re-review note (paste-ready)
 

@@ -31,12 +31,30 @@ const LOCAL_DENY = [
 ];
 
 export function moderationConfigured(): boolean {
-  return Boolean(process.env.CREEM_API_KEY?.trim());
+  return Boolean(moderationKey());
 }
 
+/**
+ * Moderation-specific key override: during Creem account review the merchant
+ * may already see a LIVE key while checkout must stay in test mode. Setting
+ * CREEM_MODERATION_API_KEY routes moderation to production without touching
+ * payments. Falls back to CREEM_API_KEY.
+ */
+function moderationKey(): string {
+  return (
+    process.env.CREEM_MODERATION_API_KEY?.trim() ||
+    process.env.CREEM_API_KEY?.trim() ||
+    ""
+  );
+}
+
+// Environment follows the KEY PREFIX (creem_test_* = sandbox, creem_* = live),
+// not CREEM_ENV, so a moderation-only live key cannot be mis-routed by the
+// payments environment setting.
 function creemBase(): string {
-  const live = (process.env.CREEM_ENV ?? "test").toLowerCase() === "live";
-  return live ? "https://api.creem.io" : "https://test-api.creem.io";
+  const key = moderationKey();
+  const isTest = key.startsWith("creem_test_");
+  return isTest ? "https://test-api.creem.io" : "https://api.creem.io";
 }
 
 /**
@@ -50,7 +68,7 @@ export async function screenPrompt(
   const clean = (text ?? "").trim();
   if (!clean) return { decision: "allow", source: "local" };
 
-  const key = process.env.CREEM_API_KEY?.trim();
+  const key = moderationKey();
   if (!key) {
     return {
       decision: LOCAL_DENY.some((re) => re.test(clean)) ? "deny" : "allow",
