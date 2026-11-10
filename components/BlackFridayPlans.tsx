@@ -12,9 +12,9 @@ import { useLanguage } from "@/lib/i18n";
 export type BfPlan = {
   id: string;
   name: string;
-  originalPrice: string; // struck anchor, e.g. "$299"
-  mgmPrice: string; // "$149"
-  bfPrice: string; // "$99" — what the CTA charges
+  originalPrice: string; // struck anchor, e.g. "$349"
+  mgmPrice: string; // "$219"
+  bfPrice: string; // "$189" — what the CTA charges
   once?: boolean;
   monthly?: boolean;
   forever?: boolean;

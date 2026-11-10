@@ -79,8 +79,8 @@ pruned, buildable Next.js project pre-configured to those exact selections.
 | Plan | Price | What the buyer gets |
 |---|---|---|
 | Free demo | $0 | Browse the site, configure any build and download a source-free preview (file inventory + design tokens, never source code). Full source ZIP is 402 without entitlement |
-| Buyout | $99 one-time | Full source, permanent offline license key, 12 months free updates then Care, license for your own products (no resale/redistribution as template) |
-| Care | $9/mo | Upstream patches, security & dependency updates, official components, priority support; key expires with the period |
+| Buyout | $249 one-time ($189 Black Friday) | Full source, permanent offline license key, 12 months free updates then Care, license for your own products (no resale/redistribution as template) |
+| Care | $19/mo ($12/mo Black Friday) | Upstream patches, security & dependency updates, official components, monthly video-studio credits, priority support; key expires with the period |
 | Custom 1:1 | Fixed quote after a free 30-minute call | Custom components/themes, private deployment, SSO, RAG on own data, audits |
 
 Checkout on this site is processed by ${PROVIDER} (PAYMENT_PROVIDER=${PROVIDER_KEY}). Custom work is
@@ -483,7 +483,7 @@ Compared with ShipFast (~$199), Divjoy (~$199), VibeReady ($149-399),
 Makerkit (~$299), Supastarter ($299-1,499) and Open SaaS ($0): make1day is the
 only one in this set that BOTH prunes unselected modules out of the downloaded
 source AND generates a root AGENTS.md, a style-specific design.md, scoped rules
-and 12 skills — all rebuildable with npm run ai:docs — at a $99 launch price,
+and 12 skills — all rebuildable with npm run ai:docs — at a $249 regular price,
 with llms.txt/llms-full.txt, an OpenAPI 3.1 contract, an MCP scaffold_project
 tool, selectable user/admin consoles and a public 18-case build matrix.
 Deep B2B multi-tenancy/IaC remains the stronger choice at Makerkit,

@@ -1,18 +1,21 @@
 import { BlackFridayCountdown } from "@/components/BlackFridayCountdown";
 import { BlackFridayPlans, type BfPlan } from "@/components/BlackFridayPlans";
 import { env, priceForPlanBf, primaryPaymentsReady } from "@/lib/env";
+import { PRICES } from "@/lib/pricing";
 import { Trans } from "@/lib/i18n";
 import { getLang, tr } from "@/lib/i18n-server";
 import Link from "next/link";
 
 // Three-tier Black Friday pricing. The buy button charges the BF price (lowest);
 // the struck price is the list anchor; the MGM tier unlocks by sharing.
-const BF_BUYOUT_ORIGINAL = "299";
-const BF_BUYOUT_MGM = "149";
-const BF_BUYOUT_PRICE = "99";
-const BF_CARE_ORIGINAL = "29";
-const BF_CARE_MGM = "15";
-const BF_CARE_PRICE = "9";
+// Prices live in lib/pricing.ts (single source of truth shared with /pricing,
+// JSON-LD and the machine-readable docs).
+const BF_BUYOUT_ORIGINAL = String(PRICES.buyout.list);
+const BF_BUYOUT_MGM = String(PRICES.buyout.mgm);
+const BF_BUYOUT_PRICE = String(PRICES.buyout.bf);
+const BF_CARE_ORIGINAL = String(PRICES.care.list);
+const BF_CARE_MGM = String(PRICES.care.mgm);
+const BF_CARE_PRICE = String(PRICES.care.bf);
 
 export const metadata = {
   title: "Black Friday — make1day",

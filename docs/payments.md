@@ -227,8 +227,9 @@ free products. You can switch to a real provider later by changing
 
 ## Plans and price IDs
 
-The pricing page sells two paid items — **Buyout** (one-time, $99 launch price)
-and **Care** (monthly, $9/mo launch price) — plus a **custom 1:1 service** with
+The pricing page sells two paid items — **Buyout** (one-time, $249 regular /
+$189 Black Friday) and **Care** (monthly, $19/mo regular / $12/mo Black Friday,
+includes video-studio credits) — plus a **custom 1:1 service** with
 no online checkout. Buyout includes 12 months of free updates; after that,
 continue with Care to keep receiving updates. The license lets you build and ship
 your own products (commercial use allowed) but not resell or redistribute the

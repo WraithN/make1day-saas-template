@@ -97,7 +97,7 @@ FREE_GENERATIONS_PER_DAY、NEXT_PUBLIC_CONTACT_EMAIL），意味着：
 |---|---|---|
 | 仓库 LICENSE=MIT vs 卖生成包 | 保持 MIT（terms 已写明"收费=配置构建+交付服务"）/ 换商业 license | 上线前拍板；换 license 必须在首笔销售前 |
 | Care 承诺 "Priority support (**Discord** + email)" | 建 Discord / 改文案 | 二选一，**不能空头承诺**；建议先改文案为 email+工单，Discord 有 50+ 用户再建 |
-| 定价一致性 | BF 页：list $299 / MGM $149 / BF $99；README 写 "$99 买断" | 统一口径：BF 期间全站 $99，BF 后回 $149–299 锚定；确认 /pricing 与 /black-friday 不打架 |
+| 定价一致性 | 单一真源 `lib/pricing.ts`（2026-11-10 调价）：Buyout 划线 $349 / 常售 $249 / 分享 $219 / 黑五 $189；Care 划线 $29 / 常售 $19 / 分享 $15 / 黑五 $12（含视频额度）。/pricing 与 /black-friday 均读它；BF 窗口内主定价页显示划线锚价 + BF 徽标 | 已落地：改价只动 `lib/pricing.ts`；llms/FAQ/README/payments 文档同步新口径 |
 | BF 活动窗口 | `BLACK_FRIDAY_ENDS_AT=2026-11-30` | 天然上线 deadline：**11 月中下旬上线，吃黑五流量** |
 | 品牌资产 | make1day 的域名/GitHub org/X handle 是否已注册 | ⚠️ 存在竞品 **shipkit.sh**（内部代号撞名，品牌已改 make1day 是对的）；尽快锁定 make1day.com/.ai/.dev + @make1day 各平台 handle |
 

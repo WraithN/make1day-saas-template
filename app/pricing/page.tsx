@@ -14,12 +14,15 @@ export const metadata: Metadata = {
   },
 };
 
-// Keep the structured-data amounts in sync with the cards below.
-const BUYOUT_PRICE = "99";
-const CARE_PRICE = "9";
+// Keep the structured-data amounts in sync with the cards below: both read
+// lib/pricing.ts so a reprice or a campaign window can never desync them.
+import { PRICES, bfActive, effectivePrice } from "@/lib/pricing";
 
 export default async function PricingPage() {
   const lang = await getLang();
+  const bf = bfActive();
+  const buyout = effectivePrice("buyout");
+  const care = effectivePrice("care");
   const plans: Plan[] = [
     {
       id: "free",
@@ -34,8 +37,10 @@ export default async function PricingPage() {
     {
       id: "buyout",
       name: "Buyout",
-      price: `$${BUYOUT_PRICE}`,
-      launch: true,
+      price: `$${buyout}`,
+      originalPrice: bf ? `$${PRICES.buyout.list}` : undefined,
+      launch: !bf,
+      bf,
       period: "",
       once: true,
       features: [
@@ -52,7 +57,9 @@ export default async function PricingPage() {
     {
       id: "care",
       name: "Care",
-      price: `$${CARE_PRICE}`,
+      price: `$${care}`,
+      originalPrice: bf ? `$${PRICES.care.list}` : undefined,
+      bf,
       period: "",
       monthly: true,
       features: [
@@ -101,18 +108,18 @@ export default async function PricingPage() {
       {
         "@type": "Offer",
         name: "Buyout — one-time source license",
-        price: BUYOUT_PRICE,
+        price: String(buyout),
         priceCurrency: "USD",
         url: `${site}/pricing`,
       },
       {
         "@type": "Offer",
         name: "Care — monthly",
-        price: CARE_PRICE,
+        price: String(care),
         priceCurrency: "USD",
         priceSpecification: {
           "@type": "UnitPriceSpecification",
-          price: CARE_PRICE,
+          price: String(care),
           priceCurrency: "USD",
           unitText: "MONTH",
         },
