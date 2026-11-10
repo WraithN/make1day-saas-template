@@ -87,9 +87,10 @@ export const builderConfigSchema = z.object({
         "i18n",
         "deploy",
         "agents",
+        "video",
       ]),
     )
-    .max(12),
+    .max(13),
 });
 
 export type ValidatedBuilderConfig = z.infer<typeof builderConfigSchema>;

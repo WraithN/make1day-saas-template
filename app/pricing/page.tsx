@@ -38,7 +38,9 @@ export default async function PricingPage() {
       id: "buyout",
       name: "Buyout",
       price: `$${buyout}`,
-      originalPrice: bf ? `$${PRICES.buyout.list}` : undefined,
+      // During BF the struck anchor is the REGULAR price (the 30%-off basis);
+      // the $349 list anchor lives on the Black Friday page's three-tier card.
+      originalPrice: bf ? `$${PRICES.buyout.regular}` : undefined,
       launch: !bf,
       bf,
       period: "",
@@ -58,7 +60,7 @@ export default async function PricingPage() {
       id: "care",
       name: "Care",
       price: `$${care}`,
-      originalPrice: bf ? `$${PRICES.care.list}` : undefined,
+      originalPrice: bf ? `$${PRICES.care.regular}` : undefined,
       bf,
       period: "",
       monthly: true,
