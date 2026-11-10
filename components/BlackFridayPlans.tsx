@@ -108,19 +108,15 @@ export function BlackFridayPlans({
   }
 
   async function copyLink() {
+    const ok = await copyText(shareUrl);
+    setCopied(ok);
+    setUnlocked(true);
     try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      setUnlocked(true);
-      try {
-        window.localStorage.setItem(MGM_UNLOCK_KEY, "1");
-      } catch {
-        /* ignore */
-      }
-      setTimeout(() => setCopied(false), 2000);
+      window.localStorage.setItem(MGM_UNLOCK_KEY, "1");
     } catch {
-      setUnlocked(true);
+      /* ignore */
     }
+    if (ok) setTimeout(() => setCopied(false), 2000);
   }
 
   // Reveal the MGM tier if it was unlocked in a previous visit.

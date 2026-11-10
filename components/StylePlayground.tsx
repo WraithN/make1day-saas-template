@@ -112,13 +112,11 @@ export function StylePlayground({ items }: { items: StyleItem[] }) {
       ([k, v]) => `  ${k}: ${v};`,
     );
     const css = `:root {\n${lines.join("\n")}\n}`;
-    navigator.clipboard?.writeText(css).then(
-      () => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      },
-      () => {},
-    );
+    copyText(css).then((ok) => {
+      if (!ok) return;
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
   }
 
   const schemeLabel =

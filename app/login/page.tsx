@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { env } from "@/lib/env";
 import { isDemoMode, DEMO_USER } from "@/lib/demo";
 import { useLanguage } from "@/lib/i18n";
 import { LocalLoginForm } from "@/components/LocalLoginForm";
@@ -76,10 +75,19 @@ export default function LoginPage() {
   // local password form instead (password resets and verification feed it).
   const localMode = !process.env.NEXT_PUBLIC_SUPABASE_URL;
 
-  // Providers enabled via NEXT_PUBLIC_OAUTH_PROVIDERS (defaults to the four below).
-  const providers = env
-    .oauthProviders()
-    .filter((p): p is OAuthProvider => p in OAUTH_META);
+  // Providers enabled via NEXT_PUBLIC_OAUTH_PROVIDERS (defaults to the four
+  // below). Read the variable STATICALLY: this is a client component, and
+  // webpack only inlines direct process.env.NEXT_PUBLIC_* references into the
+  // browser bundle — a dynamic env.oauthProviders() lookup is undefined
+  // client-side and silently fell back to the default list after hydration
+  // (Apple/Microsoft buttons reappeared even though the env says otherwise).
+  const providers = (
+    process.env.NEXT_PUBLIC_OAUTH_PROVIDERS ??
+    "google,github,apple,microsoft"
+  )
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter((p): p is OAuthProvider => Boolean(p) && p in OAUTH_META);
 
   const redirectTo =
     typeof window !== "undefined"

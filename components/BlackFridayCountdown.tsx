@@ -44,14 +44,21 @@ export function BlackFridayCountdown({ endsAt }: Props) {
   const target = iso ? new Date(iso).getTime() : NaN;
   const valid = Number.isFinite(target);
 
-  const [remaining, setRemaining] = useState<Remaining>(
-    valid
-      ? compute(target)
-      : { days: 0, hours: 0, minutes: 0, seconds: 0, done: !valid },
-  );
+  // Hydration-safe: the initial render (server AND client) shows static
+  // placeholder digits, because compute() reads Date.now() and the two renders
+  // happen at different wall-clock seconds. The clock starts in an effect.
+  const [mounted, setMounted] = useState(false);
+  const [remaining, setRemaining] = useState<Remaining>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    done: !valid,
+  });
 
   useEffect(() => {
     if (!valid) return;
+    setMounted(true);
     const tick = () => setRemaining(compute(target));
     tick();
     const id = setInterval(tick, 1000);
@@ -88,7 +95,7 @@ export function BlackFridayCountdown({ endsAt }: Props) {
             className="card flex min-w-[58px] flex-col items-center px-3 py-2"
           >
             <span className="text-2xl font-bold tabular-nums text-ink sm:text-3xl">
-              {String(value).padStart(2, "0")}
+              {mounted ? String(value).padStart(2, "0") : "--"}
             </span>
             <span className="mt-1 text-[10px] uppercase tracking-wide text-muted">
               {label}
