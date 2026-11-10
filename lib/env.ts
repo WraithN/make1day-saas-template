@@ -76,6 +76,11 @@ export const env = {
       .map((s) => s.trim().toLowerCase())
       .filter(Boolean),
 
+  // Deployment-scoped product id for profiles.product isolation when several
+  // products share one Supabase project. Defaults to 'default'; never a
+  // brand string (the value lands in customer databases).
+  productId: () => opt("PRODUCT_ID", "default"),
+
   // Workspace (multi-tenancy) UI visibility. Customer builds default ON so the
   // consoles demonstrate the org/membership scaffolding; make1day's own site
   // sets SHOW_WORKSPACES=false because its licenses/orders are per-user and

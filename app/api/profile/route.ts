@@ -2,6 +2,7 @@ import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/subscriptions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { productId } from "@/lib/product";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,7 @@ export async function GET() {
       .from("profiles")
       .select("display_name, full_name, company, role, created_at, updated_at")
       .eq("id", user.id)
+      .eq("product", productId())
       .maybeSingle();
     if (error) throw error;
     return NextResponse.json({ profile: data ?? null });
@@ -73,11 +75,18 @@ export async function PATCH(request: Request) {
   }
 
   try {
-    const supabase = await createSupabaseServerClient();
-    const { data, error } = await supabase
+    // Service role: the composite-key upsert may INSERT a first-time product
+    // row, and RLS has no self-insert policy on profiles. Fields are
+    // whitelisted above and the id comes from the validated session.
+    const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
+    const { data, error } = await createSupabaseAdminClient()
       .from("profiles")
-      .update(patch)
+      .upsert(
+        { ...patch, id: user.id, product: productId() },
+        { onConflict: "id,product" },
+      )
       .eq("id", user.id)
+      .eq("product", productId())
       .select("display_name, full_name, company, role, updated_at")
       .maybeSingle();
     if (error) throw error;

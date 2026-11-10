@@ -16,7 +16,7 @@
 | `/account` | 登录用户 | 概览：资料、订阅、授权、快捷入口 | `getAccountSnapshot()` |
 | `/account/billing` | 登录用户 | Supabase `subscriptions` 行：套餐、支付商、状态、续费日 | `lib/subscriptions.ts` |
 | `/account/licenses` | 登录用户 | 按邮箱过滤的授权码、到期时间、订单号 | `getMyLicenses()` |
-| `/account/settings` | 登录用户 | 资料编辑（display name / full name / company）+ 语言 / 主题 / 会话 / 退出登录 | `ProfileForm` + `SignOutButton` |
+| `/account/settings` | 登录用户 | 资料编辑（display name / full name / company）+ 语言 / 主题 / 会话信息 | `ProfileForm`；**退出登录在控制台头部**（"返回站点"旁的 action 槽，所有标签页可见） |
 | `/admin` | 运营者 | KPI：已签发授权、浏览量、已知账户 | `getAdminSnapshot()` |
 | `/admin/users` | 运营者 | 用户列表 + 角色列（admin/staff/member），管理员可改他人角色 | Supabase Auth + `profiles`，或本地 SQLite `profiles` 表 + `UserRoleSelect` |
 | `/admin/licenses` | 运营者 | 全部已签发授权码 | `listLicenses()` |
@@ -251,3 +251,13 @@ SUPABASE_SERVICE_ROLE_KEY=<service role>        # 配了它：用户目录与角
 `lib/generator/{config,schema,prune,pack,templates}.ts`、
 `scripts/export-local-profiles.mjs`、`scripts/lib/ai-docs.mjs`、`scripts/verify-matrix.mjs`、
 `.github/workflows/generated-matrix.yml`。
+
+## Product scoping (profiles.product, migration 0014)
+
+One Supabase project can host several products: each deployment sets PRODUCT_ID
+(default `default`); the profiles primary key is (id, product), so the same auth
+email holds independent identities, roles and directories per product. Console
+snapshot, RBAC, /api/profile and the middleware admin check all filter by
+product; first sign-in upserts the product row. The local SQLite mirror is
+single-product by deployment. GDPR erase (legal-lifecycle) deletes across
+products on purpose.

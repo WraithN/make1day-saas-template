@@ -5,6 +5,7 @@ import { consoleCopy } from "@/lib/content/console";
 import { getAccountSnapshot } from "@/lib/console";
 import { canAccessAdmin, roleKey } from "@/lib/rbac";
 import { ConsoleNav } from "@/components/console/ConsoleNav";
+import { SignOutButton } from "@/components/console/SignOutButton";
 import { env } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
@@ -64,6 +65,7 @@ export default async function AccountLayout({
         badge={snap.email ? `${badge}${roleBadge}` : badge}
         badgeTone={snap.email ? "success" : "warning"}
         backLabel={c["console.backToSite"]}
+        action={<SignOutButton label={c["console.signOut"]} />}
         rightSlot={
           canAccessAdmin(snap.role)
             ? { href: ADMIN_HREF, label: c["account.adminEntry"] }

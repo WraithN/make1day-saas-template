@@ -17,6 +17,7 @@
 
 import { env } from "@/lib/env";
 import { getCurrentUser } from "@/lib/subscriptions";
+import { productId } from "@/lib/product";
 
 export const ROLES = ["admin", "staff", "member"] as const;
 export type Role = (typeof ROLES)[number];
@@ -111,8 +112,18 @@ export async function resolveAdminRole(
       );
       const db = await createSupabaseServerClient();
       const query = userId
-        ? db.from("profiles").select("role").eq("id", userId).maybeSingle()
-        : db.from("profiles").select("role").eq("email", email ?? "").maybeSingle();
+        ? db
+            .from("profiles")
+            .select("role")
+            .eq("id", userId)
+            .eq("product", productId())
+            .maybeSingle()
+        : db
+            .from("profiles")
+            .select("role")
+            .eq("email", email ?? "")
+            .eq("product", productId())
+            .maybeSingle();
       const { data } = await query;
       if (data?.role && ROLES.includes(data.role as Role)) {
         return data.role as Role;
@@ -189,8 +200,37 @@ export async function getCurrentProfile(): Promise<Profile | null> {
       .from("profiles")
       .select("id, email, display_name, full_name, company, role, created_at, updated_at")
       .eq("id", user.id)
+      .eq("product", productId())
       .maybeSingle();
-    if (!data) return null;
+    if (!data) {
+      // First sign-in for this product: bootstrap the product-scoped row so
+      // roles/directory exist per product (the DB trigger only creates the
+      // 'default' bootstrap row). Needs the service role: RLS has no
+      // self-insert policy on profiles.
+      try {
+        const { createSupabaseAdminClient } = await import(
+          "@/lib/supabase/admin"
+        );
+        await createSupabaseAdminClient()
+          .from("profiles")
+          .upsert(
+            { id: user.id, product: productId(), email: user.email ?? null },
+            { onConflict: "id,product" },
+          );
+      } catch {
+        /* no service role / table missing: member default still applies */
+      }
+      return {
+        id: user.id,
+        email: user.email ?? null,
+        displayName: null,
+        fullName: null,
+        company: null,
+        role: "member",
+        createdAt: null,
+        updatedAt: null,
+      };
+    }
     return {
       id: data.id,
       email: data.email ?? user.email ?? null,
@@ -226,6 +266,7 @@ export async function ensureSeedAdmins(): Promise<void> {
       await db
         .from("profiles")
         .update({ role: "admin" })
+        .eq("product", productId())
         .in("email", seeds);
     } catch {
       /* missing table / network — the seed fallback still works at runtime */
@@ -251,6 +292,7 @@ export async function getRolesByEmail(): Promise<Record<string, Role>> {
       const { data } = await db
         .from("profiles")
         .select("email, role")
+        .eq("product", productId())
         .limit(1000);
       const out: Record<string, Role> = {};
       for (const r of data ?? []) {
@@ -287,7 +329,7 @@ export async function setUserRole(
   if (hasServiceRole()) {
     const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
     const db = createSupabaseAdminClient();
-    let q = db.from("profiles").update({ role });
+    let q = db.from("profiles").update({ role }).eq("product", productId());
     if (target.userId) q = q.eq("id", target.userId);
     else if (target.email) q = q.eq("email", target.email);
     else throw new Error("Need userId or email");

@@ -216,6 +216,7 @@ export async function middleware(request: NextRequest) {
         .from("profiles")
         .select("role")
         .eq("id", user.id)
+        .eq("product", process.env.PRODUCT_ID?.trim() || "default")
         .maybeSingle();
       isAdminByRole = data?.role === "admin" || data?.role === "staff";
     } catch {

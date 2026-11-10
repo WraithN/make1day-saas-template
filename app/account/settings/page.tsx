@@ -3,7 +3,6 @@ import { consoleCopy } from "@/lib/content/console";
 import { getAccountSnapshot } from "@/lib/console";
 import { roleKey } from "@/lib/rbac";
 import { ConsoleSection, KeyValue, Notice } from "@/components/console/ConsoleUI";
-import { SignOutButton } from "@/components/console/SignOutButton";
 import { ProfileForm, type ProfileFormLabels } from "@/components/console/ProfileForm";
 
 export const dynamic = "force-dynamic";
@@ -78,7 +77,6 @@ export default async function AccountSettingsPage() {
       <ConsoleSection
         title={c["account.settings.session"]}
         desc={c["account.settings.sessionDesc"]}
-        action={<SignOutButton label={c["console.signOut"]} />}
       >
         <Notice>{c["console.signedInAs"]}: {snap.email ?? c["console.dash"]}</Notice>
       </ConsoleSection>

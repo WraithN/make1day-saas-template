@@ -23,8 +23,16 @@ const GENERATOR_SOURCES = [
 ];
 
 /** @type {import('next').NextConfig} */
+import { fileURLToPath } from "node:url";
+
+const repoRoot = fileURLToPath(new URL(".", import.meta.url));
+
 const nextConfig = {
   reactStrictMode: true,
+  // Pin the tracing root to this repo: Next's auto-detection can pick an
+  // ancestor directory when stray lockfiles exist above the project (it then
+  // traces the whole home directory and dev compilation stalls).
+  outputFileTracingRoot: repoRoot,
   // Supabase JS is fine on the server; mark it external for the edge runtime
   // used by middleware to avoid bundling issues.
   serverExternalPackages: ["@supabase/supabase-js"],
