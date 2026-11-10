@@ -73,6 +73,20 @@ export function LanguageProvider({
     if (typeof document !== "undefined") {
       document.cookie = `${I18N_STORAGE_KEY}=${l}; path=/; max-age=31536000; samesite=lax`;
     }
+    // Keep the URL in sync with the visible language: every rendered language
+    // state gets its own shareable URL from the ?lang= hreflang cluster (see
+    // lib/seo-alternates.ts), EN uses the bare path = its canonical. Without
+    // this a cookie-switched visitor sat on a URL whose canonical pointed at
+    // another language's content.
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (l === "en") url.searchParams.delete("lang");
+      else url.searchParams.set("lang", l);
+      const next = url.pathname + url.search + url.hash;
+      const now =
+        window.location.pathname + window.location.search + window.location.hash;
+      if (next !== now) router.replace(next, { scroll: false });
+    }
     // Re-render server components (e.g. /account and /admin, which read the
     // language from the cookie at request time) so their copy follows the
     // switch instead of waiting for a full navigation.
