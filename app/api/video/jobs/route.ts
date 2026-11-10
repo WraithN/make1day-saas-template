@@ -15,6 +15,7 @@ import {
 import { consumeCredits, costOf, CREDITS_PER_MONTH, refundCredits } from "@/lib/video/quota";
 import { insertJob, listJobs } from "@/lib/video/store";
 import { getVideoTemplate, templateSourceUrl } from "@/lib/content/video-templates";
+import { screenPrompt, blocked as isBlocked } from "@/lib/moderation";
 
 export const runtime = "nodejs";
 
@@ -72,6 +73,30 @@ export async function POST(req: Request) {
     );
   }
   const { templateId, imageUrl, resolution, aspect } = parsed.data;
+
+  // Creem Moderation API (mandatory for AI video merchants): Video Studio
+  // takes no free-text prompt, so the only user-controlled string routed into
+  // the generation pipeline is the hosted input URL — screen it before any
+  // credit, queue or provider call. deny/flag block; failures fail closed.
+  try {
+    const screen = await screenPrompt(imageUrl, `videojob:${templateId}`);
+    if (isBlocked(screen)) {
+      return NextResponse.json(
+        {
+          error:
+            screen.decision === "deny" ? "prompt_rejected" : "prompt_flagged",
+          message:
+            "This input violates our Acceptable Use Policy (/acceptable-use).",
+        },
+        { status: 400 },
+      );
+    }
+  } catch {
+    return NextResponse.json(
+      { error: "moderation_unavailable" },
+      { status: 503 },
+    );
+  }
 
   const template = getVideoTemplate(templateId);
   if (!template) {

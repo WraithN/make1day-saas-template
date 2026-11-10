@@ -83,6 +83,16 @@ pruned, buildable Next.js project pre-configured to those exact selections.
 | Care | $19/mo ($13/mo Black Friday) | Consumption + adaptation: monthly video-render credits, Care-first modules (Video Studio included), monthly-recast agent contract (skills/rules/AGENTS.md), upstream merge patches as mergeable diffs, 12h first-response SLA; key expires with the period |
 | Custom 1:1 | Fixed quote after a free 30-minute call | Custom components/themes, private deployment, SSO, RAG on own data, audits |
 
+Content safety: every user-supplied string routed to a generation model
+(assistant chat POST /api/ai, RAG questions POST /api/rag/query, Video Studio
+inputs POST /api/video/jobs) is screened BEFORE generation by the Creem
+Moderation API — "deny" and "flag" both block, transport failures fail closed
+with 503, 5s timeout. Deployments without a Creem key enforce a local
+prohibited-content blocklist as fallback. The public Acceptable Use Policy
+(NSFW zero tolerance + filtering description + enforcement/appeals) lives at
+/acceptable-use; Video Studio additionally requires a portrait-rights
+attestation and labels every render as AI-generated.
+
 Checkout on this site is processed by ${PROVIDER} (PAYMENT_PROVIDER=${PROVIDER_KEY}). Custom work is
 scoped manually and has NO self-checkout. Subscription rules are published on
 /pricing. A paid webhook automatically issues an offline HMAC license key and

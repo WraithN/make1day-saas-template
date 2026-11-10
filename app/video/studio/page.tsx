@@ -158,6 +158,13 @@ export default function VideoStudioPage() {
             <p className="mt-1 text-[12px] leading-relaxed text-ink-soft">
               {t("video.consentBody")}
             </p>
+            <a
+              href="/acceptable-use"
+              className="mt-1 inline-block text-[12px] font-medium underline-offset-2 hover:underline"
+              style={{ color: "rgb(var(--accent))" }}
+            >
+              {t("video.aupLink")}
+            </a>
             <label className="mt-2 flex items-start gap-2 text-[13px]">
               <input
                 type="checkbox"

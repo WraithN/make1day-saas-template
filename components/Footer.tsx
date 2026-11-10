@@ -53,6 +53,9 @@ export async function Footer() {
           <Link href="/terms" className="hover:text-ink">
             <Trans k="footer.terms" lang={lang} />
           </Link>
+          <Link href="/acceptable-use" className="hover:text-ink">
+            <Trans k="footer.aup" lang={lang} />
+          </Link>
         </div>
         <div>{copyright}</div>
       </div>

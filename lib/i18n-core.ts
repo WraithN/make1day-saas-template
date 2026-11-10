@@ -340,6 +340,8 @@ export const dict: Record<Lang, Record<string, string>> = {
     "footer.copyright": "© {year} make1day",
     "footer.privacy": "Privacy",
     "footer.terms": "Terms",
+    "footer.aup": "Acceptable Use",
+    "video.aupLink": "Acceptable Use Policy",
 
     "builderBanner.eyebrow": "NEW · make1day BUILDER",
     "builderBanner.title": "Pick your stack, get a custom template.",
@@ -839,6 +841,8 @@ export const dict: Record<Lang, Record<string, string>> = {
     "footer.copyright": "© {year} make1day",
     "footer.privacy": "隐私",
     "footer.terms": "条款",
+    "footer.aup": "可接受使用政策",
+    "video.aupLink": "可接受使用政策",
 
     "builderBanner.eyebrow": "新功能 · make1day 生成器",
     "builderBanner.title": "选择你的技术栈，得到定制模板。",
@@ -1320,6 +1324,8 @@ export const dict: Record<Lang, Record<string, string>> = {
     "footer.copyright": "© {year} make1day",
     "footer.privacy": "プライバシー",
     "footer.terms": "利用規約",
+    "footer.aup": "利用許容ポリシー",
+    "video.aupLink": "利用許容ポリシー",
 
     "builderBanner.eyebrow": "新機能 · make1day ビルダー",
     "builderBanner.title": "スタックを選んで、カスタムテンプレートを。",
@@ -1758,6 +1764,8 @@ export const dict: Record<Lang, Record<string, string>> = {
     "footer.copyright": "© {year} make1day",
     "footer.privacy": "Confidentialité",
     "footer.terms": "Conditions",
+    "footer.aup": "Usage acceptable",
+    "video.aupLink": "Politique d'utilisation acceptable",
 
     "builderBanner.eyebrow": "NOUVEAU · make1day BUILDER",
     "builderBanner.title": "Choisissez votre stack, obtenez un modèle sur mesure.",
@@ -2209,6 +2217,8 @@ export const dict: Record<Lang, Record<string, string>> = {
     "footer.copyright": "© {year} make1day",
     "footer.privacy": "Datenschutz",
     "footer.terms": "AGB",
+    "footer.aup": "Acceptable Use",
+    "video.aupLink": "Acceptable-Use-Policy",
 
     "builderBanner.eyebrow": "NEU · make1day BUILDER",
     "builderBanner.title": "Wählen Sie Ihren Stack, erhalten Sie eine individuelle Vorlage.",

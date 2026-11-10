@@ -14,7 +14,7 @@
     "waffo:preflight": "node scripts/waffo-preflight.mjs",
     "probe:webhook": "node scripts/payment-webhook-probe.mjs",
     "verify:matrix": "node scripts/verify-matrix.mjs --all",
-    "smoke": "npm run smoke:gate && npm run smoke:ai:quota && npm run smoke:ai:quota:supabase && npm run smoke:ai:stream",
+    "smoke": "npm run smoke:gate && npm run smoke:ai:quota && npm run smoke:ai:quota:supabase && npm run smoke:ai:stream && npm run smoke:moderation",
     "smoke:gate": "node scripts/smoke-license-gate.cjs",
     "smoke:ai:quota": "node scripts/smoke-ai-quota.cjs",
     "smoke:ai:quota:supabase": "node scripts/smoke-ai-quota-supabase.cjs",
@@ -22,7 +22,8 @@
     "export:profiles": "node scripts/export-local-profiles.mjs",
     "rag:bench": "node scripts/rag-bench.mjs",
     "rebrand": "node scripts/rebrand.mjs",
-    "agents:lint": "node scripts/agents-lint.mjs"
+    "agents:lint": "node scripts/agents-lint.mjs",
+    "smoke:moderation": "node scripts/smoke-moderation.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",

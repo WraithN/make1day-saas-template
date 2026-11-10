@@ -9,6 +9,7 @@ import {
   isSubscribed,
 } from "@/lib/subscriptions";
 import { isDemoMode, DEMO_COOKIE } from "@/lib/demo";
+import { screenPrompt, blocked as isBlocked } from "@/lib/moderation";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -73,6 +74,21 @@ export async function POST(req: Request) {
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "Provide a question." }, { status: 400 });
+  }
+  // Moderation gate: the question is user-controlled text routed to an LLM.
+  try {
+    const screen = await screenPrompt(parsed.data.question, "rag:query");
+    if (isBlocked(screen)) {
+      return NextResponse.json(
+        { error: "prompt_rejected" },
+        { status: 400 },
+      );
+    }
+  } catch {
+    return NextResponse.json(
+      { error: "moderation_unavailable" },
+      { status: 503 },
+    );
   }
   try {
     const result = await answerQuestion(

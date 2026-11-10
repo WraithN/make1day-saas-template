@@ -35,6 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/blog", priority: 0.6 },
     { path: "/privacy", priority: 0.4 },
     { path: "/terms", priority: 0.4 },
+    { path: "/acceptable-use", priority: 0.4 },
   ];
 
   const entries: MetadataRoute.Sitemap = [];

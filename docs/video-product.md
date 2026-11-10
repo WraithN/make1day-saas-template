@@ -26,6 +26,18 @@
 5. **审计与下架**：`video_jobs` 全量留痕（输入哈希、输出 ID、声明时间戳）；
    举报通道接入 /support 工单；侵权通知 24h 下架流程写进 /terms。
 
+## 2b. 内容审核（Creem 合规，2026-11-10 整改）
+
+- 所有进入生成模型的用户可控字符串在生成**前**过 Creem Moderation API
+  （`POST /v1/moderation/prompt`）：`deny`/`flag` 一律拦截（400 prompt_rejected /
+  prompt_flagged），传输失败 **fail closed**（503 moderation_unavailable），5s 超时。
+- 接入点：`/api/ai`（message）、`/api/rag/query`（question）、`/api/video/jobs`
+  （imageUrl——视频管线无自由文本 prompt，输入 URL 是唯一进入管线的用户字符串）。
+- 无 CREEM_API_KEY 的部署回退本地违禁词表（lib/moderation.ts LOCAL_DENY），
+  AUP 页面如实披露双层结构。
+- 验证：`npm run smoke:moderation`（已进 smoke 链）；Creem 复核前用生产 creem_
+  key 真发一次调用并在 Creem 后台核对（其文档要求 production 调用可见）。
+
 ## 3. 架构（MVP）
 
 - `lib/video/provider.ts`：fal.ai 适配器（queue-subscribe 模式：submit → webhook

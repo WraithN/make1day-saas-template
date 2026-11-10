@@ -6,6 +6,7 @@ import { getCurrentUser, getCurrentSubscription, isSubscribed } from "@/lib/subs
 import { streamChatChunks, hasAiProviderKey } from "@/lib/ai";
 import { isDemoMode, DEMO_COOKIE } from "@/lib/demo";
 import { consumeAiUsage } from "@/lib/ai-usage";
+import { screenPrompt, blocked as isBlocked } from "@/lib/moderation";
 import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
@@ -60,6 +61,32 @@ export async function POST(req: Request) {
     .safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid message" }, { status: 400 });
+  }
+
+  // Creem Moderation API (mandatory for generation merchants): screen the
+  // user-controlled prompt BEFORE quota, queueing or any model call. deny and
+  // flag both block; transport failures fail closed with a retryable 503.
+  try {
+    const screen = await screenPrompt(
+      parsed.data.message,
+      `ai:${quotaUserId ?? "anon"}`,
+    );
+    if (isBlocked(screen)) {
+      return NextResponse.json(
+        {
+          error:
+            screen.decision === "deny" ? "prompt_rejected" : "prompt_flagged",
+          message:
+            "This request violates our Acceptable Use Policy (/acceptable-use). Please revise it.",
+        },
+        { status: 400 },
+      );
+    }
+  } catch {
+    return NextResponse.json(
+      { error: "moderation_unavailable" },
+      { status: 503 },
+    );
   }
 
   // Per-user daily quota. Charged once the request is known to be well formed,
