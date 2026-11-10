@@ -22,9 +22,10 @@ export interface PriceLadder {
 }
 
 export const PRICES: { buyout: PriceLadder; care: PriceLadder } = {
-  // regular sits just below the mainstream paid-kit band (ShipFast $199-249,
-  // supastarter $299, MakerKit $349); bf = 30% off regular (七折) during the
-  // Black Friday window; list = struck anchor; mgm = share-to-unlock.
+  // regular sits just below the mainstream paid-kit band; bf = 30% off
+  // regular (七折) during the Black Friday window; list = struck anchor;
+  // mgm = share-to-unlock. Competitor rationale: docs/competitive-analysis.md
+  // (competitor names must never appear in shipped source — white-label sweep).
   buyout: { list: 349, regular: 249, mgm: 219, bf: 174 },
   // Care includes the monthly video-studio credits for the generated-module
   // buyers who run their own video site (see docs/video-product.md).
