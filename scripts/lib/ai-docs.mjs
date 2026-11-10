@@ -181,6 +181,7 @@ function activeRules(spec) {
     if (r.always === "payment")
       return c.payment.length > 0 && !c.payment.includes("none");
     if (r.always === "rag") return c.features.includes("rag");
+    if (r.always === "video") return c.features.includes("video");
     if (r.always === "account") return c.features.includes("account");
     if (r.always === "admin") return c.features.includes("admin");
     return false;
