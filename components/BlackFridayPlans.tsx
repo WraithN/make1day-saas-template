@@ -1,5 +1,7 @@
 ﻿"use client";
 
+import { copyText } from "@/lib/copy";
+
 import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "@/lib/i18n";

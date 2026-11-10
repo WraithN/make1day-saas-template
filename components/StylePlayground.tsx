@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/lib/i18n";
+import { copyText } from "@/lib/copy";
 
 export type StyleItem = {
   id: string;
