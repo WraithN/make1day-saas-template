@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLanguage } from "@/lib/i18n";
 
 // Black-Friday-only pricing ladder: every paid plan shows two price points —
@@ -43,10 +43,17 @@ export function BlackFridayPlans({
 }) {
   const { t } = useLanguage();
   const [busyId, setBusyId] = useState<string | null>(null);
+  // Hard in-flight guard: state updates are async, so a double-click inside
+  // the same tick (or hammering after an error re-enables the button) could
+  // mint several pending provider checkout sessions. The ref is synchronous.
+  const inFlight = useRef(false);
 
   async function checkout(plan: BfPlan) {
     if (!plan.priceId) return;
+    if (inFlight.current) return;
+    inFlight.current = true;
     setBusyId(plan.id);
+    let navigating = false;
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
@@ -55,6 +62,9 @@ export function BlackFridayPlans({
       });
       const data = await res.json();
       if (data.url) {
+        // Navigating away: keep the guard locked so late clicks can't start
+        // a second checkout while the browser leaves the page.
+        navigating = true;
         window.location.href = data.url;
         return;
       }
@@ -62,7 +72,10 @@ export function BlackFridayPlans({
     } catch {
       alert("Network error");
     } finally {
-      setBusyId(null);
+      if (!navigating) {
+        inFlight.current = false;
+        setBusyId(null);
+      }
     }
   }
 
