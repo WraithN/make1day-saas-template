@@ -145,9 +145,9 @@ export default function VideoStudioPage() {
                 setResolution(e.target.value as "480p" | "720p" | "1080p")
               }
             >
-              <option value="480p">480p · 1 credit</option>
-              <option value="720p">720p · 2 credits</option>
-              <option value="1080p">1080p · 5 credits</option>
+              <option value="480p">480p</option>
+              <option value="720p">720p</option>
+              <option value="1080p">1080p</option>
             </select>
           </label>
 

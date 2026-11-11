@@ -25,8 +25,8 @@ export const PRICES: { buyout: PriceLadder; care: PriceLadder } = {
   // Competitor rationale: docs/competitive-analysis.md
   // (competitor names must never appear in shipped source — white-label sweep).
   buyout: { list: 349, regular: 249, bf: 174 },
-  // Care includes the monthly video-studio credits for the generated-module
-  // buyers who run their own video site (see docs/video-product.md).
+  // Care includes the Video Studio source module; generated-project owners
+  // run their own video site with their own provider keys (docs/video-product.md).
   care: { list: 29, regular: 19, bf: 13 },
 };
 
