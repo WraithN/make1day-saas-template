@@ -80,7 +80,6 @@ export default async function AccountSettingsPage() {
       </ConsoleSection>
 
       <ConsoleSection title={c["account.settings.scope"]} desc={c["account.settings.scopeDesc"]}>
-        <Notice>{c["admin.system.limitsDesc"]}</Notice>
       </ConsoleSection>
     </div>
   );

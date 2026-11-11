@@ -28,6 +28,7 @@ function normalizeStatus(s: string): NormalizedStatus {
   switch (s.toLowerCase()) {
     case "active":
     case "paid":
+    case "completed":
       return "active";
     case "canceled":
     case "cancelled":
@@ -119,24 +120,46 @@ export const creemProvider: PaymentProvider = {
 
     const out: NormalizedSubEvent[] = [];
     const obj = payload.object ?? payload;
-    const eventType: string = payload.event_type ?? payload.type ?? "";
+    // Creem delivers the event type as `eventType`; older doc drafts showed
+    // `event_type` / `type`. Accept all three — an unmatched type used to
+    // return an empty event list, i.e. a paid checkout silently ignored.
+    const eventType: string =
+      payload.eventType ?? payload.event_type ?? payload.type ?? "";
+    // Per Creem's checkout.completed sample the money lives on `order` and a
+    // recurring checkout nests its subscription under `subscription`.
+    const order = obj.order ?? {};
+    const subscription = obj.subscription ?? {};
 
     if (eventType === "checkout.completed" || eventType.includes("subscription")) {
-      const subscriptionId = obj.subscription_id ?? obj.id ?? "";
-      const customerId = obj.customer_id ?? obj.customer ?? "";
+      const subscriptionId = String(
+        subscription.id ?? obj.subscription_id ?? obj.id ?? "",
+      );
+      const customerId = String(
+        obj.customer?.id ??
+          obj.customer_id ??
+          order.customer ??
+          (typeof obj.customer === "string" ? obj.customer : "") ??
+          "",
+      );
       const productId =
-        obj.product?.id ?? obj.product_id ?? obj.product ?? null;
-      const periodEnd = obj.current_period_end
-        ? new Date(obj.current_period_end * 1000).toISOString()
-        : obj.current_period_end ?? null;
+        obj.product?.id ?? obj.product_id ?? order.product ?? null;
+      const periodEndEpoch =
+        obj.current_period_end ?? subscription.current_period_end ?? null;
+      const periodEndIso =
+        obj.current_period_end_date ??
+        subscription.current_period_end_date ??
+        null;
+      const periodEnd = periodEndEpoch
+        ? new Date(Number(periodEndEpoch) * 1000).toISOString()
+        : periodEndIso ?? null;
       const buyerEmail: string | undefined =
-        obj.customer_email ?? obj.email ?? obj.customer?.email ?? undefined;
+        obj.customer?.email ?? obj.customer_email ?? obj.email ?? undefined;
       const userId: string | undefined = obj.metadata?.userId || undefined;
       out.push({
         userId,
-        customerId: String(customerId),
-        subscriptionId: String(subscriptionId),
-        status: normalizeStatus(obj.status ?? "active"),
+        customerId,
+        subscriptionId,
+        status: normalizeStatus(obj.status ?? subscription.status ?? "active"),
         plan: planFromProduct(productId),
         periodEnd,
         // Paid checkout must grant the download license — see the shared
@@ -146,12 +169,15 @@ export const creemProvider: PaymentProvider = {
         email: buyerEmail,
         eventType,
         eventId: String(payload.id ?? obj.id ?? subscriptionId),
-        orderId: String(obj.id ?? subscriptionId),
+        orderId: String(order.id ?? obj.id ?? subscriptionId),
         grantsAccess:
           eventType === "checkout.completed" &&
           (Boolean(buyerEmail) || Boolean(userId)),
-        amount: toMajor(obj.amount, obj.currency),
-        currency: obj.currency ?? undefined,
+        amount: toMajor(
+          order.amount ?? obj.amount,
+          order.currency ?? obj.currency,
+        ),
+        currency: order.currency ?? obj.currency ?? undefined,
       });
     }
     return out;

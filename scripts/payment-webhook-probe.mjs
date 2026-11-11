@@ -87,6 +87,37 @@ const DEFS = {
   creem: {
     secret: () => process.env.CREEM_WEBHOOK_SECRET,
     headers: (raw, secret) => ({ "creem-signature": hmac(secret, raw) }),
+    // Real Creem checkout.completed shape (docs.creem.io/code/webhooks):
+    // eventType at the top, money on `order`, buyer under `customer`.
+    grantEvent() {
+      const ts = Date.now();
+      return JSON.stringify({
+        id: `evt_probe_${ts}`,
+        eventType: "checkout.completed",
+        created_at: ts,
+        object: {
+          id: `ch_probe_${ts}`,
+          object: "checkout",
+          status: "completed",
+          mode: "test",
+          product: { id: "prod_probe_unknown", object: "product" },
+          units: 1,
+          customer: {
+            id: "cust_probe",
+            object: "customer",
+            email: "probe@example.com",
+          },
+          order: {
+            id: `ord_probe_${ts}`,
+            object: "order",
+            amount: 17400,
+            currency: "usd",
+            status: "paid",
+          },
+          metadata: { userId: "" },
+        },
+      });
+    },
   },
   lemonsqueezy: {
     secret: () => process.env.LEMONSQUEEZY_WEBHOOK_SECRET,
@@ -208,8 +239,14 @@ for (const name of providers) {
   if (GRANT && def.grantEvent) {
     const body = def.grantEvent();
     const granted = await post(body, def.headers(body, secret));
-    record("paid event -> license", granted.status, 200,
-      "check licenses table for probe@example.com");
+    // A silently-ignored paid event is the failure mode that ships no
+    // license: the route flags emptiness with `ignored`, so assert on it.
+    record(
+      "paid event -> parsed (not ignored)",
+      granted.status === 200 && granted.json?.ignored !== true,
+      true,
+      `status=${granted.status} body=${JSON.stringify(granted.json ?? {})}`,
+    );
     // Replay the same event id: idempotency must not issue a second key.
     const replay = await post(body, def.headers(body, secret));
     record("replay (idempotent)", replay.status, 200);
