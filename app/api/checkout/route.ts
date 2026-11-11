@@ -31,9 +31,11 @@ export async function POST(req: Request) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
+  // Guests MAY check out: Creem's hosted page collects the buyer email, the
+  // paid webhook grants the license to exactly that email, and signing in
+  // with it (or /api/license/claim for a mismatched email) attaches the
+  // license to an account afterwards. Signed-in buyers additionally get the
+  // order attributed to their user id via checkout metadata.
 
   const body = await req.json().catch(() => ({}));
   const parsed = z
@@ -47,8 +49,8 @@ export async function POST(req: Request) {
   try {
     const result = await provider.createCheckout({
       plan: parsed.data.plan,
-      customerEmail: user.email ?? undefined,
-      userId: user.id,
+      customerEmail: user?.email ?? undefined,
+      userId: user?.id,
       successUrl: `${env.siteUrl()}/account?welcome=1`,
       cancelUrl: `${env.siteUrl()}/pricing`,
       blackFriday: parsed.data.blackFriday ?? false,
@@ -72,7 +74,7 @@ export async function POST(req: Request) {
       kind: "checkout",
       path: "/pricing",
       label: parsed.data.plan,
-      email: user.email ?? null,
+      email: user?.email ?? null,
       createdAt: new Date().toISOString(),
     });
 
