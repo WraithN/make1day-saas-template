@@ -1,0 +1,28 @@
+name: Latency probe
+
+# One-off network diagnostics: measures TTFB to the production site (through
+# Cloudflare) and to the raw Vercel origin from a GitHub Actions runner.
+# Trigger manually: gh workflow run latency-probe.yml
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe production URLs
+        run: |
+          for url in \
+            "https://www.make1day.dev/api/health" \
+            "https://www.make1day.dev/" \
+            "https://www.make1day.dev/pricing" \
+            "https://make1day-saas-template-6d5r7p0a5-wraithns-projects.vercel.app/api/health"; do
+            for i in 1 2 3; do
+              curl -s -o /dev/null -w "$url try$i: code=%{http_code} ttfb=%{time_starttransfer}s connect=%{time_connect}s tls=%{time_appconnect}s\n" \
+                --max-time 20 "$url" || echo "$url try$i: FAILED"
+            done
+          done

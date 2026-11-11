@@ -151,11 +151,27 @@ export async function POST(req: Request) {
       );
       if (!fresh) continue;
 
-      if (e.userId) {
+      if (e.userId || e.email) {
+        // Guest checkouts carry no metadata.userId; resolve the account by
+        // the buyer email Creem collected on the hosted page so a Care
+        // purchase still lands in the buyer's Billing. Unknown email (no
+        // account yet) keeps the old skip-and-warn behaviour.
+        let userId = e.userId;
+        if (!userId && e.email) {
+          try {
+            const admin = createSupabaseAdminClient();
+            const { data: byEmail } = await admin.auth.admin.getUserByEmail(
+              e.email,
+            );
+            userId = byEmail?.user?.id ?? undefined;
+          } catch {
+            // auth admin API unavailable — fall through to the warn below.
+          }
+        }
         try {
           await upsertSubscription({
             provider: provider.name,
-            userId: e.userId,
+            userId: userId ?? "",
             customerId: e.customerId,
             subscriptionId: e.subscriptionId,
             status: e.status,

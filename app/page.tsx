@@ -13,6 +13,7 @@ import { PricingCards, type Plan } from "@/components/PricingCards";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
 import { priceForPlan, primaryPaymentsReady } from "@/lib/env";
+import { PRICES, bfActive, effectivePrice } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   // Root-path language cluster lives in the sitemap's xhtml:link cluster:
@@ -25,6 +26,11 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const lang = await getLang();
+  // Same ladder as /pricing: the buy button charges the effective price and
+  // the struck anchor is the regular price while the BF window runs.
+  const bf = bfActive();
+  const buyoutPrice = effectivePrice("buyout");
+  const carePrice = effectivePrice("care");
 
   // Pricing on the home page reuses the same plan data as /pricing, but with
   // deliberate weight: Free is muted (quiet entry point), Buyout is highlighted
@@ -44,8 +50,8 @@ export default async function HomePage() {
     {
       id: "buyout",
       name: "Buyout",
-      price: "$99",
-      originalPrice: "$199",
+      price: `$${buyoutPrice}`,
+      originalPrice: bf ? `$${PRICES.buyout.regular}` : `$${PRICES.buyout.list}`,
       launch: true,
       period: "",
       once: true,
@@ -62,8 +68,8 @@ export default async function HomePage() {
     {
       id: "care",
       name: "Care",
-      price: "$9",
-      originalPrice: "$19",
+      price: `$${carePrice}`,
+      originalPrice: bf ? `$${PRICES.care.regular}` : `$${PRICES.care.list}`,
       period: "",
       monthly: true,
       features: [
