@@ -120,7 +120,9 @@ export function TopProgressBar() {
     // 1) Click on an internal link: start BEFORE the router starts fetching.
     const onClick = (e: MouseEvent) => {
       if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      const a = (e.target as Element | null)?.closest?.("a[href]");
+      const a = (e.target as Element | null)?.closest?.(
+        "a[href]",
+      ) as HTMLAnchorElement | null;
       if (!a) return;
       if (a.hasAttribute("download")) return;
       const target = a.getAttribute("target");
