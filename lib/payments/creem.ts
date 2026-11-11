@@ -84,11 +84,12 @@ export const creemProvider: PaymentProvider = {
       method: "POST",
       body: JSON.stringify({
         product_id: productId,
-        // Creem's hosted checkout page collects the buyer email itself; the
-        // create-checkout schema REJECTS customer_email (400 "property
-        // customer_email should not exist"). The paid event carries the email
-        // the buyer typed there, which is what the webhook grants to.
         success_url: p.successUrl,
+        // Prefill the SIGNED-IN buyer's email via the nested customer object
+        // ("prefill the customer info on the checkout page" per Creem docs).
+        // The schema REJECTS a top-level customer_email; guests simply omit
+        // this and type their email on the hosted page instead.
+        ...(p.customerEmail ? { customer: { email: p.customerEmail } } : {}),
         // Creem stores arbitrary metadata on the checkout.
         metadata: { userId: p.userId ?? "" },
       }),
