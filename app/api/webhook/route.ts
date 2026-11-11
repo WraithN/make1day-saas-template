@@ -160,12 +160,16 @@ export async function POST(req: Request) {
         if (!userId && e.email) {
           try {
             const admin = createSupabaseAdminClient();
-            const { data: byEmail } = await admin.auth.admin.getUserByEmail(
-              e.email,
-            );
-            userId = byEmail?.user?.id ?? undefined;
+            const { data: profile } = await admin
+              .from("profiles")
+              .select("id")
+              .eq("email", e.email)
+              .eq("product", process.env.PRODUCT_ID?.trim() || "default")
+              .limit(1)
+              .maybeSingle();
+            userId = profile?.id ?? undefined;
           } catch {
-            // auth admin API unavailable — fall through to the warn below.
+            // profiles lookup unavailable — fall through to the warn below.
           }
         }
         try {
