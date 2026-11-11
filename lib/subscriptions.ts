@@ -48,6 +48,17 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 export async function getSubscription(
   userId: string,
 ): Promise<SubscriptionRow | null> {
+  // Local (no-Supabase) deployments have no subscription store: the webhook
+  // skips subscription upserts there by design (see /api/webhook), so the
+  // honest answer is "no subscription" — NOT a thrown missing-env error that
+  // 500s every subscription-gated route (video studio, AI quota) on
+  // self-hosted installs.
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
+  ) {
+    return null;
+  }
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("subscriptions")
