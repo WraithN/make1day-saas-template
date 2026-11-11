@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { langAlternatePaths } from "@/lib/seo-alternates";
+import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import Link from "next/link";
 import { env } from "@/lib/env";
 
@@ -10,14 +10,23 @@ const SITE_URL = env.siteUrl();
 const UPDATED = env.legalUpdatedAt();
 const JURISDICTION = env.legalJurisdiction();
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "/terms",
-    languages: langAlternatePaths("/terms"),
-  },
-  title: "Terms of Service",
-  description: `The terms governing use of the ${PRODUCT} website and the generated project.`,
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string | string[] }>;
+}): Promise<Metadata> {
+  const { lang } = await searchParams;
+  const canonical = variantCanonical("/terms", lang);
+  return {
+    alternates: {
+      canonical,
+      languages: langAlternatePaths("/terms"),
+    },
+    openGraph: { url: canonical },
+    title: "Terms of Service",
+    description: `The terms governing use of the ${PRODUCT} website and the generated project.`,
+  };
+}
 
 export default function TermsPage() {
   return (

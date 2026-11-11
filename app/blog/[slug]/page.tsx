@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLang, tr } from "@/lib/i18n-server";
+import { variantCanonical } from "@/lib/seo-alternates";
 import {
   allPostSlugs,
   getPost,
@@ -24,21 +25,25 @@ export function generateStaticParams() {
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ lang?: string | string[] }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  const { lang } = await searchParams;
   const post = getPost(slug);
   if (!post) return {};
   const title = postField(post, "en", "title");
   const description = postField(post, "en", "excerpt");
+  const canonical = variantCanonical(`/blog/${post.slug}`, lang);
   return {
     title,
     description,
     keywords: post.tags,
     authors: [{ name: COMPANY }],
     alternates: {
-      canonical: `/blog/${post.slug}`,
+      canonical,
       languages: {
         en: `/blog/${post.slug}`,
         "zh-CN": `/blog/${post.slug}?lang=zh`,
@@ -53,7 +58,7 @@ export async function generateMetadata({
       type: "article",
       title,
       description,
-      url: `${SITE_URL}/blog/${post.slug}`,
+      url: `${SITE_URL}${canonical}`,
       publishedTime: post.date,
       modifiedTime: post.updated ?? post.date,
       authors: [COMPANY],

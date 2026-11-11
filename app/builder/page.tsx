@@ -2,18 +2,32 @@ import type { Metadata } from "next";
 import { Builder } from "@/components/Builder";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
+import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import { STYLE_OPTIONS, type StyleId } from "@/lib/generator/config";
 import { HreflangLinks } from "@/components/HreflangLinks";
 
-export const metadata: Metadata = {
-  title: "SaaS Template Generator",
-  description:
-    "Pick your stack, auth, payments and AI providers, then download a production-ready AI SaaS starter.",
-  // Indexable on purpose: /builder is the main conversion page. robots.ts
-  // explicitly allows it and sitemap.ts ranks it 0.9 — a page-level noindex
-  // here would silently override both.
-  robots: { index: true, follow: true },
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string | string[] }>;
+}): Promise<Metadata> {
+  const { lang } = await searchParams;
+  const canonical = variantCanonical("/builder", lang);
+  return {
+    title: "SaaS Template Generator",
+    description:
+      "Pick your stack, auth, payments and AI providers, then download a production-ready AI SaaS starter.",
+    // Indexable on purpose: /builder is the main conversion page. robots.ts
+    // explicitly allows it and sitemap.ts ranks it 0.9 — a page-level noindex
+    // here would silently override both.
+    robots: { index: true, follow: true },
+    alternates: {
+      canonical,
+      languages: langAlternatePaths("/builder"),
+    },
+    openGraph: { url: canonical },
+  };
+}
 
 export default async function BuilderPage({
   searchParams,

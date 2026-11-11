@@ -1,18 +1,27 @@
 import { CustomService } from "@/components/CustomService";
 import type { Metadata } from "next";
-import { langAlternatePaths } from "@/lib/seo-alternates";
+import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import { PricingCards, type Plan } from "@/components/PricingCards";
 import { env, priceForPlan, primaryPaymentsReady } from "@/lib/env";
 import { paymentProviderLabel } from "@/lib/payments";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "/pricing",
-    languages: langAlternatePaths("/pricing"),
-  },
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string | string[] }>;
+}): Promise<Metadata> {
+  const { lang } = await searchParams;
+  const canonical = variantCanonical("/pricing", lang);
+  return {
+    alternates: {
+      canonical,
+      languages: langAlternatePaths("/pricing"),
+    },
+    openGraph: { url: canonical },
+  };
+}
 
 // Keep the structured-data amounts in sync with the cards below: both read
 // lib/pricing.ts so a reprice or a campaign window can never desync them.
@@ -95,6 +104,11 @@ export default async function PricingPage() {
   // names it, so it must follow PAYMENT_PROVIDER instead of naming a brand
   // that may not be the one enabled.
   const provider = paymentProviderLabel();
+  // During the Black Friday window the amounts above are campaign prices;
+  // schema.org wants an explicit expiry so Google never shows a stale deal.
+  const bfEnds = env.blackFridayEndsAt();
+  const priceValidUntil =
+    bf && bfEnds ? new Date(bfEnds).toISOString().slice(0, 10) : undefined;
   const offersJsonLd = {
     "@context": "https://schema.org",
     "@type": "OfferCatalog",
@@ -113,12 +127,14 @@ export default async function PricingPage() {
         price: String(buyout),
         priceCurrency: "USD",
         url: `${site}/pricing`,
+        ...(priceValidUntil ? { priceValidUntil } : {}),
       },
       {
         "@type": "Offer",
         name: "Care — monthly",
         price: String(care),
         priceCurrency: "USD",
+        ...(priceValidUntil ? { priceValidUntil } : {}),
         priceSpecification: {
           "@type": "UnitPriceSpecification",
           price: String(care),

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
+import { variantCanonical } from "@/lib/seo-alternates";
 import { TEMPLATES } from "@/lib/content/templates";
 import { TemplateCard } from "@/components/TemplateCard";
 
@@ -21,6 +22,7 @@ export async function generateMetadata({
     title,
     description,
     alternates: {
+      canonical: variantCanonical("/templates", lang),
       languages: {
         en: "/templates",
         zh: "/templates?lang=zh",
@@ -29,6 +31,7 @@ export async function generateMetadata({
         de: "/templates?lang=de",
       },
     },
+    openGraph: { url: variantCanonical("/templates", lang) },
   };
 }
 

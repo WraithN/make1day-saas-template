@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { langAlternatePaths } from "@/lib/seo-alternates";
+import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import Link from "next/link";
 import { env } from "@/lib/env";
 
@@ -15,14 +15,23 @@ const ADDRESS = env.legalAddress();
 const JURISDICTION = env.legalJurisdiction();
 const DPA_URL = env.dpaUrl();
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "/privacy",
-    languages: langAlternatePaths("/privacy"),
-  },
-  title: "Privacy Policy",
-  description: `What personal data ${PRODUCT} collects, where it is stored, who receives it and how to exercise your rights.`,
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string | string[] }>;
+}): Promise<Metadata> {
+  const { lang } = await searchParams;
+  const canonical = variantCanonical("/privacy", lang);
+  return {
+    alternates: {
+      canonical,
+      languages: langAlternatePaths("/privacy"),
+    },
+    openGraph: { url: canonical },
+    title: "Privacy Policy",
+    description: `What personal data ${PRODUCT} collects, where it is stored, who receives it and how to exercise your rights.`,
+  };
+}
 
 export default function PrivacyPage() {
   return (

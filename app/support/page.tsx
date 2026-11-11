@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { langAlternatePaths } from "@/lib/seo-alternates";
+import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import { getLang, tr } from "@/lib/i18n-server";
 import { msgCopy } from "@/lib/content/messaging";
 import { env } from "@/lib/env";
@@ -7,15 +7,24 @@ import { SupportForm } from "@/components/SupportForm";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "/support",
-    languages: langAlternatePaths("/support"),
-  },
-  title: "Contact support",
-  description:
-    "Send the make1day team a support message, or reach us by email / a 1:1 call.",
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string | string[] }>;
+}): Promise<Metadata> {
+  const { lang } = await searchParams;
+  const canonical = variantCanonical("/support", lang);
+  return {
+    alternates: {
+      canonical,
+      languages: langAlternatePaths("/support"),
+    },
+    openGraph: { url: canonical },
+    title: "Contact support",
+    description:
+      "Send the make1day team a support message, or reach us by email / a 1:1 call.",
+  };
+}
 
 export default async function SupportPage() {
   const lang = await getLang();

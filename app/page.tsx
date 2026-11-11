@@ -13,16 +13,26 @@ import { PricingCards, type Plan } from "@/components/PricingCards";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
 import { priceForPlan, primaryPaymentsReady } from "@/lib/env";
+import { variantCanonical } from "@/lib/seo-alternates";
 import { PRICES, bfActive, effectivePrice } from "@/lib/pricing";
 
-export const metadata: Metadata = {
-  // Root-path language cluster lives in the sitemap's xhtml:link cluster:
-  // Next drops `?lang=` from metadata alternates when the path is "/", which
-  // would emit five identical hreflang tags here.
-  alternates: {
-    canonical: "/",
-  },
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string | string[] }>;
+}): Promise<Metadata> {
+  const { lang } = await searchParams;
+  return {
+    // The root-path LANGUAGE cluster lives in the sitemap's xhtml:link cluster:
+    // Next drops `?lang=` from metadata alternates when the path is "/", which
+    // would emit five identical hreflang tags here. The canonical, however, is
+    // a plain string and keeps its query — each variant must self-canonical.
+    alternates: {
+      canonical: variantCanonical("", lang),
+    },
+    openGraph: { url: variantCanonical("", lang) },
+  };
+}
 
 export default async function HomePage() {
   const lang = await getLang();

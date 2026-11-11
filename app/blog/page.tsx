@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { langAlternatePaths } from "@/lib/seo-alternates";
+import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import Link from "next/link";
 import { getLang, tr } from "@/lib/i18n-server";
 import { getAllPosts, postField } from "@/lib/content/blog";
@@ -7,22 +7,33 @@ import { getAllPosts, postField } from "@/lib/content/blog";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com";
 const COMPANY = "make1day";
 
-export const metadata: Metadata = {
-  title: "Blog — make1day AI SaaS starter guides",
-  description:
-    "Practical, verified guides on building, billing and launching an AI SaaS with Next.js: subscription webhooks, payment gateways, white-label source delivery, the 2026 AI boilerplate checklist and agent-readable docs.",
-  keywords: [
-    "how to build a SaaS with Next.js",
-    "Next.js SaaS boilerplate with Stripe and auth",
-    "Next.js subscription billing boilerplate",
-    "AI SaaS boilerplate checklist 2026",
-    "white label SaaS boilerplate",
-    "AGENTS.md boilerplate",
-    "ShipFast alternative",
-    "best Next.js SaaS boilerplate 2026",
-  ],
-  alternates: { canonical: "/blog", languages: langAlternatePaths("/blog") },
-};
+const BLOG_DESCRIPTION =
+  "Practical, verified guides on building, billing and launching an AI SaaS with Next.js: subscription webhooks, payment gateways, white-label source delivery, the 2026 AI boilerplate checklist and agent-readable docs.";
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string | string[] }>;
+}): Promise<Metadata> {
+  const { lang } = await searchParams;
+  const canonical = variantCanonical("/blog", lang);
+  return {
+    title: "Blog — make1day AI SaaS starter guides",
+    description: BLOG_DESCRIPTION,
+    keywords: [
+      "how to build a SaaS with Next.js",
+      "Next.js SaaS boilerplate with Stripe and auth",
+      "Next.js subscription billing boilerplate",
+      "AI SaaS boilerplate checklist 2026",
+      "white label SaaS boilerplate",
+      "AGENTS.md boilerplate",
+      "ShipFast alternative",
+      "best Next.js SaaS boilerplate 2026",
+    ],
+    alternates: { canonical, languages: langAlternatePaths("/blog") },
+    openGraph: { url: canonical },
+  };
+}
 
 export default async function BlogIndex() {
   const lang = await getLang();
@@ -33,7 +44,7 @@ export default async function BlogIndex() {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: `${COMPANY} Blog`,
-    description: metadata.description,
+    description: BLOG_DESCRIPTION,
     url: `${SITE_URL}/blog`,
     inLanguage: lang,
     publisher: { "@type": "Organization", name: COMPANY, url: SITE_URL },

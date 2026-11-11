@@ -1006,6 +1006,11 @@ export function pruneTemplatesSitemap(source: string): string {
   return source.replace(/\s*\{ path: "\/templates", priority: 0\.6 \},/, "");
 }
 
+/** Drop the site-only /black-friday entry from the generated sitemap. */
+export function pruneBlackFridaySitemap(source: string): string {
+  return source.replace(/\s*\{ path: "\/black-friday", priority: 0\.8 \},/, "");
+}
+
 // ── Generator removal ──────────────────────────────────────────────────────
 //
 // The generator is pruned from every customer project (see GENERATOR_FILES),

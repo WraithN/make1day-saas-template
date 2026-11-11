@@ -5,6 +5,7 @@ import { env, priceForPlanBf, primaryPaymentsReady } from "@/lib/env";
 import { PRICES } from "@/lib/pricing";
 import { Trans } from "@/lib/i18n";
 import { getLang } from "@/lib/i18n-server";
+import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import Link from "next/link";
 
 // Two-tier Black Friday pricing. The buy button charges the BF price (lowest);
@@ -16,11 +17,24 @@ const BF_BUYOUT_PRICE = String(PRICES.buyout.bf);
 const BF_CARE_ORIGINAL = String(PRICES.care.regular);
 const BF_CARE_PRICE = String(PRICES.care.bf);
 
-export const metadata = {
-  title: "Black Friday — make1day",
-  description:
-    "Black Friday: own the make1day source at the year's lowest price. The struck list price is the anchor; the Black Friday deal is what the buy button charges while the timer runs.",
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string | string[] }>;
+}) {
+  const { lang } = await searchParams;
+  const canonical = variantCanonical("/black-friday", lang);
+  return {
+    title: "Black Friday — make1day",
+    description:
+      "Black Friday: own the make1day source at the year's lowest price. The struck list price is the anchor; the Black Friday deal is what the buy button charges while the timer runs.",
+    alternates: {
+      canonical,
+      languages: langAlternatePaths("/black-friday"),
+    },
+    openGraph: { url: canonical },
+  };
+}
 
 export default async function BlackFridayPage() {
   const lang = await getLang();
@@ -122,6 +136,7 @@ export default async function BlackFridayPage() {
         price: BF_BUYOUT_PRICE,
         priceCurrency: "USD",
         url: `${site}/black-friday`,
+        ...(endsAt ? { priceValidUntil: new Date(endsAt).toISOString().slice(0, 10) } : {}),
       },
       {
         "@type": "Offer",
@@ -129,6 +144,7 @@ export default async function BlackFridayPage() {
         price: BF_CARE_PRICE,
         priceCurrency: "USD",
         url: `${site}/black-friday`,
+        ...(endsAt ? { priceValidUntil: new Date(endsAt).toISOString().slice(0, 10) } : {}),
         priceSpecification: {
           "@type": "UnitPriceSpecification",
           price: BF_CARE_PRICE,
