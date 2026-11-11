@@ -277,7 +277,7 @@ const SITE_MARKETING_FILES = [
   // customer ZIPs, and keep its companion countdown component too — it imports
   // nothing customer-specific, but ships no value without the page.
   "app/black-friday/page.tsx",
-  // The BF pricing ladder (three tiers + share-to-unlock MGM) is site-only
+  // The BF pricing ladder (struck anchor + campaign price) is site-only
   // too — it renders the promo and imports nothing customer-specific.
   "components/BlackFridayPlans.tsx",
   "components/BlackFridayCountdown.tsx",

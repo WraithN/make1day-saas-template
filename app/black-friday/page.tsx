@@ -4,24 +4,22 @@ import { HreflangLinks } from "@/components/HreflangLinks";
 import { env, priceForPlanBf, primaryPaymentsReady } from "@/lib/env";
 import { PRICES } from "@/lib/pricing";
 import { Trans } from "@/lib/i18n";
-import { getLang, tr } from "@/lib/i18n-server";
+import { getLang } from "@/lib/i18n-server";
 import Link from "next/link";
 
-// Three-tier Black Friday pricing. The buy button charges the BF price (lowest);
-// the struck price is the list anchor; the MGM tier unlocks by sharing.
+// Two-tier Black Friday pricing. The buy button charges the BF price (lowest);
+// the struck price is the list anchor.
 // Prices live in lib/pricing.ts (single source of truth shared with /pricing,
 // JSON-LD and the machine-readable docs).
 const BF_BUYOUT_ORIGINAL = String(PRICES.buyout.list);
-const BF_BUYOUT_MGM = String(PRICES.buyout.mgm);
 const BF_BUYOUT_PRICE = String(PRICES.buyout.bf);
 const BF_CARE_ORIGINAL = String(PRICES.care.list);
-const BF_CARE_MGM = String(PRICES.care.mgm);
 const BF_CARE_PRICE = String(PRICES.care.bf);
 
 export const metadata = {
   title: "Black Friday — make1day",
   description:
-    "Black Friday: own the make1day source at the year's lowest price. Three tiers — list price, MGM share price, and the Black Friday deal. Share to unlock the MGM price.",
+    "Black Friday: own the make1day source at the year's lowest price. The struck list price is the anchor; the Black Friday deal is what the buy button charges while the timer runs.",
 };
 
 export default async function BlackFridayPage() {
@@ -57,13 +55,12 @@ export default async function BlackFridayPage() {
     );
   }
 
-  // ── Campaign ON → hero + countdown + 3-tier promo cards + share bar ──
+  // ── Campaign ON → hero + countdown + promo cards ──
   const plans: BfPlan[] = [
     {
       id: "free",
       name: "Free",
       originalPrice: "",
-      mgmPrice: "",
       bfPrice: "$0",
       forever: true,
       features: ["pricing.free.f1", "pricing.free.f2", "pricing.free.f3"],
@@ -74,7 +71,6 @@ export default async function BlackFridayPage() {
       id: "buyout",
       name: "Buyout",
       originalPrice: `$${BF_BUYOUT_ORIGINAL}`,
-      mgmPrice: `$${BF_BUYOUT_MGM}`,
       bfPrice: `$${BF_BUYOUT_PRICE}`,
       once: true,
       features: [
@@ -92,7 +88,6 @@ export default async function BlackFridayPage() {
       id: "care",
       name: "Care",
       originalPrice: `$${BF_CARE_ORIGINAL}`,
-      mgmPrice: `$${BF_CARE_MGM}`,
       bfPrice: `$${BF_CARE_PRICE}`,
       monthly: true,
       features: [
@@ -144,9 +139,6 @@ export default async function BlackFridayPage() {
     ],
   };
 
-  const shareUrl = `${site}/black-friday`;
-  const shareText = tr(lang, "blackfriday.shareText");
-
   return (
     <section className="wrap py-12 sm:py-20">
       <HreflangLinks path="/black-friday" />
@@ -168,8 +160,6 @@ export default async function BlackFridayPage() {
       <div className="mt-10">
         <BlackFridayPlans
           plans={plans}
-          shareUrl={shareUrl}
-          shareText={shareText}
           paymentsReady={primaryPaymentsReady()}
         />
       </div>

@@ -824,7 +824,7 @@ For Pancake you need a **WAFFO_STORE_SLUG** (or **WAFFO_STORE_ID** / **WAFFO_MER
 
 ## 3. Create products and prices
 
-In the Waffo dashboard create a one-time product for Buyout and a recurring product for Care, then copy their price ids into **WAFFO_PRICE_ID_BUYOUT** and **WAFFO_PRICE_ID_CARE**. For a Black Friday or MGM promo, create separate price ids and set **WAFFO_PRICE_ID_BUYOUT_BF** / **_MGM** (the webhook plan inference recognises them automatically).
+In the Waffo dashboard create a one-time product for Buyout and a recurring product for Care, then copy their price ids into **WAFFO_PRICE_ID_BUYOUT** and **WAFFO_PRICE_ID_CARE**. For a Black Friday promo, create separate price ids and set **WAFFO_PRICE_ID_BUYOUT_BF** / **WAFFO_PRICE_ID_CARE_BF** (the webhook plan inference recognises them automatically).
 
 ## 4. Configure the webhook
 
@@ -851,7 +851,7 @@ Pancake 需要 **WAFFO_STORE_SLUG**（或 **WAFFO_STORE_ID** / **WAFFO_MERCHANT_
 
 ## 3. 创建商品与价格
 
-在 Waffo 后台为 Buyout 建一次性商品、为 Care 建周期商品，把价格 id 填入 **WAFFO_PRICE_ID_BUYOUT** 与 **WAFFO_PRICE_ID_CARE**。若做黑五或 MGM 促销，另建价格 id 并设 **WAFFO_PRICE_ID_BUYOUT_BF** / **_MGM**（Webhook 的 plan 反推会自动识别）。
+在 Waffo 后台为 Buyout 建一次性商品、为 Care 建周期商品，把价格 id 填入 **WAFFO_PRICE_ID_BUYOUT** 与 **WAFFO_PRICE_ID_CARE**。若做黑五促销，另建价格 id 并设 **WAFFO_PRICE_ID_BUYOUT_BF** / **WAFFO_PRICE_ID_CARE_BF**（Webhook 的 plan 反推会自动识别）。
 
 ## 4. 配置 Webhook
 
@@ -871,12 +871,12 @@ Pancake 需要 **WAFFO_STORE_SLUG**（或 **WAFFO_STORE_ID** / **WAFFO_MERCHANT_
       en: [
         { q: "Which Waffo flavour should I use?", a: "Use pancake for a global Merchant-of-Record checkout. Use acquiring only if you already have a regional acquiring contract that requires its specific fields and RSA signing." },
         { q: "Do I need to verify the Waffo webhook signature?", a: "Yes. The integration verifies it server-side with the platform public key for both flavours. Skipping verification would let anyone forge a paid event." },
-        { q: "How does the licence get issued?", a: "The webhook infers the plan from the price id (including BF and MGM ids) and calls the licence grant. Without a configured price id the checkout falls back to display mode." },
+        { q: "How does the licence get issued?", a: "The webhook infers the plan from the price id (including BF ids) and calls the licence grant. Without a configured price id the checkout falls back to display mode." },
       ],
       zh: [
         { q: "该用哪种 Waffo 形态？", a: "想要全球商户登记结账用 pancake。仅当你已有需要特定字段与 RSA 签名的区域收单合同时，才用 acquiring。" },
         { q: "需要验证 Waffo Webhook 签名吗？", a: "需要。集成对两种形态都用平台公钥在服务端验证。跳过验证会让任何人伪造已支付事件。" },
-        { q: "许可是怎么签发的？", a: "Webhook 通过价格 id（含 BF 与 MGM id）反推方案并调用许可发放。若未配置价格 id，结账会回退到展示模式。" },
+        { q: "许可是怎么签发的？", a: "Webhook 通过价格 id（含 BF id）反推方案并调用许可发放。若未配置价格 id，结账会回退到展示模式。" },
       ],
     },
   },
@@ -903,7 +903,7 @@ Sign up at Creem, switch to test mode, and create an API key. Store it as **CREE
 
 ## 2. Create products and prices
 
-In the Creem dashboard create a one-time product for Buyout and a recurring product for Care. Copy their price ids into **CREEM_PRICE_ID_PRO** (one-time Buyout maps to the PRO slot, recurring Care maps to SCALE) — or, if your integration separates them, **CREEM_PRICE_ID_BUYOUT** / **CREEM_PRICE_ID_CARE**. For a Black Friday or MGM promo, create separate price ids and set **CREEM_PRICE_ID_BUYOUT_BF** / **_MGM**; the webhook plan inference already recognises them.
+In the Creem dashboard create a one-time product for Buyout and a recurring product for Care. Copy their price ids into **CREEM_PRICE_ID_PRO** (one-time Buyout maps to the PRO slot, recurring Care maps to SCALE) — or, if your integration separates them, **CREEM_PRICE_ID_BUYOUT** / **CREEM_PRICE_ID_CARE**. For a Black Friday promo, create separate price ids and set **CREEM_PRICE_ID_BUYOUT_BF** / **CREEM_PRICE_ID_CARE_BF**; the webhook plan inference already recognises them.
 
 ## 3. Set the webhook
 
@@ -911,7 +911,7 @@ Point Creem at your **/api/payments/webhook/creem** endpoint and copy the webhoo
 
 ## 4. Set the provider
 
-Set **PAYMENT_PROVIDER=creem** plus **CREEM_API_KEY** and **CREEM_WEBHOOK_SECRET**. A checkout call picks the right price id for the active plan (or the BF / MGM price id when the promo is on), and redirects to Creem's hosted checkout.
+Set **PAYMENT_PROVIDER=creem** plus **CREEM_API_KEY** and **CREEM_WEBHOOK_SECRET**. A checkout call picks the right price id for the active plan (or the BF price id when the promo is on), and redirects to Creem's hosted checkout.
 
 ## 5. Run a sandbox test
 
@@ -926,7 +926,7 @@ Because Creem, Waffo, Stripe, PayPal and Lemon Squeezy all sit behind the same c
 
 ## 2. 创建商品与价格
 
-在 Creem 后台为 Buyout 建一次性商品、为 Care 建周期商品。把价格 id 填入 **CREEM_PRICE_ID_PRO**（一次性 Buyout 映射到 PRO 槽、周期 Care 映射到 SCALE），若你的集成分开字段则填 **CREEM_PRICE_ID_BUYOUT** / **CREEM_PRICE_ID_CARE**。若做黑五或 MGM 促销，另建价格 id 并设 **CREEM_PRICE_ID_BUYOUT_BF** / **_MGM**；Webhook 的 plan 反推已能识别。
+在 Creem 后台为 Buyout 建一次性商品、为 Care 建周期商品。把价格 id 填入 **CREEM_PRICE_ID_PRO**（一次性 Buyout 映射到 PRO 槽、周期 Care 映射到 SCALE），若你的集成分开字段则填 **CREEM_PRICE_ID_BUYOUT** / **CREEM_PRICE_ID_CARE**。若做黑五促销，另建价格 id 并设 **CREEM_PRICE_ID_BUYOUT_BF** / **CREEM_PRICE_ID_CARE_BF**；Webhook 的 plan 反推已能识别。
 
 ## 3. 配置 Webhook
 
@@ -934,7 +934,7 @@ Because Creem, Waffo, Stripe, PayPal and Lemon Squeezy all sit behind the same c
 
 ## 4. 设定网关
 
-设 **PAYMENT_PROVIDER=creem**，外加 **CREEM_API_KEY** 与 **CREEM_WEBHOOK_SECRET**。结账调用为当前方案（或促销开启时的 BF / MGM 价格 id）选取正确价格 id，并重定向到 Creem 托管结账。
+设 **PAYMENT_PROVIDER=creem**，外加 **CREEM_API_KEY** 与 **CREEM_WEBHOOK_SECRET**。结账调用为当前方案（或促销开启时的 BF 价格 id）选取正确价格 id，并重定向到 Creem 托管结账。
 
 ## 5. 跑沙箱测试
 

@@ -183,19 +183,6 @@ export const env = {
   lemonsqueezyVariantCareBf: () => opt("LEMONSQUEEZY_VARIANT_CARE_BF"),
   paypalPlanBuyoutBf: () => opt("PAYPAL_PLAN_ID_BUYOUT_BF"),
   paypalPlanCareBf: () => opt("PAYPAL_PLAN_ID_CARE_BF"),
-  // MGM / referral price ids — the "share to unlock" tier on the Black Friday
-  // page. Same shape as the BF ids: null when unset, so the checkout/plan
-  // inference never sees a phantom MGM price.
-  stripePriceBuyoutMgm: () => opt("STRIPE_PRICE_ID_BUYOUT_MGM"),
-  stripePriceCareMgm: () => opt("STRIPE_PRICE_ID_CARE_MGM"),
-  creemPriceBuyoutMgm: () => opt("CREEM_PRICE_ID_BUYOUT_MGM"),
-  creemPriceCareMgm: () => opt("CREEM_PRICE_ID_CARE_MGM"),
-  waffoPriceBuyoutMgm: () => opt("WAFFO_PRICE_ID_BUYOUT_MGM"),
-  waffoPriceCareMgm: () => opt("WAFFO_PRICE_ID_CARE_MGM"),
-  lemonsqueezyVariantBuyoutMgm: () => opt("LEMONSQUEEZY_VARIANT_BUYOUT_MGM"),
-  lemonsqueezyVariantCareMgm: () => opt("LEMONSQUEEZY_VARIANT_CARE_MGM"),
-  paypalPlanBuyoutMgm: () => opt("PAYPAL_PLAN_ID_BUYOUT_MGM"),
-  paypalPlanCareMgm: () => opt("PAYPAL_PLAN_ID_CARE_MGM"),
 
   // ── Waffo Acquiring (WAFFO_FLAVOR=acquiring) ────────────────
   // POST /api/v1/order/create needs merchant-contract fields. EVERY value
@@ -514,35 +501,6 @@ export function priceForPlanBf(plan: PricePlan): string | null {
     case "stripe":
     default:
       return bf(env.stripePriceBuyoutBf(), env.stripePriceCareBf());
-  }
-}
-
-/**
- * MGM / referral price/plan id for a plan, or null when unset. Mirrors
- * priceForPlanBf() but reads the *_MGM env vars. The Black Friday page exposes
- * this as the "share to unlock" tier; the webhook plan inference includes it so
- * an MGM-priced charge is never silently dropped.
- */
-export function priceForPlanMgm(plan: PricePlan): string | null {
-  const provider = env.paymentProvider().split(",")[0].trim();
-  const isBuyout = plan === "buyout" || plan === "pro";
-  const mgm = (buyoutId: string, careId: string) =>
-    (isBuyout ? buyoutId : careId) || null;
-  switch (provider) {
-    case "creem":
-      return mgm(env.creemPriceBuyoutMgm(), env.creemPriceCareMgm());
-    case "paypal":
-      return mgm(env.paypalPlanBuyoutMgm(), env.paypalPlanCareMgm());
-    case "waffo":
-      return mgm(env.waffoPriceBuyoutMgm(), env.waffoPriceCareMgm());
-    case "lemonsqueezy":
-      return mgm(
-        env.lemonsqueezyVariantBuyoutMgm(),
-        env.lemonsqueezyVariantCareMgm(),
-      );
-    case "stripe":
-    default:
-      return mgm(env.stripePriceBuyoutMgm(), env.stripePriceCareMgm());
   }
 }
 

@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { env, priceForPlan, priceForPlanBf, priceForPlanMgm } from "@/lib/env";
+import { env, priceForPlan, priceForPlanBf } from "@/lib/env";
 import type {
   CheckoutParams,
   CheckoutResult,
@@ -39,8 +39,8 @@ function normalizeStatus(s: string): NormalizedStatus {
 
 function planFromPrice(priceId: string | null | undefined): PlanId | undefined {
   if (!priceId) return undefined;
-  if (priceId === priceForPlan("buyout") || priceId === priceForPlanBf("buyout") || priceId === priceForPlanMgm("buyout")) return "buyout";
-  if (priceId === priceForPlan("care") || priceId === priceForPlanBf("care") || priceId === priceForPlanMgm("care")) return "care";
+  if (priceId === priceForPlan("buyout") || priceId === priceForPlanBf("buyout")) return "buyout";
+  if (priceId === priceForPlan("care") || priceId === priceForPlanBf("care")) return "care";
   return undefined;
 }
 

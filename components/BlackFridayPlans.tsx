@@ -1,21 +1,18 @@
 ﻿"use client";
 
-import { copyText } from "@/lib/copy";
-
 import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "@/lib/i18n";
 
-// Black-Friday-only pricing ladder: every paid plan shows three price points —
-// the struck list price (原价), the share-to-unlock MGM price (MGM 传播价), and
-// the lowest Black Friday price (黑五价) that the buy button actually charges.
+// Black-Friday-only pricing ladder: every paid plan shows two price points —
+// the struck list price (原价) and the lowest Black Friday price (黑五价) that
+// the buy button actually charges.
 // Site-only (not shipped to generated customer builds).
 
 export type BfPlan = {
   id: string;
   name: string;
   originalPrice: string; // struck anchor, e.g. "$349"
-  mgmPrice: string; // "$219"
   bfPrice: string; // "$174" — what the CTA charges
   once?: boolean;
   monthly?: boolean;
@@ -26,8 +23,6 @@ export type BfPlan = {
   note?: string; // dict key
 };
 
-const MGM_UNLOCK_KEY = "bf_mgm_unlocked";
-
 function Spinner() {
   return (
     <span
@@ -37,41 +32,17 @@ function Spinner() {
   );
 }
 
-const SHARE_TARGETS: { key: string; href: (url: string, text: string) => string }[] = [
-  {
-    key: "x",
-    href: (url, text) =>
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
-  },
-  {
-    key: "linkedin",
-    href: (url) =>
-      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
-  },
-  {
-    key: "facebook",
-    href: (url) =>
-      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-  },
-];
-
 export function BlackFridayPlans({
   plans,
-  shareUrl,
-  shareText,
   paymentsReady = true,
 }: {
   plans: BfPlan[];
-  shareUrl: string;
-  shareText: string;
   /** False while the payment provider is unconfigured (e.g. pending
    *  approval): paid CTAs render as a disabled "coming soon" button. */
   paymentsReady?: boolean;
 }) {
   const { t } = useLanguage();
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [unlocked, setUnlocked] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   async function checkout(plan: BfPlan) {
     if (!plan.priceId) return;
@@ -92,41 +63,6 @@ export function BlackFridayPlans({
       alert("Network error");
     } finally {
       setBusyId(null);
-    }
-  }
-
-  function doShare(target: (url: string, text: string) => string) {
-    if (typeof window !== "undefined") {
-      window.open(target(shareUrl, shareText), "_blank", "noopener,noreferrer");
-    }
-    setUnlocked(true);
-    if (typeof window !== "undefined") {
-      try {
-        window.localStorage.setItem(MGM_UNLOCK_KEY, "1");
-      } catch {
-        /* ignore */
-      }
-    }
-  }
-
-  async function copyLink() {
-    const ok = await copyText(shareUrl);
-    setCopied(ok);
-    setUnlocked(true);
-    try {
-      window.localStorage.setItem(MGM_UNLOCK_KEY, "1");
-    } catch {
-      /* ignore */
-    }
-    if (ok) setTimeout(() => setCopied(false), 2000);
-  }
-
-  // Reveal the MGM tier if it was unlocked in a previous visit.
-  if (typeof window !== "undefined" && !unlocked) {
-    try {
-      if (window.localStorage.getItem(MGM_UNLOCK_KEY) === "1") setUnlocked(true);
-    } catch {
-      /* ignore */
     }
   }
 
@@ -191,27 +127,6 @@ export function BlackFridayPlans({
                         : ""}
                   </span>
                 </div>
-                <div
-                  className={`flex items-center gap-2 rounded-md border px-2 py-1 text-sm ${
-                    unlocked
-                      ? "border-accent/40 bg-accent/10 text-accent"
-                      : "border-dashed border-line text-muted"
-                  }`}
-                >
-                  <span className="font-semibold">
-                    {t("blackfriday.tierMgm")}
-                  </span>
-                  <s className={unlocked ? "" : "opacity-60"}>{plan.mgmPrice}</s>
-                  {unlocked ? (
-                    <span className="ml-auto rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase text-white">
-                      {t("blackfriday.unlocked")}
-                    </span>
-                  ) : (
-                    <span className="ml-auto text-[11px]">
-                      {t("blackfriday.shareUnlock")}
-                    </span>
-                  )}
-                </div>
               </div>
             )}
 
@@ -265,32 +180,6 @@ export function BlackFridayPlans({
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Share-to-unlock MGM bar */}
-      <div className="card mx-auto mt-6 max-w-3xl border-accent/40 sm:p-6">
-        <div className="eyebrow mb-2">{t("blackfriday.shareHeading")}</div>
-        <p className="text-sm text-ink-soft">{t("blackfriday.shareBody")}</p>
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          {SHARE_TARGETS.map((s) => (
-            <button
-              key={s.key}
-              type="button"
-              className="btn-ghost"
-              onClick={() => doShare(s.href)}
-            >
-              {t(`blackfriday.share.${s.key}`)}
-            </button>
-          ))}
-          <button type="button" className="btn-ghost" onClick={copyLink}>
-            {copied ? t("blackfriday.copied") : t("blackfriday.share.copy")}
-          </button>
-        </div>
-        {unlocked && (
-          <p className="mt-3 text-sm font-semibold text-accent">
-            {t("blackfriday.unlockedBody")}
-          </p>
-        )}
       </div>
     </div>
   );

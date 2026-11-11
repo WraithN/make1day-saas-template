@@ -5,7 +5,6 @@
 // Ladder semantics:
 //   list    — struck-through anchor ("was") price, display only
 //   regular — default sale price outside campaign windows
-//   mgm     — share-to-unlock price (member-get-member)
 //   bf      — Black Friday window price = 30% off regular (env-gated)
 //
 // Positioning rationale (which competing kits this sits below, and why) lives
@@ -17,19 +16,18 @@ import { env } from "@/lib/env";
 export interface PriceLadder {
   list: number;
   regular: number;
-  mgm: number;
   bf: number;
 }
 
 export const PRICES: { buyout: PriceLadder; care: PriceLadder } = {
   // regular sits just below the mainstream paid-kit band; bf = 30% off
-  // regular (七折) during the Black Friday window; list = struck anchor;
-  // mgm = share-to-unlock. Competitor rationale: docs/competitive-analysis.md
+  // regular (七折) during the Black Friday window; list = struck anchor.
+  // Competitor rationale: docs/competitive-analysis.md
   // (competitor names must never appear in shipped source — white-label sweep).
-  buyout: { list: 349, regular: 249, mgm: 219, bf: 174 },
+  buyout: { list: 349, regular: 249, bf: 174 },
   // Care includes the monthly video-studio credits for the generated-module
   // buyers who run their own video site (see docs/video-product.md).
-  care: { list: 29, regular: 19, mgm: 15, bf: 13 },
+  care: { list: 29, regular: 19, bf: 13 },
 };
 
 export type PricePlan = keyof typeof PRICES;

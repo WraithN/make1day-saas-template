@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { env, priceForPlan, priceForPlanBf, priceForPlanMgm } from "@/lib/env";
+import { env, priceForPlan, priceForPlanBf } from "@/lib/env";
 import type {
   CheckoutParams,
   CheckoutResult,
@@ -97,8 +97,8 @@ function planFromCustom(
   if (raw === "scale") return "care";
   const v = String(variantId ?? "");
   if (!v) return undefined;
-  if (v === priceForPlan("buyout") || v === priceForPlanBf("buyout") || v === priceForPlanMgm("buyout")) return "buyout";
-  if (v === priceForPlan("care") || v === priceForPlanBf("care") || v === priceForPlanMgm("care")) return "care";
+  if (v === priceForPlan("buyout") || v === priceForPlanBf("buyout")) return "buyout";
+  if (v === priceForPlan("care") || v === priceForPlanBf("care")) return "care";
   return undefined;
 }
 

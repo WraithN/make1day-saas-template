@@ -195,16 +195,14 @@ Test mode is a fully isolated environment (separate keys, separate
 - `CREEM_ENV=test`, the TEST `CREEM_API_KEY` and the **test-mode** webhook's
   `CREEM_WEBHOOK_SECRET` (register `https://<domain>/api/webhook` while the
   dashboard is in Test Mode — test events only go to test webhooks)
-- six test products mapped to `CREEM_PRICE_ID_*` (incl. `_BF` / `_MGM`), amounts
+- four test products mapped to `CREEM_PRICE_ID_*` (incl. `_BF`), amounts
   per `lib/pricing.ts`:
 
   | Creem product | Type | Amount | env var |
   |---|---|---|---|
   | Buyout regular | one-time | $249 | `CREEM_PRICE_ID_BUYOUT` |
-  | Buyout MGM | one-time | $219 | `CREEM_PRICE_ID_BUYOUT_MGM` |
   | Buyout Black Friday | one-time | $174 | `CREEM_PRICE_ID_BUYOUT_BF` |
   | Care regular | monthly | $19 | `CREEM_PRICE_ID_CARE` |
-  | Care MGM | monthly | $15 | `CREEM_PRICE_ID_CARE_MGM` |
   | Care Black Friday | monthly | $13 | `CREEM_PRICE_ID_CARE_BF` |
 - redeploy after env changes (Vercel snapshots env per deployment)
 
