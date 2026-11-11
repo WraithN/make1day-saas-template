@@ -24,7 +24,7 @@ const TEXT: Record<
 > = {
   en: {
     title: "Unlock downloads",
-    body: "Generating the full source ZIP requires a license. Buy once ($99) and paste the key you received — or sign in with the email you used at checkout to unlock automatically.",
+    body: "Generating the full source ZIP requires a license. Buy once and paste the key you received — or sign in with the email you used at checkout to unlock automatically.",
     placeholder: "Paste your license key (SK1.…)",
     redeem: "Redeem license",
     buying: "Get a license",
@@ -39,7 +39,7 @@ const TEXT: Record<
   },
   zh: {
     title: "解锁下载",
-    body: "生成完整源码 ZIP 需要授权。一次性购买（$99）后粘贴收到的 License Key，或用下单邮箱登录即可自动解锁。",
+    body: "生成完整源码 ZIP 需要授权。一次性购买后粘贴收到的 License Key，或用下单邮箱登录即可自动解锁。",
     placeholder: "粘贴 License Key（SK1.…）",
     redeem: "兑换授权",
     buying: "购买授权",
@@ -54,7 +54,7 @@ const TEXT: Record<
   },
   ja: {
     title: "ダウンロードを解除",
-    body: "完全なソース ZIP の生成にはライセンスが必要です。買い切り（$99）後に届いたキーを貼り付けるか、決済時と同じメールでログインすると自動解除されます。",
+    body: "完全なソース ZIP の生成にはライセンスが必要です。買い切り後に届いたキーを貼り付けるか、決済時と同じメールでログインすると自動解除されます。",
     placeholder: "ライセンスキーを貼り付け（SK1.…）",
     redeem: "ライセンスを登録",
     buying: "ライセンスを購入",
@@ -69,7 +69,7 @@ const TEXT: Record<
   },
   fr: {
     title: "Débloquer les téléchargements",
-    body: "La génération du ZIP source complet nécessite une licence. Achetez une fois (99 $) et collez la clé reçue, ou connectez-vous avec l'e-mail utilisé lors du paiement pour un déblocage automatique.",
+    body: "La génération du ZIP source complet nécessite une licence. Achetez une fois et collez la clé reçue, ou connectez-vous avec l'e-mail utilisé lors du paiement pour un déblocage automatique.",
     placeholder: "Collez votre clé de licence (SK1.…)",
     redeem: "Activer la licence",
     buying: "Obtenir une licence",
@@ -84,7 +84,7 @@ const TEXT: Record<
   },
   de: {
     title: "Downloads freischalten",
-    body: "Für die Generierung des vollständigen Source-ZIP ist eine Lizenz erforderlich. Kaufen Sie einmalig (99 $) und fügen Sie den erhaltenen Schlüssel ein — oder melden Sie sich mit der E-Mail an, die Sie beim Kauf verwendet haben, um automatisch freizuschalten.",
+    body: "Für die Generierung des vollständigen Source-ZIP ist eine Lizenz erforderlich. Kaufen Sie einmalig und fügen Sie den erhaltenen Schlüssel ein — oder melden Sie sich mit der E-Mail an, die Sie beim Kauf verwendet haben, um automatisch freizuschalten.",
     placeholder: "Lizenzschlüssel einfügen (SK1.…)",
     redeem: "Lizenz einlösen",
     buying: "Lizenz erhalten",
@@ -111,13 +111,16 @@ type Status = {
 export function LicensePanel({
   onRedeemed,
   compact = false,
+  initialKey = "",
 }: {
   onRedeemed?: () => void;
   compact?: boolean;
+  /** Pre-filled key (e.g. carried from /account/licenses via ?key=). */
+  initialKey?: string;
 }) {
   const { lang } = useLanguage();
   const s = TEXT[lang];
-  const [key, setKey] = useState("");
+  const [key, setKey] = useState(initialKey);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [status, setStatus] = useState<Status | null>(null);

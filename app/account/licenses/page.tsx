@@ -62,9 +62,18 @@ export default async function AccountLicensesPage() {
               <span key="order" className="font-mono text-xs">
                 {l.orderId ?? c["console.dash"]}
               </span>,
-              <code key="key" className="block max-w-xs break-all font-mono text-xs text-accent">
-                {l.key}
-              </code>,
+              <span key="keycell" className="block">
+                <code className="block max-w-xs break-all font-mono text-xs text-accent">
+                  {l.key}
+                </code>
+                <Link
+                  key="redeem"
+                  href={`/license?key=${encodeURIComponent(l.key)}`}
+                  className="mt-1 inline-block text-xs font-semibold text-accent hover:underline"
+                >
+                  {c["account.licenses.redeem"]} →
+                </Link>
+              </span>,
             ])}
           />
         )}

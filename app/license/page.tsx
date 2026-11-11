@@ -38,9 +38,17 @@ const HEAD: Record<Lang, { eyebrow: string; title: string; body: string }> = {
   },
 };
 
-export default async function LicensePage() {
+export default async function LicensePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ key?: string }>;
+}) {
   const lang = await getLang();
   const h = HEAD[lang];
+  const sp = await searchParams;
+  // Pre-fill from ?key= so the per-license "redeem" button on
+  // /account/licenses can carry the key over without copy-paste.
+  const initialKey = (sp.key ?? "").slice(0, 4096).trim();
   return (
     <section className="wrap py-12 sm:py-20">
       <div className="max-w-2xl">
@@ -49,7 +57,7 @@ export default async function LicensePage() {
         <p className="mt-4 text-ink-soft">{h.body}</p>
       </div>
       <div className="mt-10 max-w-2xl">
-        <LicensePanel />
+        <LicensePanel initialKey={initialKey} />
         <LicenseClaimForm />
       </div>
     </section>

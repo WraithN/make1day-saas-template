@@ -102,11 +102,27 @@ export const creemProvider: PaymentProvider = {
   ): Promise<NormalizedSubEvent[]> {
     const signature = headers["creem-signature"];
     if (!signature) throw new Error("Missing creem-signature header");
+    // Creem delivers TWO signature formats: the documented plain
+    // HMAC-SHA256 hex digest over the raw body, and a newer Stripe-style
+    // "t=<timestamp>,v1=<hex>" scheme (used by dashboard test events and
+    // newer accounts). Accept both so a test event or account-migration
+    // never fails verification.
+    let expectedHex: string;
+    const parts = signature.split(",").reduce<Record<string, string>>((acc, p) => {
+      const [k, v] = p.split("=");
+      if (k && v) acc[k.trim()] = v.trim();
+      return acc;
+    }, {});
+    if (parts.v1) {
+      expectedHex = parts.v1;
+    } else {
+      expectedHex = signature.trim();
+    }
     const expected = createHmac("sha256", env.creemWebhookSecret())
       .update(rawBody)
       .digest("hex");
     const a = Buffer.from(expected);
-    const b = Buffer.from(signature);
+    const b = Buffer.from(expectedHex);
     if (a.length !== b.length || !timingSafeEqual(a, b)) {
       throw new Error("Invalid Creem webhook signature");
     }
