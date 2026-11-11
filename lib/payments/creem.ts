@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { env, priceForPlan, priceForPlanBf } from "@/lib/env";
+import { logger } from "@/lib/logger";
 import type {
   CheckoutParams,
   CheckoutResult,
@@ -41,15 +42,32 @@ function normalizeStatus(s: string): NormalizedStatus {
 }
 
 async function creemFetch(path: string, init?: RequestInit): Promise<any> {
+  const t0 = Date.now();
   const res = await fetch(`${baseUrl()}${path}`, {
     ...init,
+    // Vercel kills a hanging function at the edge (opaque 502, no lambda
+    // log). Fail fast with a catchable, logged error instead.
+    signal: AbortSignal.timeout(9000),
     headers: {
       "x-api-key": env.creemApiKey(),
       "content-type": "application/json",
       ...(init?.headers ?? {}),
     },
   });
-  return res.json();
+  const text = await res.text();
+  logger.info("creem api call", {
+    path,
+    status: res.status,
+    ms: Date.now() - t0,
+  });
+  if (!res.ok) {
+    throw new Error(`creem_http_${res.status}: ${text.slice(0, 200)}`);
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`creem_bad_json_${res.status}: ${text.slice(0, 200)}`);
+  }
 }
 
 export const creemProvider: PaymentProvider = {

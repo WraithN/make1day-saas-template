@@ -9,6 +9,9 @@ import { recordTrafficEvent } from "@/lib/traffic";
 import { resolveIdentity } from "@/lib/visitor-id";
 
 export const runtime = "nodejs";
+// Creem's hosted-checkout creation plus the Supabase session lookup must fit
+// comfortably inside the function budget; the adapter itself times out at 9s.
+export const maxDuration = 30;
 
 export async function POST(req: Request) {
   // While the payment provider is unconfigured (e.g. Creem approval pending)

@@ -11,9 +11,9 @@ import Link from "next/link";
 // the struck price is the list anchor.
 // Prices live in lib/pricing.ts (single source of truth shared with /pricing,
 // JSON-LD and the machine-readable docs).
-const BF_BUYOUT_ORIGINAL = String(PRICES.buyout.list);
+const BF_BUYOUT_ORIGINAL = String(PRICES.buyout.regular);
 const BF_BUYOUT_PRICE = String(PRICES.buyout.bf);
-const BF_CARE_ORIGINAL = String(PRICES.care.list);
+const BF_CARE_ORIGINAL = String(PRICES.care.regular);
 const BF_CARE_PRICE = String(PRICES.care.bf);
 
 export const metadata = {

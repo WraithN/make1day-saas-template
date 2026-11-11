@@ -70,7 +70,7 @@ export function BlackFridayPlans({
 
   return (
     <div>
-      <div className="grid gap-4 sm:gap-5 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
         {plans.map((plan, idx) => (
           <div
             key={plan.id}
