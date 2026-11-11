@@ -386,7 +386,7 @@ pre {
   height: 100%;
   background: rgb(var(--accent));
   box-shadow: 0 0 8px rgb(var(--accent) / 0.6);
-  transition: width 0.3s ease;
+  transition: width 0.4s cubic-bezier(0.25, 0.6, 0.35, 1);
 }
 
 @layer components {
