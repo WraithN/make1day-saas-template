@@ -11,26 +11,19 @@ import { FaqSection } from "@/components/home/FaqSection";
 import { HreflangLinks } from "@/components/HreflangLinks";
 import { PricingCards, type Plan } from "@/components/PricingCards";
 import { Trans } from "@/lib/i18n";
-import { getLang } from "@/lib/i18n-server";
+import { getCanonicalLang, getLang } from "@/lib/i18n-server";
 import { priceForPlan, primaryPaymentsReady } from "@/lib/env";
 import { variantCanonical } from "@/lib/seo-alternates";
 import { PRICES, bfActive, effectivePrice } from "@/lib/pricing";
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: string | string[] }>;
-}): Promise<Metadata> {
-  const { lang } = await searchParams;
+export async function generateMetadata(): Promise<Metadata> {
   return {
-    // The root-path LANGUAGE cluster lives in the sitemap's xhtml:link cluster:
-    // Next drops `?lang=` from metadata alternates when the path is "/", which
-    // would emit five identical hreflang tags here. The canonical, however, is
-    // a plain string and keeps its query — each variant must self-canonical.
+    // Root canonical: EN is the bare "/", localized roots are "/zh" etc.
+    // (the old "?lang=" form 301s here from middleware).
     alternates: {
-      canonical: variantCanonical("", lang),
+      canonical: variantCanonical("", await getCanonicalLang()),
     },
-    openGraph: { url: variantCanonical("", lang) },
+    openGraph: { url: variantCanonical("", await getCanonicalLang()) },
   };
 }
 

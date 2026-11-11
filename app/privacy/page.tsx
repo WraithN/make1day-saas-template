@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getCanonicalLang } from "@/lib/i18n-server";
 import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import Link from "next/link";
 import { env } from "@/lib/env";
@@ -15,13 +16,8 @@ const ADDRESS = env.legalAddress();
 const JURISDICTION = env.legalJurisdiction();
 const DPA_URL = env.dpaUrl();
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: string | string[] }>;
-}): Promise<Metadata> {
-  const { lang } = await searchParams;
-  const canonical = variantCanonical("/privacy", lang);
+export async function generateMetadata(): Promise<Metadata> {
+  const canonical = variantCanonical("/privacy", await getCanonicalLang());
   return {
     alternates: {
       canonical,

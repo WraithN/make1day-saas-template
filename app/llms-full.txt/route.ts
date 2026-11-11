@@ -321,7 +321,7 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
   get_agent_delivery. Stateless JSON-RPC over HTTP; scripts/mcp-server.mjs
   bridges stdio for Cursor / Claude Code. Reference: docs/mcp.md.
 - ${SITE}/sitemap.xml — indexable pages, all blog posts, every
-  /blog/<slug>/md Markdown variant and localized ?lang= variants.
+  /blog/<slug>/md Markdown variant and localized path-prefixed variants (/zh/… /ja/… /fr/… /de/…).
 - ${SITE}/robots.txt — default rules + explicit AI crawler allowlist
   (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, Applebot-Extended,
   CCBot, Bytespider); /blog/, /faq, /compare and the machine-readable routes
@@ -355,7 +355,7 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
   /account, /account/billing, /account/licenses, /account/settings,
   /admin, /admin/users, /admin/licenses, /admin/stats, /admin/system,
   /admin/tickets.
-- Languages: English, 中文, 日本語, Français, Deutsch (?lang= or the language switcher).
+- Languages: English, 中文, 日本語, Français, Deutsch (path prefixes like /zh/pricing, or the language switcher).
 - Docs in the repository: docs/email.md (transactional mail, SPF / DKIM /
   DMARC / subdomain isolation / anti-spam checklist, Resend domain
   verification, and what is NOT implemented), docs/waffo.md (protocol reference),

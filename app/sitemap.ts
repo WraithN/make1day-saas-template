@@ -4,6 +4,14 @@ import { POSTS } from "@/lib/content/blog";
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com";
 const LANGS = ["en", "zh", "ja", "fr", "de"];
 
+/** Localized URLs are path-prefixed: /pricing → /zh/pricing, / → /zh. */
+function locHref(path: string, l: string): string {
+  const base = path || "/";
+  return l === "en"
+    ? `${BASE}${base}`
+    : `${BASE}${base === "/" ? "" : base ? `/${l}${base}` : `/${l}`}` || `${BASE}/`;
+}
+
 /**
  * hreflang cluster for one logical page: every language variant (plus
  * x-default → EN) cross-references the others. Emitted as xhtml:link
@@ -11,11 +19,9 @@ const LANGS = ["en", "zh", "ja", "fr", "de"];
  * carry alternates and keeps the cluster definition in exactly one place.
  */
 function langSet(path: string) {
-  const href = (l: string) =>
-    l === "en" ? `${BASE}${path || "/"}` : `${BASE}${path || "/"}?lang=${l}`;
   const languages: Record<string, string> = {};
-  for (const l of LANGS) languages[l] = href(l);
-  languages["x-default"] = href("en");
+  for (const l of LANGS) languages[l] = locHref(path, l);
+  languages["x-default"] = locHref(path, "en");
   return { languages };
 }
 
@@ -54,7 +60,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     for (const l of LANGS) {
       if (l === "en") continue;
       entries.push({
-        url: `${BASE}${r.path || "/"}?lang=${l}`,
+        url: locHref(r.path, l),
         lastModified: now,
         changeFrequency: r.path === "" ? "weekly" : "monthly",
         priority: r.priority - 0.1,
@@ -79,7 +85,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     for (const l of LANGS) {
       if (l === "en") continue;
       entries.push({
-        url: `${BASE}${path}?lang=${l}`,
+        url: locHref(path, l),
         lastModified: modified,
         changeFrequency: "monthly",
         priority: 0.5,

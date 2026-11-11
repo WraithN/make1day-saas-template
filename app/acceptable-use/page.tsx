@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
-import { getLang } from "@/lib/i18n-server";
+import { getCanonicalLang, getLang } from "@/lib/i18n-server";
 import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import { AUP_INTRO, AUP_SECTIONS } from "@/lib/content/aup";
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: string | string[] }>;
-}): Promise<Metadata> {
-  const { lang } = await searchParams;
-  const canonical = variantCanonical("/acceptable-use", lang);
+export async function generateMetadata(): Promise<Metadata> {
+  const canonical = variantCanonical("/acceptable-use", await getCanonicalLang());
   return {
     title: "Acceptable Use Policy",
     description:

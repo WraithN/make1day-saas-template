@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getLang, tr } from "@/lib/i18n-server";
-import { variantCanonical } from "@/lib/seo-alternates";
+import { getCanonicalLang, getLang, tr } from "@/lib/i18n-server";
+import { localeHref, variantCanonical } from "@/lib/seo-alternates";
 import {
   allPostSlugs,
   getPost,
@@ -25,18 +25,16 @@ export function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-  searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ lang?: string | string[] }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const { lang } = await searchParams;
   const post = getPost(slug);
   if (!post) return {};
   const title = postField(post, "en", "title");
   const description = postField(post, "en", "excerpt");
-  const canonical = variantCanonical(`/blog/${post.slug}`, lang);
+  const canonical = variantCanonical(`/blog/${post.slug}`, await getCanonicalLang());
+  const p = `/blog/${post.slug}`;
   return {
     title,
     description,
@@ -45,14 +43,14 @@ export async function generateMetadata({
     alternates: {
       canonical,
       languages: {
-        en: `/blog/${post.slug}`,
-        "zh-CN": `/blog/${post.slug}?lang=zh`,
-        ja: `/blog/${post.slug}?lang=ja`,
-        fr: `/blog/${post.slug}?lang=fr`,
-        de: `/blog/${post.slug}?lang=de`,
+        en: p,
+        zh: localeHref(p, "zh"),
+        ja: localeHref(p, "ja"),
+        fr: localeHref(p, "fr"),
+        de: localeHref(p, "de"),
       },
       // Machine-readable variant for AI crawlers / answer engines (GEO).
-      types: { "text/markdown": `/blog/${post.slug}/md` },
+      types: { "text/markdown": `${p}/md` },
     },
     openGraph: {
       type: "article",

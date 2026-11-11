@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
 import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
-import { getLang, tr } from "@/lib/i18n-server";
+import { getCanonicalLang, getLang, tr } from "@/lib/i18n-server";
 import { msgCopy } from "@/lib/content/messaging";
 import { env } from "@/lib/env";
 import { SupportForm } from "@/components/SupportForm";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: string | string[] }>;
-}): Promise<Metadata> {
-  const { lang } = await searchParams;
-  const canonical = variantCanonical("/support", lang);
+export async function generateMetadata(): Promise<Metadata> {
+  const canonical = variantCanonical("/support", await getCanonicalLang());
   return {
     alternates: {
       canonical,

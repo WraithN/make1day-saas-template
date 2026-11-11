@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import Link from "next/link";
-import { getLang, tr } from "@/lib/i18n-server";
+import { getCanonicalLang, getLang, tr } from "@/lib/i18n-server";
 import { getAllPosts, postField } from "@/lib/content/blog";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com";
@@ -10,13 +10,8 @@ const COMPANY = "make1day";
 const BLOG_DESCRIPTION =
   "Practical, verified guides on building, billing and launching an AI SaaS with Next.js: subscription webhooks, payment gateways, white-label source delivery, the 2026 AI boilerplate checklist and agent-readable docs.";
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: string | string[] }>;
-}): Promise<Metadata> {
-  const { lang } = await searchParams;
-  const canonical = variantCanonical("/blog", lang);
+export async function generateMetadata(): Promise<Metadata> {
+  const canonical = variantCanonical("/blog", await getCanonicalLang());
   return {
     title: "Blog — make1day AI SaaS starter guides",
     description: BLOG_DESCRIPTION,

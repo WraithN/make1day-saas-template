@@ -1,37 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Trans } from "@/lib/i18n";
-import { getLang } from "@/lib/i18n-server";
-import { variantCanonical } from "@/lib/seo-alternates";
+import { getCanonicalLang, getLang } from "@/lib/i18n-server";
+import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import { TEMPLATES } from "@/lib/content/templates";
 import { TemplateCard } from "@/components/TemplateCard";
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: string }>;
-}): Promise<Metadata> {
-  const { lang = "en" } = await searchParams;
+export async function generateMetadata(): Promise<Metadata> {
+  const lang = await getLang();
   // The root layout's title template appends "· make1day" — don't add it here.
   const title = lang === "zh" ? "样板间" : "Templates";
   const description =
     lang === "zh"
       ? "看看每个 make1day 模板真实生成的站点——点击即可在线预览。"
       : "See a live preview of the site each make1day template generates — click to open it.";
+  const canonical = variantCanonical("/templates", await getCanonicalLang());
   return {
     title,
     description,
     alternates: {
-      canonical: variantCanonical("/templates", lang),
-      languages: {
-        en: "/templates",
-        zh: "/templates?lang=zh",
-        ja: "/templates?lang=ja",
-        fr: "/templates?lang=fr",
-        de: "/templates?lang=de",
-      },
+      canonical,
+      languages: langAlternatePaths("/templates"),
     },
-    openGraph: { url: variantCanonical("/templates", lang) },
+    openGraph: { url: canonical },
   };
 }
 

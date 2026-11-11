@@ -5,15 +5,10 @@ import { PricingCards, type Plan } from "@/components/PricingCards";
 import { env, priceForPlan, primaryPaymentsReady } from "@/lib/env";
 import { paymentProviderLabel } from "@/lib/payments";
 import { Trans } from "@/lib/i18n";
-import { getLang } from "@/lib/i18n-server";
+import { getCanonicalLang, getLang } from "@/lib/i18n-server";
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: string | string[] }>;
-}): Promise<Metadata> {
-  const { lang } = await searchParams;
-  const canonical = variantCanonical("/pricing", lang);
+export async function generateMetadata(): Promise<Metadata> {
+  const canonical = variantCanonical("/pricing", await getCanonicalLang());
   return {
     alternates: {
       canonical,

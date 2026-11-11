@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
+import { getCanonicalLang } from "@/lib/i18n-server";
 import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import { CompareContent } from "@/components/CompareContent";
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: string | string[] }>;
-}): Promise<Metadata> {
-  const { lang } = await searchParams;
-  const canonical = variantCanonical("/compare", lang);
+export async function generateMetadata(): Promise<Metadata> {
+  const canonical = variantCanonical("/compare", await getCanonicalLang());
   return {
     alternates: {
       canonical,

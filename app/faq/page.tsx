@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
+import { getCanonicalLang } from "@/lib/i18n-server";
 import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import { FaqContent } from "@/components/FaqContent";
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: string | string[] }>;
-}): Promise<Metadata> {
-  const { lang } = await searchParams;
-  const canonical = variantCanonical("/faq", lang);
+export async function generateMetadata(): Promise<Metadata> {
+  const canonical = variantCanonical("/faq", await getCanonicalLang());
   return {
     title: "FAQ — make1day AI SaaS starter, licensing, payments and limits",
     description:

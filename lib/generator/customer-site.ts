@@ -404,7 +404,7 @@ ${rows}
     for (const l of LANGS) {
       if (l === "en") continue;
       entries.push({
-        url: \`\${BASE}\${r.path || "/"}?lang=\${l}\`,
+        url: l === "en" ? \`\${BASE}\${r.path || "/"}\` : \`\${BASE}/\${l}\${r.path || ""}\`,
         lastModified: now,
         changeFrequency: "monthly",
         priority: r.priority - 0.1,

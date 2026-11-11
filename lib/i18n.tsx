@@ -73,16 +73,21 @@ export function LanguageProvider({
     if (typeof document !== "undefined") {
       document.cookie = `${I18N_STORAGE_KEY}=${l}; path=/; max-age=31536000; samesite=lax`;
     }
-    // Keep the URL in sync with the visible language: every rendered language
-    // state gets its own shareable URL from the ?lang= hreflang cluster (see
-    // lib/seo-alternates.ts), EN uses the bare path = its canonical. Without
-    // this a cookie-switched visitor sat on a URL whose canonical pointed at
-    // another language's content.
+    // Keep the URL in sync with the visible language: localized languages use
+    // their path prefix (/zh/pricing — the self-canonicalized variant URL from
+    // the hreflang cluster), EN uses the bare path. Without this a switched
+    // visitor sat on a URL whose canonical pointed at another language.
     if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      if (l === "en") url.searchParams.delete("lang");
-      else url.searchParams.set("lang", l);
-      const next = url.pathname + url.search + url.hash;
+      const seg = window.location.pathname.split("/")[1] ?? "";
+      const bare =
+        ["zh", "ja", "fr", "de"].includes(seg) && window.location.pathname.length > seg.length + 1
+          ? window.location.pathname.slice(seg.length + 1)
+          : seg && ["zh", "ja", "fr", "de"].includes(seg)
+            ? "/"
+            : window.location.pathname;
+      const target =
+        l === "en" ? bare : bare === "/" ? `/${l}` : `/${l}${bare}`;
+      const next = target + window.location.search + window.location.hash;
       const now =
         window.location.pathname + window.location.search + window.location.hash;
       if (next !== now) router.replace(next, { scroll: false });

@@ -21,11 +21,11 @@ make1day project. make1day is built SEO-first — keep it that way.
 ## Multilingual (5 langs: en/zh/ja/fr/de)
 - Server content uses `lib/i18n-server` (`getLang`, `tr`).
 - Client content uses `useLanguage` + `<Trans k=... />`.
-- Language is carried by `?lang=` (crawler-friendly) and the `sk_lang` cookie (return visits).
+- Language is carried by **path prefixes** (`/zh/pricing`, homepage `/zh`; EN is the bare path — legacy `?lang=` 301s onto this form) and the `sk_lang` cookie (return visits).
 - Don't split routes per language — use the query param + cookie model.
 
 ## Sitemap & robots
-- Add every indexable route (and its `/?lang=xx` variants) to `app/sitemap.ts`.
+- Add every indexable route (and its path-prefixed `/zh/…` variants) to `app/sitemap.ts`.
 - `app/robots.ts` blocks `/dashboard /api/ /auth/ /builder`; explicitly allows AI crawlers (GPTBot, ClaudeBot, PerplexityBot, Google-Extended).
 - Keep these in sync after adding pages.
 
@@ -49,6 +49,6 @@ make1day project. make1day is built SEO-first — keep it that way.
 ## Do / Don't
 - DO keep metadata truthful (no keyword stuffing).
 - DON'T block indexable pages in robots.
-- DON'T forget the `?lang=` sitemap variants — crawlers don't run JS.
+- DON'T forget the path-prefixed sitemap variants — crawlers don't run JS.
 
 After adding a page: update `sitemap.ts`, `llms.txt`, and any FAQ/blog cross-links.

@@ -4,7 +4,7 @@ import { HreflangLinks } from "@/components/HreflangLinks";
 import { env, priceForPlanBf, primaryPaymentsReady } from "@/lib/env";
 import { PRICES } from "@/lib/pricing";
 import { Trans } from "@/lib/i18n";
-import { getLang } from "@/lib/i18n-server";
+import { getCanonicalLang, getLang } from "@/lib/i18n-server";
 import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import Link from "next/link";
 
@@ -17,13 +17,8 @@ const BF_BUYOUT_PRICE = String(PRICES.buyout.bf);
 const BF_CARE_ORIGINAL = String(PRICES.care.regular);
 const BF_CARE_PRICE = String(PRICES.care.bf);
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: string | string[] }>;
-}) {
-  const { lang } = await searchParams;
-  const canonical = variantCanonical("/black-friday", lang);
+export async function generateMetadata() {
+  const canonical = variantCanonical("/black-friday", await getCanonicalLang());
   return {
     title: "Black Friday — make1day",
     description:

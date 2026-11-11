@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
 import { Builder } from "@/components/Builder";
 import { Trans } from "@/lib/i18n";
-import { getLang } from "@/lib/i18n-server";
+import { getCanonicalLang, getLang } from "@/lib/i18n-server";
 import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import { STYLE_OPTIONS, type StyleId } from "@/lib/generator/config";
 import { HreflangLinks } from "@/components/HreflangLinks";
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: string | string[] }>;
-}): Promise<Metadata> {
-  const { lang } = await searchParams;
-  const canonical = variantCanonical("/builder", lang);
+export async function generateMetadata(): Promise<Metadata> {
+  const canonical = variantCanonical("/builder", await getCanonicalLang());
   return {
     title: "SaaS Template Generator",
     description:

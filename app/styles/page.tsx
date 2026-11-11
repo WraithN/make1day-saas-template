@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
 import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
-import { getLang, tr } from "@/lib/i18n-server";
+import { getCanonicalLang, getLang, tr } from "@/lib/i18n-server";
 import { STYLE_OPTIONS, type StyleId } from "@/lib/generator/config";
 import { PALETTES, themeVars, textureStyle } from "@/lib/generator/themes";
 import { StylePlayground, type StyleItem } from "@/components/StylePlayground";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<{ lang?: string | string[] }>;
-}): Promise<Metadata> {
-  const { lang } = await searchParams;
-  const canonical = variantCanonical("/styles", lang);
+export async function generateMetadata(): Promise<Metadata> {
+  const canonical = variantCanonical("/styles", await getCanonicalLang());
   return {
     title: "Styles — make1day design system",
     description:

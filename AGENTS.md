@@ -57,8 +57,11 @@ will 404 every route. Stop dev → delete `.next` → build → start.
 4. **Payments verify on the raw body.** Waffo Pancake uses RSA-SHA256 over
    `${t}.${rawBody}`; the single webhook is `POST /api/webhook`. `buyout` is
    one-time, `care` is monthly. Never trust an unsigned event.
-5. **Five complete locales.** Any new copy needs en / zh / ja / fr / de. `?lang=`
-   must stay in canonical and hreflang URLs.
+5. **Five complete locales.** Any new copy needs en / zh / ja / fr / de. Localized
+   pages live at **path-prefixed URLs** (`/zh/pricing`, homepage `/zh`); EN is the
+   bare path. Canonical and hreflang must declare the prefixed self-URL
+   (`getCanonicalLang()`), content language comes from `getLang()`, and legacy
+   `?lang=` URLs 301 onto the path form.
 6. **Be honest in machine-readable docs.** `llms-full.txt`, `openapi.json`,
    `/compare`, `/faq` and README's Known gaps must list real limitations, not
    aspirational marketing.

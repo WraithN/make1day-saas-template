@@ -83,7 +83,7 @@ ${BLOG_INDEX}
 - [MCP endpoint](${SITE}/api/mcp): stateless JSON-RPC 2.0 with tools get_product_info, get_builder_config, scaffold_project and get_agent_delivery, plus resources/list and resources/read for llms.txt / llms-full.txt / openapi.json. scaffold_project returns a validated BuilderConfig plus the exact /api/generate POST body; includeZip=true returns the ZIP as base64 behind the same license gate. No sampling, prompts, logging, completions, subscriptions or SSE. A stdio bridge (scripts/mcp-server.mjs) connects Cursor and Claude Code. See docs/mcp.md.
 - [Markdown variants](${SITE}/blog): append \`?format=md\` to any public page for a plain-text digest, or fetch /blog/<slug>/md?lang=xx for the full article. [Agent card](${SITE}/.well-known/agent-card.json) declares the agent-facing endpoints and their honest limitations. npm run agents:lint verifies the generated AGENTS.md / scoped-rule / skills contract.
 - [Builder](${SITE}/builder) and the machine-readable routes are crawlable; robots.txt explicitly allows them, the machine-readable routes and /api/mcp for AI crawlers.
-- /sitemap.xml lists indexable pages, localized ?lang= variants and the machine-readable endpoints. /api/payments/self-check reports live configuration readiness without secrets; /api/mail/self-check reports mail provider readiness without secrets.
+- /sitemap.xml lists indexable pages, localized path-prefixed variants (/zh/… /ja/… /fr/… /de/…) and the machine-readable endpoints. /api/payments/self-check reports live configuration readiness without secrets; /api/mail/self-check reports mail provider readiness without secrets.
 - New HTTP endpoints (full schema in /openapi.json): POST/GET /api/support/tickets, PATCH /api/support/tickets/{id} (operator only), POST /api/auth/password-reset (request + confirm), POST/GET /api/auth/verify-email (send + confirm), GET /api/mail/self-check.
 - Generated-template build matrix: 19 cases in .github/workflows/generated-matrix.yml, each downloading a real ZIP and asserting AGENTS.md, scoped rules, Cursor rules, 13 skills, ai:docs and both consoles' pruning / dead-link rewrites before running tsc --noEmit inside it (docs/build-matrix.md).
 - These site-only endpoints are excluded from customer ZIPs; downloaded projects ship their own AGENTS.md, design.md, ai/rules/*, .cursor/rules/*, CLAUDE.md and skills/* instead.
@@ -103,7 +103,7 @@ ${BLOG_INDEX}
 - Hybrid RAG: lib/rag/{embed,vector,hybrid,retrieve}.ts + supabase/migrations/0002_rag.sql (pgvector + tsvector + SQL-side RRF).
 
 ## Languages
-- Available in English, 中文, 日本語, Français and Deutsch (use ?lang=xx or the language switcher).
+- Available in English, 中文, 日本語, Français and Deutsch (path prefixes like /zh/pricing, or the language switcher).
 
 ## Source & brand
 - Author / publisher (company name): make1day. All guides and FAQ answers on this site are published under this company name.

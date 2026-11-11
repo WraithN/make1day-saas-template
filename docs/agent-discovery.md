@@ -10,7 +10,7 @@
 | `/llms-full.txt` | text/plain | coding agent、选型 agent | **长版事实表**：BuilderConfig 完整枚举、剪枝规则、RAG 算法参数、支付协议、license gate 顺序、API 汇总、已知限制 |
 | `/openapi.json` | OpenAPI 3.1 JSON | 工具型 agent、集成脚本 | 全部公开 API 路径 + `/blog/{slug}/md`、`/llms.txt`、`/llms-full.txt` 三个内容/GEO 端点的请求/响应 schema、错误码、安全方案、`BuilderConfig` 完整 JSON Schema |
 | `/api/mcp` | JSON-RPC 2.0 / MCP | coding agent | `get_product_info`、`get_builder_config`、`scaffold_project`、`get_agent_delivery`；`includeZip` 与网站同一 license gate；`scripts/mcp-server.mjs` 提供 stdio 桥接 |
-| `/sitemap.xml` | XML | 搜索引擎 | 可索引页面 + 9 篇博客（仅规范 slug，旧 alias 不列入以免重复内容信号）+ 每篇 `/md` Markdown 变体 + 五种语言 `?lang=` 变体 + 机器可读端点 |
+| `/sitemap.xml` | XML | 搜索引擎 | 可索引页面 + 9 篇博客（仅规范 slug，旧 alias 不列入以免重复内容信号）+ 每篇 `/md` Markdown 变体 + 五种语言**路径前缀**变体（`/zh/…` 等，EN 为裸路径）+ 机器可读端点 |
 | `/robots.txt` | text/plain | 所有爬虫 | 默认规则；对 GPTBot / ClaudeBot / PerplexityBot / Google-Extended / Applebot-Extended / CCBot / Bytespider 显式放行，并显式允许 `/blog/`、`/blog/*/md`、`/faq`、`/compare` 与机器可读路由 |
 | `/blog/<slug>/md` | text/markdown | 答案引擎、LLM 爬虫 | 每篇文章的纯文本版：标题、公司署名、发布/更新日期、canonical、分类、tags、正文与结构化 FAQ；`?lang=` 五语，HTML 页用 `alternates.types` 声明 |
 | `<公开页>?format=md` | text/markdown | 答案引擎、LLM 爬虫 | 任意公开页的纯文本变体：`/faq` 输出完整 Q&A、`/blog` 输出文章索引、`/blog/<slug>` 输出全文，其余页面输出事实摘要；`Content-Language` 标注正文真实语言 |

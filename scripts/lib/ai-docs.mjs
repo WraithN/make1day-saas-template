@@ -129,8 +129,8 @@ const RULES_META = [
       "All five locales (en, zh, ja, fr, de) are complete. Never add an en-only key.",
       "Dynamic values use {var} placeholders + interpolate(), never string concatenation of raw HTML.",
       "Highlight markup uses {{g}}...{{/g}}; no JSX in dictionary values.",
-      "?lang= seeds sk_lang and is forwarded as x-sk-lang for Server Components. Do not 308-redirect it.",
-      "Keep canonical / hreflang in sync with the active locale.",
+      "Localized pages use URL path prefixes (/zh/pricing, /ja, /de/…); EN is the bare path. Middleware rewrites the prefix onto the base route and sets x-sk-lang + x-sk-locale; legacy ?lang= URLs 301 to the path form.",
+      "Content language comes from getLang(); canonical/hreflang come from getCanonicalLang() (the URL locale) — never let a cookie-switched bare URL canonical to a localized path.",
     ],
   },
   {
