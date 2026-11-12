@@ -283,7 +283,7 @@ export const dict: Record<Lang, Record<string, string>> = {
 
     "pricing.model.heading": "One buyout. Optional care.",
     "pricing.model.body":
-      "Buy the source once and own it forever — updates included for 12 months. Care is not insurance, it's payroll for your foundation's product team: monthly render credits, Care-first modules, a monthly-recast agent contract and upstream merge patches.",
+      "Buy the source once and own it forever — updates included for 12 months. Care is not insurance, it's payroll for your foundation's product team: monthly template & component drops, Care-first modules, a monthly-recast agent contract and upstream merge patches.",
     "pricing.buyout.name": "Buyout",
     "pricing.buyout.once": "one-time",
     "pricing.buyout.f1": "Full source code (Next.js + Supabase + pluggable payments)",
@@ -789,7 +789,7 @@ export const dict: Record<Lang, Record<string, string>> = {
 
     "pricing.model.heading": "一次买断，可选管护。",
     "pricing.model.body":
-      "源码一次买断、永久拥有，含 12 个月免费更新。Care 不是保险，而是给你地基的产品团队继续发工资：每月渲染额度、新模块首发、每月重铸的 agent 契约、上游合并补丁。",
+      "源码一次买断、永久拥有，含 12 个月免费更新。Care 不是保险，而是给你地基的产品团队继续发工资：每月模板与组件更新、新模块首发、每月重铸的 agent 契约、上游合并补丁。",
     "pricing.buyout.name": "买断",
     "pricing.buyout.once": "一次性",
     "pricing.buyout.f1": "完整源码（Next.js + Supabase + 可插拔支付）",
@@ -1276,7 +1276,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "pricing.scale.f4": "SLA + オンボーディング通話",
     "pricing.model.heading": "一度買い切り、ケアは任意。",
     "pricing.model.body":
-      "ソースは一度購入すれば永久に自分のもの、12 か月の無料アップデート付き。Care は保険ではなく、あなたの土台のプロダクトチームへの給与です：毎月のレンダークレジット、Care 先行モジュール、毎月再鋳造のエージェント契約、上流マージパッチ。",
+      "ソースは一度購入すれば永久に自分のもの、12 か月の無料アップデート付き。Care は保険ではなく、あなたの土台のプロダクトチームへの給与です：毎月のテンプレート・コンポーネント追加、Care 先行モジュール、毎月再鋳造のエージェント契約、上流マージパッチ。",
     "pricing.buyout.name": "買い切り",
     "pricing.buyout.once": "一度きり",
     "pricing.buyout.f1": "完全なソースコード（Next.js + Supabase + 差し替え可能な決済）",
@@ -1734,7 +1734,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "pricing.scale.f4": "SLA + appel d'onboarding",
     "pricing.model.heading": "Un achat unique. Un suivi facultatif.",
     "pricing.model.body":
-      "Achetez le code une fois, il est à vous pour toujours — mises à jour incluses 12 mois. Care n'est pas une assurance : c'est la paie de l'équipe produit de votre fondation — crédits de rendu mensuels, modules en avant-première, contrat agent refondu chaque mois, patchs amont mergeables.",
+      "Achetez le code une fois, il est à vous pour toujours — mises à jour incluses 12 mois. Care n'est pas une assurance : c'est la paie de l'équipe produit de votre fondation — livraisons mensuelles de gabarits et composants, modules en avant-première, contrat agent refondu chaque mois, patchs amont mergeables.",
     "pricing.buyout.name": "Achat unique",
     "pricing.buyout.once": "paiement unique",
     "pricing.buyout.f1": "Code source complet (Next.js + Supabase + paiements modulables)",
@@ -2206,7 +2206,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "pricing.scale.f3": "RAG-Modul-Boilerplate",
     "pricing.scale.f4": "SLA + Onboarding-Call",
     "pricing.model.heading": "Ein Buyout. Optionale Betreuung.",
-    "pricing.model.body": "Quellcode einmal kaufen, für immer besitzen — 12 Monate Updates inklusive. Care ist keine Versicherung, sondern das Gehalt des Produktteams deiner Basis: monatliche Render-Credits, Care-first-Module, monatlich neu gegossener Agent-Vertrag, Upstream-Merge-Patches.",
+    "pricing.model.body": "Quellcode einmal kaufen, für immer besitzen — 12 Monate Updates inklusive. Care ist keine Versicherung, sondern das Gehalt des Produktteams deiner Basis: monatliche Template- & Komponenten-Drops, Care-first-Module, monatlich neu gegossener Agent-Vertrag, Upstream-Merge-Patches.",
     "pricing.buyout.name": "Buyout",
     "pricing.buyout.once": "einmalig",
     "pricing.buyout.f1": "Vollständiger Quellcode (Next.js + Supabase + austauschbare Zahlungen)",
