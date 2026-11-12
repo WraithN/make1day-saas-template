@@ -32,6 +32,7 @@ export type TemplateChrome = {
   oneTime: string;
   choose: string;
   tabWorkspaces: string;
+  tabVideo: string;
   members: string;
   owner: string;
   member: string;
@@ -46,7 +47,8 @@ export type Surface =
   | "chat"
   | "rag"
   | "admin"
-  | "workspaces";
+  | "workspaces"
+  | "video";
 
 const SURFACES: { id: Surface; key: keyof TemplateChrome }[] = [
   { id: "landing", key: "tabLanding" },
@@ -56,12 +58,13 @@ const SURFACES: { id: Surface; key: keyof TemplateChrome }[] = [
   { id: "rag", key: "tabRag" },
   { id: "admin", key: "tabAdmin" },
   { id: "workspaces", key: "tabWorkspaces" },
+  { id: "video", key: "tabVideo" },
 ];
 
 /**
- * A believable product site generated from a template: the six surfaces the
+ * A believable product site generated from a template: the surfaces the
  * generator actually ships (landing, pricing, login, AI chat, RAG, admin
- * console), rendered with the template's REAL theme variables and switchable
+ * console, workspaces, video studio), rendered with the template's REAL theme variables and switchable
  * in-page. Demo controls are inert — this is a preview, not a live app.
  */
 export function TemplateSite({
@@ -96,6 +99,10 @@ export function TemplateSite({
     "w-full rounded-lg border border-[rgb(var(--line))] bg-[rgb(var(--bg))] px-3 py-2 text-[14px] outline-none focus:border-[rgb(var(--accent))]";
 
   const name = pick(tpl.name);
+  // The video-workflow tab appears only on templates that ship the module.
+  const surfaces = tpl.studio
+    ? SURFACES
+    : SURFACES.filter((s) => s.id !== "video");
 
   return (
     <div className="ts-site relative overflow-hidden" style={wrapStyle}>
@@ -120,7 +127,7 @@ export function TemplateSite({
           aria-label={name}
           className="mt-4 flex flex-wrap gap-1.5 border-y border-[rgb(var(--line))] py-2"
         >
-          {SURFACES.map((s) => (
+          {surfaces.map((s) => (
             <button
               key={s.id}
               type="button"
@@ -396,6 +403,59 @@ export function TemplateSite({
                   </button>
                 </div>
               ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Video-workflow studio (static demo) ── */}
+        {surface === "video" && tpl.studio && (
+          <section className="py-10">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-[18px] font-semibold">{t.tabVideo}</h2>
+              <span className="tag">{name}</span>
+            </div>
+            <p className="mt-2 text-[12px] text-[rgb(var(--muted))]">
+              {pick(tpl.studio.note)}
+            </p>
+            <ol className="mt-4 grid gap-2 sm:grid-cols-3">
+              {tpl.studio.steps.map((s, k) => (
+                <li key={k} className={panel + " !p-3 text-[13px]"}>
+                  <span
+                    className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold"
+                    style={solidStyle}
+                  >
+                    {k + 1}
+                  </span>
+                  {pick(s)}
+                </li>
+              ))}
+            </ol>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              {tpl.studio.templates.map((tp, k) => (
+                <div key={k} className={panel + " !p-3"}>
+                  <div className="text-[13px] font-semibold">{pick(tp.name)}</div>
+                  <div className="mt-0.5 text-[11px] text-[rgb(var(--muted))]">
+                    {tp.seconds}s · 9:16
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className={panel + " mt-3"}>
+              <div className="flex items-center gap-2 text-[13px]">
+                <input type="checkbox" checked readOnly aria-disabled className="h-3.5 w-3.5" />
+                <span className="text-[rgb(var(--ink-soft))]">{pick(tpl.studio.steps[1])}</span>
+              </div>
+              <div className="mt-3 space-y-2">
+                {tpl.studio.outputs.map((o, k) => (
+                  <div
+                    key={k}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-dashed border-[rgb(var(--line))] px-3 py-2 text-[12px]"
+                  >
+                    <span className="font-mono">{pick(o.label)}</span>
+                    <span className="tag" style={solidStyle}>{pick(o.badge)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )}

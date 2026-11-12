@@ -45,6 +45,18 @@ export interface TemplateMeta {
     stats: { users: string; licenses: string; revenue: string; tickets: string };
     activity: TText[];
   };
+  /**
+   * Video-workflow studio surface (static demo, no live generation): shown
+   * only for templates that ship the AI video-workflow module. Steps mirror
+   * the shipped code's guardrails: template pick -> portrait-rights
+   * attestation -> render with a visible AI label; credits refund on failure.
+   */
+  studio?: {
+    note: TText;
+    steps: TText[];
+    templates: { name: TText; seconds: number }[];
+    outputs: { label: TText; badge: TText }[];
+  };
 }
 
 export const TEMPLATES: TemplateMeta[] = [
@@ -413,6 +425,123 @@ export const TEMPLATES: TemplateMeta[] = [
         { en: "Check-in: ana@run.club", zh: "签到：ana@run.club", ja: "チェックイン: ana@run.club", fr: "Check-in : ana@run.club", de: "Check-in: ana@run.club" },
         { en: "Class full: Power 18:00", zh: "课程满员：Power 18:00", ja: "満員: Power 18:00", fr: "Cours complet : Power 18 h", de: "Kurs voll: Power 18:00" },
         { en: "New member: leo@lift.gg", zh: "新会员：leo@lift.gg", ja: "新会員: leo@lift.gg", fr: "Nouveau membre : leo@lift.gg", de: "Neues Mitglied: leo@lift.gg" },
+      ],
+    },
+  },
+  {
+    slug: "reel-forge",
+    styleId: "midnight",
+    category: { en: "Video", zh: "视频", ja: "動画", fr: "Vidéo", de: "Video" },
+    name: { en: "Reel Forge", zh: "Reel 锻造坊", ja: "Reel Forge", fr: "Reel Forge", de: "Reel Forge" },
+    heroTitle: {
+      en: "Turn one photo into a scroll-stopping reel.",
+      zh: "一张照片，一条让人停下来的短视频。",
+      ja: "写真1枚から、止まっちゃうリールを。",
+      fr: "Une photo, un reel qui arrête le scroll.",
+      de: "Ein Foto, ein Reel, das alle stoppen.",
+    },
+    heroSubtitle: {
+      en: "A video-workflow SaaS: pick a template, confirm rights, get an AI-labeled render.",
+      zh: "视频工作流 SaaS：选模板、确认肖像权、拿到带 AI 标识的成片。",
+      ja: "動画ワークフロー SaaS：テンプレ選択→権利確認→AI ラベル付きで出力。",
+      fr: "Un SaaS de flux vidéo : modèle, droits confirmés, rendu labellisé IA.",
+      de: "Ein Video-Workflow-SaaS: Vorlage, Rechte bestätigt, KI-markiertes Ergebnis.",
+    },
+    features: [
+      { en: "Trendy video templates", zh: "热门视频模板", ja: "トレンド動画テンプレ", fr: "Modèles vidéo tendance", de: "Video-Trendvorlagen" },
+      { en: "Portrait-rights attestation", zh: "肖像权确认", ja: "肖像権の確認", fr: "Attestation de droits à l'image", de: "Bildrechte-Bestätigung" },
+      { en: "AI label on every render", zh: "成片带 AI 标识", ja: "全出力に AI ラベル", fr: "Label IA sur chaque rendu", de: "KI-Label auf jedem Render" },
+    ],
+    primaryCta: { en: "Forge a reel", zh: "生成一条", ja: "リールを作る", fr: "Créer un reel", de: "Reel erstellen" },
+    tiers: [
+      {
+        name: { en: "Free", zh: "免费", ja: "無料", fr: "Gratuit", de: "Gratis" },
+        price: "$0",
+        period: "mo",
+        features: [
+          { en: "3 renders / month", zh: "每月 3 条", ja: "月 3 レンダー", fr: "3 rendus / mois", de: "3 Renders/Monat" },
+          { en: "Watermarked output", zh: "带水印输出", ja: "ウォーターマーク付き", fr: "Sortie avec filigrane", de: "Mit Wasserzeichen" },
+        ],
+      },
+      {
+        name: { en: "Creator", zh: "创作者", ja: "クリエイター", fr: "Créateur", de: "Creator" },
+        price: "$19",
+        period: "mo",
+        highlight: true,
+        features: [
+          { en: "40 renders / month", zh: "每月 40 条", ja: "月 40 レンダー", fr: "40 rendus / mois", de: "40 Renders/Monat" },
+          { en: "HD, no watermark", zh: "高清无水印", ja: "HD・透かしなし", fr: "HD sans filigrane", de: "HD ohne Wasserzeichen" },
+          { en: "Credits refund on failure", zh: "失败自动返还额度", ja: "失敗時はクレジット返還", fr: "Crédits remboursés en cas d'échec", de: "Credits bei Fehler zurück" },
+        ],
+      },
+    ],
+    chat: {
+      user: {
+        en: "Write a 30-second hook script for my sneaker drop.",
+        zh: "给我的球鞋新品写一条 30 秒钩子脚本。",
+        ja: "スニーカー発売向け30秒のフック台本を。",
+        fr: "Un hook de 30 s pour mon drop de sneakers.",
+        de: "30-Sekunden-Hook für meinen Sneaker-Drop.",
+      },
+      assistant: {
+        en: "Hook in 3s: close-up + one bold claim, then the reveal at 12s, CTA at 27s. Want the template that fits this pacing?",
+        zh: "前 3 秒钩子：特写+一句狠话，12 秒反转，27 秒 CTA。要配这个节奏的模板吗？",
+        ja: "冒頭3秒は接写＋太い一言、12秒で反転、27秒で CTA。このテンポに合うテンプレを出しますか？",
+        fr: "Hook en 3 s : gros plan + une affirmation forte, révélation à 12 s, CTA à 27 s. Un modèle pour ce rythme ?",
+        de: "Hook in 3s: Close-up + eine klare Ansage, Reveal bei 12s, CTA bei 27s. Passende Vorlage?",
+      },
+    },
+    rag: {
+      question: {
+        en: "What happens if a render fails?",
+        zh: "渲染失败会怎样？",
+        ja: "レンダリングが失敗したら？",
+        fr: "Que se passe-t-il si un rendu échoue ?",
+        de: "Was, wenn ein Render fehlschlägt?",
+      },
+      answer: {
+        en: "The credit is refunded automatically to your monthly balance — failures never spend your quota.",
+        zh: "额度自动退回当月余额——失败绝不扣你的配额。",
+        ja: "クレジットは月の残高に自動返還。失敗では消費しません。",
+        fr: "Le crédit est remboursé automatiquement — un échec ne consomme jamais votre quota.",
+        de: "Das Credit wird automatisch erstattet — Fehler verbrauchen nie dein Kontingent.",
+      },
+      sources: [
+        { en: "Credits policy", zh: "额度规则", ja: "クレジット規則", fr: "Politique de crédits", de: "Credit-Bedingungen" },
+        { en: "FAQ", zh: "常见问题", ja: "FAQ", fr: "FAQ", de: "FAQ" },
+      ],
+    },
+    admin: {
+      stats: { users: "5,012", licenses: "1,208", revenue: "$21.4k", tickets: "4" },
+      activity: [
+        { en: "Render #231 completed · AI-labeled", zh: "渲染 #231 完成·带 AI 标识", ja: "レンダー #231 完了・AI ラベル済", fr: "Rendu #231 terminé · label IA", de: "Render #231 fertig · KI-Label" },
+        { en: "Refund: job #228 failed upstream", zh: "退款：任务 #228 上游失败", ja: "返還: #228 は上流失敗", fr: "Remboursement : #228 échoué", de: "Erstattung: Job #228 fehlgeschlagen" },
+        { en: "Rights attestation recorded: u_8842", zh: "已记录肖像权确认：u_8842", ja: "権利確認を記録: u_8842", fr: "Attestation enregistrée : u_8842", de: "Rechte-Bestätigung: u_8842" },
+      ],
+    },
+    studio: {
+      note: {
+        en: "Static demo of the video-workflow module — in a real build it runs on YOUR provider keys.",
+        zh: "视频工作流模块的静态演示——真实部署里用你自己的供应商密钥运行。",
+        ja: "動画ワークフロー・モジュールの静的デモ——実運用ではあなた自身のプロバイダキーで動きます。",
+        fr: "Démo statique du module de flux vidéo — en production, sur VOS clés prestataire.",
+        de: "Statische Demo des Video-Workflow-Moduls — im Ernstlauf mit DEINEN Provider-Keys.",
+      },
+      steps: [
+        { en: "Pick a trending template", zh: "选一个热门模板", ja: "トレンドテンプレを選択", fr: "Choisir un modèle tendance", de: "Trendvorlage wählen" },
+        { en: "Confirm portrait rights", zh: "确认肖像权", ja: "肖像権を確認", fr: "Confirmer les droits à l'image", de: "Bildrechte bestätigen" },
+        { en: "Render & download (AI-labeled)", zh: "渲染下载（带 AI 标识）", ja: "レンダリング＆ダウンロード（AI ラベル）", fr: "Rendre et télécharger (label IA)", de: "Rendern & laden (KI-Label)" },
+      ],
+      templates: [
+        { name: { en: "Dance hook", zh: "热舞卡点", ja: "ダンスフック", fr: "Hook dansé", de: "Tanz-Hook" }, seconds: 15 },
+        { name: { en: "Product spin", zh: "商品旋转", ja: "商品スピン", fr: "Spin produit", de: "Produkt-Spin" }, seconds: 20 },
+        { name: { en: "Outfit swap reel", zh: "穿搭切换秀", ja: "コーデ切替リール", fr: "Reel change de tenue", de: "Outfit-Wechsel-Reel" }, seconds: 25 },
+      ],
+      outputs: [
+        {
+          label: { en: "hook-01.mp4 · 1080×1920", zh: "hook-01.mp4 · 1080×1920", ja: "hook-01.mp4 · 1080×1920", fr: "hook-01.mp4 · 1080×1920", de: "hook-01.mp4 · 1080×1920" },
+          badge: { en: "AI-generated", zh: "AI 生成", ja: "AI 生成", fr: "Généré par IA", de: "KI-generiert" },
+        },
       ],
     },
   },
