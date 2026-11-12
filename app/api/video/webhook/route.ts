@@ -6,14 +6,19 @@ import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
-// POST /api/video/webhook — fal.ai queue webhook. Verified with
-// HMAC-SHA256(raw body) under VIDEO_WEBHOOK_SECRET; without a secret the
-// endpoint is CLOSED in production (fail-safe, same discipline as payments).
+// POST /api/video/webhook — fal.ai queue webhook, verified with the official
+// @fal-ai/client authenticity check (Ed25519 JWT against fal's published
+// keys). Unsigned or foreign payloads are rejected before any job mutation -
+// the same fail-closed discipline as the payment webhooks (AGENTS rule 4).
 export async function POST(req: Request) {
   const raw = await req.text();
-  const sig =
-    req.headers.get("x-fal-signature") ?? req.headers.get("x-video-signature");
-  if (!verifyVideoWebhook(raw, sig)) {
+  const ok = await verifyVideoWebhook(raw, {
+    requestId: req.headers.get("x-fal-webhook-request-id"),
+    userId: req.headers.get("x-fal-webhook-user-id"),
+    timestamp: req.headers.get("x-fal-webhook-timestamp"),
+    signatureHex: req.headers.get("x-fal-webhook-signature"),
+  });
+  if (!ok) {
     return NextResponse.json({ error: "invalid signature" }, { status: 401 });
   }
 

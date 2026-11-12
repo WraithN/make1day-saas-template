@@ -1,8 +1,22 @@
-import OpenAI from "openai";
-import Anthropic from "@anthropic-ai/sdk";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+// Model providers via the Vercel AI SDK (the community-standard, MIT-licensed
+// abstraction layer for Next.js apps) instead of hand-rolled SDK wrappers.
+//
+// The exported interface is unchanged - /api/ai, the RAG answer path and the
+// demo fallbacks keep consuming chat()/streamChatChunks() exactly as before.
+// What changed underneath: streaming protocol handling, tool-call plumbing
+// and, importantly, TOKEN USAGE now come from the AI SDK's standardized
+// `usage` fields, which feed the billing ledger (lib/billing.ts). Providers
+// outside the first-party packages speak the OpenAI-compatible protocol via
+// @ai-sdk/openai-compatible (DeepSeek/Groq/OpenRouter/Mistral/Cohere/xAI/
+// Perplexity/Ollama all have documented OpenAI-compatible endpoints).
+
+import { generateText, streamText, type ModelMessage } from "ai";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { env } from "@/lib/env";
-import { resolveAiConfig, type AiProviderKey } from "./providers";
+import { resolveAiConfig, type AiProviderKey, type ProviderConfig } from "./providers";
 import { getRouting, recordUsage, estimateTokens } from "@/lib/billing";
 
 export type ChatMessage = {
@@ -10,142 +24,94 @@ export type ChatMessage = {
   content: string;
 };
 
-// ── Lazy client caches (constructed on first use, never at import time) ──
-const openaiCache = new Map<string, OpenAI>();
-let _anthropic: Anthropic | null = null;
-let _gemini: GoogleGenerativeAI | null = null;
-
-function openaiClient(baseURL: string, apiKey: string): OpenAI {
-  const cacheKey = `${baseURL}::${apiKey}`;
-  let c = openaiCache.get(cacheKey);
-  if (!c) {
-    c = new OpenAI({ apiKey, baseURL });
-    openaiCache.set(cacheKey, c);
+/** Build the AI SDK language model for a resolved provider config. */
+function languageModel(key: string, cfg: ProviderConfig) {
+  if (cfg.kind === "anthropic") {
+    return createAnthropic({ apiKey: cfg.apiKey }).chat(cfg.model);
   }
-  return c;
+  if (cfg.kind === "gemini") {
+    return createGoogleGenerativeAI({ apiKey: cfg.apiKey })(cfg.model);
+  }
+  // OpenAI itself gets the first-party provider; everything that speaks the
+  // compatible protocol (custom OPENAI_BASE_URL, DeepSeek, Groq, OpenRouter,
+  // Mistral, Cohere, xAI, Perplexity, Ollama...) uses the compatible one.
+  if (key === "openai" && cfg.baseURL === "https://api.openai.com/v1") {
+    return createOpenAI({ apiKey: cfg.apiKey }).chat(cfg.model);
+  }
+  return createOpenAICompatible({
+    name: key,
+    baseURL: cfg.baseURL,
+    apiKey: cfg.apiKey,
+  })(cfg.model);
 }
 
-function anthropicClient(apiKey: string): Anthropic {
-  if (!_anthropic) _anthropic = new Anthropic({ apiKey });
-  return _anthropic;
+/** provider key + effective config, honoring the admin routing override. */
+async function effective(keyArg: string | undefined): Promise<{ key: string; cfg: ProviderConfig }> {
+  const route = await getRouting("chat");
+  const key = keyArg?.trim() || route?.provider || env.aiProvider();
+  const base = resolveAiConfig(key);
+  const cfg = route?.model ? { ...base, model: route.model } : base;
+  return { key, cfg };
 }
 
-function geminiClient(apiKey: string): GoogleGenerativeAI {
-  if (!_gemini) _gemini = new GoogleGenerativeAI(apiKey);
-  return _gemini;
+type SdkUsage = { inputTokens?: number; outputTokens?: number } | null | undefined;
+
+async function meter(key: string, cfg: ProviderConfig, usage: SdkUsage, outChars?: number): Promise<void> {
+  if (usage && (usage.inputTokens || usage.outputTokens)) {
+    await recordUsage({
+      lane: "chat",
+      provider: key,
+      model: cfg.model,
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+      source: "usage",
+    });
+    return;
+  }
+  const est = estimateTokens(outChars ?? 0);
+  if (est.outputTokens > 0) {
+    await recordUsage({
+      lane: "chat",
+      provider: key,
+      model: cfg.model,
+      outputTokens: est.outputTokens,
+      source: "estimated",
+    });
+  }
 }
 
 /**
  * Send chat messages to the chosen provider and return a single string.
- * Any provider/network error is swallowed and returned as a readable message
- * so the UI never hard-fails (handy for demos on a misconfigured key).
+ * Provider/network errors are returned as a readable message (the UI must
+ * never hard-fail on a misconfigured demo key).
  */
 export async function chat(providerKey: string, messages: ChatMessage[]): Promise<string> {
-  // Admin routing (the /admin/models console) overrides the env default.
-  const route = await getRouting("chat");
-  const key = providerKey?.trim() || route?.provider || env.aiProvider();
-  const base = resolveAiConfig(key);
-  const cfg = route?.model ? { ...base, model: route.model } : base;
-  void providerKey;
-
-  if (cfg.kind === "openai-compatible") {
-    if (!cfg.apiKey) return "\n[AI error] No API key configured for this provider.";
-    try {
-      const client = openaiClient(cfg.baseURL, cfg.apiKey);
-      const completion = await client.chat.completions.create({
-        model: cfg.model,
-        messages,
-        stream: false,
-        temperature: 0.4,
-      });
-      await recordUsage({
-        lane: "chat",
-        provider: key,
-        model: cfg.model,
-        inputTokens: completion.usage?.prompt_tokens,
-        outputTokens: completion.usage?.completion_tokens,
-      });
-      return completion.choices[0]?.message?.content ?? "";
-    } catch (err) {
-      return `\n[AI error] ${(err as Error).message}`;
-    }
+  const { key, cfg } = await effective(providerKey);
+  if (!cfg.apiKey) return "\n[AI error] No API key configured for this provider.";
+  try {
+    const result = await generateText({
+      model: languageModel(key, cfg),
+      messages: messages as ModelMessage[],
+      temperature: 0.4,
+    });
+    await meter(key, cfg, result.usage as SdkUsage);
+    return result.text;
+  } catch (err) {
+    return `\n[AI error] ${(err as Error).message}`;
   }
-
-  if (cfg.kind === "anthropic") {
-    if (!cfg.apiKey) return "\n[AI error] No Anthropic API key configured.";
-    try {
-      const client = anthropicClient(cfg.apiKey);
-      const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n");
-      const conv = messages
-        .filter((m) => m.role !== "system")
-        .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
-      const msg = await client.messages.create({
-        model: cfg.model,
-        max_tokens: 1024,
-        system: system || undefined,
-        messages: conv,
-      });
-      await recordUsage({
-        lane: "chat",
-        provider: key,
-        model: cfg.model,
-        inputTokens: msg.usage?.input_tokens,
-        outputTokens: msg.usage?.output_tokens,
-      });
-      return msg.content
-        .map((b) => (b.type === "text" ? b.text : ""))
-        .join("");
-    } catch (err) {
-      return `\n[AI error] ${(err as Error).message}`;
-    }
-  }
-
-  if (cfg.kind === "gemini") {
-    if (!cfg.apiKey) return "\n[AI error] No Gemini API key configured.";
-    try {
-      const client = geminiClient(cfg.apiKey);
-      const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n");
-      const contents = messages
-        .filter((m) => m.role !== "system")
-        .map((m) => ({
-          role: m.role === "assistant" ? "model" : "user",
-          parts: [{ text: m.content }],
-        }));
-      const model = client.getGenerativeModel({
-        model: cfg.model,
-        systemInstruction: system || undefined,
-      });
-      const result = await model.generateContent({ contents });
-      const um = (result.response as any).usageMetadata;
-      await recordUsage({
-        lane: "chat",
-        provider: key,
-        model: cfg.model,
-        inputTokens: um?.promptTokenCount,
-        outputTokens: um?.candidatesTokenCount,
-      });
-      return result.response.text();
-    } catch (err) {
-      return `\n[AI error] ${(err as Error).message}`;
-    }
-  }
-
-  return "\n[AI error] Unknown provider.";
 }
 
 /**
- * Backwards-compatible helper used by /api/ai. Falls back to the configured
- * default provider when none is requested.
+ * Backwards-compatible helper used by older callers: falls back to the
+ * configured default provider when none is requested.
  */
 export async function streamChat(messages: ChatMessage[], provider?: string): Promise<string> {
-  const key = provider && provider.trim() ? provider.trim() : env.aiProvider();
-  return chat(key, messages);
+  return chat(provider ?? "", messages);
 }
 
 /**
  * Whether the selected provider has an API key configured. /api/ai uses this
- * to decide between the built-in demo reply and a real (streamed) call, so a
- * configured-but-broken provider never masquerades as a normal answer.
+ * to decide between the built-in demo reply and a real (streamed) call.
  */
 export function hasAiProviderKey(providerKey?: string): boolean {
   const key = providerKey && providerKey.trim() ? providerKey.trim() : env.aiProvider();
@@ -158,131 +124,39 @@ const NO_KEY_TEXT =
   "Until then the endpoint returns the built-in demo reply.";
 
 /**
- * Real token streaming: each `yield` is one incremental text chunk from the
- * provider. Errors are deliberately NOT swallowed — a provider that has a key
- * but fails (bad key, insufficient balance, timeout, unknown model) throws, so
- * the caller can log the real error and surface a clear failure instead of a
- * fake friendly answer.
+ * Real token streaming via the AI SDK: each `yield` is one incremental text
+ * chunk. Errors are deliberately NOT swallowed — a provider that has a key
+ * but fails (bad key, balance, timeout, unknown model) throws, so the caller
+ * can log the real error instead of surfacing a fake friendly answer.
  */
 export async function* streamChatChunks(
   providerKey: string | undefined,
   messages: ChatMessage[],
 ): AsyncGenerator<string> {
-  const route = await getRouting("chat");
-  const key = providerKey?.trim() || route?.provider || env.aiProvider();
-  const base = resolveAiConfig(key);
-  const cfg = route?.model ? { ...base, model: route.model } : base;
-
-  if (cfg.kind === "openai-compatible") {
-    if (!cfg.apiKey) {
-      yield NO_KEY_TEXT;
-      return;
-    }
-    const client = openaiClient(cfg.baseURL, cfg.apiKey);
-    const completion: any = await client.chat.completions.create({
-      model: cfg.model,
-      messages,
-      stream: true,
-      temperature: 0.4,
-      // Ask compatible endpoints for a final usage chunk (OpenAI standard;
-      // endpoints that ignore it fall through to the character estimate).
-      stream_options: { include_usage: true },
-    });
-    let usage: { input?: number; output?: number } | null = null;
-    let outChars = 0;
-    for await (const chunk of completion) {
-      const text = chunk.choices?.[0]?.delta?.content;
-      if (text) {
-        outChars += text.length;
-        yield text;
-      }
-      const u = (chunk as any).usage;
-      if (u) usage = { input: u.prompt_tokens, output: u.completion_tokens };
-    }
-    if (usage) {
-      await recordUsage({ lane: "chat", provider: key, model: cfg.model, inputTokens: usage.input, outputTokens: usage.output });
-    } else {
-      const est = estimateTokens(outChars);
-      await recordUsage({ lane: "chat", provider: key, model: cfg.model, outputTokens: est.outputTokens, source: "estimated" });
-    }
+  const { key, cfg } = await effective(providerKey);
+  if (!cfg.apiKey) {
+    yield NO_KEY_TEXT;
     return;
   }
-
-  if (cfg.kind === "anthropic") {
-    if (!cfg.apiKey) {
-      yield NO_KEY_TEXT;
-      return;
-    }
-    const client = anthropicClient(cfg.apiKey);
-    const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n");
-    const conv = messages
-      .filter((m) => m.role !== "system")
-      .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
-    const stream = await client.messages.create({
-      model: cfg.model,
-      max_tokens: 1024,
-      system: system || undefined,
-      messages: conv,
-      stream: true,
-    });
-    let aUsage: { input?: number; output?: number } | null = null;
-    let aChars = 0;
-    for await (const event of stream) {
-      if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
-        aChars += event.delta.text.length;
-        yield event.delta.text;
-      }
-      const u = (event as any).usage;
-      if ((event as any).type === "message_delta" && u) {
-        aUsage = { input: u.input_tokens, output: u.output_tokens };
-      }
-    }
-    if (aUsage) {
-      await recordUsage({ lane: "chat", provider: key, model: cfg.model, inputTokens: aUsage.input, outputTokens: aUsage.output });
-    } else {
-      const est = estimateTokens(aChars);
-      await recordUsage({ lane: "chat", provider: key, model: cfg.model, outputTokens: est.outputTokens, source: "estimated" });
-    }
-    return;
+  const result = streamText({
+    model: languageModel(key, cfg),
+    messages: messages as ModelMessage[],
+    temperature: 0.4,
+  });
+  let outChars = 0;
+  for await (const delta of result.textStream) {
+    outChars += delta.length;
+    yield delta;
   }
-
-  if (cfg.kind === "gemini") {
-    if (!cfg.apiKey) {
-      yield NO_KEY_TEXT;
-      return;
-    }
-    const client = geminiClient(cfg.apiKey);
-    const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n");
-    const contents = messages
-      .filter((m) => m.role !== "system")
-      .map((m) => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }],
-      }));
-    const model = client.getGenerativeModel({
-      model: cfg.model,
-      systemInstruction: system || undefined,
-    });
-    const result = await model.generateContentStream({ contents });
-    let gUsage: { input?: number; output?: number } | null = null;
-    let gChars = 0;
-    for await (const chunk of result.stream) {
-      const text = chunk.text();
-      if (text) {
-        gChars += text.length;
-        yield text;
-      }
-      const um = (chunk as any).usageMetadata;
-      if (um) gUsage = { input: um.promptTokenCount, output: um.candidatesTokenCount };
-    }
-    if (gUsage) {
-      await recordUsage({ lane: "chat", provider: key, model: cfg.model, inputTokens: gUsage.input, outputTokens: gUsage.output });
-    } else {
-      const est = estimateTokens(gChars);
-      await recordUsage({ lane: "chat", provider: key, model: cfg.model, outputTokens: est.outputTokens, source: "estimated" });
-    }
-    return;
+  // After the stream finishes the SDK resolves the usage it captured from
+  // the provider's final chunk - exactly what the ledger needs.
+  let usage: SdkUsage = null;
+  try {
+    usage = (await result.usage) as SdkUsage;
+  } catch {
+    usage = null;
   }
+  await meter(key, cfg, usage, outChars);
 }
 
 export type { AiProviderKey };

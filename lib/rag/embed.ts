@@ -1,11 +1,11 @@
-// Dense embeddings for the RAG module — intentionally dependency-free.
+// Dense embeddings for the RAG module.
 //
-// The generator rewrites `lib/ai/index.ts` to contain only the providers the
-// user selected, so RAG must NOT rely on an SDK method that may be pruned.
-// This module talks to any OpenAI-compatible `/embeddings` endpoint with plain
-// fetch. It works with OpenAI, OpenRouter, DeepSeek-compatible gateways, local
-// Ollama / vLLM, etc. No key → returns null and the caller degrades to BM25.
+// Talks to any OpenAI-compatible `/embeddings` endpoint through the official
+// `openai` SDK (the community-standard client; baseURL-swappable for
+// OpenRouter / DeepSeek / Ollama / vLLM). No key → returns null and the
+// caller degrades to BM25. Token usage is metered into the billing ledger.
 
+import OpenAI from "openai";
 import { env } from "@/lib/env";
 import { getRouting, recordUsage } from "@/lib/billing";
 
@@ -30,51 +30,48 @@ export function embeddingConfig(): EmbeddingConfig | null {
   };
 }
 
-type EmbeddingResponse = {
-  data?: { index: number; embedding: number[] }[];
-  usage?: { prompt_tokens?: number; total_tokens?: number };
-  error?: { message?: string };
-};
+// Shared clients per (baseURL, key) - the SDK handles retries/errors for us.
+const clients = new Map<string, OpenAI>();
+function openaiFor(cfg: EmbeddingConfig): OpenAI {
+  const k = cfg.baseUrl + "::" + cfg.apiKey.slice(-6);
+  let c = clients.get(k);
+  if (!c) {
+    c = new OpenAI({ apiKey: cfg.apiKey, baseURL: cfg.baseUrl });
+    clients.set(k, c);
+  }
+  return c;
+}
 
 async function requestBatch(
   cfg: EmbeddingConfig,
   input: string[],
   withDimensions: boolean,
 ): Promise<number[][] | null> {
-  const body: Record<string, unknown> = { model: cfg.model, input };
-  // Some compatible gateways reject the `dimensions` field. We retry once
-  // without it below rather than failing the whole retrieval path.
-  if (withDimensions) body.dimensions = cfg.dimensions;
-
-  const res = await fetch(`${cfg.baseUrl}/embeddings`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${cfg.apiKey}`,
-      "content-type": "application/json",
-    },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(20_000),
-  });
-  if (!res.ok) return null;
-
-  const json = (await res.json()) as EmbeddingResponse;
-  if (!Array.isArray(json.data)) return null;
-  const sorted = [...json.data].sort((a, b) => a.index - b.index);
-  const vectors = sorted.map((d) => d.embedding);
-  if (vectors.length !== input.length || vectors.some((v) => !Array.isArray(v))) {
+  try {
+    const res = await openaiFor(cfg).embeddings.create({
+      model: cfg.model,
+      input,
+      ...(withDimensions ? { dimensions: cfg.dimensions } : {}),
+    });
+    const vectors = [...res.data].sort((a, b) => a.index - b.index).map((d) => d.embedding);
+    if (vectors.length !== input.length || vectors.some((v) => !Array.isArray(v))) {
+      return null;
+    }
+    // Retrieval spend metering: OpenAI-compatible /embeddings responses carry
+    // total_tokens; anything missing falls back to a char estimate.
+    const tokens = res.usage?.total_tokens ?? res.usage?.prompt_tokens ?? Math.round(input.join("").length / 4);
+    await recordUsage({
+      lane: "embed",
+      provider: cfg.sourceProvider ?? env.aiProvider(),
+      model: cfg.model,
+      inputTokens: tokens,
+      source: res.usage ? "usage" : "estimated",
+    });
+    return vectors;
+  } catch {
+    // Any SDK error (rejection, 4xx, timeout) degrades to BM25 upstream.
     return null;
   }
-  // Meter the retrieval spend: providers return real token usage here;
-  // otherwise fall back to a ~4 chars/token estimate.
-  const tokens = json.usage?.total_tokens ?? json.usage?.prompt_tokens ?? Math.round(input.join("").length / 4);
-  await recordUsage({
-    lane: "embed",
-    provider: cfg.sourceProvider ?? env.aiProvider(),
-    model: cfg.model,
-    inputTokens: tokens,
-    source: json.usage ? "usage" : "estimated",
-  });
-  return vectors;
 }
 
 const BATCH_SIZE = 32;
@@ -108,3 +105,4 @@ export async function embedQuery(text: string): Promise<number[] | null> {
   const result = await embedTexts([text]);
   return result?.[0] ?? null;
 }
+
