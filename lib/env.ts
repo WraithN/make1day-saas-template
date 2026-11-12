@@ -146,7 +146,17 @@ export const env = {
   waffoStoreSlug: () => opt("WAFFO_STORE_SLUG"),
   waffoStoreId: () => opt("WAFFO_STORE_ID"),
   waffoMerchantId: () => opt("WAFFO_MERCHANT_ID"),
-  waffoPrivateKey: () => opt("WAFFO_PRIVATE_KEY").replace(/\\n/g, "\n"),
+  waffoPrivateKey: () => {
+    // Accept every shape the dashboard / docs hand out: multi-line PEM,
+    // single-line PEM with literal \n escapes, or raw base64 without headers
+    // (the API Keys download). crypto.sign needs PEM — wrap the headerless
+    // case as PKCS#8 (what Pancake generates: MIIEvQ... prefix). Pure string
+    // handling: lib/env is also pulled into edge middleware transitively.
+    const v = opt("WAFFO_PRIVATE_KEY").replace(/\\n/g, "\n").trim();
+    if (!v || v.includes("-----BEGIN")) return v;
+    const body = v.replace(/\s+/g, "");
+    return `-----BEGIN PRIVATE KEY-----\n${body.replace(/(.{64})/g, "$1\n")}\n-----END PRIVATE KEY-----\n`;
+  },
   // Pancake webhook: platform-level RSA public keys, one per environment.
   waffoWebhookPublicKey: () =>
     opt("WAFFO_WEBHOOK_PUBLIC_KEY").replace(/\\n/g, "\n"),
