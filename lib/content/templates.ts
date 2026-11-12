@@ -132,42 +132,6 @@ export const TEMPLATES: TemplateMeta[] = [
         ],
       },
     ],
-    chat: {
-      user: {
-        en: "Draft a launch email for my waitlist.",
-        zh: "给我的等待列表写一封上线邮件。",
-        ja: "ウェイトリスト向け公開メールを作って。",
-        fr: "Rédige un email de lancement pour ma liste d'attente.",
-        de: "Entwirf eine Launch-Mail für meine Warteliste.",
-      },
-      assistant: {
-        en: "Here's a 90-word draft with one clear CTA — want a shorter variant for social?",
-        zh: "这是一版 90 字草稿、只含一个明确 CTA——需要更短的社媒版吗？",
-        ja: "CTA 1 つの 90 語ドラフトです——SNS 用の短縮版も出せます。",
-        fr: "Voici un brouillon de 90 mots avec un seul CTA — version courte pour les réseaux ?",
-        de: "Hier ein 90-Wort-Entwurf mit einem klaren CTA — Kürzer für Social?",
-      },
-    },
-    rag: {
-      question: {
-        en: "How do I invite teammates?",
-        zh: "如何邀请团队成员？",
-        ja: "チームメンバーの招待方法は？",
-        fr: "Comment inviter des coéquipiers ?",
-        de: "Wie lade ich Teammitglieder ein?",
-      },
-      answer: {
-        en: "Settings → Members → invite by email. Seats are prorated to your billing cycle.",
-        zh: "设置 → 成员 → 通过邮箱邀请；席位按账单周期折算计费。",
-        ja: "設定 → メンバー → メールで招待。席数は請求サイクルで日割りです。",
-        fr: "Réglages → Membres → invitation par email. Les sièges sont proratisés sur votre cycle.",
-        de: "Einstellungen → Mitglieder → per E-Mail einladen. Sitze werden anteilig im Zyklus berechnet.",
-      },
-      sources: [
-        { en: "Docs → Teams", zh: "文档 → 团队", ja: "ドキュメント → チーム", fr: "Docs → Équipes", de: "Doku → Teams" },
-        { en: "Billing FAQ", zh: "计费 FAQ", ja: "請求 FAQ", fr: "FAQ facturation", de: "Abrechnungs-FAQ" },
-      ],
-    },
     showcase: {
       kind: "dash",
       title: { en: "Inside the dashboard", zh: "仪表盘实时画面", ja: "ダッシュボードの現在", fr: "Dans le tableau de bord", de: "Im Dashboard live" },
@@ -280,42 +244,6 @@ export const TEMPLATES: TemplateMeta[] = [
         ],
       },
     ],
-    chat: {
-      user: {
-        en: "Write copy for an 8-bit font pack.",
-        zh: "给一个 8-bit 字体包写文案。",
-        ja: "8bit フォントパックの説明文を書いて。",
-        fr: "Rédige une fiche pour un pack de polices 8-bit.",
-        de: "Schreib einen Text für ein 8-Bit-Fontpack.",
-      },
-      assistant: {
-        en: "Pixel-perfect type for retro builds: 6 weights, hinting for low-res screens, OFL licensed.",
-        zh: "为复古项目打造的像素级字体：6 个字重、低分辨率屏_hinting_、OFL 授权。",
-        ja: "レトロ制作向け完璧なピクセル書体：6 ウェイト、低解像度ヒントング、OFL ライセンス。",
-        fr: "Une typo pixel-perfect pour vos builds rétro : 6 graisses, hinting basse résolution, licence OFL.",
-        de: "Pixelgenaue Type für Retro-Builds: 6 Schnitte, Hinting für Low-Res, OFL-Lizenz.",
-      },
-    },
-    rag: {
-      question: {
-        en: "When do payouts arrive?",
-        zh: "结算款什么时候到账？",
-        ja: "払い出しはいつ届きますか？",
-        fr: "Quand arrivent les virements ?",
-        de: "Wann kommen Auszahlungen an?",
-      },
-      answer: {
-        en: "Balances over $50 settle every Monday; Studio plans can payout instantly.",
-        zh: "余额满 $50 每周一结算；Studio 方案可即时结算。",
-        ja: "$50 以上の残高は毎週月曜に決済。Studio は即時払い出し可能です。",
-        fr: "Les soldes > 50 $ sont réglés chaque lundi ; le plan Studio permet le virement instantané.",
-        de: "Guthaben über $50 werden montags ausgezahlt; Studio sofort.",
-      },
-      sources: [
-        { en: "Payments guide", zh: "支付指南", ja: "決済ガイド", fr: "Guide paiements", de: "Zahlungs-Guide" },
-        { en: "Plan comparison", zh: "方案对比", ja: "プラン比較", fr: "Comparatif", de: "Plan-Vergleich" },
-      ],
-    },
     showcase: {
       kind: "dash",
       title: { en: "The store, both ends", zh: "店铺的前后场", ja: "店舗の表と裏", fr: "La boutique, des deux côtés", de: "Der Shop von beiden Seiten" },
@@ -428,42 +356,6 @@ export const TEMPLATES: TemplateMeta[] = [
         ],
       },
     ],
-    chat: {
-      user: {
-        en: "What should I bring to a first visit?",
-        zh: "第一次到访需要带什么？",
-        ja: "初回訪問の持ち物は？",
-        fr: "Qu'apporter pour une première visite ?",
-        de: "Was bringe ich zum Ersttermin mit?",
-      },
-      assistant: {
-        en: "Photo ID, current medication list and recent labs. Arrive 10 min early for intake.",
-        zh: "身份证件、当前用药清单与近期化验单；请提前 10 分钟到院登记。",
-        ja: "身分証、服用薬リスト、直近の検査結果を。受付のため 10 分前にお越しください。",
-        fr: "Pièce d'identité, liste des traitements et analyses récentes. Arrivez 10 min en avance.",
-        de: "Ausweis, Medikamentenliste, aktuelle Befunde. Bitte 10 Min früher da sein.",
-      },
-    },
-    rag: {
-      question: {
-        en: "Do you offer home visits?",
-        zh: "提供上门服务吗？",
-        ja: "自宅への訪問はありますか？",
-        fr: "Proposez-vous des visites à domicile ?",
-        de: "Bieten Sie Hausbesuche an?",
-      },
-      answer: {
-        en: "Yes — within 8 km on weekdays, booked at least 24 h ahead.",
-        zh: "提供——工作日 8 公里范围内，需提前 24 小时预约。",
-        ja: "はい——平日、8 km 圏内、24 時間前までの予約制です。",
-        fr: "Oui — dans un rayon de 8 km en semaine, réservées 24 h à l'avance.",
-        de: "Ja — werktags im Umkreis von 8 km, Buchung 24 h im Voraus.",
-      },
-      sources: [
-        { en: "Service area", zh: "服务范围", ja: "対応エリア", fr: "Zone desservie", de: "Einzugsgebiet" },
-        { en: "Booking policy", zh: "预约政策", ja: "予約ポリシー", fr: "Politique de RDV", de: "Terminrichtlinie" },
-      ],
-    },
     showcase: {
       kind: "dash",
       title: { en: "Today’s clinic board", zh: "今日诊所看板", ja: "本日の診察ボード", fr: "Tableau du jour du cabinet", de: "Tagesboard der Praxis" },
@@ -576,42 +468,6 @@ export const TEMPLATES: TemplateMeta[] = [
         ],
       },
     ],
-    chat: {
-      user: {
-        en: "Build me a 3-day strength split.",
-        zh: "给我排一个三天力量分化计划。",
-        ja: "3 日の筋力分割メニューを作って。",
-        fr: "Crée-moi un split force sur 3 jours.",
-        de: "Erstelle mir einen 3-Tage-Kraftsplit.",
-      },
-      assistant: {
-        en: "Push / pull / legs+core, 45 min each at RPE 7, warm-ups linked.",
-        zh: "推 / 拉 / 腿+核心，每次 45 分钟、RPE 7，热身链接已附。",
-        ja: "プッシュ／プル／脚+コア、各 45 分・RPE 7、ウォームアップ 링크付き。",
-        fr: "Push / pull / jambes+core, 45 min à RPE 7, échauffements liés.",
-        de: "Push / Pull / Beine+Core, je 45 Min bei RPE 7, Warm-ups verlinkt.",
-      },
-    },
-    rag: {
-      question: {
-        en: "Can I pause my membership?",
-        zh: "可以暂停会员吗？",
-        ja: "メンバーシップは休止できますか？",
-        fr: "Puis-je suspendre mon abonnement ?",
-        de: "Kann ich meine Mitgliedschaft pausieren?",
-      },
-      answer: {
-        en: "Up to 8 weeks per year from the member portal; billing resumes automatically.",
-        zh: "每年最多 8 周，在会员门户操作；到期自动恢复计费。",
-        ja: "年最大 8 週まで会員ポータルから休止可。終了後、請求は自動再開。",
-        fr: "Jusqu'à 8 semaines par an via le portail ; la facturation reprend automatiquement.",
-        de: "Bis 8 Wochen/Jahr im Portal; Abrechnung läuft automatisch weiter.",
-      },
-      sources: [
-        { en: "Membership terms", zh: "会员条款", ja: "会員規約", fr: "Conditions d'abonnement", de: "Mitgliedsbedingungen" },
-        { en: "Portal guide", zh: "门户指南", ja: "ポータルガイド", fr: "Guide du portail", de: "Portal-Handbuch" },
-      ],
-    },
     showcase: {
       kind: "dash",
       title: { en: "Studio today", zh: "今日工作室", ja: "本日のスタジオ", fr: "Studio du jour", de: "Studio heute" },
