@@ -20,12 +20,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // Keep the structured-data amounts in sync with the cards below: both read
 // lib/pricing.ts so a reprice or a campaign window can never desync them.
-import { PRICES, bfActive, effectivePrice } from "@/lib/pricing";
+import { PRICES, STUDIO_UPGRADE, bfActive, effectivePrice } from "@/lib/pricing";
 
 export default async function PricingPage() {
   const lang = await getLang();
   const bf = bfActive();
-  const buyout = effectivePrice("buyout");
+  const buyout = effectivePrice("buyout", "core");
+  const studio = effectivePrice("buyout", "studio");
   const care = effectivePrice("care");
   const plans: Plan[] = [
     {
@@ -40,11 +41,11 @@ export default async function PricingPage() {
     },
     {
       id: "buyout",
-      name: "Buyout",
-      price: `$${buyout}`,
+      name: "Buyout Core",
+      price: `${buyout}`,
       // During BF the struck anchor is the REGULAR price (the 30%-off basis);
-      // the $349 list anchor lives on the Black Friday page's three-tier card.
-      originalPrice: bf ? `$${PRICES.buyout.regular}` : undefined,
+      // the list anchor lives on the Black Friday page's promo cards.
+      originalPrice: bf ? `${PRICES.buyout.regular}` : undefined,
       launch: !bf,
       bf,
       period: "",
@@ -57,7 +58,26 @@ export default async function PricingPage() {
         "pricing.buyout.f5",
       ],
       ctaKey: "pricing.buyLicense",
-      priceId: priceForPlan("buyout") || null,
+      priceId: priceForPlan("buyout", "core") || null,
+    },
+    {
+      id: "studio",
+      pkg: "studio",
+      name: "Buyout Studio",
+      price: `$${studio}`,
+      originalPrice: bf ? `$${PRICES.buyout.regular + STUDIO_UPGRADE.premium}` : undefined,
+      bf,
+      period: "",
+      once: true,
+      features: [
+        "pricing.studio.f1",
+        "pricing.studio.f2",
+        "pricing.studio.f3",
+        "pricing.studio.f4",
+        "pricing.studio.f5",
+      ],
+      ctaKey: "pricing.buyLicense",
+      priceId: priceForPlan("buyout", "studio") || null,
       highlight: true,
     },
     {
@@ -118,8 +138,16 @@ export default async function PricingPage() {
       },
       {
         "@type": "Offer",
-        name: "Buyout — one-time source license",
+        name: "Buyout Core — one-time source license",
         price: String(buyout),
+        priceCurrency: "USD",
+        url: `${site}/pricing`,
+        ...(priceValidUntil ? { priceValidUntil } : {}),
+      },
+      {
+        "@type": "Offer",
+        name: "Buyout Studio — one-time source license + AI workflow module",
+        price: String(studio),
         priceCurrency: "USD",
         url: `${site}/pricing`,
         ...(priceValidUntil ? { priceValidUntil } : {}),

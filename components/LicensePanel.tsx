@@ -115,6 +115,7 @@ type Status = {
   gateEnabled: boolean;
   redeemed: boolean;
   plan: string | null;
+  pkg?: string | null;
   email: string | null;
   expiresAt: string | null;
   updatesUntil: string | null;
@@ -168,6 +169,7 @@ export function LicensePanel({
         gateEnabled: true,
         redeemed: true,
         plan: j.plan,
+        pkg: j.pkg ?? null,
         email: j.email,
         expiresAt: j.expiresAt,
         updatesUntil: j.updatesUntil ?? null,
@@ -190,7 +192,14 @@ export function LicensePanel({
         <div className="eyebrow mb-2">{s.title}</div>
         <p className="mb-3 text-sm text-accent">
           {done ? s.success : s.active}
-          {status?.plan ? ` · ${status.plan}` : ""}
+          {status?.plan
+            ? " · " +
+              (status.plan === "buyout" && status.pkg === "studio"
+                ? "Buyout Studio"
+                : status.plan === "buyout" && status.pkg === "core"
+                  ? "Buyout Core"
+                  : status.plan)
+            : ""}
         </p>
         {status?.plan === "buyout" && status?.updatesUntil && (
           <p className="mb-2 text-xs text-ink-soft">

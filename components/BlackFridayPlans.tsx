@@ -21,6 +21,8 @@ export type BfPlan = {
   priceId: string | null; // BF price id for the active provider
   ctaFallbackHref: string;
   note?: string; // dict key
+  /** Buyout package; id "studio" checks out as plan "buyout" + this field. */
+  pkg?: "core" | "studio";
 };
 
 function Spinner() {
@@ -58,7 +60,11 @@ export function BlackFridayPlans({
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ plan: plan.id, blackFriday: true }),
+        body: JSON.stringify({
+          plan: plan.id === "studio" ? "buyout" : plan.id,
+          ...(plan.pkg ? { buyoutPackage: plan.pkg } : {}),
+          blackFriday: true,
+        }),
       });
       const data = await res.json();
       if (data.url) {
@@ -83,7 +89,12 @@ export function BlackFridayPlans({
 
   return (
     <div>
-      <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
+      <div
+        className={
+          "grid gap-4 sm:gap-5 " +
+          (plans.length > 3 ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-3")
+        }
+      >
         {plans.map((plan, idx) => (
           <div
             key={plan.id}

@@ -86,6 +86,23 @@ export async function POST(req: Request) {
 
   const { licenseKey: _licenseKey, ...config } = parsed.data;
   const typedConfig: BuilderConfig = config;
+
+  // Buyout CORE does not include the AI video-workflow source module — that
+  // is the Studio package. Legacy keys carry no pkg (grandfathered); the
+  // generated customer projects run with the gate OFF and never land here.
+  if (typedConfig.features.includes("video") && entitlement.pkg === "core") {
+    return NextResponse.json(
+      {
+        error: "module_not_licensed",
+        code: "MODULE_NOT_LICENSED",
+        message:
+          "Your Buyout Core license does not include the AI video-workflow module. Buy Buyout Studio (a new key unlocks it), or generate without that module.",
+        upgradeUrl: "/pricing#studio",
+        licenseUrl: "/license",
+      },
+      { status: 402 },
+    );
+  }
   const slug = slugify(typedConfig.appName);
 
   try {

@@ -185,6 +185,8 @@ export const env = {
   waffoPriceScale: () => opt("WAFFO_PRICE_ID_SCALE"),
   waffoPriceBuyout: () => opt("WAFFO_PRICE_ID_BUYOUT"),
   waffoPriceCare: () => opt("WAFFO_PRICE_ID_CARE"),
+  waffoPriceBuyoutStudio: () => opt("WAFFO_PRICE_ID_BUYOUT_STUDIO"),
+  waffoPriceBuyoutStudioBf: () => opt("WAFFO_PRICE_ID_BUYOUT_STUDIO_BF"),
 
   // ── Black Friday campaign (reserved hook; OFF by default) ──────
   // The /black-friday page shows promo pricing + a countdown. To charge the
@@ -471,9 +473,11 @@ export function licenseGateStatus(): {
  * is the one-time Buyout product and the SCALE slot is the recurring Care plan.
  */
 export type PricePlan = "buyout" | "care" | "pro" | "scale";
+/** Buyout package; a "studio" checkout resolves the STUDIO product slot. */
+export type BuyoutPackage = "core" | "studio";
 
 /** Resolve the price/plan id for a plan under the active payment provider. */
-export function priceForPlan(plan: PricePlan): string | null {
+export function priceForPlan(plan: PricePlan, pkg?: BuyoutPackage): string | null {
   const provider = env.paymentProvider().split(",")[0].trim();
   const isBuyout = plan === "buyout" || plan === "pro";
   const valueOrFallback = (primary: string, fallback: string) =>
@@ -484,6 +488,7 @@ export function priceForPlan(plan: PricePlan): string | null {
     case "paypal":
       return (isBuyout ? env.paypalPlanPro() : env.paypalPlanScale()) || null;
     case "waffo":
+      if (isBuyout && pkg === "studio") return env.waffoPriceBuyoutStudio() || null;
       return valueOrFallback(
         isBuyout ? env.waffoPriceBuyout() : env.waffoPriceCare(),
         isBuyout ? env.waffoPricePro() : env.waffoPriceScale(),
@@ -510,7 +515,7 @@ export function priceForPlan(plan: PricePlan): string | null {
  * /black-friday page (and any checkout it starts with `blackFriday: true`)
  * uses this; /pricing never does, so its prices are untouched by the campaign.
  */
-export function priceForPlanBf(plan: PricePlan): string | null {
+export function priceForPlanBf(plan: PricePlan, pkg?: BuyoutPackage): string | null {
   if (!env.blackFridayActive()) return null;
   const provider = env.paymentProvider().split(",")[0].trim();
   const isBuyout = plan === "buyout" || plan === "pro";
@@ -522,6 +527,8 @@ export function priceForPlanBf(plan: PricePlan): string | null {
     case "paypal":
       return bf(env.paypalPlanBuyoutBf(), env.paypalPlanCareBf());
     case "waffo":
+      if (isBuyout && pkg === "studio")
+        return env.waffoPriceBuyoutStudioBf() || null;
       return bf(env.waffoPriceBuyoutBf(), env.waffoPriceCareBf());
     case "lemonsqueezy":
       return bf(env.lemonsqueezyVariantBuyoutBf(), env.lemonsqueezyVariantCareBf());

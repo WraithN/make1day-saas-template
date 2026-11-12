@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS licenses (
   key        TEXT NOT NULL,
   email      TEXT,
   plan       TEXT NOT NULL,
+  pkg        TEXT,
   order_id   TEXT,
   created_at TEXT NOT NULL,
   expires_at TEXT,
@@ -403,6 +404,8 @@ function migrate(database: SqliteDatabase): void {
   addColumnIfMissing(database, "profiles", "email_verified", "integer not null default 0");
   // Buyout 12-month free-update window (task #226/#227).
   addColumnIfMissing(database, "licenses", "updates_until", "text");
+  // Buyout package (Core vs Studio with the AI workflow module).
+  addColumnIfMissing(database, "licenses", "pkg", "text");
 }
 
 /** Add a column when the table exists but does not have it yet. */

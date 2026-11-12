@@ -131,9 +131,10 @@ async function createCheckoutPancake(
 ): Promise<CheckoutResult> {
   // In Pancake the "price id" IS the product id: a one-time product for the
   // Buyout license and a subscription product for Care.
+  const pkg = p.buyoutPackage;
   const productId = p.blackFriday
-    ? priceForPlanBf(p.plan) ?? priceForPlan(p.plan)
-    : priceForPlan(p.plan);
+    ? priceForPlanBf(p.plan, pkg) ?? priceForPlan(p.plan, pkg)
+    : priceForPlan(p.plan, pkg);
   if (!productId) {
     throw new Error(
       `No Waffo Pancake product configured for plan "${p.plan}". Set WAFFO_PRICE_ID_BUYOUT / WAFFO_PRICE_ID_CARE.`,
@@ -147,6 +148,7 @@ async function createCheckoutPancake(
     currency: "USD",
     metadata: {
       plan: oneTime ? "buyout" : "care",
+      ...(oneTime && p.buyoutPackage ? { pkg: p.buyoutPackage } : {}),
       userId: p.userId ?? "",
       source: "shipkit",
     },
@@ -416,6 +418,10 @@ function normalizePancakeEvent(payload: any): NormalizedSubEvent[] {
       : type === "order.completed"
         ? "buyout"
         : "care";
+  const buyoutPackage =
+    plan === "buyout" && (meta?.pkg === "studio" || meta?.pkg === "core")
+      ? (meta.pkg as "core" | "studio")
+      : undefined;
 
   const identifier =
     data?.paymentId ?? data?.orderId ?? payload?.eventId ?? payload?.id;
@@ -437,6 +443,7 @@ function normalizePancakeEvent(payload: any): NormalizedSubEvent[] {
       subscriptionId: String(identifier),
       status,
       plan,
+      buyoutPackage,
       periodEnd,
       email: data?.buyerEmail ?? undefined,
       eventType: type,

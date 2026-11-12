@@ -8,6 +8,11 @@
  */
 export type PlanId = "buyout" | "care" | "pro" | "scale";
 
+/** Buyout packages: Core (no AI workflow module) vs Studio (with the
+ *  AI video/image workflow + the model-routing admin console). Same plan
+ *  id ("buyout") for the gateway, a package field carried in metadata. */
+export type BuyoutPackage = "core" | "studio";
+
 export type NormalizedStatus =
   | "active"
   | "trialing"
@@ -22,6 +27,8 @@ export type NormalizedSubEvent = {
   subscriptionId: string; // gateway subscription id
   status: NormalizedStatus;
   plan?: PlanId;
+  /** Which buyout package this paid order unlocked (metadata.pkg). */
+  buyoutPackage?: BuyoutPackage;
   periodEnd?: string | null; // ISO timestamp
   // ── Extra fields used for license issuance / idempotency ─────
   email?: string; // buyer email (Pancake: data.buyerEmail)
@@ -61,6 +68,8 @@ export type CheckoutResult = {
 
 export type CheckoutParams = {
   plan: PlanId;
+  /** Buyout package to charge for; ignored for Care. */
+  buyoutPackage?: BuyoutPackage;
   customerEmail?: string;
   userId?: string;
   successUrl: string;

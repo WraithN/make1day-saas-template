@@ -176,7 +176,7 @@ export function GET() {
           tags: ["Payments"],
           summary: "Create a Waffo Pancake checkout session",
           description:
-            "Requires a Supabase-authenticated user. Buyout is a one-time product, Care is a monthly subscription.",
+            "Buyout is a one-time product (package: core $249 / studio $349 with the AI workflow module), Care is a monthly subscription that re-opens a Buyout owner's update window. Guests may check out; the paid webhook grants the key to the checkout email.",
           security: [{ supabaseSession: [] }],
           requestBody: {
             required: true,
@@ -187,6 +187,12 @@ export function GET() {
                   required: ["plan"],
                   properties: {
                     plan: { type: "string", enum: ["buyout", "care"] },
+                    buyoutPackage: {
+                      type: "string",
+                      enum: ["core", "studio"],
+                      description:
+                        "Only for plan=buyout. studio charges the dedicated Studio product; 503 studio_unavailable if the gateway has no Studio product configured.",
+                    },
                   },
                 },
               },

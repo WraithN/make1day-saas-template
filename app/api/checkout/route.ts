@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getPaymentProvider } from "@/lib/payments";
-import { env, primaryPaymentsReady } from "@/lib/env";
+import { env, priceForPlan, priceForPlanBf, primaryPaymentsReady } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { recordTrafficEvent } from "@/lib/traffic";
 import { resolveIdentity } from "@/lib/visitor-id";
@@ -39,16 +39,39 @@ export async function POST(req: Request) {
 
   const body = await req.json().catch(() => ({}));
   const parsed = z
-    .object({ plan: z.enum(["buyout", "care"]), blackFriday: z.boolean().optional() })
+    .object({
+      plan: z.enum(["buyout", "care"]),
+      /** Which buyout package to charge; only meaningful for plan=buyout. */
+      buyoutPackage: z.enum(["core", "studio"]).optional(),
+      blackFriday: z.boolean().optional(),
+    })
     .safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+  }
+
+  // A Studio checkout must resolve to a REAL Studio product — never fall
+  // back to the Core price id silently (that would sell $349 rights for $249).
+  const wantStudio =
+    parsed.data.plan === "buyout" &&
+    (parsed.data.buyoutPackage ?? "core") === "studio";
+  if (wantStudio) {
+    const slot =
+      (parsed.data.blackFriday ? priceForPlanBf("buyout", "studio") : null) ??
+      priceForPlan("buyout", "studio");
+    if (!slot) {
+      return NextResponse.json(
+        { error: "studio_unavailable" },
+        { status: 503 },
+      );
+    }
   }
 
   const provider = getPaymentProvider();
   try {
     const result = await provider.createCheckout({
       plan: parsed.data.plan,
+      buyoutPackage: parsed.data.plan === "buyout" ? parsed.data.buyoutPackage ?? "core" : undefined,
       customerEmail: user?.email ?? undefined,
       userId: user?.id,
       successUrl: `${env.siteUrl()}/account?welcome=1`,
@@ -73,7 +96,10 @@ export async function POST(req: Request) {
       sessionId: identity.sessionId,
       kind: "checkout",
       path: "/pricing",
-      label: parsed.data.plan,
+      label:
+        parsed.data.plan === "buyout" && parsed.data.buyoutPackage === "studio"
+          ? "buyout-studio"
+          : parsed.data.plan,
       email: user?.email ?? null,
       createdAt: new Date().toISOString(),
     });

@@ -2,7 +2,7 @@ import { BlackFridayCountdown } from "@/components/BlackFridayCountdown";
 import { BlackFridayPlans, type BfPlan } from "@/components/BlackFridayPlans";
 import { HreflangLinks } from "@/components/HreflangLinks";
 import { env, priceForPlanBf, primaryPaymentsReady } from "@/lib/env";
-import { PRICES } from "@/lib/pricing";
+import { PRICES, STUDIO_UPGRADE } from "@/lib/pricing";
 import { Trans } from "@/lib/i18n";
 import { getCanonicalLang, getLang } from "@/lib/i18n-server";
 import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
@@ -78,7 +78,7 @@ export default async function BlackFridayPage() {
     },
     {
       id: "buyout",
-      name: "Buyout",
+      name: "Buyout Core",
       originalPrice: `$${BF_BUYOUT_ORIGINAL}`,
       bfPrice: `$${BF_BUYOUT_PRICE}`,
       once: true,
@@ -92,6 +92,24 @@ export default async function BlackFridayPage() {
       priceId: priceForPlanBf("buyout") || null,
       ctaFallbackHref: "/pricing",
       note: "blackfriday.saveBuyout",
+    },
+    {
+      id: "studio",
+      pkg: "studio",
+      name: "Buyout Studio",
+      originalPrice: `$${PRICES.buyout.regular + STUDIO_UPGRADE.premium}`,
+      bfPrice: `$${PRICES.buyout.bf + STUDIO_UPGRADE.premium}`,
+      once: true,
+      features: [
+        "pricing.studio.f1",
+        "pricing.studio.f2",
+        "pricing.studio.f3",
+        "pricing.studio.f4",
+        "pricing.studio.f5",
+      ],
+      priceId: priceForPlanBf("buyout", "studio") || null,
+      ctaFallbackHref: "/pricing",
+      note: "blackfriday.saveStudio",
     },
     {
       id: "care",
@@ -127,8 +145,16 @@ export default async function BlackFridayPage() {
       },
       {
         "@type": "Offer",
-        name: "Buyout — one-time source license (Black Friday)",
+        name: "Buyout Core — one-time source license (Black Friday)",
         price: BF_BUYOUT_PRICE,
+        priceCurrency: "USD",
+        url: `${site}/black-friday`,
+        ...(endsAt ? { priceValidUntil: new Date(endsAt).toISOString().slice(0, 10) } : {}),
+      },
+      {
+        "@type": "Offer",
+        name: "Buyout Studio — one-time license + AI workflow module (Black Friday)",
+        price: String(PRICES.buyout.bf + STUDIO_UPGRADE.premium),
         priceCurrency: "USD",
         url: `${site}/black-friday`,
         ...(endsAt ? { priceValidUntil: new Date(endsAt).toISOString().slice(0, 10) } : {}),

@@ -250,7 +250,7 @@ gateway with `PAYMENT_PROVIDER` (`waffo` | `stripe` | `creem` | `paypal` |
 **Waffo Pancake (default)**
 1. Create a **one-time** product for Buyout ($249; Black Friday $174) and a **monthly** product for
    Care ($19/mo; Black Friday $13/mo). In Pancake the **product id IS the price id** → set
-   `WAFFO_PRICE_ID_BUYOUT` / `WAFFO_PRICE_ID_CARE` (legacy `_PRO`/`_SCALE` are
+   `WAFFO_PRICE_ID_BUYOUT` / `WAFFO_PRICE_ID_BUYOUT_STUDIO` / `WAFFO_PRICE_ID_CARE` (legacy `_PRO`/`_SCALE` are
    fallbacks).
 2. Set `WAFFO_STORE_SLUG` + `WAFFO_ENVIRONMENT=test|prod` for public auth, **or**
    `WAFFO_MERCHANT_ID` + `WAFFO_PRIVATE_KEY` for RSA-signed server calls — never

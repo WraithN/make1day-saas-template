@@ -90,6 +90,7 @@ async function grantLicense(
   return issueLicense({
     email,
     plan,
+    ...(plan === "buyout" ? { pkg: e.buyoutPackage ?? "core" } : {}),
     orderId: e.orderId ?? e.subscriptionId,
     periodEnd: e.periodEnd,
   });

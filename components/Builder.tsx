@@ -157,6 +157,14 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
       });
       if (!res.ok) {
         const j = await res.json().catch(() => ({}));
+        if (j.code === "MODULE_NOT_LICENSED") {
+          // The visitor HAS a license — it just is the Core package, which
+          // does not include the AI workflow module. Say so; do NOT show the
+          // generic paywall (they already paid).
+          setNeedLicense(false);
+          setErr(String(j.message || j.error || "Generate failed"));
+          return;
+        }
         // 402 = license gate. Show the localized redeem panel instead of an
         // opaque English error, and keep the visitor's configuration intact.
         if (res.status === 402 || j.code === "PAYMENT_REQUIRED") {

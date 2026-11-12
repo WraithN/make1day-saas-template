@@ -56,7 +56,12 @@ will 404 every route. Stop dev → delete `.next` → build → start.
    machine-readable gateway lists. An unselected adapter must never ship.
 4. **Payments verify on the raw body.** Waffo Pancake uses RSA-SHA256 over
    `${t}.${rawBody}`; the single webhook is `POST /api/webhook`. `buyout` is
-   one-time, `care` is monthly. Never trust an unsigned event.
+   one-time in two packages (Core $249 / Studio $349 — the paid webhook's
+   `metadata.pkg` decides, `licenses.pkg` stores it, and `/api/generate`
+   refuses the `video` module for explicit Core keys with 402
+   `MODULE_NOT_LICENSED`; package-less legacy keys stay grandfathered),
+   `care` is monthly and is a service AROUND an owned buyout — a Care plan
+   alone is never a source entitlement. Never trust an unsigned event.
 5. **Five complete locales.** Any new copy needs en / zh / ja / fr / de. Localized
    pages live at **path-prefixed URLs** (`/zh/pricing`, homepage `/zh`); EN is the
    bare path. Canonical and hreflang must declare the prefixed self-URL

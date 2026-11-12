@@ -79,8 +79,9 @@ pruned, buildable Next.js project pre-configured to those exact selections.
 | Plan | Price | What the buyer gets |
 |---|---|---|
 | Free demo | $0 | Browse the site, configure any build and download a source-free preview (file inventory + design tokens, never source code). Full source ZIP is 402 without entitlement |
-| Buyout | $249 one-time ($174 Black Friday) | Full source, permanent offline license key, 12 months free updates then Care, license for your own products (no resale/redistribution as template) |
-| Care | $19/mo ($13/mo Black Friday) | Consumption + adaptation: AI video-workflow source module for your own projects, Care-first modules, monthly-recast agent contract (skills/rules/AGENTS.md), upstream merge patches as mergeable diffs, 12h first-response SLA; key expires with the period |
+| Buyout Core | $249 one-time ($174 Black Friday) | Full source of every core module (auth, billing, admin, multi-tenancy, RAG), permanent offline license key, 12 months free updates then Care, license for your own products (no resale/redistribution as template). Does NOT include the AI video-workflow module |
+| Buyout Studio | $349 one-time ($274 Black Friday) | Everything in Core plus the AI video & image workflow source module (script → storyboard → cost quote → render → conversational diff-edit) and the model-routing admin console (provider lanes, fallbacks, budgets, per-run cost ledger). New AI modules land here first |
+| Care | $19/mo ($13/mo Black Friday) | Consumption + adaptation service AROUND an owned Buyout (never a substitute — a Care plan alone cannot download the source): re-opens the 12-month update window, Care-first modules, monthly-recast agent contract (skills/rules/AGENTS.md), upstream merge patches as mergeable diffs, 12h first-response SLA; entitlement expires with the period |
 | Custom 1:1 | Fixed quote after a free 30-minute call | Custom components/themes, private deployment, SSO, RAG on own data, audits |
 
 Content safety: on the make1day.dev STORE the hosted generation surfaces are

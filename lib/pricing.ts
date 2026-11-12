@@ -32,14 +32,24 @@ export const PRICES: { buyout: PriceLadder; care: PriceLadder } = {
 
 export type PricePlan = keyof typeof PRICES;
 
+/** Buyout packages. Core is the base ladder above; Studio is the same
+ *  generator PLUS the AI video/image workflow source module and the
+ *  model-routing admin console, at a premium. */
+export type BuyoutPackage = "core" | "studio";
+export const STUDIO_UPGRADE = {
+  // Studio = Core regular + $100 module premium (one-time).
+  premium: 100,
+} as const;
+
 export function bfActive(): boolean {
   return env.blackFridayActive();
 }
 
 /** What a buy button charges right now: BF window price, else regular. */
-export function effectivePrice(plan: PricePlan): number {
+export function effectivePrice(plan: PricePlan, pkg: BuyoutPackage = "core"): number {
   const ladder = PRICES[plan];
-  return bfActive() ? ladder.bf : ladder.regular;
+  const base = bfActive() ? ladder.bf : ladder.regular;
+  return plan === "buyout" && pkg === "studio" ? base + STUDIO_UPGRADE.premium : base;
 }
 
 /** "$249" / "$19" style strings for copy and structured data. */

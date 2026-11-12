@@ -27,6 +27,9 @@ export type Plan = {
   note?: string;
   /** Black Friday badge — shows the BLACK FRIDAY tag instead of "launch price". */
   bf?: boolean;
+  /** Buyout package charged for this card (id "studio" maps to plan
+   *  "buyout" + buyoutPackage "studio" at checkout). */
+  pkg?: "core" | "studio";
   /** Where the CTA links when there is no priceId (defaults to /login). The
    *  Black Friday page overrides this to /pricing so an unconfigured promo
    *  still sends buyers to the real purchase page. */
@@ -63,7 +66,11 @@ export function PricingCards({
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ plan: plan.id, blackFriday: plan.bf }),
+        body: JSON.stringify({
+      plan: plan.id === "studio" ? "buyout" : plan.id,
+      ...(plan.pkg ? { buyoutPackage: plan.pkg } : {}),
+      blackFriday: plan.bf,
+    }),
       });
       const data = await res.json();
       if (data.url) {
@@ -85,7 +92,7 @@ export function PricingCards({
 
   return (
     <>
-    <div className="grid gap-4 sm:gap-5 lg:grid-cols-3">
+    <div className={"grid gap-4 sm:gap-5 " + (plans.length > 3 ? "sm:grid-cols-2 lg:grid-cols-4" : "lg:grid-cols-3")}>
       {plans.map((plan, idx) => (
         <div
           key={plan.id}

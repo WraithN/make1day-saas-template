@@ -42,6 +42,9 @@ export type LicensePayload = {
   jti: string;
   email?: string;
   plan: "buyout" | "care";
+  /** Which buyout package the paid order unlocked. Only set on Buyout keys;
+   *  absent = Core (safe default: the AI workflow module stays locked). */
+  pkg?: "core" | "studio";
   orderId?: string;
   iat: number; // seconds
   exp?: number; // seconds; absent = lifetime (Buyout)
@@ -56,6 +59,7 @@ export type LicenseRecord = {
   key: string;
   email?: string;
   plan: "buyout" | "care";
+  pkg?: "core" | "studio";
   orderId?: string;
   createdAt: string;
   expiresAt?: string | null;
@@ -78,6 +82,8 @@ export type Entitlement = {
   allowed: boolean;
   reason: EntitlementReason;
   plan?: "buyout" | "care";
+  /** Buyout package behind this entitlement (Buyout plans only). */
+  pkg?: "core" | "studio";
   remaining?: number;
   /** Present when a specific issued key backs the entitlement (delivery log). */
   jti?: string;
@@ -144,6 +150,7 @@ type LicenseRow = {
   key: string;
   email: string | null;
   plan: string;
+  pkg: string | null;
   order_id: string | null;
   created_at: string;
   expires_at: string | null;
@@ -159,6 +166,7 @@ function rowToLicense(r: LicenseRow): LicenseRecord {
     key: r.key,
     email: r.email ?? undefined,
     plan,
+    pkg: r.pkg === "studio" ? "studio" : r.pkg === "core" ? "core" : undefined,
     orderId: r.order_id ?? undefined,
     createdAt: r.created_at,
     expiresAt: r.expires_at ?? null,
@@ -185,6 +193,7 @@ async function adminClient(): Promise<any | null> {
 export async function issueLicense(params: {
   email?: string;
   plan: "buyout" | "care";
+  pkg?: "core" | "studio";
   orderId?: string;
   periodEnd?: string | null;
 }): Promise<LicenseRecord> {
@@ -209,6 +218,7 @@ export async function issueLicense(params: {
     jti: randomUUID(),
     email: params.email?.toLowerCase() || undefined,
     plan: params.plan,
+    ...(params.plan === "buyout" && params.pkg ? { pkg: params.pkg } : {}),
     orderId: params.orderId,
     iat: now,
     ...(exp ? { exp } : {}),
@@ -220,6 +230,7 @@ export async function issueLicense(params: {
     key,
     email: payload.email,
     plan: payload.plan,
+    pkg: payload.pkg,
     orderId: payload.orderId,
     createdAt: new Date().toISOString(),
     expiresAt: exp ? new Date(exp * 1000).toISOString() : null,
@@ -233,6 +244,7 @@ export async function issueLicense(params: {
       key: record.key,
       email: record.email ?? null,
       plan: record.plan,
+      pkg: record.pkg ?? null,
       order_id: record.orderId ?? null,
       expires_at: record.expiresAt ?? null,
       updates_until: record.updatesUntil ?? null,
@@ -247,12 +259,13 @@ export async function issueLicense(params: {
     console.warn("license insert fell back to local store:", error.message);
   }
   run(
-    `INSERT OR IGNORE INTO licenses (jti, key, email, plan, order_id, created_at, expires_at, updates_until)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR IGNORE INTO licenses (jti, key, email, plan, pkg, order_id, created_at, expires_at, updates_until)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     record.jti,
     record.key,
     record.email ?? null,
     record.plan,
+    record.pkg ?? null,
     record.orderId ?? null,
     record.createdAt,
     record.expiresAt ?? null,
@@ -281,6 +294,7 @@ export async function getLicenseRecordByJti(
         key: data.key,
         email: data.email ?? undefined,
         plan: data.plan,
+        pkg: data.pkg ?? undefined,
         orderId: data.order_id ?? undefined,
         createdAt: data.created_at,
         expiresAt: data.expires_at ?? null,
@@ -349,6 +363,7 @@ export async function findLicenseByEmail(
         key: pick.key,
         email: pick.email ?? undefined,
         plan: pick.plan,
+        pkg: pick.pkg ?? undefined,
         orderId: pick.order_id ?? undefined,
         createdAt: pick.created_at,
         expiresAt: pick.expires_at ?? null,
@@ -357,6 +372,10 @@ export async function findLicenseByEmail(
     }
   }
   const row =
+    get<LicenseRow>(
+      "SELECT * FROM licenses WHERE email = ? AND plan = 'buyout' AND pkg = 'studio' ORDER BY created_at DESC LIMIT 1",
+      normalized,
+    ) ??
     get<LicenseRow>(
       "SELECT * FROM licenses WHERE email = ? AND plan = 'buyout' ORDER BY created_at DESC LIMIT 1",
       normalized,
@@ -387,6 +406,7 @@ export async function listLicenses(): Promise<LicenseRecord[]> {
         key: r.key,
         email: r.email ?? undefined,
         plan: r.plan,
+        pkg: r.pkg ?? undefined,
         orderId: r.order_id ?? undefined,
         createdAt: r.created_at,
         expiresAt: r.expires_at ?? null,
@@ -732,6 +752,7 @@ export async function checkEntitlement(
         allowed: true,
         reason: "license-key",
         plan: payload.plan,
+        pkg: payload.pkg,
         jti: payload.jti,
         email: payload.email,
       };
@@ -792,6 +813,7 @@ export async function checkEntitlement(
           allowed: true,
           reason: "license-email",
           plan: owned.plan,
+          pkg: owned.pkg,
           jti: owned.jti,
           email: owned.email,
         };

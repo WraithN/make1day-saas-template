@@ -41,6 +41,7 @@ export async function POST(req: Request) {
   const res = NextResponse.json({
     ok: true,
     plan: payload.plan,
+    pkg: payload.pkg ?? null,
     email: payload.email ?? null,
     expiresAt: payload.exp ? new Date(payload.exp * 1000).toISOString() : null,
     updatesUntil: payload.updatesUntil
@@ -65,6 +66,7 @@ export async function GET(req: Request) {
     gateEnabled: isLicenseGateEnabled(),
     redeemed: !!payload,
     plan: payload?.plan ?? null,
+    pkg: payload?.pkg ?? null,
     email: payload?.email ?? null,
     expiresAt: payload?.exp
       ? new Date(payload.exp * 1000).toISOString()
