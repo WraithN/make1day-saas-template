@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { env } from "@/lib/env";
 import { getLang, tr } from "@/lib/i18n-server";
 import { langAlternatePaths } from "@/lib/seo-alternates";
 import {
@@ -16,9 +18,13 @@ export const metadata: Metadata = {
   },
 };
 
-// Gallery of face-swap video templates. Session-gated by middleware; the
-// studio itself is Care-subscription-gated at the API layer.
+// Gallery of template-driven AI video-workflow examples. Session-gated by
+// middleware; the studio itself is Care-subscription-gated at the API layer.
+// make1day's own store hides these routes (SHOW_VIDEO_STUDIO=false) — the
+// store sells the module as source code; running it is the customer's own
+// deployment decision. Customer builds keep it.
 export default async function VideoGalleryPage() {
+  if (!env.showVideoStudio()) notFound();
   const lang = await getLang();
   const configured = videoConfigured();
 

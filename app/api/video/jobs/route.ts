@@ -2,6 +2,7 @@ import { guardApiWrite } from "@/lib/http-guard";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { z } from "zod";
+import { env } from "@/lib/env";
 import {
   getCurrentUser,
   getCurrentSubscription,
@@ -23,6 +24,12 @@ export const runtime = "nodejs";
 // Subscription-only by product decision: an active **Care** plan is required
 // (one-time Buyout does not include video credits).
 export async function POST(req: Request) {
+  // make1day's own store operates no hosted generation entry point: with
+  // SHOW_VIDEO_STUDIO=false the entire feature surface — pages AND API —
+  // 404s. Customer builds ship this route with the flag unset (= enabled).
+  if (!env.showVideoStudio()) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   const blocked = await guardApiWrite(req, {
     bucket: "video",
     limit: 20,

@@ -113,8 +113,8 @@ export const FEATURE_OPTIONS: { id: Feature; label: string; note: string }[] = [
   },
   {
     id: "video",
-    label: "Video studio (face-swap)",
-    note: "Consent-gated template face-swap jobs via fal.ai, subscription credits, deep-synthesis labeling",
+    label: "AI video workflow module",
+    note: "Template-driven video generation on your own provider keys; consent attestation, provider safety filters and visible AI labeling built in",
   },
 ];
 
@@ -223,8 +223,8 @@ export const SKILL_OPTIONS: { id: SkillId; label: string; note: string }[] = [
   },
   {
     id: "video",
-    label: "Video Studio",
-    note: "Consent-gated face-swap jobs, credits, deep-synthesis labeling",
+    label: "AI Video Workflow",
+    note: "Template-driven generation jobs on your own provider keys, consent attestation, AI labeling",
   },
 ];
 

@@ -2,7 +2,10 @@
 
 > 状态：**已入生成器**（2026-11-10，feature `video` + skill `video`，19 组矩阵含
 > `creem-aurora-video` 用例）。购买 make1day 且勾选该 feature 的客户拿到合规就绪的
-> 视频站骨架——"想做换脸视频站的人"是本模块的目标客群。站点自身（/video）即 dogfood。
+> 视频站骨架——"想做视频工作流的人"是本模块的目标客群。模块作为源码交付给客户，
+> 由客户配自己的供应商密钥、过自己支付商的审核。**make1day 本站不出售托管生成入口**
+> （SHOW_VIDEO_STUDIO=false：/video、/video/studio 与 /api/video/jobs 在商店全部 404；
+> 商店面文案统一使用"AI 视频工作流模块"）。
 > 定价口径见 `lib/pricing.ts`（Care 含每月视频额度）。
 
 ## 1. 产品定义

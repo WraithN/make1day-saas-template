@@ -86,6 +86,14 @@ export const env = {
   // sets SHOW_WORKSPACES=false because its licenses/orders are per-user and
   // the org UI would be a dead-end tab for buyers.
   showWorkspaces: () => opt("SHOW_WORKSPACES", "true").toLowerCase() !== "false",
+  // The hosted AI video-workflow surfaces (/video gallery and /video/studio).
+  // make1day's OWN store sets SHOW_VIDEO_STUDIO=false: the store sells source
+  // code templates, it does not operate a hosted generation entry point —
+  // merchant-of-record review treats any such entry point on the selling
+  // site as disqualifying, and the customer's own deployment (with its own
+  // provider keys and its own processor review) is the product. Customer
+  // builds default ON.
+  showVideoStudio: () => opt("SHOW_VIDEO_STUDIO", "true").toLowerCase() !== "false",
 
   // ── Payment provider (selects the active gateway) ────────────
   // Defaults to Waffo (Pancake), matching .env.example, the pricing copy and

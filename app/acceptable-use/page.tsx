@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Acceptable Use Policy",
     description:
-      "Prohibited uses, NSFW filtering and enforcement for make1day's AI generation surfaces (assistant chat, document Q&A, Video Studio).",
+      "Prohibited uses, NSFW filtering and enforcement for make1day's AI generation surfaces (assistant chat, document Q&A, AI video workflow).",
     alternates: {
       canonical,
       languages: langAlternatePaths("/acceptable-use"),

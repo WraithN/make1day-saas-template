@@ -15,11 +15,11 @@ export interface AucSection {
 }
 
 export const AUP_INTRO: TText = {
-  en: "This Acceptable Use Policy governs every AI generation surface on this site: the assistant chat, document Q&A and the Video Studio face-swap pipeline. Using any of them means you accept these rules. Violations lead to blocked requests, suspended accounts and, where required, reports to authorities.",
-  zh: "本《可接受使用政策》适用于本站全部 AI 生成面：助手对话、文档问答与 Video Studio 换脸管线。使用即视为接受下列规则。违规将导致请求被拦截、账号被停用，必要时依法向主管机关报告。",
-  ja: "本利用許容ポリシーは、アシスタントチャット、ドキュメント Q&A、Video Studio の顔スワップを含むすべての AI 生成面に適用されます。利用は本ルールへの同意を意味します。違反はリクエスト遮断、アカウント停止、必要に応じた当局への報告の対象となります。",
-  fr: "La présente politique d'utilisation acceptable régit toutes les surfaces de génération IA du site : chat assistant, Q&R documentaire et pipeline face-swap du Studio Vidéo. Les utiliser vaut acceptation de ces règles. Les violations entraînent blocage, suspension et, si requis, signalement aux autorités.",
-  de: "Diese Acceptable-Use-Policy gilt für alle KI-Erzeugungsflächen dieser Site: Assistent-Chat, Doku-Q&A und die Face-Swap-Pipeline des Video-Studios. Nutzung bedeutet Zustimmung. Verstöße führen zu Blocks, Kontosperrung und ggf. Meldung an Behörden.",
+  en: "This Acceptable Use Policy governs every AI generation surface on this site: the assistant chat, document Q&A and the AI video-workflow feature. Using any of them means you accept these rules. Violations lead to blocked requests, suspended accounts and, where required, reports to authorities.",
+  zh: "本《可接受使用政策》适用于本站全部 AI 生成面：助手对话、文档问答与 AI 视频工作流功能。使用即视为接受下列规则。违规将导致请求被拦截、账号被停用，必要时依法向主管机关报告。",
+  ja: "本利用許容ポリシーは、アシスタントチャット、ドキュメント Q&A、AI ビデオワークフロー機能を含むすべての AI 生成面に適用されます。利用は本ルールへの同意を意味します。違反はリクエスト遮断、アカウント停止、必要に応じた当局への報告の対象となります。",
+  fr: "La présente politique d'utilisation acceptable régit toutes les surfaces de génération IA du site : chat assistant, Q&R documentaire et fonction de flux vidéo IA. Les utiliser vaut acceptation de ces règles. Les violations entraînent blocage, suspension et, si requis, signalement aux autorités.",
+  de: "Diese Acceptable-Use-Policy gilt für alle KI-Erzeugungsflächen dieser Site: Assistent-Chat, Doku-Q&A und die KI-Video-Workflow-Funktion. Nutzung bedeutet Zustimmung. Verstöße führen zu Blocks, Kontosperrung und ggf. Meldung an Behörden.",
 };
 
 export const AUP_SECTIONS: AucSection[] = [
@@ -95,11 +95,11 @@ export const AUP_SECTIONS: AucSection[] = [
         de: "Ist die Moderation nicht erreichbar, schlägt die Erzeugung fail-closed fehl (abgelehnt) — kein ungescreentes Erzeugen.",
       },
       {
-        en: "Deployments without a Creem key enforce a local prohibited-content blocklist as a fallback layer; Video Studio additionally requires the portrait-rights attestation and applies a visible AI label to every render.",
-        zh: "未配置 Creem key 的部署以本地违禁词表作为兜底层；Video Studio 另强制肖像权声明并对每条成片加可见 AI 标识。",
-        ja: "Creem キー未設定の環境はローカル禁止リストをフォールバックとし、Video Studio は肖像権確認と全出力への可視 AI ラベルを強制します。",
-        fr: "Sans clé Creem, une liste locale de contenus interdits sert de filet ; le Studio Vidéo exige en plus l'attestation de droits à l'image et appose un label IA visible.",
-        de: "Ohne Creem-Key greift eine lokale Sperrliste als Fallback; das Video-Studio verlangt zusätzlich die Bildrechte-Bestätigung und setzt ein sichtbares KI-Label.",
+        en: "Deployments without a moderation API key enforce a local prohibited-content blocklist as a fallback layer; video-workflow jobs additionally require a portrait-rights attestation and apply a visible AI label to every render.",
+        zh: "未配置审查 API key 的部署以本地违禁词表作为兜底层；视频工作流任务另强制肖像权声明并对每条成片加可见 AI 标识。",
+        ja: "モデレーション API キー未設定の環境はローカル禁止リストをフォールバックとし、ビデオワークフロージョブは肖像権確認と全出力への可視 AI ラベルを強制します。",
+        fr: "Sans clé d'API de modération, une liste locale de contenus interdits sert de filet ; les tâches de flux vidéo exigent en plus l'attestation de droits à l'image et apposent un label IA visible.",
+        de: "Ohne Moderations-API-Key greift eine lokale Sperrliste als Fallback; Video-Workflow-Jobs verlangen zusätzlich die Bildrechte-Bestätigung und setzen ein sichtbares KI-Label."
       },
       {
         en: "Sexual content involving minors is never filterable, never appealable: accounts are terminated and preserved for referral.",
@@ -135,11 +135,11 @@ export const AUP_SECTIONS: AucSection[] = [
         de: "POST /api/rag/query — die Frage wird vor der Retrieval-Generierung gescreent.",
       },
       {
-        en: "POST /api/video/jobs — Video Studio accepts no free-text prompt; the only user-controlled string entering the face-swap pipeline (the hosted input URL) is screened before credits, queueing or the provider call. Extra layers: portrait-rights attestation, provider-side safety filters, visible AI label on every render.",
-        zh: "POST /api/video/jobs——Video Studio 不接受自由文本 prompt；进入换脸管线的唯一用户可控字符串（托管输入 URL）在扣额度、入队、调用供应商之前受审。附加层：肖像权声明、供应商侧安全过滤、每条成片的可见 AI 标识。",
-        ja: "POST /api/video/jobs — Video Studio に自由文本プロンプトはなく、顔スワップ設計に入る唯一のユーザー制御文字列（ホスト入力 URL）をクレジット・キュー・プロバイダ呼び出しの前に審査。追加層：肖像権確認、プロバイダ側安全フィルタ、全出力の可視 AI ラベル。",
-        fr: "POST /api/video/jobs — le Studio Vidéo n'accepte aucun prompt libre ; la seule chaîne contrôlée par l'utilisateur entrant dans le pipeline (l'URL d'entrée hébergée) est criblée avant crédits, file et appel prestataire. Couches supplémentaires : attestation de droits à l'image, filtres du prestataire, label IA visible.",
-        de: "POST /api/video/jobs — das Video-Studio nimmt keinen Freitext-Prompt an; der einzige nutzerkontrollierte String in der Pipeline (die gehostete Eingabe-URL) wird vor Credits, Queue und Provider-Aufruf gescreent. Zusätzliche Ebenen: Bildrechte-Bestätigung, Provider-Safety-Filter, sichtbares KI-Label.",
+        en: "POST /api/video/jobs — the AI video-workflow feature (delivered to customers as a source module; this store operates no public generation entry point) accepts no free-text prompt; the only user-controlled string entering the pipeline (the hosted input URL) is screened before credits, queueing or the provider call. Extra layers: portrait-rights attestation, provider-side safety filters, visible AI label on every render.",
+        zh: "POST /api/video/jobs——AI 视频工作流功能（作为源码模块交付给客户；本站不运营任何公开的生成入口）不接受自由文本 prompt；进入管线的唯一用户可控字符串（托管输入 URL）在扣额度、入队、调用供应商之前受审。附加层：肖像权声明、供应商侧安全过滤、每条成片的可见 AI 标识。",
+        ja: "POST /api/video/jobs — AI ビデオワークフロー機能（顧客にはソースモジュールとして納品；本ストアは公開生成窓口を運営しない）に自由文本プロンプトはなく、パイプラインに入る唯一のユーザー制御文字列（ホスト入力 URL）をクレジット・キュー・プロバイダ呼び出しの前に審査。追加層：肖像権確認、プロバイダ側安全フィルタ、全出力の可視 AI ラベル。",
+        fr: "POST /api/video/jobs — la fonction de flux vidéo IA (livrée aux clients comme module source ; cette boutique n'exploite aucun point d'entrée public de génération) n'accepte aucun prompt libre ; la seule chaîne contrôlée par l'utilisateur entrant dans le pipeline (l'URL d'entrée hébergée) est criblée avant crédits, file et appel prestataire. Couches supplémentaires : attestation de droits à l'image, filtres du prestataire, label IA visible.",
+        de: "POST /api/video/jobs — die KI-Video-Workflow-Funktion (an Kunden als Quellmodul geliefert; dieser Shop betreibt keinen öffentlichen Generierungs-Einstieg) nimmt keinen Freitext-Prompt an; der einzige nutzerkontrollierte String in der Pipeline (die gehostete Eingabe-URL) wird vor Credits, Queue und Provider-Aufruf gescreent. Zusätzliche Ebenen: Bildrechte-Bestätigung, Provider-Safety-Filter, sichtbares KI-Label."
       },
       {
         en: "Screening runs on every deployment: via the Creem Moderation API when a Creem key is configured, otherwise via the local prohibited-content blocklist described above. There is no code path from user input to a generation model without a preceding screen.",

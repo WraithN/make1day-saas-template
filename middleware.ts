@@ -86,6 +86,20 @@ export async function middleware(request: NextRequest) {
     ? pathname.slice(localeSeg.length + 1) || "/"
     : pathname;
 
+  // make1day's own store hides the hosted video-workflow pages entirely:
+  // the store sells the module as source code and operates NO public
+  // generation entry point (merchant-of-record review treats any such entry
+  // on the selling site as disqualifying). Customer builds ship this same
+  // middleware with SHOW_VIDEO_STUDIO unset (= visible).
+  if (
+    (process.env.SHOW_VIDEO_STUDIO ?? "true").toLowerCase() === "false" &&
+    (logicalPath === "/video" || logicalPath.startsWith("/video/"))
+  ) {
+    return NextResponse.rewrite(new URL("/_not-found", request.url), {
+      status: 404,
+    });
+  }
+
   // GEO: `?format=md` on any public page returns a plain-text representation
   // of that exact URL. Restricted to public GET pages so the rewrite can
   // never be used to bypass a console guard or an API same-origin check.
