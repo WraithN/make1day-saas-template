@@ -1,7 +1,7 @@
 // Customer-owned site pages for the generated ZIP.
 //
 // make1day's own marketing pages (home, pricing, blog, compare, faq, license)
-// describe SHIPKIT — its $99 source license, its competitors, its SEO posts.
+// describe SHIPKIT — its $249 source license, its competitors, its SEO posts.
 // Shipping them inside a customer's starter meant the customer's own site
 // was silently advertising our product instead of theirs. This module builds
 // a neutral, brand-free starter home + pricing page from the BuilderConfig,

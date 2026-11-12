@@ -27,8 +27,8 @@
 | 1 | Store Settings → **Store Slug**（公开店铺标识） | `WAFFO_STORE_SLUG` | 纯 slug，小写字母数字与连字符，**不带 `https://`** | 误填 Store ID 或完整店铺 URL |
 | 1b | *（二选一）* API Key 页 → **Merchant ID** + 生成的 **RSA 私钥** | `WAFFO_MERCHANT_ID`、`WAFFO_PRIVATE_KEY` | 私钥为 PEM，单行 env 里用 `\n` 表示换行；`env.waffoPrivateKey()` 会还原 | 与 Store Slug 同时配置（官方互斥）；私钥带真实换行导致 env 解析截断 |
 | 2 | 环境切换 | `WAFFO_ENVIRONMENT` | `test` \| `prod`，决定请求头 `X-Environment` 与验签公钥选择 | test 下单、prod 公钥验签（必然 400） |
-| 3 | Products → **一次性产品**（Buyout $99）ID | `WAFFO_PRICE_ID_BUYOUT` | `PROD_…`；币种 USD；产品类型 onetime | 用订阅产品 ID → 客户被按月扣款 |
-| 4 | Products → **月订阅产品**（Care $9/mo）ID | `WAFFO_PRICE_ID_CARE` | `PROD_…`；币种 USD；产品类型 subscription | 与 Buyout 填同一个 ID |
+| 3 | Products → **一次性产品**（Buyout $249，BF $174）ID | `WAFFO_PRICE_ID_BUYOUT` / `_BF` | `PROD_…`；币种 USD；产品类型 onetime | 用订阅产品 ID → 客户被按月扣款 |
+| 4 | Products → **月订阅产品**（Care $19/mo，BF $13/mo）ID | `WAFFO_PRICE_ID_CARE` / `_BF` | `PROD_…`；币种 USD；产品类型 subscription | 与 Buyout 填同一个 ID |
 | 5 | Settings → Webhooks → **Webhook Public Key（test）** | `WAFFO_WEBHOOK_PUBLIC_KEY_TEST` | PEM **`BEGIN PUBLIC KEY`**，平台级，不是商户密钥 | 误填私钥或商户 API Key |
 | 6 | Settings → Webhooks → **Webhook Public Key（prod）** | `WAFFO_WEBHOOK_PUBLIC_KEY_PROD` | 同上；**两套都要填**，因为重试会跨环境 | 只填 test，切 prod 后所有事件 400 |
 | 7 | Settings → Webhooks → Endpoint URL | 固定写 `https://<你的域名>/api/webhook` | 全站**唯一**一个 webhook 路由，POST + raw body | 注册成 `/api/webhooks/waffo`（旧文档错误地址） |

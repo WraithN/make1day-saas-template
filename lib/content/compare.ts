@@ -35,7 +35,7 @@ export const compareContent: Record<
       supastarter: "Supastarter",
     },
     rows: [
-      { feature: "One-time price", shipkit: "$99 one-time", shipfast: "~$199–249", makerkit: "$299–599", supastarter: "$299–1,499" },
+      { feature: "One-time price", shipkit: "$249 one-time", shipfast: "~$199–249", makerkit: "$299–599", supastarter: "$299–1,499" },
       { feature: "Ongoing plan", shipkit: "12 mo free updates + optional $9/mo Care", shipfast: "None (lifetime updates)", makerkit: "Tiered licenses", supastarter: "All-access upgrade" },
       { feature: "Framework", shipkit: "Next.js 15 App Router", shipfast: "Next.js", makerkit: "Next.js (monorepo)", supastarter: "Next.js / Nuxt" },
       { feature: "Auth", shipkit: "Email + OAuth (Google/GitHub/Apple/Microsoft)", shipfast: "Google + magic link", makerkit: "Deep RBAC", supastarter: "Multiple providers" },
@@ -59,7 +59,7 @@ export const compareContent: Record<
       { feature: "User console + admin console", shipkit: "Both included, five-language, selectable and fully pruned when unchecked", shipfast: "Account page only", makerkit: "Admin + RBAC", supastarter: "Admin basics" },
     ],
     verdict:
-      "Pick make1day.dev if you build with an AI coding agent: it is the only starter here that generates AGENTS.md AND a style-specific design.md, prunes modules you did not select, ships working hybrid RAG, five-language i18n and agent-readable llms.txt — at the lowest price in the category. Choose ShipFast for the biggest community, Makerkit for deep B2B multi-tenancy, Supastarter for maximum breadth, or VibeReady ($149–399) if enforced commit-time quality gates and Terraform matter more than i18n and a visual generator. make1day.dev also ships scoped rules, 13 skills, `npm run ai:docs` for deterministic regeneration, an MCP `scaffold_project` tool, an OpenAPI 3.1 contract and a public 19-case build matrix, plus selectable /account and /admin consoles in every generated project, so an agent can both assemble a project and verify that its ZIP type-checks instead of trusting a README.",
+      "Pick make1day.dev if you build with an AI coding agent: it is the only starter here that generates AGENTS.md AND a style-specific design.md, prunes modules you did not select, ships working hybrid RAG, five-language i18n and agent-readable llms.txt — for a $249 one-time buyout that includes 12 months of updates. Choose ShipFast for the biggest community, Makerkit for deep B2B multi-tenancy, Supastarter for maximum breadth, or VibeReady ($149–399) if enforced commit-time quality gates and Terraform matter more than i18n and a visual generator. make1day.dev also ships scoped rules, 13 skills, `npm run ai:docs` for deterministic regeneration, an MCP `scaffold_project` tool, an OpenAPI 3.1 contract and a public 19-case build matrix, plus selectable /account and /admin consoles in every generated project, so an agent can both assemble a project and verify that its ZIP type-checks instead of trusting a README.",
   },
   zh: {
     eyebrow: "对比",
@@ -72,7 +72,7 @@ export const compareContent: Record<
       supastarter: "Supastarter",
     },
     rows: [
-      { feature: "一次性价格", shipkit: "$99 一次性", shipfast: "约 $199–249", makerkit: "$299–599", supastarter: "$299–1,499" },
+      { feature: "一次性价格", shipkit: "$249 一次性", shipfast: "约 $199–249", makerkit: "$299–599", supastarter: "$299–1,499" },
       { feature: "持续服务", shipkit: "12 个月免费更新 + 可选 $9/月 Care", shipfast: "无（终身更新）", makerkit: "分级授权", supastarter: "全通升级" },
       { feature: "框架", shipkit: "Next.js 15 App Router", shipfast: "Next.js", makerkit: "Next.js（monorepo）", supastarter: "Next.js / Nuxt" },
       { feature: "登录", shipkit: "邮箱 + OAuth（Google/GitHub/Apple/Microsoft）", shipfast: "Google + magic link", makerkit: "深度 RBAC", supastarter: "多供应商" },
@@ -96,6 +96,6 @@ export const compareContent: Record<
       { feature: "用户后台 + 管理员后台", shipkit: "两套五语后台，可勾选、未选即真剪枝", shipfast: "仅账户页", makerkit: "管理端 + RBAC", supastarter: "基础管理端" },
     ],
     verdict:
-      "如果你用 AI coding agent 写代码：make1day.dev 是这批产品里唯一同时生成 AGENTS.md 与「随风格变化的 design.md」、按选项真实剪枝、内置可运行混合检索 RAG、五语 i18n 和面向智能体的 llms.txt 的启动包，而且价格最低。要最大社区选 ShipFast，深度 B2B 多租户选 Makerkit，功能广度选 Supastarter；若更看重提交时质量门禁与 Terraform 且不需要 i18n，可看 VibeReady（$149–399）。此外 make1day.dev 还附带 scoped rules、12 份 skills、`npm run ai:docs` 确定性重建、MCP `scaffold_project` 工具、OpenAPI 3.1 契约与 18 组构建矩阵，并且每个生成工程都带可勾选的 /account 用户后台与 /admin 管理员后台——agent 既能自己组装工程，也能验证生成的 ZIP 能否通过类型检查，而不必只信 README。",
+      "如果你用 AI coding agent 写代码：make1day.dev 是这批产品里唯一同时生成 AGENTS.md 与「随风格变化的 design.md」、按选项真实剪枝、内置可运行混合检索 RAG、五语 i18n 和面向智能体的 llms.txt 的启动包，$249 一次性买断并含 12 个月更新。要最大社区选 ShipFast，深度 B2B 多租户选 Makerkit，功能广度选 Supastarter；若更看重提交时质量门禁与 Terraform 且不需要 i18n，可看 VibeReady（$149–399）。此外 make1day.dev 还附带 scoped rules、13 份 skills、`npm run ai:docs` 确定性重建、MCP `scaffold_project` 工具、OpenAPI 3.1 契约与 19 组构建矩阵，并且每个生成工程都带可勾选的 /account 用户后台与 /admin 管理员后台——agent 既能自己组装工程，也能验证生成的 ZIP 能否通过类型检查，而不必只信 README。",
   },
 };
