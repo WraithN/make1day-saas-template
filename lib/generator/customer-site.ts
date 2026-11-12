@@ -221,8 +221,79 @@ function stackRows(config: BuilderConfig): string {
 }
 
 /** Brand-free home page for the customer's own application. */
+/** Scene strip: the real production stages of the vertical. Empty for
+ *  classic configs — landing depth only where the vertical justifies it. */
+function sceneStages(c: BuilderConfig): string[] {
+  if (c.features.includes("video"))
+    return ["Brief", "Script", "Storyboard", "Cost quote", "Visuals + voice", "Assembly + diff-edit"];
+  if (c.ai.length && c.features.includes("premium") && !c.features.includes("rag"))
+    return ["Brand kit", "Prompt recipe", "Routing + queue", "Refine chain", "Deliver + storage", "Batch + API"];
+  if (c.features.includes("rag"))
+    return ["Ingest", "Chunk + index", "Cite + verify", "Grounded answer", "Escalate to human"];
+  return [];
+}
+
+/** Metric tiles under the pipeline strip — per-vertical unit economics. */
+function sceneMetrics(c: BuilderConfig): { label: string; value: string }[] {
+  if (c.features.includes("video"))
+    return [
+      { label: "Quote before render", value: "Yes" },
+      { label: "Diff-only re-render", value: "85–95% reuse" },
+      { label: "60s ad run cost", value: "$0.50–1.50" },
+    ];
+  if (c.features.includes("rag"))
+    return [
+      { label: "Answers cite sources", value: "Always" },
+      { label: "Isolated indexes", value: "Per workspace" },
+      { label: "No-key fallback", value: "BM25" },
+    ];
+  if (c.ai.length && c.features.includes("premium"))
+    return [
+      { label: "Credits metered per", value: "Model × size" },
+      { label: "Accepted-image cost", value: "price × regen" },
+      { label: "Per-key spend cap", value: "Configurable" },
+    ];
+  return [];
+}
+
 export function buildCustomerHome(config: BuilderConfig): string {
   const name = JSON.stringify(config.appName);
+  const stages = sceneStages(config);
+  const metrics = sceneMetrics(config);
+  const stagesJs = stages.map((s) => JSON.stringify(s)).join(", ");
+  const metricsJs = metrics
+    .map((m) => `{ label: ${JSON.stringify(m.label)}, value: ${JSON.stringify(m.value)} }`)
+    .join(",\n            ");
+  const pipelineSection = stages.length
+    ? `
+      <section className="wrap py-16">
+        <div className="eyebrow mb-3">The pipeline</div>
+        <div className="flex flex-wrap items-center gap-2">
+          {STAGES.map((stage, i) => (
+            <div key={stage} className="flex items-center gap-2">
+              <span className="card px-3 py-1.5 text-sm">
+                <span className="font-mono text-xs text-ink-soft">{i + 1}.</span>{" "}
+                {stage}
+              </span>
+              {i < STAGES.length - 1 && (
+                <span aria-hidden className="text-ink-soft">→</span>
+              )}
+            </div>
+          ))}
+        </div>
+        {METRICS.length > 0 && (
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            {METRICS.map((m) => (
+              <div key={m.label} className="card">
+                <div className="eyebrow mb-2">{m.label}</div>
+                <div className="text-lg font-semibold">{m.value}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+`
+    : "";
   return `// Generated starter landing page for ${config.appName}.
 // This is YOUR landing page: edit the copy in lib/i18n-core.ts (app.*) and
 // the module cards below to describe your own product.
@@ -234,6 +305,14 @@ const APP_NAME = ${name};
 const STACK: { label: string; value: string }[] = [
 ${stackRows(config)}
 ];
+
+const STAGES: string[] = [${stagesJs}];
+
+const METRICS: { label: string; value: string }[] = ${
+    metrics.length
+      ? `[\n            ${metricsJs},\n          ]`
+      : "[]"
+  };
 
 export default async function HomePage() {
   const lang = await getLang();
@@ -257,7 +336,7 @@ export default async function HomePage() {
           </Link>
         </div>
       </section>
-
+${pipelineSection}
       <section className="wrap pb-20">
         <h2 className="text-2xl font-semibold">{c("app.stack.title")}</h2>
         <p className="mt-2 max-w-2xl text-sm text-ink-soft">

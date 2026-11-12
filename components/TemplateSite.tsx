@@ -49,7 +49,6 @@ export type Surface =
   | "chat"
   | "rag"
   | "admin"
-  | "workspaces"
   | "workflow"
   | "ops";
 
@@ -68,7 +67,6 @@ function surfacesFor(tpl: TemplateMeta): { id: Surface; key: keyof TemplateChrom
     ...(tpl.workflow ? [{ id: "workflow" as Surface, key: "tabWorkflow" as keyof TemplateChrome }] : []),
     ...(tpl.ops ? [{ id: "ops" as Surface, key: "tabOps" as keyof TemplateChrome }] : []),
     { id: "admin", key: "tabAdmin" },
-    { id: "workspaces", key: "tabWorkspaces" },
   ];
 }
 
@@ -541,94 +539,93 @@ export function TemplateSite({
                 ))}
               </ul>
             </div>
-          </section>
-        )}
 
-        {/* ── Workspaces (multi-tenancy showcase) ── */}
-        {surface === "workspaces" && (
-          <section className="py-10">
-            <h2 className="text-[18px] font-semibold">{t.tabWorkspaces}</h2>
-            {wss ? (
-              <>
-                <p className="mt-1 max-w-2xl text-[12px] leading-relaxed text-[rgb(var(--muted))]">
-                  {pick(wss.note)}
-                </p>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {wss.spaces.map((sp, i) => (
+            {/* Workspaces live INSIDE the console — the org isolation these
+                 templates ship is an admin concern, not a marketing tab. */}
+            <div className="mt-6">
+              <h3 className="text-[15px] font-semibold">{t.tabWorkspaces}</h3>
+              {wss ? (
+                <>
+                  <p className="mt-1 max-w-2xl text-[12px] leading-relaxed text-[rgb(var(--muted))]">
+                    {pick(wss.note)}
+                  </p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    {wss.spaces.map((sp, i) => (
+                      <div
+                        key={i}
+                        className={
+                          panel +
+                          (i === 0 ? " border-[rgb(var(--accent))] ring-1 ring-[rgb(var(--accent))]" : "")
+                        }
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[15px] font-semibold">{pick(sp.name)}</span>
+                          {i === 0 && (
+                            <span className="tag" style={solidStyle}>
+                              {t.activeWs}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1 text-[12px] text-[rgb(var(--muted))]">{pick(sp.detail)}</div>
+                        <div className="mt-3 space-y-1.5">
+                          {sp.pools.map((p, j) => (
+                            <div key={j} className="flex items-center justify-between gap-2 text-[12px]">
+                              <span className="text-[rgb(var(--ink-soft))]">{pick(p.label)}</span>
+                              <span className="font-mono font-semibold">{p.value}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          className={(i === 0 ? ghostBtn : solidBtn) + " mt-3 w-full"}
+                          style={i === 0 ? undefined : solidStyle}
+                          disabled={i === 0}
+                        >
+                          {i === 0 ? t.activeWs : t.switch}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  {[
+                    { org: `${name} HQ`, role: t.owner, members: 8, active: true },
+                    { org: `${name} Studio`, role: t.member, members: 3, active: false },
+                  ].map((o, i) => (
                     <div
                       key={i}
                       className={
                         panel +
-                        (i === 0 ? " border-[rgb(var(--accent))] ring-1 ring-[rgb(var(--accent))]" : "")
+                        (o.active
+                          ? " border-[rgb(var(--accent))] ring-1 ring-[rgb(var(--accent))]"
+                          : "")
                       }
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[15px] font-semibold">{pick(sp.name)}</span>
-                        {i === 0 && (
+                        <span className="text-[15px] font-semibold">{o.org}</span>
+                        {o.active && (
                           <span className="tag" style={solidStyle}>
                             {t.activeWs}
                           </span>
                         )}
                       </div>
-                      <div className="mt-1 text-[12px] text-[rgb(var(--muted))]">{pick(sp.detail)}</div>
-                      <div className="mt-3 space-y-1.5">
-                        {sp.pools.map((p, j) => (
-                          <div key={j} className="flex items-center justify-between gap-2 text-[12px]">
-                            <span className="text-[rgb(var(--ink-soft))]">{pick(p.label)}</span>
-                            <span className="font-mono font-semibold">{p.value}</span>
-                          </div>
-                        ))}
+                      <div className="mt-1 text-[12px] text-[rgb(var(--muted))]">
+                        {o.role} · {o.members} {t.members}
                       </div>
                       <button
                         type="button"
-                        className={(i === 0 ? ghostBtn : solidBtn) + " mt-3 w-full"}
-                        style={i === 0 ? undefined : solidStyle}
-                        disabled={i === 0}
+                        className={(o.active ? ghostBtn : solidBtn) + " mt-3 w-full"}
+                        style={o.active ? undefined : solidStyle}
+                        disabled={o.active}
                       >
-                        {i === 0 ? t.activeWs : t.switch}
+                        {o.active ? t.activeWs : t.switch}
                       </button>
                     </div>
                   ))}
                 </div>
-              </>
-            ) : (
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {[
-                  { org: `${name} HQ`, role: t.owner, members: 8, active: true },
-                  { org: `${name} Studio`, role: t.member, members: 3, active: false },
-                ].map((o, i) => (
-                  <div
-                    key={i}
-                    className={
-                      panel +
-                      (o.active
-                        ? " border-[rgb(var(--accent))] ring-1 ring-[rgb(var(--accent))]"
-                        : "")
-                    }
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[15px] font-semibold">{o.org}</span>
-                      {o.active && (
-                        <span className="tag" style={solidStyle}>
-                          {t.activeWs}
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-1 text-[12px] text-[rgb(var(--muted))]">
-                      {o.role} · {o.members} {t.members}
-                    </div>
-                    <button
-                      type="button"
-                      className={(o.active ? ghostBtn : solidBtn) + " mt-3 w-full"}
-                      style={o.active ? undefined : solidStyle}
-                      disabled={o.active}
-                    >
-                      {o.active ? t.activeWs : t.switch}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+              )}
+            </div>
           </section>
         )}
 
