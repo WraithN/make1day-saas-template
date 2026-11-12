@@ -6,7 +6,7 @@
 // subscribes to a Care plan cannot burn through the whole LLM bill in one
 // afternoon.
 //
-// Storage mirrors the rest of make1day: Supabase when a service-role key is
+// Storage mirrors the rest of make1day.dev: Supabase when a service-role key is
 // configured (production), the local SQLite database otherwise (dev /
 // self-hosted). Switching backends is an env change, not a code change.
 //

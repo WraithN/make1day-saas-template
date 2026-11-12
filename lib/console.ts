@@ -2,7 +2,7 @@
 //
 // Deliberately depends ONLY on modules that exist in every generated build
 // (lib/license.ts, lib/stats.ts, lib/subscriptions.ts, lib/env.ts). It must
-// never import a payment adapter or a make1day-site-only endpoint, otherwise
+// never import a payment adapter or a make1day.dev-site-only endpoint, otherwise
 // pruning a gateway out of a downloaded template would break `tsc`.
 // The operator session layer is reached through a DYNAMIC import, so the
 // SQLite-backed store is only loaded on pages that actually read it.

@@ -25,8 +25,8 @@ export const faqContent: Record<string, FaqLang> = {
     eyebrow: "FAQ",
     heading: "Questions indie founders actually ask",
     subtitle:
-      "Everything about using make1day to ship your AI SaaS — auth, checkout, AI, deployment, white-labelling and licensing, including the limits we do not hide.",
-    reviewed: "Maintained by the make1day team · last updated 2026-11-08",
+      "Everything about using make1day.dev to ship your AI SaaS — auth, checkout, AI, deployment, white-labelling and licensing, including the limits we do not hide.",
+    reviewed: "Maintained by the make1day.dev team · last updated 2026-11-08",
     items: [
       {
         q: "Does the starter include a user dashboard and an admin dashboard?",
@@ -42,10 +42,10 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "How do I build a SaaS with Next.js?",
-        a: "1. Start from a configurable starter such as make1day.\n2. Set your env vars — Supabase, a payment gateway, an AI key.\n3. Pick your stack in the Builder.\n4. Download the generated scaffold and deploy to Vercel or Cloudflare.\n\nMost founders reach a launchable MVP in days, not months.",
+        a: "1. Start from a configurable starter such as make1day.dev.\n2. Set your env vars — Supabase, a payment gateway, an AI key.\n3. Pick your stack in the Builder.\n4. Download the generated scaffold and deploy to Vercel or Cloudflare.\n\nMost founders reach a launchable MVP in days, not months.",
       },
       {
-        q: "Does make1day include subscription billing and Stripe support?",
+        q: "Does make1day.dev include subscription billing and Stripe support?",
         a: "**Yes.** The generated app ships with hosted checkout (Waffo Pancake by default) and webhook-synced plan status.\n\nIn the Builder you can switch to Stripe, Creem, PayPal, Lemon Squeezy or Waffo Acquiring — checkout and webhook routes are provider-agnostic, and only the selected adapter ships in the ZIP.\n\nTrial periods are configured in your payment provider's dashboard, not hardcoded in the scaffold.",
       },
       {
@@ -70,7 +70,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "Is it a one-time buyout or a subscription?",
-        a: "The source is a **one-time buyout you own forever**. Free updates are included for **12 months**; after that, make1day Care keeps them coming.\n\nCare is an optional monthly subscription for ongoing updates, hosting help and priority support.\n\nThe license lets you build and ship your own products (commercial use allowed), but not resell or redistribute the source as a template. See the [pricing page](/pricing) for current prices and the full rules.",
+        a: "The source is a **one-time buyout you own forever**. Free updates are included for **12 months**; after that, make1day.dev Care keeps them coming.\n\nCare is an optional monthly subscription for ongoing updates, hosting help and priority support.\n\nThe license lets you build and ship your own products (commercial use allowed), but not resell or redistribute the source as a template. See the [pricing page](/pricing) for current prices and the full rules.",
       },
       {
         q: "Do you offer custom development or a 1:1 call?",
@@ -81,7 +81,7 @@ export const faqContent: Record<string, FaqLang> = {
         a: "It's **Vercel-ready**, and also runs on:\n\n- Cloudflare Workers via the OpenNext adapter (`nodejs_compat`)\n- your own Node server\n\nThe generated README lists the env vars you need.\n\n**Heads-up:** the local SQLite backend is for development only — it does not persist on serverless and cannot run on Workers at all, so configure Supabase for production.",
       },
       {
-        q: "Is make1day open source?",
+        q: "Is make1day.dev open source?",
         a: "The **marketing site and its documentation are public**. The generated template is a paid, licensed product you receive as source after purchase, with an `MIT LICENSE` file in every ZIP.\n\nYou can inspect the live stack this site is built on.",
       },
       {
@@ -98,7 +98,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "How do AI answer engines discover this site?",
-        a: "Through a full machine-readable surface:\n\n- `llms.txt` (short overview) and `llms-full.txt` (long-form facts)\n- an OpenAPI 3.1 contract\n- an MCP `scaffold_project` tool at `/api/mcp`\n- per-page canonical and hreflang links\n- Organization / WebSite / OfferCatalog / FAQPage / BlogPosting JSON-LD\n- a sitemap that lists the machine-readable routes\n- `robots.txt` rules that explicitly allow AI crawlers\n\nEvery article also publishes a plain Markdown variant at `/blog/<slug>/md`. All editorial content is attributed to the company name **make1day**, so there is one consistent entity to cite.",
+        a: "Through a full machine-readable surface:\n\n- `llms.txt` (short overview) and `llms-full.txt` (long-form facts)\n- an OpenAPI 3.1 contract\n- an MCP `scaffold_project` tool at `/api/mcp`\n- per-page canonical and hreflang links\n- Organization / WebSite / OfferCatalog / FAQPage / BlogPosting JSON-LD\n- a sitemap that lists the machine-readable routes\n- `robots.txt` rules that explicitly allow AI crawlers\n\nEvery article also publishes a plain Markdown variant at `/blog/<slug>/md`. All editorial content is attributed to the company name **make1day.dev**, so there is one consistent entity to cite.",
       },
       {
         q: "What is the refund policy?",
@@ -117,8 +117,8 @@ export const faqContent: Record<string, FaqLang> = {
   zh: {
     eyebrow: "常见问题",
     heading: "独立开发者真正会问的问题",
-    subtitle: "关于用 make1day 构建 AI SaaS 的一切——登录、收款、AI、部署、白标与授权，包括我们不隐藏的限制。",
-    reviewed: "由 make1day 团队维护 · 最近更新 2026-11-08",
+    subtitle: "关于用 make1day.dev 构建 AI SaaS 的一切——登录、收款、AI、部署、白标与授权，包括我们不隐藏的限制。",
+    reviewed: "由 make1day.dev 团队维护 · 最近更新 2026-11-08",
     items: [
       {
         q: "模板里有用户后台和管理员后台吗？",
@@ -134,10 +134,10 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "如何用 Next.js 构建一个 SaaS？",
-        a: "1. 从可配置的启动模板（如 make1day）开始。\n2. 配置环境变量——Supabase、支付通道、AI 密钥。\n3. 在 Builder 里选择技术栈。\n4. 下载生成的脚手架并部署到 Vercel 或 Cloudflare。\n\n多数创始人几天内即可到达可上线的 MVP，而非数月。",
+        a: "1. 从可配置的启动模板（如 make1day.dev）开始。\n2. 配置环境变量——Supabase、支付通道、AI 密钥。\n3. 在 Builder 里选择技术栈。\n4. 下载生成的脚手架并部署到 Vercel 或 Cloudflare。\n\n多数创始人几天内即可到达可上线的 MVP，而非数月。",
       },
       {
-        q: "make1day 包含订阅计费与 Stripe 支持吗？",
+        q: "make1day.dev 包含订阅计费与 Stripe 支持吗？",
         a: "**包含。** 生成的应用自带托管结账（默认 Waffo Pancake）与通过 Webhook 同步的套餐状态。\n\n在 Builder 中也可切换为 Stripe、Creem、PayPal、Lemon Squeezy 或 Waffo Acquiring——结账与 Webhook 路由与支付商无关，且 ZIP 只保留选中的适配器。\n\n试用期在支付商后台配置，不写死在脚手架里。",
       },
       {
@@ -162,7 +162,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "这是一次性买断还是订阅？",
-        a: "源码**一次性买断、永久拥有**；含 **12 个月**免费更新，之后可订阅 make1day Care 持续获取更新。\n\nCare 是可选的按月订阅，提供持续更新、部署协助与优先支持。\n\n许可可用于构建并运营你自己的产品（允许商用），但**不得转售**，也不得将源码打包成模板二次售卖。当前价格与完整规则见[定价页](/pricing)。",
+        a: "源码**一次性买断、永久拥有**；含 **12 个月**免费更新，之后可订阅 make1day.dev Care 持续获取更新。\n\nCare 是可选的按月订阅，提供持续更新、部署协助与优先支持。\n\n许可可用于构建并运营你自己的产品（允许商用），但**不得转售**，也不得将源码打包成模板二次售卖。当前价格与完整规则见[定价页](/pricing)。",
       },
       {
         q: "支持定制开发或 1V1 沟通吗？",
@@ -173,7 +173,7 @@ export const faqContent: Record<string, FaqLang> = {
         a: "它原生支持 Vercel，也可运行在：\n\n- 通过 OpenNext 适配器（nodejs_compat）运行于 Cloudflare Workers\n- 你自己的 Node 服务器\n\n生成的 README 含所需环境变量。\n\n**注意：** 本地 SQLite 后端只用于开发——在 serverless 上不持久，Workers 更是完全没有可写磁盘，生产环境请配置 Supabase。",
       },
       {
-        q: "make1day 是开源的吗？",
+        q: "make1day.dev 是开源的吗？",
         a: "**营销站与文档是公开的**；生成的模板是你购买后以源码形式获得的授权产品，每个 ZIP 都带 `MIT LICENSE` 文件。\n\n你可以直接查看本站点所基于的实时技术栈。",
       },
       {
@@ -190,7 +190,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "AI 答案引擎是怎么发现这个站点的？",
-        a: "通过一整套机器可读面：\n\n- `llms.txt`（精要概览）与 `llms-full.txt`（长文事实）\n- OpenAPI 3.1 契约\n- `/api/mcp` 的 `scaffold_project` 工具\n- 每页 canonical / hreflang 链接\n- Organization / WebSite / OfferCatalog / FAQPage / BlogPosting 的 JSON-LD\n- 列出机器可读路由的 sitemap\n- 显式允许 AI 爬虫的 `robots.txt`\n\n每篇文章还在 `/blog/<slug>/md` 发布纯 Markdown 变体。所有内容统一以公司名 **make1day** 署名，便于被作为单一实体引用。",
+        a: "通过一整套机器可读面：\n\n- `llms.txt`（精要概览）与 `llms-full.txt`（长文事实）\n- OpenAPI 3.1 契约\n- `/api/mcp` 的 `scaffold_project` 工具\n- 每页 canonical / hreflang 链接\n- Organization / WebSite / OfferCatalog / FAQPage / BlogPosting 的 JSON-LD\n- 列出机器可读路由的 sitemap\n- 显式允许 AI 爬虫的 `robots.txt`\n\n每篇文章还在 `/blog/<slug>/md` 发布纯 Markdown 变体。所有内容统一以公司名 **make1day.dev** 署名，便于被作为单一实体引用。",
       },
       {
         q: "退款规则是什么？",
@@ -213,8 +213,8 @@ export const faqContent: Record<string, FaqLang> = {
     eyebrow: "FAQ",
     heading: "個人開発者が本当に聞く質問",
     subtitle:
-      "make1day で AI SaaS を構築・販売するための質問と、隠さない制限事項。認証・決済・AI・デプロイ・ホワイトラベル・ライセンスを扱います。",
-    reviewed: "make1day チームが維持・最終更新 2026-11-08",
+      "make1day.dev で AI SaaS を構築・販売するための質問と、隠さない制限事項。認証・決済・AI・デプロイ・ホワイトラベル・ライセンスを扱います。",
+    reviewed: "make1day.dev チームが維持・最終更新 2026-11-08",
     items: [
       {
         q: "ユーザー画面と管理画面は付いていますか？",
@@ -270,8 +270,8 @@ export const faqContent: Record<string, FaqLang> = {
     eyebrow: "FAQ",
     heading: "Les questions que se posent vraiment les fondateurs indépendants",
     subtitle:
-      "Tout sur la création et la vente d'un SaaS IA avec make1day : auth, paiement, IA, déploiement, marque blanche et licences, y compris les limites que nous ne cachons pas.",
-    reviewed: "Tenue par l'équipe make1day · mise à jour 2026-11-08",
+      "Tout sur la création et la vente d'un SaaS IA avec make1day.dev : auth, paiement, IA, déploiement, marque blanche et licences, y compris les limites que nous ne cachons pas.",
+    reviewed: "Tenue par l'équipe make1day.dev · mise à jour 2026-11-08",
     items: [
       {
         q: "Le starter inclut-il un espace utilisateur et un back-office ?",
@@ -327,8 +327,8 @@ export const faqContent: Record<string, FaqLang> = {
     eyebrow: "FAQ",
     heading: "Fragen, die Indie-Gründer wirklich stellen",
     subtitle:
-      "Alles über den Aufbau und Verkauf eines AI-SaaS mit make1day: Auth, Checkout, KI, Deployment, White-Label und Lizenzen — inklusive der Grenzen, die wir nicht verstecken.",
-    reviewed: "Gepflegt vom make1day-Team · zuletzt aktualisiert 2026-11-08",
+      "Alles über den Aufbau und Verkauf eines AI-SaaS mit make1day.dev: Auth, Checkout, KI, Deployment, White-Label und Lizenzen — inklusive der Grenzen, die wir nicht verstecken.",
+    reviewed: "Gepflegt vom make1day.dev-Team · zuletzt aktualisiert 2026-11-08",
     items: [
       {
         q: "Enthält das Starter einen Nutzer- und einen Admin-Bereich?",

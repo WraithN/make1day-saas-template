@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "make1day — AI SaaS starter";
+export const alt = "make1day.dev — AI SaaS starter";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -38,7 +38,7 @@ export default function OpengraphImage() {
               transform: "rotate(-2deg)",
             }}
           >
-            AI SAAS STARTER · BY make1day
+            AI SAAS STARTER · BY make1day.dev
           </div>
         </div>
 
@@ -53,7 +53,7 @@ export default function OpengraphImage() {
             letterSpacing: "-0.03em",
           }}
         >
-          make1day
+          make1day.dev
           <div
             style={{
               display: "flex",

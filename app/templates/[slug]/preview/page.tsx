@@ -16,7 +16,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const tpl = getTemplate(slug);
-  // The root layout's title template appends "· make1day" — don't add it here.
+  // The root layout's title template appends "· make1day.dev" — don't add it here.
   if (!tpl) return { title: "Preview", robots: { index: false } };
   const name = tpl.name.en;
   return {

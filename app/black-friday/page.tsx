@@ -20,9 +20,9 @@ const BF_CARE_PRICE = String(PRICES.care.bf);
 export async function generateMetadata() {
   const canonical = variantCanonical("/black-friday", await getCanonicalLang());
   return {
-    title: "Black Friday — make1day",
+    title: "Black Friday — make1day.dev",
     description:
-      "Black Friday: own the make1day source at the year's lowest price. The struck list price is the anchor; the Black Friday deal is what the buy button charges while the timer runs.",
+      "Black Friday: own the make1day.dev source at the year's lowest price. The struck list price is the anchor; the Black Friday deal is what the buy button charges while the timer runs.",
     alternates: {
       canonical,
       languages: langAlternatePaths("/black-friday"),
@@ -116,7 +116,7 @@ export default async function BlackFridayPage() {
   const offersJsonLd = {
     "@context": "https://schema.org",
     "@type": "OfferCatalog",
-    name: "make1day Black Friday plans",
+    name: "make1day.dev Black Friday plans",
     itemListElement: [
       {
         "@type": "Offer",

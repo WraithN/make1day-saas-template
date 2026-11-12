@@ -101,7 +101,7 @@ export function Nav() {
         {/* Keep this <Link> className verbatim: customerNavBrand() matches it
             structurally to swap in the customer's own app name. */}
         <Link href="/" className="shrink-0 font-semibold tracking-tight">
-          make1day
+          make1day.dev
         </Link>
 
         {/* ── Desktop (>= md) ── */}

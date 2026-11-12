@@ -8,12 +8,12 @@ import { TemplateCard } from "@/components/TemplateCard";
 
 export async function generateMetadata(): Promise<Metadata> {
   const lang = await getLang();
-  // The root layout's title template appends "· make1day" — don't add it here.
+  // The root layout's title template appends "· make1day.dev" — don't add it here.
   const title = lang === "zh" ? "样板间" : "Templates";
   const description =
     lang === "zh"
-      ? "看看每个 make1day 模板真实生成的站点——点击即可在线预览。"
-      : "See a live preview of the site each make1day template generates — click to open it.";
+      ? "看看每个 make1day.dev 模板真实生成的站点——点击即可在线预览。"
+      : "See a live preview of the site each make1day.dev template generates — click to open it.";
   const canonical = variantCanonical("/templates", await getCanonicalLang());
   return {
     title,

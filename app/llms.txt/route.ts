@@ -20,9 +20,9 @@ const BLOG_INDEX = POSTS.map(
 // llms.txt — the machine-readable overview of this site for LLMs / answer
 // engines (ChatGPT, Claude, Perplexity, Google AI Overviews). See llms.txt spec.
 export function GET(_req: NextRequest) {
-  const body = `# make1day
+  const body = `# make1day.dev
 
-> make1day is a configurable, white-labelled AI SaaS starter and build generator: a production-grade Next.js 15 (App Router) template with Supabase auth, Waffo-hosted checkout, a working AI feature, hybrid RAG with citations, a signed-in user console (/account), an operator admin console (/admin) and a configurable project generator. Pick your stack, download a brand-free ZIP, launch.
+> make1day.dev is a configurable, white-labelled AI SaaS starter and build generator: a production-grade Next.js 15 (App Router) template with Supabase auth, Waffo-hosted checkout, a working AI feature, hybrid RAG with citations, a signed-in user console (/account), an operator admin console (/admin) and a configurable project generator. Pick your stack, download a brand-free ZIP, launch.
 
 ## What it is
 - A configurable starter: pick auth, payments, AI providers, features, visual style and deploy target in the Builder, then download a clean, buildable Next.js project. Both consoles are selectable features: checking \`account\` ships /account, checking \`admin\` ships /admin; unchecking either prunes its whole route tree from the ZIP.
@@ -31,15 +31,15 @@ export function GET(_req: NextRequest) {
 - RAG retrieval is **hybrid**: Okapi BM25 (Latin words + CJK unigrams/bigrams) fused with dense embeddings via **Reciprocal Rank Fusion** (RRF, k=60). In-memory vectors by default; optional pgvector persistence. Without an embedding key it degrades to BM25-only, and answers carry inline [n] citations.
 - Every generated ZIP is **agent-native**: a root \`AGENTS.md\` (repo conventions, pruned modules, commands, scoped-rule index, definition of done), a style-specific \`design.md\`, \`ai/rules/*.md\` scoped rules with globs, \`.cursor/rules/*.mdc\` for Cursor, \`CLAUDE.md\` for Claude Code, and up to 12 \`skills/*.md\` playbooks. \`npm run ai:docs\` rebuilds all of them from \`shipkit.config.json\` after a config change.
 - Licensing: one-time source buyout ($249 regular, $174 during Black Friday) plus an optional Care subscription ($19/mo regular, $13/mo during Black Friday). Care is consumption + adaptation, not insurance: the AI video-workflow source module for your own projects, new modules landing on Care first, a monthly-recast agent contract (skills, scoped rules, AGENTS.md regenerated for evolving coding agents), upstream merge patches and a 12-hour first-response SLA. The buyout includes 12 months of free updates; free updates then require an active Care subscription. The license lets you build and ship your own products (commercial use allowed), but not resell or redistribute the source as a template.
-- Compared with ShipFast (~$199), Divjoy (~$149), MkSaaS (~$129), Makerkit (~$349) and Supastarter (~$299), the make1day buyout ($249 regular) sits just below the B2B kits while including the generator, multi-provider payments, AI, hybrid RAG, i18n and SEO/GEO scaffolding.
-- Differentiation for AI-assisted development: make1day is the only starter in this set that BOTH prunes unselected modules out of the downloaded source AND generates a style-specific design.md plus a root AGENTS.md, scoped rules and per-skill playbooks. ShipFast/Divjoy ship no AGENTS.md; Makerkit/Supastarter ship AGENTS.md but no per-style design system document; VibeReady enforces quality gates but has no i18n and no visual generator.
+- Compared with ShipFast (~$199), Divjoy (~$149), MkSaaS (~$129), Makerkit (~$349) and Supastarter (~$299), the make1day.dev buyout ($249 regular) sits just below the B2B kits while including the generator, multi-provider payments, AI, hybrid RAG, i18n and SEO/GEO scaffolding.
+- Differentiation for AI-assisted development: make1day.dev is the only starter in this set that BOTH prunes unselected modules out of the downloaded source AND generates a style-specific design.md plus a root AGENTS.md, scoped rules and per-skill playbooks. ShipFast/Divjoy ship no AGENTS.md; Makerkit/Supastarter ship AGENTS.md but no per-style design system document; VibeReady enforces quality gates but has no i18n and no visual generator.
 - Agent-readable distribution: llms.txt, llms-full.txt, OpenAPI 3.1, an MCP \`scaffold_project\` tool at /api/mcp, per-post \`text/markdown\` alternates, per-page canonical/hreflang, Organization/WebSite/OfferCatalog/FAQPage/BlogPosting/CollectionPage/ItemList/BreadcrumbList JSON-LD, sitemap and robots.txt with an AI-bot allowlist. See /compare for the feature matrix.
 - Honest delivery status: a paid webhook issues the key, emails it to the checkout address, and records a delivery event. A failed transport is persisted in mail_outbox and retried by POST /api/cron/mail-outbox; guest checkout and a mismatched login email can request a re-send at /license. The key is also visible at /account/licenses. Delivery, consent and error events are logged with hashed emails; see docs/legal-data-map.md.
 
 ## Pricing & plans
 - [Pricing](${SITE}/pricing): Free demo, $249 one-time Buyout ($174 during Black Friday), $19/mo Care ($13/mo during Black Friday), and custom 1:1 development. See subscription rules on the page.
 - Checkout on this site is processed by **Waffo Pancake** (Merchant of Record: global payments, tax and compliance without a company entity). Generated projects can switch gateways in the Builder. Webhooks use RSA-SHA256 verification of \`X-Waffo-Signature\` over \`\${t}.\${rawBody}\`; one webhook route: \`POST /api/webhook\`.
-- Download entitlement: \`POST /api/generate\` requires an offline HMAC license key (issued automatically on a paid Waffo webhook) or an active subscription / email auto-claim; otherwise HTTP 402. The source ZIP IS the product, so anonymous visitors never receive it. Buyers redeem keys at /license. Anonymous visitors may take a free source-free preview from \`POST /api/generate/preview\` (file inventory + design tokens). This gate protects make1day's site only — generated customer projects ship with it disabled.
+- Download entitlement: \`POST /api/generate\` requires an offline HMAC license key (issued automatically on a paid Waffo webhook) or an active subscription / email auto-claim; otherwise HTTP 402. The source ZIP IS the product, so anonymous visitors never receive it. Buyers redeem keys at /license. Anonymous visitors may take a free source-free preview from \`POST /api/generate/preview\` (file inventory + design tokens). This gate protects make1day.dev's site only — generated customer projects ship with it disabled.
 - Configuration self-check: \`GET /api/payments/self-check\` reports missing Waffo and license settings without exposing secrets.
 - Custom development is a separate service, not a self-checkout plan: it is scoped in a free 30-minute 1:1 call, quoted as a fixed price before work starts, with no automatic charge and no obligation.
 
@@ -52,7 +52,7 @@ export function GET(_req: NextRequest) {
 - Transactional email: the \`lib/mail\` module sends five five-language templates (verify email, password reset, ticket acknowledgement, new-ticket operator notice, license key delivery) via \`MAIL_PROVIDER=resend\` (Resend REST, zero dependencies), \`webhook\` (custom HTTP mailer) or \`none\` (safe logged no-op). \`GET /api/mail/self-check\` returns CONFIGURATION STATE ONLY, never secret values. \`MAIL_PROVIDER=smtp\` is a reserved, NOT-IMPLEMENTED value — there is no nodemailer dependency; installing it and adding a dynamic-import adapter is left to the operator (docs/email.md).
 - The code only SENDS mail. SPF / DKIM / DMARC, a dedicated sending subdomain, suppression lists and warm-up are DNS / provider-side work that decides inbox placement — see docs/email.md for the full checklist and Resend domain-verification steps. Resend endpoint/field names and Supabase Auth redirect/email-template details are 需按服务商文档核对.
 - Password reset + email verification: /forgot-password, /reset-password, /verify-email (linked from /login). Supabase path uses \`resetPasswordForEmail\` / \`verifyOtp\` / \`updateUser\` / \`resend\`; the local SQLite path stores one-time, expiring tokens ONLY as SHA-256 hashes (\`password_resets\` / \`email_verifications\`) and scrypt password hashes. All "send" endpoints return the SAME generic success copy (no user enumeration). A local password sign-in consumer exists (lib/local-auth.ts, /api/auth/local, hash-only sessions in local_sessions), so reset passwords can actually be used. The local path is still NOT equivalent to Supabase Auth: no MFA, no OAuth, no session rotation or refresh.
-- These three areas (mail, support tickets, auth recovery) are make1day-site-only: present in this repo's runtime but pruned from every generated customer ZIP; the corresponding nav/footer/login/admin links are rewritten out of the customer package.
+- These three areas (mail, support tickets, auth recovery) are make1day.dev-site-only: present in this repo's runtime but pruned from every generated customer ZIP; the corresponding nav/footer/login/admin links are rewritten out of the customer package.
 
 ## Key pages
 - [Home](${SITE}/): overview and feature list.
@@ -62,14 +62,14 @@ export function GET(_req: NextRequest) {
 - [Blog](${SITE}/blog): guides on building, billing and launching a SaaS with Next.js.
 - [FAQ](${SITE}/faq): how to build a SaaS with Next.js, auth, billing, AI, deployment, licensing.
 - [Support](${SITE}/support): submittable contact form plus mailto / booking fallbacks.
-- [Compare](${SITE}/compare): make1day vs ShipFast, Makerkit, Supastarter — including AGENTS.md/design.md, scoped rules, ai:docs, MCP, llms.txt, hybrid RAG, i18n and MoR rows.
+- [Compare](${SITE}/compare): make1day.dev vs ShipFast, Makerkit, Supastarter — including AGENTS.md/design.md, scoped rules, ai:docs, MCP, llms.txt, hybrid RAG, i18n and MoR rows.
 - [License](${SITE}/license): redeem a license key to unlock source downloads (noindex).
 - [Privacy](${SITE}/privacy) and [Terms](${SITE}/terms): full data map (SQLite/Supabase tables, cookies, sub-processors, retention, rights); all entity/mailbox/domain values come from lib/env.ts. Refund window is 14 days from purchase.
 - [RAG demo](${SITE}/rag): ingest a document and ask questions with citations (noindex demo page).
 - /account and /admin: private user / operator consoles (noindex, disallowed in robots.txt, not in the sitemap).
 
 ## Editorial content (human readers + answer engines)
-All ${POSTS.length} articles and all ${FAQ_COUNT} FAQ entries are published under the company name **make1day**. Every article has a visible FAQ backed by FAQPage JSON-LD, a BlogPosting + BreadcrumbList graph, canonical/hreflang metadata, and a plain-text Markdown variant at /blog/<slug>/md?lang=xx that AI crawlers can read without rendering React.
+All ${POSTS.length} articles and all ${FAQ_COUNT} FAQ entries are published under the company name **make1day.dev**. Every article has a visible FAQ backed by FAQPage JSON-LD, a BlogPosting + BreadcrumbList graph, canonical/hreflang metadata, and a plain-text Markdown variant at /blog/<slug>/md?lang=xx that AI crawlers can read without rendering React.
 
 ${BLOG_INDEX}
 
@@ -106,7 +106,7 @@ ${BLOG_INDEX}
 - Available in English, 中文, 日本語, Français and Deutsch (path prefixes like /zh/pricing, or the language switcher).
 
 ## Source & brand
-- Author / publisher (company name): make1day. All guides and FAQ answers on this site are published under this company name.
+- Author / publisher (company name): make1day.dev. All guides and FAQ answers on this site are published under this company name.
 - Canonical domain: set NEXT_PUBLIC_SITE_URL to the real domain before launch; no repository URL is published yet.
 `;
 

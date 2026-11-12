@@ -1,11 +1,11 @@
 // Template gallery + sample-site (样板间) data.
 //
-// Each entry is a real make1day starter template. The preview renders the
+// Each entry is a real make1day.dev starter template. The preview renders the
 // surfaces the generator actually ships — landing, pricing, login, AI chat,
 // RAG and the admin console — with the template's REAL theme variables from
 // lib/generator/themes (not a screenshot), switchable via tabs.
 //
-// These are make1day-site-only marketing assets (listed in
+// These are make1day.dev-site-only marketing assets (listed in
 // lib/generator/prune.ts SITE_MARKETING_FILES) and never ship in a customer ZIP.
 
 import type { Lang } from "@/lib/i18n-core";

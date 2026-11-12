@@ -16,6 +16,8 @@ const TEXT: Record<
     success: string;
     active: string;
     manage: string;
+    goBuilder: string;
+    swapKey: string;
     note: string;
     freeUntil: string;
     careUpdates: string;
@@ -32,6 +34,8 @@ const TEXT: Record<
     success: "License redeemed — you can download now.",
     active: "Active license",
     manage: "Redeem a different key",
+    goBuilder: "Open the builder — configure & download",
+    swapKey: "Use a different key",
     note: "No license yet? The free preview shows the file inventory and the design tokens — no source code. Keys are stored in an httpOnly cookie on this device.",
     freeUntil: "Free updates until {date}",
     careUpdates: "Updates included with your Care plan",
@@ -47,6 +51,8 @@ const TEXT: Record<
     success: "授权成功，现在可以下载了。",
     active: "当前授权有效",
     manage: "更换密钥",
+    goBuilder: "打开发生成器 — 配置并下载",
+    swapKey: "使用其他密钥",
     note: "还没有授权？免费预览会给你文件清单和设计令牌，不含源码。密钥保存在本机的 httpOnly Cookie 中。",
     freeUntil: "免费更新至 {date}",
     careUpdates: "更新包含在 Care 套餐中",
@@ -62,6 +68,8 @@ const TEXT: Record<
     success: "登録完了。ダウンロードできます。",
     active: "ライセンス有効",
     manage: "別のキーを登録",
+    goBuilder: "ビルダーを開く — 設定してダウンロード",
+    swapKey: "別のキーを使う",
     note: "ライセンスがまだの場合は無料プレビュー（ファイル一覧とデザイントークン、ソースコードなし）を利用できます。キーは httpOnly Cookie に保存されます。",
     freeUntil: "無料アップデートは {date} まで",
     careUpdates: "Care プランにアップデートが含まれます",
@@ -77,6 +85,8 @@ const TEXT: Record<
     success: "Licence activée — téléchargement disponible.",
     active: "Licence active",
     manage: "Changer de clé",
+    goBuilder: "Ouvrir le générateur — configurer et télécharger",
+    swapKey: "Utiliser une autre clé",
     note: "Pas encore de licence ? L'aperçu gratuit montre l'inventaire des fichiers et les tokens de design — sans code source. La clé est stockée dans un cookie httpOnly.",
     freeUntil: "Mises à jour gratuites jusqu'au {date}",
     careUpdates: "Mises à jour incluses avec votre plan Care",
@@ -92,6 +102,8 @@ const TEXT: Record<
     success: "Lizenz eingelöst — Sie können jetzt herunterladen.",
     active: "Aktive Lizenz",
     manage: "Anderen Schlüssel einlösen",
+    goBuilder: "Builder öffnen — konfigurieren & herunterladen",
+    swapKey: "Anderen Schlüssel verwenden",
     note: "Noch keine Lizenz? Die kostenlose Vorschau zeigt die Dateiliste und die Design-Tokens — ohne Quellcode. Schlüssel werden in einem httpOnly-Cookie auf diesem Gerät gespeichert.",
     freeUntil: "Kostenlose Updates bis {date}",
     careUpdates: "Updates in Ihrem Care-Tarif enthalten",
@@ -125,6 +137,11 @@ export function LicensePanel({
   const [error, setError] = useState("");
   const [status, setStatus] = useState<Status | null>(null);
   const [done, setDone] = useState(false);
+  // With an active license the panel's job is to send the buyer to the
+  // builder — the key input (for holders of a second key) stays collapsed
+  // behind a quiet link so "redeem a different key" never reads as part of
+  // the one-time flow.
+  const [swap, setSwap] = useState(false);
 
   useEffect(() => {
     fetch("/api/license")
@@ -167,30 +184,66 @@ export function LicensePanel({
 
   const active = status?.redeemed || done;
 
+  if (active) {
+    return (
+      <div className={compact ? "mt-4 border-t border-line pt-4" : "card"}>
+        <div className="eyebrow mb-2">{s.title}</div>
+        <p className="mb-3 text-sm text-accent">
+          {done ? s.success : s.active}
+          {status?.plan ? ` · ${status.plan}` : ""}
+        </p>
+        {status?.plan === "buyout" && status?.updatesUntil && (
+          <p className="mb-2 text-xs text-ink-soft">
+            {new Date(status.updatesUntil).getTime() > Date.now()
+              ? s.freeUntil.replace(
+                  "{date}",
+                  new Date(status.updatesUntil).toLocaleDateString(),
+                )
+              : s.expired}
+          </p>
+        )}
+        {status?.plan === "care" && (
+          <p className="mb-2 text-xs text-ink-soft">{s.careUpdates}</p>
+        )}
+        <a
+          className="btn-solid mt-2 inline-block"
+          href="/builder"
+          data-cta="license-to-builder"
+        >
+          {s.goBuilder}
+        </a>
+        {swap ? (
+          <>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <input
+                className="input min-w-0 flex-1 font-mono text-xs"
+                value={key}
+                onChange={(e) => setKey(e.target.value)}
+                placeholder={s.placeholder}
+                aria-label={s.placeholder}
+              />
+              <button className="btn-solid shrink-0" onClick={redeem} disabled={busy || !key.trim()}>
+                {s.redeem}
+              </button>
+            </div>
+            {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
+          </>
+        ) : (
+          <button
+            type="button"
+            className="mt-3 text-xs text-muted underline-offset-2 hover:underline"
+            onClick={() => setSwap(true)}
+          >
+            {s.swapKey}
+          </button>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={compact ? "mt-4 border-t border-line pt-4" : "card"}>
       <div className="eyebrow mb-2">{s.title}</div>
-      {active && (
-        <>
-          <p className="mb-3 text-sm text-accent">
-            {done ? s.success : s.active}
-            {status?.plan ? ` · ${status.plan}` : ""}
-          </p>
-          {status?.plan === "buyout" && status?.updatesUntil && (
-            <p className="mb-2 text-xs text-ink-soft">
-              {new Date(status.updatesUntil).getTime() > Date.now()
-                ? s.freeUntil.replace(
-                    "{date}",
-                    new Date(status.updatesUntil).toLocaleDateString(),
-                  )
-                : s.expired}
-            </p>
-          )}
-          {status?.plan === "care" && (
-            <p className="mb-2 text-xs text-ink-soft">{s.careUpdates}</p>
-          )}
-        </>
-      )}
       <p className="text-sm text-ink-soft">{s.body}</p>
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <input
@@ -201,7 +254,7 @@ export function LicensePanel({
           aria-label={s.placeholder}
         />
         <button className="btn-solid shrink-0" onClick={redeem} disabled={busy || !key.trim()}>
-          {active ? s.manage : s.redeem}
+          {s.redeem}
         </button>
       </div>
       {error && <p className="mt-2 text-sm text-red-400">{error}</p>}

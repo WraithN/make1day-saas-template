@@ -38,7 +38,7 @@ export default async function AccountLayout({
     { href: "/account/settings", label: c["account.nav.settings"] },
     { href: WORKSPACES_HREF, label: c["account.nav.workspaces"] },
   ];
-  // Ops gate: hide the org UI where tenancy is not productised (make1day's
+  // Ops gate: hide the org UI where tenancy is not productised (make1day.dev's
   // own site sets SHOW_WORKSPACES=false). Filtering by the literal — not the
   // constant — keeps the multitenancy-prune rewrite in prune.ts (which drops
   // the item line and the constant) compiling cleanly.

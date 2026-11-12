@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { isLicenseGateEnabled } from "@/lib/env";
 
 // ───────────────────────────────────────────────────────────────
-// Content paywall interception for generated make1day sites.
+// Content paywall interception for generated make1day.dev sites.
 //
 // These helpers are part of the CORE and are never pruned, so any generated
 // project — even one that did not pick the "premium" Builder feature — can

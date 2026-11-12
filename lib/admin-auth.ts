@@ -3,7 +3,7 @@
 // Why this exists instead of HTTP Basic Auth: a Basic-Auth challenge renders
 // a native browser dialog that embedded previews, some kiosk browsers and
 // every non-Chrome client refuse to show — the visitor just sees a bare
-// "Authentication required" body with no way to type a password. make1day
+// "Authentication required" body with no way to type a password. make1day.dev
 // therefore uses a normal in-page login form that exchanges credentials for
 // an opaque session cookie.
 //

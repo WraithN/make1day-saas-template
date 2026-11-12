@@ -41,7 +41,7 @@ function plain(lang: Lang, key: MsgKey, vars: Record<string, string | number>): 
 }
 
 export function appName(): string {
-  return env.mailFromName().trim() || "make1day";
+  return env.mailFromName().trim() || "make1day.dev";
 }
 
 function vars(data: TemplateData): Record<string, string | number> {

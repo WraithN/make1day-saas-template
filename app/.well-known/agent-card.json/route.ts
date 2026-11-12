@@ -18,14 +18,14 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com";
 export function GET() {
   return NextResponse.json(
     {
-      name: "make1day",
+      name: "make1day.dev",
       description:
         "Configurable AI SaaS starter: pick a stack, receive a pruned, white-label source ZIP. Machine-readable docs and a gated scaffolding tool for coding agents.",
       url: SITE_URL,
       version: "1.0.0",
       protocolVersion: "0.3.0",
       provider: {
-        organization: "make1day",
+        organization: "make1day.dev",
         url: SITE_URL,
       },
       documentationUrl: `${SITE_URL}/llms-full.txt`,

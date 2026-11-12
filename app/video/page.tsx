@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 // Gallery of template-driven AI video-workflow examples. Session-gated by
 // middleware; the studio itself is Care-subscription-gated at the API layer.
-// make1day's own store hides these routes (SHOW_VIDEO_STUDIO=false) — the
+// make1day.dev's own store hides these routes (SHOW_VIDEO_STUDIO=false) — the
 // store sells the module as source code; running it is the customer's own
 // deployment decision. Customer builds keep it.
 export default async function VideoGalleryPage() {

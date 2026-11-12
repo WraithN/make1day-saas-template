@@ -1,7 +1,7 @@
 import type { Lang } from "@/lib/i18n-core";
 
 // Editorial content for /blog. Every post is published under the company name
-// make1day (see the BlogPosting JSON-LD and the byline in the page).
+// make1day.dev (see the BlogPosting JSON-LD and the byline in the page).
 // Each post also carries a structured FAQ: the page renders it visibly AND
 // emits FAQPage JSON-LD, which is what answer engines actually quote.
 // Bodies avoid template-literal backticks so code identifiers stay plain text.
@@ -49,7 +49,7 @@ Every SaaS needs the same backbone: authentication, a database with row-level se
 
 ## Pick a stack that already has it
 
-Next.js 15 (App Router) + TypeScript + Tailwind is the default for a reason: the tooling, hiring pool and examples already live there. Pair it with Supabase for auth and Postgres. For billing, decide early whether you want one gateway or a switchable layer — a global launch often needs a Merchant of Record plus a fallback provider. make1day ships six adapters (Waffo Pancake by default, plus Waffo Acquiring, Stripe, Creem, PayPal and Lemon Squeezy) behind one checkout and webhook contract.
+Next.js 15 (App Router) + TypeScript + Tailwind is the default for a reason: the tooling, hiring pool and examples already live there. Pair it with Supabase for auth and Postgres. For billing, decide early whether you want one gateway or a switchable layer — a global launch often needs a Merchant of Record plus a fallback provider. make1day.dev ships six adapters (Waffo Pancake by default, plus Waffo Acquiring, Stripe, Creem, PayPal and Lemon Squeezy) behind one checkout and webhook contract.
 
 ## Add the one thing that is yours
 
@@ -57,7 +57,7 @@ The common mistake is over-building the demo. Ship ONE real AI feature behind au
 
 ## Generate instead of deleting
 
-If you know up front which modules you need, a configurator that prunes unselected code beats a starter you have to strip by hand. In make1day the Builder picks auth, gateway, AI providers, features, deploy target and visual style; the server returns a ZIP containing only those modules. Eighteen representative combinations are downloaded and type-checked in CI, and the ZIP is brand-free: our marketing pages and the generator itself are removed.
+If you know up front which modules you need, a configurator that prunes unselected code beats a starter you have to strip by hand. In make1day.dev the Builder picks auth, gateway, AI providers, features, deploy target and visual style; the server returns a ZIP containing only those modules. Eighteen representative combinations are downloaded and type-checked in CI, and the ZIP is brand-free: our marketing pages and the generator itself are removed.
 
 ## Ship, then charge
 
@@ -70,7 +70,7 @@ Start from a free or preview tier, wire a test checkout, and only ask for money 
 
 ## 选一套已经具备主干的技术栈
 
-Next.js 15（App Router）+ TypeScript + Tailwind 成为默认，是因为工具链、人才池和示例都集中在这里。再配 Supabase 做登录与 Postgres。计费要早点决定：只接一家，还是做可切换层——面向全球发布时，通常需要一个 Merchant of Record 加备用通道。make1day 用同一套结账与 Webhook 契约接了六个适配器（默认 Waffo Pancake，另有 Waffo Acquiring、Stripe、Creem、PayPal、Lemon Squeezy）。
+Next.js 15（App Router）+ TypeScript + Tailwind 成为默认，是因为工具链、人才池和示例都集中在这里。再配 Supabase 做登录与 Postgres。计费要早点决定：只接一家，还是做可切换层——面向全球发布时，通常需要一个 Merchant of Record 加备用通道。make1day.dev 用同一套结账与 Webhook 契约接了六个适配器（默认 Waffo Pancake，另有 Waffo Acquiring、Stripe、Creem、PayPal、Lemon Squeezy）。
 
 ## 加上只属于你的那一个功能
 
@@ -78,7 +78,7 @@ Next.js 15（App Router）+ TypeScript + Tailwind 成为默认，是因为工具
 
 ## 用生成代替手工删减
 
-如果你一开始就知道要哪些模块，「按配置真裁剪」的生成器比「买回来再手删」的模板更省事。make1day 的 Builder 选择登录、支付、AI 供应商、功能、部署目标与视觉风格，服务端只把选中的模块打进 ZIP。CI 会下载 18 组代表性组合并逐个做类型检查；ZIP 是白标的——本站营销页与生成器本身都会被剪掉。
+如果你一开始就知道要哪些模块，「按配置真裁剪」的生成器比「买回来再手删」的模板更省事。make1day.dev 的 Builder 选择登录、支付、AI 供应商、功能、部署目标与视觉风格，服务端只把选中的模块打进 ZIP。CI 会下载 18 组代表性组合并逐个做类型检查；ZIP 是白标的——本站营销页与生成器本身都会被剪掉。
 
 ## 先上线，再收费
 
@@ -87,12 +87,12 @@ Next.js 15（App Router）+ TypeScript + Tailwind 成为默认，是因为工具
     faq: {
       en: [
         { q: "How long does it take to build a SaaS with Next.js?", a: "The commodity backbone (auth, database, billing, dashboard) is what takes weeks. With a starter it is an afternoon of configuration; the remaining time is your actual product, which no template can shorten." },
-        { q: "Do I need Supabase?", a: "No. make1day switches between Supabase (auth + Postgres) and a local SQLite store depending on whether SUPABASE_SERVICE_ROLE_KEY is set. SQLite is for local development — the local auth path has no MFA, OAuth or session rotation, and does not persist on serverless." },
+        { q: "Do I need Supabase?", a: "No. make1day.dev switches between Supabase (auth + Postgres) and a local SQLite store depending on whether SUPABASE_SERVICE_ROLE_KEY is set. SQLite is for local development — the local auth path has no MFA, OAuth or session rotation, and does not persist on serverless." },
         { q: "Which payment gateway should I start with?", a: "If you sell globally without a company entity, a Merchant of Record such as Waffo Pancake or Lemon Squeezy removes tax handling. If you already have a Stripe account, use Stripe. The generated app keeps checkout and webhooks behind one provider-agnostic contract, so switching later is a config change." },
       ],
       zh: [
         { q: "用 Next.js 做一个 SaaS 要多久？", a: "真正耗时的是通用主干（登录、数据库、计费、控制台），通常是几周。用模板后这部分只是半天配置；剩下的时间是你自己的产品，模板无法替你缩短。" },
-        { q: "必须用 Supabase 吗？", a: "不必。make1day 按是否配置 SUPABASE_SERVICE_ROLE_KEY 在 Supabase 与本地 SQLite 之间切换。SQLite 只适合本地开发：本地登录路径没有 MFA、OAuth、会话轮换，在 serverless 上也不持久。" },
+        { q: "必须用 Supabase 吗？", a: "不必。make1day.dev 按是否配置 SUPABASE_SERVICE_ROLE_KEY 在 Supabase 与本地 SQLite 之间切换。SQLite 只适合本地开发：本地登录路径没有 MFA、OAuth、会话轮换，在 serverless 上也不持久。" },
         { q: "先接哪个支付通道？", a: "没有公司主体却要面向全球收款，用 Waffo Pancake 或 Lemon Squeezy 这类 Merchant of Record 可以免去税务处理；已有 Stripe 账户就直接接 Stripe。生成的应用把结账与 Webhook 收在同一份与支付商无关的契约里，之后切换只是改配置。" },
       ],
     },
@@ -280,7 +280,7 @@ By late 2026, LLM streaming, multiple model providers, token or credit metering,
 - Makerkit — batteries-included, enterprise-leaning. More structure and real org/role complexity from day one.
 - Supastarter — Supabase-native; fits perfectly if your whole world is Supabase, less flexible if you later swap the backend.
 - AI-first kits in the 179–249 dollar band — streaming, credit billing, RAG and agent docs, usually sold as a fixed repository with GitHub access.
-- make1day — a configurable generator, not a fixed repository. You pick the modules and the server returns a pruned, brand-free ZIP. The differentiator is delivery infrastructure, not another AI feature.
+- make1day.dev — a configurable generator, not a fixed repository. You pick the modules and the server returns a pruned, brand-free ZIP. The differentiator is delivery infrastructure, not another AI feature.
 
 ## The delivery layer nobody else needs
 
@@ -303,7 +303,7 @@ No starter is universally best. Choose against the 40% that is yours.`,
 - Makerkit——「电池全配」、偏企业。结构更多，从第一天就有真实的组织／角色复杂度。
 - Supastarter——Supabase 原生；整个世界都是 Supabase 时最贴合，日后换后端就没那么灵活。
 - 179–249 美元档的 AI-first 套件——流式、credit 计费、RAG、agent 文档，通常以固定仓库 + GitHub 访问权出售。
-- make1day——可配置生成器，不是固定仓库。你选模块，服务端返回真裁剪、品牌中性的 ZIP。差异在交付基础设施，而不是多一个 AI 功能。
+- make1day.dev——可配置生成器，不是固定仓库。你选模块，服务端返回真裁剪、品牌中性的 ZIP。差异在交付基础设施，而不是多一个 AI 功能。
 
 ## 别人不需要的交付层
 
@@ -319,12 +319,12 @@ No starter is universally best. Choose against the 40% that is yours.`,
       en: [
         { q: "Is streaming AI output a differentiator in 2026?", a: "No. Streaming, multi-provider chat, token metering, RAG, MCP and AGENTS.md are baseline across paid AI starters and many free ones. Compare on delivery model, honest limits and what you actually have to write yourself." },
         { q: "What does a generator do that a fixed repository cannot?", a: "It removes unselected modules from the downloaded source instead of leaving dead code, rewrites navigation so no dead links remain, and produces a brand-free ZIP per configuration. A fixed repository gives everyone the same tree." },
-        { q: "Is make1day open source?", a: "The site and its documentation are public; the generated template is a paid, licensed product delivered as source. Each ZIP ships an MIT LICENSE file and the customer is free to rename and restyle it." },
+        { q: "Is make1day.dev open source?", a: "The site and its documentation are public; the generated template is a paid, licensed product delivered as source. Each ZIP ships an MIT LICENSE file and the customer is free to rename and restyle it." },
       ],
       zh: [
         { q: "2026 年流式 AI 输出还算差异点吗？", a: "不算。流式、多模型对话、token 计量、RAG、MCP、AGENTS.md 已是付费 AI 模板乃至很多免费模板的基线。要比就比交付形态、诚实边界，以及你到底还要亲手写多少。" },
         { q: "生成器比固定仓库多做了什么？", a: "它把未选中的模块从源码里真正删掉（而不是留死代码），改写导航避免死链，并按配置产出品牌中性的 ZIP。固定仓库给所有人的是同一棵树。" },
-        { q: "make1day 是开源的吗？", a: "本站与文档是公开的；生成的模板是购买后以源码交付的授权产品。每个 ZIP 都带 MIT LICENSE 文件，客户可自由改名与换肤。" },
+        { q: "make1day.dev 是开源的吗？", a: "本站与文档是公开的；生成的模板是购买后以源码交付的授权产品。每个 ZIP 都带 MIT LICENSE 文件，客户可自由改名与换肤。" },
       ],
     },
   },
@@ -737,7 +737,7 @@ robots 应显式允许 AI 爬虫访问机器可读路由，sitemap 也应列出�
 
 ## Two different product shapes
 
-Waffo is not a single product. In the make1day adapters it ships in two flavours: **Pancake** (a Merchant of Record / global checkout, docs.waffo.ai) and **Acquiring** (a SE-Asia acquiring gateway, waffo.com/docs, RSA-signed webhooks). Creem is a hosted checkout plus a Merchant of Record, with a Stripe-like API and webhooks. The practical difference: Waffo Acquiring is built for a specific regional acquiring flow, while Creem and Waffo Pancake are closer to "drop-in global checkout".
+Waffo is not a single product. In the make1day.dev adapters it ships in two flavours: **Pancake** (a Merchant of Record / global checkout, docs.waffo.ai) and **Acquiring** (a SE-Asia acquiring gateway, waffo.com/docs, RSA-signed webhooks). Creem is a hosted checkout plus a Merchant of Record, with a Stripe-like API and webhooks. The practical difference: Waffo Acquiring is built for a specific regional acquiring flow, while Creem and Waffo Pancake are closer to "drop-in global checkout".
 
 ## Fees and payout
 
@@ -745,7 +745,7 @@ Both are MoR-ish, which means they take a higher cut than a raw processor becaus
 
 ## Onboarding and KYC
 
-Creem's onboarding is aimed at digital products and is generally quick for software. Waffo Pancake onboarding is straightforward for a solo founder; Waffo Acquiring requires the merchant contract fields (merchant info, user info, payment info, currency, order description) that the make1day integration reads from env. Neither is instant if your product category triggers extra review.
+Creem's onboarding is aimed at digital products and is generally quick for software. Waffo Pancake onboarding is straightforward for a solo founder; Waffo Acquiring requires the merchant contract fields (merchant info, user info, payment info, currency, order description) that the make1day.dev integration reads from env. Neither is instant if your product category triggers extra review.
 
 ## Global coverage and tax
 
@@ -753,7 +753,7 @@ This is where a Merchant of Record earns its fee. If you sell worldwide, an MoR 
 
 ## Developer experience
 
-Both expose a hosted checkout so you never touch card data. Creem's API is the more familiar Stripe-like surface. Waffo Pancake uses a Store-Slug or API-Key auth and a checkout session endpoint; Waffo Acquiring signs requests with RSA and needs the platform public key for webhook verification. If your stack already has a unified checkout + webhook contract (like make1day's six adapters behind one interface), the per-gateway differences stay contained.
+Both expose a hosted checkout so you never touch card data. Creem's API is the more familiar Stripe-like surface. Waffo Pancake uses a Store-Slug or API-Key auth and a checkout session endpoint; Waffo Acquiring signs requests with RSA and needs the platform public key for webhook verification. If your stack already has a unified checkout + webhook contract (like make1day.dev's six adapters behind one interface), the per-gateway differences stay contained.
 
 ## Which to pick
 
@@ -762,7 +762,7 @@ Pick Creem if you want the fastest Stripe-like integration and a hosted dashboar
 
 ## 两种不同形态
 
-Waffo 不是一个单一产品。在 make1day 的适配器里它有两种形态：**Pancake**（商户登记 / 全球结账，docs.waffo.ai）与 **Acquiring**（东南亚收单网关，waffo.com/docs，RSA 签名 Webhook）。Creem 是托管结账加商户登记，提供类 Stripe 的 API 与 Webhook。实际差别在于：Waffo Acquiring 为特定区域的收单流程而建，而 Creem 与 Waffo Pancake 更接近「即插即用的全球结账」。
+Waffo 不是一个单一产品。在 make1day.dev 的适配器里它有两种形态：**Pancake**（商户登记 / 全球结账，docs.waffo.ai）与 **Acquiring**（东南亚收单网关，waffo.com/docs，RSA 签名 Webhook）。Creem 是托管结账加商户登记，提供类 Stripe 的 API 与 Webhook。实际差别在于：Waffo Acquiring 为特定区域的收单流程而建，而 Creem 与 Waffo Pancake 更接近「即插即用的全球结账」。
 
 ## 费率和结算
 
@@ -770,7 +770,7 @@ Waffo 不是一个单一产品。在 make1day 的适配器里它有两种形态�
 
 ## 入驻与 KYC
 
-Creem 的入驻面向数字商品，对软件通常很快。Waffo Pancake 对独立创始人也很容易；Waffo Acquiring 则需要商户合同字段（商户信息、用户信息、支付信息、币种、订单描述），make1day 的集成会从 env 读取这些。若你的品类触发额外审核，两者都不是即时的。
+Creem 的入驻面向数字商品，对软件通常很快。Waffo Pancake 对独立创始人也很容易；Waffo Acquiring 则需要商户合同字段（商户信息、用户信息、支付信息、币种、订单描述），make1day.dev 的集成会从 env 读取这些。若你的品类触发额外审核，两者都不是即时的。
 
 ## 全球覆盖与税务
 
@@ -778,7 +778,7 @@ Creem 的入驻面向数字商品，对软件通常很快。Waffo Pancake 对独
 
 ## 开发体验
 
-两者都提供托管结账，因此你无需碰卡号数据。Creem 的 API 是更熟悉的类 Stripe 表面。Waffo Pancake 用 Store-Slug 或 API-Key 鉴权与结账会话端点；Waffo Acquiring 用 RSA 给请求签名，并需要平台公钥验证 Webhook。若你的技术栈已有统一的结账 + Webhook 契约（如 make1day 在单一接口后接的六个适配器），各网关差异就被隔离了。
+两者都提供托管结账，因此你无需碰卡号数据。Creem 的 API 是更熟悉的类 Stripe 表面。Waffo Pancake 用 Store-Slug 或 API-Key 鉴权与结账会话端点；Waffo Acquiring 用 RSA 给请求签名，并需要平台公钥验证 Webhook。若你的技术栈已有统一的结账 + Webhook 契约（如 make1day.dev 在单一接口后接的六个适配器），各网关差异就被隔离了。
 
 ## 该选哪个
 
@@ -812,7 +812,7 @@ Creem 的入驻面向数字商品，对软件通常很快。Waffo Pancake 对独
       zh: "把 Waffo（Pancake MoR 或 Acquiring）接进 Next.js 结账：API key、Webhook 验签、价目 id 与一次测试购买。",
     },
     body: {
-      en: `Waffo has two flavours and the setup differs between them. This tutorial covers both, because the make1day integration supports each through the same checkout and webhook contract.
+      en: `Waffo has two flavours and the setup differs between them. This tutorial covers both, because the make1day.dev integration supports each through the same checkout and webhook contract.
 
 ## 1. Decide the flavour
 
@@ -838,8 +838,8 @@ Set **PAYMENT_PROVIDER=waffo** and the Waffo env vars above. A checkout call res
 
 Use the Waffo test environment (**WAFFO_ENVIRONMENT=test**) and a test purchase. Confirm the webhook fires, the plan is inferred correctly, and the licence key is issued. Do not go live until a real sandbox round-trip is green.
 
-If you are on make1day, the six adapters already share this contract, so the same code path works for Creem, Stripe, PayPal and Lemon Squeezy — only the env vars change.`,
-      zh: `Waffo 有两种形态，接入方式不同。本教程两种都覆盖，因为 make1day 的集成通过同一套结账与 Webhook 契约支持两者。
+If you are on make1day.dev, the six adapters already share this contract, so the same code path works for Creem, Stripe, PayPal and Lemon Squeezy — only the env vars change.`,
+      zh: `Waffo 有两种形态，接入方式不同。本教程两种都覆盖，因为 make1day.dev 的集成通过同一套结账与 Webhook 契约支持两者。
 
 ## 1. 确定形态
 
@@ -865,7 +865,7 @@ Pancake 需要 **WAFFO_STORE_SLUG**（或 **WAFFO_STORE_ID** / **WAFFO_MERCHANT_
 
 使用 Waffo 测试环境（**WAFFO_ENVIRONMENT=test**）做一次测试购买。确认 Webhook 触发、方案被正确反推、许可 key 已签发。在真实沙箱往返变绿前不要上线。
 
-若你用 make1day，六个适配器共享同一套契约，因此 Creem、Stripe、PayPal、Lemon Squeezy 走的是同一代码路径——只换 env 即可。`,
+若你用 make1day.dev，六个适配器共享同一套契约，因此 Creem、Stripe、PayPal、Lemon Squeezy 走的是同一代码路径——只换 env 即可。`,
     },
     faq: {
       en: [
@@ -917,7 +917,7 @@ Set **PAYMENT_PROVIDER=creem** plus **CREEM_API_KEY** and **CREEM_WEBHOOK_SECRET
 
 Use test mode and a test purchase. Confirm the webhook fires, the plan is inferred correctly, the licence key is issued, and a test refund revokes it. Go live (CREEM_ENV=live with live keys) only after that round-trip is green.
 
-Because Creem, Waffo, Stripe, PayPal and Lemon Squeezy all sit behind the same checkout and webhook contract in make1day, switching providers is a config change — not a rewrite.`,
+Because Creem, Waffo, Stripe, PayPal and Lemon Squeezy all sit behind the same checkout and webhook contract in make1day.dev, switching providers is a config change — not a rewrite.`,
       zh: `Creem 是最接近「类 Stripe 托管结账 + 商户登记」的方案。本教程让 Next.js SaaS 通过它收真实款项。
 
 ## 1. 创建账户与 API key
@@ -940,7 +940,7 @@ Because Creem, Waffo, Stripe, PayPal and Lemon Squeezy all sit behind the same c
 
 用测试模式做一次测试购买。确认 Webhook 触发、方案被正确反推、许可 key 已签发，且测试退款能撤消许可。在往返变绿后再上线（CREEM_ENV=live 并换正式 key）。
 
-由于 Creem、Waffo、Stripe、PayPal、Lemon Squeezy 在 make1day 里都位于同一套结账与 Webhook 契约之后，切换供应商只是配置项——不是重写。`,
+由于 Creem、Waffo、Stripe、PayPal、Lemon Squeezy 在 make1day.dev 里都位于同一套结账与 Webhook 契约之后，切换供应商只是配置项——不是重写。`,
     },
     faq: {
       en: [
@@ -997,7 +997,7 @@ export function postContentLang(post: Post, lang: Lang): Lang {
 export function buildPostMarkdown(
   post: Post,
   lang: Lang,
-  company = "make1day",
+  company = "make1day.dev",
 ): string {
   const contentLang = postContentLang(post, lang);
   const lines: string[] = [

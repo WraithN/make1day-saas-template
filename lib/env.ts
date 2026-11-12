@@ -21,7 +21,7 @@ function opt(name: string, fallback = ""): string {
  * than the site's contact address, which is both wrong and misleading.
  */
 function publicContactEmail(): string {
-  // Deliberately an obvious placeholder: the brand is make1day but the
+  // Deliberately an obvious placeholder: the brand is make1day.dev but the
   // production domain is not registered yet. Set NEXT_PUBLIC_CONTACT_EMAIL to
   // a real mailbox on your own domain before launch; never invent one here.
   return opt("NEXT_PUBLIC_CONTACT_EMAIL", "hello@example.com");
@@ -36,7 +36,7 @@ function acquiringContract(name: string, where: string): string {
   const v = process.env[name];
   if (!v || !v.trim()) {
     throw new Error(
-      `Waffo Acquiring: missing ${name}. ${where} Copy it from your Waffo merchant contract / integration guide (waffo.com/docs) — make1day never invents contract fields. See docs/waffo.md §5.`,
+      `Waffo Acquiring: missing ${name}. ${where} Copy it from your Waffo merchant contract / integration guide (waffo.com/docs) — make1day.dev never invents contract fields. See docs/waffo.md §5.`,
     );
   }
   return v;
@@ -82,12 +82,12 @@ export const env = {
   productId: () => opt("PRODUCT_ID", "default"),
 
   // Workspace (multi-tenancy) UI visibility. Customer builds default ON so the
-  // consoles demonstrate the org/membership scaffolding; make1day's own site
+  // consoles demonstrate the org/membership scaffolding; make1day.dev's own site
   // sets SHOW_WORKSPACES=false because its licenses/orders are per-user and
   // the org UI would be a dead-end tab for buyers.
   showWorkspaces: () => opt("SHOW_WORKSPACES", "true").toLowerCase() !== "false",
   // The hosted AI video-workflow surfaces (/video gallery and /video/studio).
-  // make1day's OWN store sets SHOW_VIDEO_STUDIO=false: the store sells source
+  // make1day.dev's OWN store sets SHOW_VIDEO_STUDIO=false: the store sells source
   // code templates, it does not operate a hosted generation entry point —
   // merchant-of-record review treats any such entry point on the selling
   // site as disqualifying, and the customer's own deployment (with its own
@@ -95,7 +95,7 @@ export const env = {
   // builds default ON.
   showVideoStudio: () => opt("SHOW_VIDEO_STUDIO", "true").toLowerCase() !== "false",
   // The store's hosted AI chat / document-Q&A surfaces (/rag demo page,
-  // POST /api/ai, /api/rag/*). make1day's OWN store sets
+  // POST /api/ai, /api/rag/*). make1day.dev's OWN store sets
   // SHOW_AI_SURFACES=false: it sells the AI feature as shipped source, it
   // does not operate hosted generation endpoints — which also keeps the
   // merchant-of-record "every AI app must wire a prompt-moderation API"
@@ -135,7 +135,7 @@ export const env = {
   paypalPlanPro: () => opt("PAYPAL_PLAN_ID_PRO"),
   paypalPlanScale: () => opt("PAYPAL_PLAN_ID_SCALE"),
 
-  // ── Waffo (active gateway for make1day's own checkout) ────────
+  // ── Waffo (active gateway for make1day.dev's own checkout) ────────
   // IMPORTANT: "Waffo" is two different products with INCOMPATIBLE protocols.
   //   pancake   = MoR / global payments, docs.waffo.ai, @waffo/pancake-ts
   //   acquiring = SE-Asia acquiring gateway, waffo.com/docs, RSA X-SIGNATURE
@@ -213,7 +213,7 @@ export const env = {
 
   // ── Waffo Acquiring (WAFFO_FLAVOR=acquiring) ────────────────
   // POST /api/v1/order/create needs merchant-contract fields. EVERY value
-  // below comes from env (JSON string / scalar); make1day invents none of them.
+  // below comes from env (JSON string / scalar); make1day.dev invents none of them.
   // Missing → acquiringContract() throws a named, actionable error. The exact
   // field names/shapes are 需按你的 Waffo 合同核对 (docs/waffo.md §5).
   waffoAcquiringMerchantInfo: () =>
@@ -384,9 +384,9 @@ export const env = {
   // fills these in before launch (see .env.example "Legal / data controller").
   // Until NEXT_PUBLIC_LEGAL_ENTITY is set, the brand name is used as a
   // placeholder — that is intentional and documented, not a real entity.
-  productName: () => opt("NEXT_PUBLIC_PRODUCT_NAME", "make1day"),
+  productName: () => opt("NEXT_PUBLIC_PRODUCT_NAME", "make1day.dev"),
   legalEntity: () =>
-    opt("NEXT_PUBLIC_LEGAL_ENTITY") || opt("NEXT_PUBLIC_PRODUCT_NAME", "make1day"),
+    opt("NEXT_PUBLIC_LEGAL_ENTITY") || opt("NEXT_PUBLIC_PRODUCT_NAME", "make1day.dev"),
   legalAddress: () => opt("NEXT_PUBLIC_LEGAL_ADDRESS"),
   legalJurisdiction: () => opt("NEXT_PUBLIC_LEGAL_JURISDICTION"),
   privacyEmail: () => opt("NEXT_PUBLIC_PRIVACY_EMAIL") || publicContactEmail(),
@@ -411,7 +411,7 @@ export const env = {
   //   auto → ON in production, OFF in development.
   // The generated customer project ships with this rewritten to default
   // "off" (see lib/generator/prune.ts → pruneLicenseGateDefault), so a
-  // customer never inherits make1day's own paywall.
+  // customer never inherits make1day.dev's own paywall.
   licenseGateMode: () => opt("LICENSE_GATE", "auto").toLowerCase(),
   // Free PREVIEW downloads per visitor per UTC day. 0 = no anonymous
   // previews at all. Note: a preview never contains application source

@@ -271,7 +271,7 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
           </div>
 
           {/* Local, contained preview of the chosen style — does NOT recolor
-              the make1day site. */}
+              the make1day.dev site. */}
           <StylePreview style={config.style} />
         </Section>
 

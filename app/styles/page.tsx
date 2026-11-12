@@ -10,9 +10,9 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const canonical = variantCanonical("/styles", await getCanonicalLang());
   return {
-    title: "Styles — make1day design system",
+    title: "Styles — make1day.dev design system",
     description:
-      "Preview all sixteen make1day themes — including the hand-drawn Doodle palette, Y2K, pixel and neon — every template ships with a full set of CSS variables. Pick a look, then carry it into the builder.",
+      "Preview all sixteen make1day.dev themes — including the hand-drawn Doodle palette, Y2K, pixel and neon — every template ships with a full set of CSS variables. Pick a look, then carry it into the builder.",
     robots: { index: true, follow: true },
     alternates: {
       canonical,

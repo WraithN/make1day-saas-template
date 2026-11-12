@@ -43,7 +43,7 @@ export async function POST(req: Request) {
   // of the build plus the design tokens, never application source.
   //
   // Generated customer projects ship with the gate OFF (their lib/env.ts
-  // defaults to LICENSE_GATE=off), so this only protects make1day's own
+  // defaults to LICENSE_GATE=off), so this only protects make1day.dev's own
   // deployed site.
   const entitlement = await checkEntitlement(req, parsed.data.licenseKey);
   if (!entitlement.allowed) {

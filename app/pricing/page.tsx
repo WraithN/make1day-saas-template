@@ -107,7 +107,7 @@ export default async function PricingPage() {
   const offersJsonLd = {
     "@context": "https://schema.org",
     "@type": "OfferCatalog",
-    name: "make1day plans",
+    name: "make1day.dev plans",
     itemListElement: [
       {
         "@type": "Offer",

@@ -1,6 +1,6 @@
 // Local SQLite persistence for the dev / self-hosted install.
 //
-// make1day ships two storage backends:
+// make1day.dev ships two storage backends:
 //   * Supabase (Postgres) — the production path, used when a service-role key
 //     is configured. See lib/license.ts, lib/orders.ts, lib/stats.ts.
 //   * SQLite (this file) — the LOCAL path. A single file under .data/ that
@@ -67,7 +67,7 @@ function loadSqlite(): SqliteModule {
   }
 
   throw new Error(
-    "make1day's local database needs Node.js 22.5+ (built-in `node:sqlite`). " +
+    "make1day.dev's local database needs Node.js 22.5+ (built-in `node:sqlite`). " +
       "Upgrade Node, or configure Supabase (SUPABASE_SERVICE_ROLE_KEY) to use " +
       "the hosted database instead.",
   );

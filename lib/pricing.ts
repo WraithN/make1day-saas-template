@@ -1,4 +1,4 @@
-// Single source of truth for make1day's displayed and chargeable prices.
+// Single source of truth for make1day.dev's displayed and chargeable prices.
 // Pages, JSON-LD, llms.txt/llms-full.txt and the Black Friday page all read
 // from here so a reprice can never leave two surfaces disagreeing.
 //

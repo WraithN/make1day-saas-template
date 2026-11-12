@@ -16,7 +16,7 @@ import { Markdown } from "@/lib/markdown";
 // Keep this literal stable: the generator rewrites it to localhost inside
 // customer ZIPs. Set NEXT_PUBLIC_SITE_URL to the real domain at launch.
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com";
-const COMPANY = "make1day";
+const COMPANY = "make1day.dev";
 
 /** Canonical slugs AND legacy aliases resolve to a static page. */
 export function generateStaticParams() {

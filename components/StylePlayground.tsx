@@ -96,7 +96,7 @@ function Preview({ item, scale = 1 }: { item: StyleItem; scale?: number }) {
 }
 
 /**
- * Interactive gallery of all make1day styles. The big panel re-renders in the
+ * Interactive gallery of all make1day.dev styles. The big panel re-renders in the
  * selected palette; each grid card is a mini preview. Styles are pure CSS
  * variable sets, so the preview just swaps the custom properties on a wrapper.
  */

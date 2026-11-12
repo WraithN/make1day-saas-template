@@ -14,7 +14,7 @@ export const runtime = "nodejs";
 function mockReply(message: string): string {
   return (
     `Got it — you asked: "${message.slice(0, 120)}". ` +
-    `This is make1day's demo reply (no AI key is configured). ` +
+    `This is make1day.dev's demo reply (no AI key is configured). ` +
     `Wire up OPENAI_API_KEY (or any OpenAI-compatible provider) in .env.local ` +
     `and this endpoint will stream a real model response instead.`
   );
@@ -132,7 +132,7 @@ export async function POST(req: Request) {
     {
       role: "system" as const,
       content:
-        "You are make1day's demo assistant. You help founders plan and ship AI SaaS products. Be concise and concrete.",
+        "You are make1day.dev's demo assistant. You help founders plan and ship AI SaaS products. Be concise and concrete.",
     },
     { role: "user" as const, content: parsed.data.message },
   ];

@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export default async function WorkspacesPage() {
   // Ops can hide the org UI on deployments where tenancy is not productised
-  // (make1day's own site: SHOW_WORKSPACES=false). Customer builds default ON.
+  // (make1day.dev's own site: SHOW_WORKSPACES=false). Customer builds default ON.
   if (!env.showWorkspaces()) notFound();
   const lang = await getLang();
   const c = consoleCopy(lang);

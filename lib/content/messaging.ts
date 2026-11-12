@@ -4,7 +4,7 @@
 // focused; every locale is typed `Record<keyof typeof en, string>` so a
 // missing key is a COMPILE error instead of a silent English fallback.
 //
-// This module is make1day-site-only (pruned from customer ZIPs). It must never
+// This module is make1day.dev-site-only (pruned from customer ZIPs). It must never
 // be imported by a file that ships to customers — customer pages resolve their
 // copy through lib/i18n-core.ts instead.
 

@@ -23,7 +23,7 @@ import type { Lang } from "@/lib/i18n-core";
  */
 export const dynamic = "force-dynamic";
 
-const COMPANY = "make1day";
+const COMPANY = "make1day.dev";
 const LANGS: readonly string[] = ["en", "zh", "ja", "fr", "de"];
 
 type Digest = { title: string; summary: string; facts: string[] };

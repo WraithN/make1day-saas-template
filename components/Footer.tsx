@@ -13,7 +13,7 @@ export async function Footer() {
             line showed the company name twice; customerFooter() matches this
             exact shape when it swaps in the customer's own app name. */}
         <div>
-          <span className="font-semibold text-ink">make1day</span> —{" "}
+          <span className="font-semibold text-ink">make1day.dev</span> —{" "}
           <span>
             <Trans k="footer.tagline" lang={lang} />
           </span>

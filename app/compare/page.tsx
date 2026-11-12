@@ -11,9 +11,9 @@ export async function generateMetadata(): Promise<Metadata> {
       languages: langAlternatePaths("/compare"),
     },
     openGraph: { url: canonical },
-    title: "make1day vs ShipFast, Makerkit, Supastarter — comparison",
+    title: "make1day.dev vs ShipFast, Makerkit, Supastarter — comparison",
     description:
-      "An honest, source-level comparison of make1day against ShipFast, Makerkit and Supastarter — the best Next.js SaaS boilerplates in 2026.",
+      "An honest, source-level comparison of make1day.dev against ShipFast, Makerkit and Supastarter — the best Next.js SaaS boilerplates in 2026.",
     keywords: [
       "ShipFast alternative",
       "Makerkit alternative",

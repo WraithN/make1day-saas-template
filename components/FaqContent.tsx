@@ -20,7 +20,7 @@ export function FaqContent() {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     inLanguage: contentLang,
-    publisher: { "@type": "Organization", name: "make1day" },
+    publisher: { "@type": "Organization", name: "make1day.dev" },
     mainEntity: c.items.map((it) => ({
       "@type": "Question",
       name: it.q,
@@ -40,7 +40,7 @@ export function FaqContent() {
         <p className="mx-auto mt-4 max-w-2xl text-ink-soft">{c.subtitle}</p>
         <p className="mt-2 text-xs text-muted">
           {c.items.length} Q&amp;A · {t("footer.blog")}:{" "}
-          <span className="font-semibold text-ink">make1day</span>
+          <span className="font-semibold text-ink">make1day.dev</span>
         </p>
         {c.reviewed && (
           <p className="mt-1 text-xs text-muted">{c.reviewed}</p>

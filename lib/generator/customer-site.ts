@@ -577,6 +577,10 @@ export function neutralizeBrand(source: string, appName: string): string {
   out = out
     .replaceAll("https://make1day.com", "http://localhost:3000")
     .replaceAll("make1day.com", `${slug}.example`)
+    // The storefront brand is written as the domain "make1day.dev" in UI
+    // copy; strip it BEFORE the bare word, otherwise a leftover ".dev"
+    // would stick onto the customer's app name.
+    .replaceAll("make1day.dev", appName)
     .replaceAll("uncorne/shipkit", `${slug}/app`)
     .replaceAll("ShipYourProduct", appName)
     .replaceAll("ShipKit", appName)

@@ -24,7 +24,7 @@ export const runtime = "nodejs";
 // Subscription-only by product decision: an active **Care** plan is required
 // (one-time Buyout does not include video credits).
 export async function POST(req: Request) {
-  // make1day's own store operates no hosted generation entry point: with
+  // make1day.dev's own store operates no hosted generation entry point: with
   // SHOW_VIDEO_STUDIO=false the entire feature surface — pages AND API —
   // 404s. Customer builds ship this route with the flag unset (= enabled).
   if (!env.showVideoStudio()) {

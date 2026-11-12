@@ -5,7 +5,7 @@ import { getCanonicalLang, getLang, tr } from "@/lib/i18n-server";
 import { getAllPosts, postField } from "@/lib/content/blog";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://make1day.com";
-const COMPANY = "make1day";
+const COMPANY = "make1day.dev";
 
 const BLOG_DESCRIPTION =
   "Practical, verified guides on building, billing and launching an AI SaaS with Next.js: subscription webhooks, payment gateways, white-label source delivery, the 2026 AI boilerplate checklist and agent-readable docs.";
@@ -13,7 +13,7 @@ const BLOG_DESCRIPTION =
 export async function generateMetadata(): Promise<Metadata> {
   const canonical = variantCanonical("/blog", await getCanonicalLang());
   return {
-    title: "Blog — make1day AI SaaS starter guides",
+    title: "Blog — make1day.dev AI SaaS starter guides",
     description: BLOG_DESCRIPTION,
     keywords: [
       "how to build a SaaS with Next.js",

@@ -28,12 +28,12 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "make1day — Ship your AI SaaS MVP in days, not months",
-    template: "%s · make1day",
+    default: "make1day.dev — Ship your AI SaaS MVP in days, not months",
+    template: "%s · make1day.dev",
   },
   description:
-    "make1day is a configurable AI SaaS starter: auth, subscriptions, a real AI feature, an admin console and a build generator. Pick your stack, download the source, launch.",
-  applicationName: "make1day",
+    "make1day.dev is a configurable AI SaaS starter: auth, subscriptions, a real AI feature, an admin console and a build generator. Pick your stack, download the source, launch.",
+  applicationName: "make1day.dev",
   keywords: [
     "AI SaaS starter",
     "Next.js SaaS boilerplate",
@@ -41,20 +41,20 @@ export const metadata: Metadata = {
     "Stripe Supabase starter",
     "AI MVP",
   ],
-  authors: [{ name: "make1day" }],
-  creator: "make1day",
+  authors: [{ name: "make1day.dev" }],
+  creator: "make1day.dev",
   openGraph: {
     type: "website",
     url: SITE_URL,
-    siteName: "make1day",
-    title: "make1day — Ship your AI SaaS MVP in days, not months",
+    siteName: "make1day.dev",
+    title: "make1day.dev — Ship your AI SaaS MVP in days, not months",
     description:
       "A production-grade AI SaaS starter: auth, billing, DB, admin and one real AI feature. Pick your stack, download, launch.",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "make1day — Ship your AI SaaS MVP in days, not months",
+    title: "make1day.dev — Ship your AI SaaS MVP in days, not months",
     description:
       "A production-grade AI SaaS starter. Pick your stack, download a buildable Next.js project, launch.",
   },
@@ -68,16 +68,16 @@ export const metadata: Metadata = {
 const ORG_JSONLD = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "make1day",
+  name: "make1day.dev",
   url: SITE_URL,
   description:
-    "make1day publishes a configurable, white-labelled AI SaaS starter and the generator that produces each customer build.",
+    "make1day.dev publishes a configurable, white-labelled AI SaaS starter and the generator that produces each customer build.",
 };
 
 const SITE_JSONLD = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "make1day",
+  name: "make1day.dev",
   url: SITE_URL,
   inLanguage: ["en", "zh", "ja", "fr", "de"],
 };

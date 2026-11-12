@@ -38,7 +38,7 @@ export function currentMailProvider(): MailProvider {
   return "none";
 }
 
-/** Outbound From header, e.g. `make1day <no-reply@example.com>`. */
+/** Outbound From header, e.g. `make1day.dev <no-reply@example.com>`. */
 export function mailFromHeader(): string {
   const address = env.mailFrom().trim();
   const name = env.mailFromName().trim();
