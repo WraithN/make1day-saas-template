@@ -82,14 +82,14 @@ export default function TermsPage() {
             the specific limits in section 7.
           </p>
           <p className="mt-2">
-            The Service relies on third-party AI model providers when the
-            site&apos;s assistant or RAG features are used: the assistant calls
-            the operator-configured mainstream LLM APIs (currently any of
-            OpenAI, Anthropic, Google Gemini, OpenRouter, DeepSeek or Groq, as
-            configured — see{" "}
-            <span className="font-mono">/llms.txt</span> for the live list).
-            Capability and availability may be affected by those providers&apos;
-            operational status; we notify users of major disruptions.
+            The Service relies on third-party AI model providers wherever its
+            assistant or RAG features are enabled. On this store those hosted
+            surfaces are currently switched off — the AI capability is part of
+            the source you receive and runs on providers you configure
+            (OpenAI, Anthropic, Google Gemini, OpenRouter, DeepSeek or Groq,
+            as configured). Capability and availability may be affected by
+            those providers&apos; operational status; we notify users of major
+            disruptions.
           </p>
         </section>
 

@@ -100,6 +100,22 @@ export async function middleware(request: NextRequest) {
     });
   }
 
+  // Same store policy for the hosted AI chat / RAG surfaces: the store
+  // ships them ENABLED inside every generated project (with the prompt
+  // moderation gate compiled in) but operates none of them itself, so no
+  // visitor-facing generation endpoint exists on the selling site.
+  if (
+    (process.env.SHOW_AI_SURFACES ?? "true").toLowerCase() === "false" &&
+    (logicalPath === "/rag" ||
+      logicalPath.startsWith("/rag/") ||
+      logicalPath === "/api/ai" ||
+      logicalPath.startsWith("/api/rag/"))
+  ) {
+    return NextResponse.rewrite(new URL("/_not-found", request.url), {
+      status: 404,
+    });
+  }
+
   // GEO: `?format=md` on any public page returns a plain-text representation
   // of that exact URL. Restricted to public GET pages so the rewrite can
   // never be used to bypass a console guard or an API same-origin check.

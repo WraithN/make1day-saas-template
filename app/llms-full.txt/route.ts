@@ -83,15 +83,20 @@ pruned, buildable Next.js project pre-configured to those exact selections.
 | Care | $19/mo ($13/mo Black Friday) | Consumption + adaptation: AI video-workflow source module for your own projects, Care-first modules, monthly-recast agent contract (skills/rules/AGENTS.md), upstream merge patches as mergeable diffs, 12h first-response SLA; key expires with the period |
 | Custom 1:1 | Fixed quote after a free 30-minute call | Custom components/themes, private deployment, SSO, RAG on own data, audits |
 
-Content safety: every user-supplied string routed to a generation model
-(assistant chat POST /api/ai, RAG questions POST /api/rag/query, video-workflow
-inputs POST /api/video/jobs) is screened BEFORE generation by the Creem
-Moderation API — "deny" and "flag" both block, transport failures fail closed
-with 503, 5s timeout. Deployments without a Creem key enforce a local
-prohibited-content blocklist as fallback. The public Acceptable Use Policy
-(NSFW zero tolerance + filtering description + enforcement/appeals) lives at
-/acceptable-use; video-workflow jobs additionally require a portrait-rights
-attestation and labels every render as AI-generated.
+Content safety: on the make1day STORE the hosted generation surfaces are
+switched off (SHOW_AI_SURFACES / SHOW_VIDEO_STUDIO = false — the store sells
+source code and operates no public generation endpoint). Wherever these
+endpoints ARE enabled (every generated project ships them live, with the
+screening compiled in), every user-supplied string routed to a generation
+model (assistant chat POST /api/ai, RAG questions POST /api/rag/query,
+video-workflow inputs POST /api/video/jobs) is screened BEFORE generation by
+a moderation API (Creem Moderation API when configured) — "deny" and "flag"
+both block, transport failures fail closed with 503, 5s timeout. Deployments
+without a moderation key enforce a local prohibited-content blocklist as
+fallback. The public Acceptable Use Policy (NSFW zero tolerance + filtering
+description + enforcement/appeals) lives at /acceptable-use; video-workflow
+jobs additionally require a portrait-rights attestation and label every
+render as AI-generated.
 
 Checkout on this site is processed by ${PROVIDER} (PAYMENT_PROVIDER=${PROVIDER_KEY}). Custom work is
 scoped manually and has NO self-checkout. Subscription rules are published on
@@ -241,7 +246,9 @@ multi-tenancy feature; see section 12. See docs/consoles.md.
   quoting retrieved passages. Answers carry inline [n] citations and a
   "retrieval" object describing which branches actually ran.
 - Endpoints: POST /api/rag/ingest {title,text}, GET /api/rag/ingest,
-  POST /api/rag/query {question,provider?}. Demo UI: /rag (noindex).
+  POST /api/rag/query {question,provider?}. Demo UI: /rag (noindex). On the
+  make1day store itself /rag and these endpoints are disabled (404); they
+  ship enabled inside every generated project.
 - Auth: ingest (POST + GET) needs a signed-in user or an operator session
   (401 otherwise); query needs a signed-in user WITH an active subscription
   (401 without a session, 402 without a subscription) because every call runs

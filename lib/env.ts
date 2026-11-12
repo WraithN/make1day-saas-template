@@ -94,6 +94,15 @@ export const env = {
   // provider keys and its own processor review) is the product. Customer
   // builds default ON.
   showVideoStudio: () => opt("SHOW_VIDEO_STUDIO", "true").toLowerCase() !== "false",
+  // The store's hosted AI chat / document-Q&A surfaces (/rag demo page,
+  // POST /api/ai, /api/rag/*). make1day's OWN store sets
+  // SHOW_AI_SURFACES=false: it sells the AI feature as shipped source, it
+  // does not operate hosted generation endpoints — which also keeps the
+  // merchant-of-record "every AI app must wire a prompt-moderation API"
+  // rule out of scope for the store itself. Customer builds default ON,
+  // with the moderation gate (Creem API / Waffo Prompt Sift / local
+  // blocklist) compiled into their copy.
+  showAiSurfaces: () => opt("SHOW_AI_SURFACES", "true").toLowerCase() !== "false",
 
   // ── Payment provider (selects the active gateway) ────────────
   // Defaults to Waffo (Pancake), matching .env.example, the pricing copy and
