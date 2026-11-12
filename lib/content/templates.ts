@@ -38,16 +38,30 @@ export interface TemplateMeta {
   primaryCta: TText;
   /** Pricing surface. */
   tiers: TemplateTier[];
-  /** AI chat surface: one sample exchange. */
-  chat: { user: TText; assistant: TText };
-  /** RAG surface: sample grounded question + cited answer. */
-  rag: { question: TText; answer: TText; sources: TText[] };
+  /** AI chat surface: one sample exchange (only when the vertical has one). */
+  chat?: { user: TText; assistant: TText };
+  /** RAG surface: sample grounded question + cited answer (knowledge
+   *  verticals only — a video or image pipeline does NOT get one). */
+  rag?: { question: TText; answer: TText; sources: TText[] };
   /** Admin console surface: headline stats + recent activity. */
   admin: {
     stats: { users: string; licenses: string; revenue: string; tickets: string };
     activity: TText[];
+    invoices?: { id: string; who: string; amount: string; status: TText }[];
   };
-
+  /** Pipeline walkthrough surface for scene templates (video / image): the
+   *  real production stages of the vertical, not a generic feature list. */
+  workflow?: {
+    note: TText;
+    steps: { name: TText; detail: TText }[];
+    gates: TText[];
+  };
+  /** Model-routing + billing plane: what admins actually configure in an
+   *  AI SaaS (providers per task, fallbacks, unit economics). */
+  ops?: {
+    routes: { task: TText; primary: string; fallback: string }[];
+    billing: TText[];
+  };
 }
 
 export const TEMPLATES: TemplateMeta[] = [
@@ -425,121 +439,149 @@ export const TEMPLATES: TemplateMeta[] = [
   },
   {
     slug: "reel-forge",
-    group: "ai" as const,
+    group: "ai",
     styleId: "midnight",
-    category: { en: "Video", zh: "视频", ja: "動画", fr: "Vidéo", de: "Video" },
+    category: { en: "AI Video Ads", zh: "AI 视频广告", ja: "AI 動画広告", fr: "Pub vidéo IA", de: "KI-Werbevideo" },
     name: { en: "Reel Forge", zh: "Reel 锻造坊", ja: "Reel Forge", fr: "Reel Forge", de: "Reel Forge" },
-    heroTitle: {
-      en: "Turn one photo into a scroll-stopping reel.",
-      zh: "一张照片，一条让人停下来的短视频。",
-      ja: "写真1枚から、止まっちゃうリールを。",
-      fr: "Une photo, un reel qui arrête le scroll.",
-      de: "Ein Foto, ein Reel, das alle stoppen.",
-    },
-    heroSubtitle: {
-      en: "A video-workflow SaaS: pick a template, confirm rights, get an AI-labeled render.",
-      zh: "视频工作流 SaaS：选模板、确认肖像权、拿到带 AI 标识的成片。",
-      ja: "動画ワークフロー SaaS：テンプレ選択→権利確認→AI ラベル付きで出力。",
-      fr: "Un SaaS de flux vidéo : modèle, droits confirmés, rendu labellisé IA.",
-      de: "Ein Video-Workflow-SaaS: Vorlage, Rechte bestätigt, KI-markiertes Ergebnis.",
-    },
+    heroTitle: { en: "Paste a script. Get a ready-to-run 9:16 ad.", zh: "贴一段脚本，产出可直接投放的 9:16 广告视频。", ja: "台本を貼ると、そのまま出稿できる 9:16 広告動画に。", fr: "Collez un script. Obtenez une pub 9:16 prête à diffuser.", de: "Skript rein, fertige 9:16-Meta-Ad raus." },
+    heroSubtitle: { en: "An ad-video pipeline SaaS: script → storyboard → voice → visuals → captions → music → rendered MP4. Revisions re-render only the scenes you touched.", zh: "广告视频流水线 SaaS：脚本→分镜→配音→画面→字幕→音乐→成片；改哪儿，只重渲哪儿。", ja: "広告動画パイプライン SaaS：台本→絵コンテ→音声→映像→字幕→音楽→完成版。触ったシーンだけ再レンダリング。", fr: "Un SaaS de pipeline pub vidéo : script → storyboard → voix → visuels → sous-titres → musique → MP4. Seules les scènes touchées sont relues.", de: "Ein Werbevideo-Pipeline-SaaS: Skript → Storyboard → Voice → Visuals → Captions → Musik → MP4. Nur geänderte Szenen rendern neu." },
     features: [
-      { en: "Trendy video templates", zh: "热门视频模板", ja: "トレンド動画テンプレ", fr: "Modèles vidéo tendance", de: "Video-Trendvorlagen" },
-      { en: "Portrait-rights attestation", zh: "肖像权确认", ja: "肖像権の確認", fr: "Attestation de droits à l'image", de: "Bildrechte-Bestätigung" },
-      { en: "AI label on every render", zh: "成片带 AI 标识", ja: "全出力に AI ラベル", fr: "Label IA sur chaque rendu", de: "KI-Label auf jedem Render" },
+      { en: "Scene-graph storyboard (shot / angle / camera)", zh: "分镜表带镜别/角度/运镜", ja: "絵コンテ（ショット／角度／カメラ）", fr: "Storyboard par scène (plan / angle / caméra)", de: "Storyboard pro Szene (Shot / Winkel / Kamera)" },
+      { en: "Conversational edits — diff re-render only", zh: "对话式修改，只重渲改动镜头", ja: "対話編集——差分だけ再レンダリング", fr: "Édition conversationnelle — re-rendu par delta", de: "Konversationelle Edits — nur Delta nachrendern" },
+      { en: "Per-run cost ledger you can actually read", zh: "每次运行的成本账单一目了然", ja: "実行ごとのコスト台帳をそのまま提示", fr: "Journal de coûts par run, lisible", de: "Kosten-Ledger pro Run, direkt lesbar" },
     ],
     primaryCta: { en: "Forge a reel", zh: "生成一条", ja: "リールを作る", fr: "Créer un reel", de: "Reel erstellen" },
     tiers: [
       {
-        name: { en: "Free", zh: "免费", ja: "無料", fr: "Gratuit", de: "Gratis" },
+        name: { en: "Draft", zh: "草稿", ja: "下書き", fr: "Brouillon", de: "Entwurf" },
         price: "$0",
         period: "mo",
         features: [
-          { en: "3 renders / month", zh: "每月 3 条", ja: "月 3 レンダー", fr: "3 rendus / mois", de: "3 Renders/Monat" },
-          { en: "Watermarked output", zh: "带水印输出", ja: "ウォーターマーク付き", fr: "Sortie avec filigrane", de: "Mit Wasserzeichen" },
+          { en: "1 render / month, watermarked", zh: "每月 1 条·带水印", ja: "月1本・透かし付き", fr: "1 rendu / mois, filigrané", de: "1 Render/Monat, Wasserzeichen" },
+          { en: "Rule-based edits only", zh: "仅规则式修改", ja: "ルール編集のみ", fr: "Éditions par règles", de: "Nur Regel-Edits" },
         ],
       },
       {
         name: { en: "Creator", zh: "创作者", ja: "クリエイター", fr: "Créateur", de: "Creator" },
-        price: "$19",
+        price: "$29",
         period: "mo",
         highlight: true,
         features: [
-          { en: "40 renders / month", zh: "每月 40 条", ja: "月 40 レンダー", fr: "40 rendus / mois", de: "40 Renders/Monat" },
-          { en: "HD, no watermark", zh: "高清无水印", ja: "HD・透かしなし", fr: "HD sans filigrane", de: "HD ohne Wasserzeichen" },
-          { en: "Credits refund on failure", zh: "失败自动返还额度", ja: "失敗時はクレジット返還", fr: "Crédits remboursés en cas d'échec", de: "Credits bei Fehler zurück" },
+          { en: "40 renders / month, HD clean", zh: "每月 40 条·高清无水印", ja: "月40本・HD・透かしなし", fr: "40 rendus / mois, HD propre", de: "40 Renders/Monat, HD" },
+          { en: "LLM conversational editing", zh: "LLM 对话式修改", ja: "LLM対話編集", fr: "Édition LLM conversationnelle", de: "LLM-Chat-Edits" },
+          { en: "Cost ledger + resume without re-spend", zh: "成本账单 + 断点续渲不重复花钱", ja: "コスト台帳＋再開で二重支出なし", fr: "Ledger + reprise sans double dépense", de: "Ledger + Resume ohne Doppel-Ausgabe" },
         ],
       },
     ],
-    chat: {
-      user: {
-        en: "Write a 30-second hook script for my sneaker drop.",
-        zh: "给我的球鞋新品写一条 30 秒钩子脚本。",
-        ja: "スニーカー発売向け30秒のフック台本を。",
-        fr: "Un hook de 30 s pour mon drop de sneakers.",
-        de: "30-Sekunden-Hook für meinen Sneaker-Drop.",
-      },
-      assistant: {
-        en: "Hook in 3s: close-up + one bold claim, then the reveal at 12s, CTA at 27s. Want the template that fits this pacing?",
-        zh: "前 3 秒钩子：特写+一句狠话，12 秒反转，27 秒 CTA。要配这个节奏的模板吗？",
-        ja: "冒頭3秒は接写＋太い一言、12秒で反転、27秒で CTA。このテンポに合うテンプレを出しますか？",
-        fr: "Hook en 3 s : gros plan + une affirmation forte, révélation à 12 s, CTA à 27 s. Un modèle pour ce rythme ?",
-        de: "Hook in 3s: Close-up + eine klare Ansage, Reveal bei 12s, CTA bei 27s. Passende Vorlage?",
-      },
+    workflow: {
+      note: { en: "Static pipeline demo — in a real build every model runs on YOUR provider keys.", zh: "静态流水线演示——真实部署里所有模型都跑在你自己的供应商密钥上。", ja: "静的パイプラインデモ——実運用では全モデルを自分のプロバイダキーで。", fr: "Démo statique — en production chaque modèle tourne sur VOS clés.", de: "Statische Demo — im Ernstlauf laufen alle Modelle auf DEINEN Keys." },
+      steps: [
+        {
+          name: { en: "Product brief", zh: "产品简报", ja: "ブリーフ", fr: "Brief produit", de: "Produkt-Briefing" },
+          detail: { en: "traits + selling points + audience → four competing concepts (pain→solution, seeding, review, story)", zh: "填特质/卖点/受众 → 产出 4 套竞争脚本（痛点方案、种草、测评、故事）", ja: "特徴・訴求・対象 → 競合する4本の案（課題解決・種明かし・レビュー・ストーリー）", fr: "traits + arguments + cible → 4 concepts (pain→solution, seeding, review, story)", de: "Traits + USPs + Zielgruppe → 4 Wettbewerbskonzepte" },
+        },
+        {
+          name: { en: "Script", zh: "脚本", ja: "台本", fr: "Script", de: "Skript" },
+          detail: { en: "pick one concept and polish the copy — it stays the single source of truth", zh: "选定一版并打磨文案——它始终是唯一事实源", ja: "1案を選び文言を磨く——それが唯一の真実ソース", fr: "on choisit un concept — il reste la source unique", de: "ein Konzept wählen — es bleibt die Wahrheitsquelle" },
+        },
+        {
+          name: { en: "Storyboard", zh: "分镜", ja: "絵コンテ", fr: "Storyboard", de: "Storyboard" },
+          detail: { en: "every scene carries shot / angle / camera move / elements — nothing renders yet", zh: "每个分镜带镜别/角度/运镜/画面元素——此刻还不渲染", ja: "各シーンにショット・角度・カメラ・要素——まだ描画しない", fr: "chaque scène porte plan/angle/mouvement/éléments — rien ne rend", de: "jede Szene mit Shot/Winkel/Kamera/Elementen — nichts rendert" },
+        },
+        {
+          name: { en: "Cost quote", zh: "成本预估", ja: "コスト見積", fr: "Devis de coût", de: "Kostenangebot" },
+          detail: { en: "the render price is quoted and confirmed BEFORE any credit is spent", zh: "渲染前先报价、待确认——额度一分都不冤枉", ja: "描画前に金額提示・確認後クレジット消費", fr: "le prix est annoncé et confirmé AVANT toute dépense", de: "Preis vor jeder Ausgabe angekündigt und bestätigt" },
+        },
+        {
+          name: { en: "Visuals + voice", zh: "画面与配音", ja: "映像＋音声", fr: "Visuels + voix", de: "Visuals + Voice" },
+          detail: { en: "per-scene video generation, neural voiceover with word-level timings, kinetic captions, music bed", zh: "逐镜生成视频、词级时间轴配音、动效字幕、音乐铺底", ja: "シーン別映像、語レベル音声、動的字幕、BGM", fr: "vidéo par scène, voix au timing mot-à-mot, sous-titres animés, musique", de: "Video pro Szene, Voice mit Wort-Timings, Kinetik-Captions, Musik" },
+        },
+        {
+          name: { en: "Assembly + revise", zh: "合成与修改", ja: "合成と修正", fr: "Montage + révisions", de: "Assembly + Revision" },
+          detail: { en: "segments stitched into the 9:16 MP4; “make the hook punchier” only re-renders the targeted scenes", zh: "拼接成片 9:16；说“开场更抓人”只重渲命中的镜头", ja: "9:16完成品へ；「冒頭をもっと強く」で対象シーンだけ再描画", fr: "assemblé en MP4 9:16 ; « rends le hook punchy » ne relit que les scènes visées", de: "MP4 9:16 gefügt; „Hook punchiger“ rendert nur die Zielszenen" },
+        },
+      ],
+      gates: [
+        { en: "Storyboard approval before spend", zh: "分镜确认前不渲染", ja: "絵コンテ承認まで描画しない", fr: "Validation du storyboard avant dépense", de: "Storyboard-Freigabe vor Ausgabe" },
+        { en: "Content-addressed cache: 85–95% of segments reused on edits", zh: "内容寻址缓存：改动复用 85–95% 已渲段", ja: "内容アドレスキャッシュ：編集の85–95%を再利用", fr: "Cache par contenu : 85–95 % des segments réutilisés", de: "Content-Addressed-Cache: 85–95 % Reuse" },
+        { en: "Fail loud — never fake footage when a key is missing", zh: "缺密钥直接报错，绝不产出假画面", ja: "キー欠落は即エラー——偽映像を出さない", fr: "Échec franc — jamais de fausses images", de: "Lauter Fehler — nie Fake-Clips" },
+      ],
     },
-    rag: {
-      question: {
-        en: "What happens if a render fails?",
-        zh: "渲染失败会怎样？",
-        ja: "レンダリングが失敗したら？",
-        fr: "Que se passe-t-il si un rendu échoue ?",
-        de: "Was, wenn ein Render fehlschlägt?",
-      },
-      answer: {
-        en: "The credit is refunded automatically to your monthly balance — failures never spend your quota.",
-        zh: "额度自动退回当月余额——失败绝不扣你的配额。",
-        ja: "クレジットは月の残高に自動返還。失敗では消費しません。",
-        fr: "Le crédit est remboursé automatiquement — un échec ne consomme jamais votre quota.",
-        de: "Das Credit wird automatisch erstattet — Fehler verbrauchen nie dein Kontingent.",
-      },
-      sources: [
-        { en: "Credits policy", zh: "额度规则", ja: "クレジット規則", fr: "Politique de crédits", de: "Credit-Bedingungen" },
-        { en: "FAQ", zh: "常见问题", ja: "FAQ", fr: "FAQ", de: "FAQ" },
+    ops: {
+      routes: [
+        {
+          task: { en: "Script & chat edits", zh: "脚本与对话修改", ja: "脚本・対話編集", fr: "Script & éditions", de: "Skript & Edits" },
+          primary: "DeepSeek / any OpenAI-compatible LLM",
+          fallback: "deterministic rule templates (offline)",
+        },
+        {
+          task: { en: "Scene video", zh: "分镜视频", ja: "シーン映像", fr: "Vidéo de scène", de: "Szenen-Video" },
+          primary: "Seedance · Kling · Veo",
+          fallback: "Wan / Hailuo / CogVideoX / Jimeng",
+        },
+        {
+          task: { en: "Voiceover", zh: "配音", ja: "ナレーション", fr: "Voix off", de: "Voice" },
+          primary: "edge-tts (free)",
+          fallback: "ElevenLabs / CosyVoice",
+        },
+        {
+          task: { en: "Music & SFX", zh: "音乐音效", ja: "音楽・SE", fr: "Musique & SFX", de: "Musik & SFX" },
+          primary: "local synth (zero cost)",
+          fallback: "licensed library",
+        },
+      ],
+      billing: [
+        { en: "$0.03–0.15 per rendered scene at draft tier", zh: "草渲档每镜 $0.03–0.15", ja: "下書きはシーン$0.03–0.15", fr: "0,03–0,15 $ par scène (brouillon)", de: "$0,03–0,15 pro Szene (Draft)" },
+        { en: "A 60s ad: ~$0.5–1.5 with edge-tts + Seedance mini; $4–16 fully premium", zh: "60 秒成片约 $0.5–1.5（edge-tts+Seedance mini），全顶配 $4–16", ja: "60秒は$0.5–1.5（edge-tts+Seedance mini）・最高構成で$4–16", fr: "Pub 60 s : 0,5–1,5 $ (edge-tts + Seedance mini), 4–16 $ full premium", de: "60-Sekunden-Ad: $0,5–1,5 bzw. $4–16 premium" },
+        { en: "Every provider's spend rolls into per-run totals and monthly invoices", zh: "各供应商花费自动汇总为单次运行与月度账单", ja: "プロバイダ別支出を実行別・月次請求に集計", fr: "Chaque dépense agrégée par run et par facture", de: "Provider-Ausgaben pro Run und Rechnung aggregiert" },
       ],
     },
     admin: {
-      stats: { users: "5,012", licenses: "1,208", revenue: "$21.4k", tickets: "4" },
+      stats: {
+        users: "5,012",
+        licenses: "1,208",
+        revenue: "$21.4k",
+        tickets: "4",
+      },
       activity: [
-        { en: "Render #231 completed · AI-labeled", zh: "渲染 #231 完成·带 AI 标识", ja: "レンダー #231 完了・AI ラベル済", fr: "Rendu #231 terminé · label IA", de: "Render #231 fertig · KI-Label" },
-        { en: "Refund: job #228 failed upstream", zh: "退款：任务 #228 上游失败", ja: "返還: #228 は上流失敗", fr: "Remboursement : #228 échoué", de: "Erstattung: Job #228 fehlgeschlagen" },
-        { en: "Rights attestation recorded: u_8842", zh: "已记录肖像权确认：u_8842", ja: "権利確認を記録: u_8842", fr: "Attestation enregistrée : u_8842", de: "Rechte-Bestätigung: u_8842" },
+        { en: "Run #231 done · 8 scenes · $1.12 cost logged", zh: "任务 #231 完成·8 镜·入账成本 $1.12", ja: "実行#231完了・8シーン・$1.12計上", fr: "Run #231 fini · 8 scènes · 1,12 $ notés", de: "Run #231 fertig · 8 Szenen · $1,12 erfasst" },
+        { en: "Resume: only scene 4 re-rendered after top-up, 7 from cache", zh: "断点续渲：补余额后仅重渲第 4 镜，其余 7 镜走缓存", ja: "再開：シーン4のみ再描画・7件キャッシュ", fr: "Reprise : seule la scène 4 relue, 7 en cache", de: "Resume: nur Szene 4 neu, 7 aus Cache" },
+        { en: "Edit plan: pacing → 4 scenes invalidated, 16 reused", zh: "对话修改：节奏调整 → 失效 4 镜、复用 16 镜", ja: "編集プラン：pacing→4シーン無効・16再利用", fr: "Plan d'édition : rythme → 4 invalidées, 16 réutilisées", de: "Edit-Plan: Pacing → 4 invalidiert, 16 reuse" },
+      ],
+      invoices: [
+        {
+          id: "INV-2301",
+          who: "growth@dtc-store.com",
+          amount: "$29.00",
+          status: { en: "Paid", zh: "已支付", ja: "支払済", fr: "Payée", de: "Bezahlt" },
+        },
+        {
+          id: "INV-2302",
+          who: "media@brandlab.io",
+          amount: "$29.00",
+          status: { en: "Paid", zh: "已支付", ja: "支払済", fr: "Payée", de: "Bezahlt" },
+        },
+        {
+          id: "INV-2303",
+          who: "solo@creator.dev",
+          amount: "$9.90",
+          status: { en: "Refunded", zh: "已退款", ja: "返金済", fr: "Remboursée", de: "Erstattet" },
+        },
       ],
     },
   },
   {
     slug: "poster-forge",
-    group: "ai" as const,
+    group: "ai",
     styleId: "candy",
     category: { en: "AI Image", zh: "AI 图片", ja: "AI 画像", fr: "Image IA", de: "KI-Bild" },
     name: { en: "Poster Forge", zh: "海报熔炉", ja: "Poster Forge", fr: "Poster Forge", de: "Poster Forge" },
-    heroTitle: {
-      en: "One brief, a hundred scroll-stopping posters.",
-      zh: "一句需求，一百张抓眼海报。",
-      ja: "一言のブリーフから、目を引くポスターを100枚。",
-      fr: "Un brief, cent affiches qui arrêtent le scroll.",
-      de: "Ein Briefing, hundert Scroll-Stopper-Poster.",
-    },
-    heroSubtitle: {
-      en: "An AI image SaaS: briefs in, brand-consistent posters out — prompt screening included.",
-      zh: "AI 图片生成 SaaS：输入需求，产出符合品牌的海报——内置提示词审查。",
-      ja: "AI 画像 SaaS：ブリーフを入れるとブランドに合うポスターが出力——プロンプト審査組み込み。",
-      fr: "Un SaaS d'image IA : le brief entre, l'affiche on-brand sort — criblage inclus.",
-      de: "Ein KI-Bild-SaaS: Briefing rein, markenkonsistentes Poster raus — Screening inklusive.",
-    },
+    heroTitle: { en: "One brand kit. Every campaign image.", zh: "一套品牌套件，产出所有营销图。", ja: "ブランドキット一つから、全キャンペーン画像を。", fr: "Un brand kit, tous vos visuels de campagne.", de: "Ein Brand-Kit, alle Kampagnen-Bilder." },
+    heroSubtitle: { en: "An image-generation SaaS shape: brand-locked prompts, model routing per task, async jobs, upscale chain, API delivery.", zh: "图片生成 SaaS 形态：品牌锁定提示词、按任务路由模型、异步任务、放大精修链、API 交付。", ja: "画像生成SaaSの型：ブランド固定プロンプト・タスク別ルーティング・非同期ジョブ・拡大加工・API納品。", fr: "Un SaaS d'image : prompts verrouillés marque, routage par tâche, jobs asynchrones, chaîne d'upscaling, livraison API.", de: "Ein KI-Bild-SaaS: markenfixierte Prompts, Routing pro Aufgabe, Async-Jobs, Upscale-Kette, API-Auslieferung." },
     features: [
-      { en: "Style-locked generation", zh: "风格锁定生成", ja: "スタイル固定生成", fr: "Génération style verrouillé", de: "Style-fixierte Generierung" },
-      { en: "Batch poster sets", zh: "海报批量出图", ja: "ポスター一括出力", fr: "Lots d'affiches", de: "Poster-Batches" },
-      { en: "Prompt moderation built in", zh: "内置提示词审查", ja: "プロンプト審査内蔵", fr: "Criblage de prompts intégré", de: "Prompt-Screening integriert" },
+      { en: "Brand kit locks palette, type, product", zh: "品牌套件锁定色板/字体/产品", ja: "キットで色・書体・商品を固定", fr: "Le kit verrouille palette, typo, produit", de: "Kit fixiert Palette, Typo, Produkt" },
+      { en: "Style-specific model routing", zh: "按风格路由到最合适模型", ja: "スタイル別ルーティング", fr: "Routage de modèle par style", de: "Style-spezifisches Routing" },
+      { en: "Credit-metered, batch-friendly", zh: "额度计量，天然适合批量", ja: "クレジット計量・バッチ向き", fr: "Crédits meterés, adapté au batch", de: "Credit-gemessen, batch-freundlich" },
     ],
     primaryCta: { en: "Forge a poster", zh: "生成一张海报", ja: "ポスターを作る", fr: "Créer une affiche", de: "Poster erstellen" },
     tiers: [
@@ -548,8 +590,8 @@ export const TEMPLATES: TemplateMeta[] = [
         price: "$0",
         period: "mo",
         features: [
-          { en: "10 images / month", zh: "每月 10 张", ja: "月 10 枚", fr: "10 images / mois", de: "10 Bilder/Monat" },
-          { en: "Watermarked exports", zh: "带水印导出", ja: "ウォーターマーク付き", fr: "Exports filigranés", de: "Mit Wasserzeichen" },
+          { en: "10 images / month", zh: "每月 10 张", ja: "月10枚", fr: "10 images / mois", de: "10 Bilder/Monat" },
+          { en: "Watermarked exports", zh: "带水印导出", ja: "透かし付き", fr: "Exports filigranés", de: "Mit Wasserzeichen" },
         ],
       },
       {
@@ -558,59 +600,135 @@ export const TEMPLATES: TemplateMeta[] = [
         period: "mo",
         highlight: true,
         features: [
-          { en: "200 images / month", zh: "每月 200 张", ja: "月 200 枚", fr: "200 images / mois", de: "200 Bilder/Monat" },
-          { en: "Custom brand styles", zh: "自定义品牌风格", ja: "ブランドスタイル自作", fr: "Styles de marque perso", de: "Eigene Markenstyles" },
-          { en: "API access", zh: "API 接入", ja: "API 接続", fr: "Accès API", de: "API-Zugang" },
+          { en: "200 images / month", zh: "每月 200 张", ja: "月200枚", fr: "200 images / mois", de: "200 Bilder/Monat" },
+          { en: "Custom brand styles + 4K upscale", zh: "自定义品牌风格 + 4K 放大", ja: "ブランドスタイル自作＋4K拡大", fr: "Styles perso + upscale 4K", de: "Eigene Styles + 4K-Upscale" },
+          { en: "Delivery API + per-key spend caps", zh: "交付 API + 按密钥限额", ja: "配信API＋キー別上限", fr: "API + plafonds par clé", de: "Delivery-API + Key-Limits" },
         ],
       },
     ],
-    chat: {
-      user: {
-        en: "Write the prompt for a launch poster: neon ramen shop, midnight vibe.",
-        zh: "给开业海报写提示词：霓虹拉面店，午夜氛围。",
-        ja: "オープン記念ポスターのプロンプトを：ネオンラーメン屋、真夜中の雰囲気。",
-        fr: "Un prompt d'affiche : ramenerie néon, ambiance minuit.",
-        de: "Prompt für ein Launch-Poster: Neon-Ramen, Mitternachts-Vibe.",
-      },
-      assistant: {
-        en: "Try: 'steaming tonkotsu bowl under pink neon rain, wet asphalt reflections, 35mm, moody rim light' — keep the brand pink locked.",
-        zh: "可以试：'粉色霓虹雨下热气腾腾的豚骨拉面碗，湿润沥青倒影，35mm，情绪化轮廓光'——锁定品牌粉。",
-        ja: "おすすめ：'ピンクのネオン雨の中の豚骨ラーメン、濡れたアスファルトの反射、35mm、情緒的なリムライト'——ブランドピンク固定で。",
-        fr: "Essaie : 'bol tonkotsu fumant sous pluie néon rose, reflets asphalt mouillé, 35 mm, rim light' — verrouille le rose de la marque.",
-        de: "Versuch: 'dampfende Tonkotsu-Schale im rosa Neonregen, nasse Asphaltreflexe, 35mm, Mood-Rimlight' — Markenpink gesperrt.",
-      },
+    workflow: {
+      note: { en: "Static pipeline demo — in a real build every model runs on YOUR provider keys.", zh: "静态流水线演示——真实部署里所有模型都跑在你自己的供应商密钥上。", ja: "静的パイプラインデモ——実運用は自分のプロバイダキーで。", fr: "Démo statique — en production, sur VOS clés.", de: "Statische Demo — im Ernstlauf auf DEINEN Keys." },
+      steps: [
+        {
+          name: { en: "Brand kit", zh: "品牌套件", ja: "ブランドキット", fr: "Brand kit", de: "Brand-Kit" },
+          detail: { en: "palette, typography, product photos and reference angles locked as anchors for every render", zh: "色板/字体/产品图/参考角度全部锁定，作为每次生成的锚点", ja: "配色・書体・商品写真・参照アングルを固定条件に", fr: "palette, typo, photos, angles verrouillés comme ancres", de: "Palette, Typo, Fotos, Winkel als Anker fixiert" },
+        },
+        {
+          name: { en: "Prompt recipe", zh: "提示词配方", ja: "プロンプトレシピ", fr: "Recette de prompt", de: "Prompt-Rezept" },
+          detail: { en: "users supply variables; the server supplies style prefix, negative terms and size — never raw prompting", zh: "用户只填变量；前缀/负面词/尺寸由服务端配方注入——绝不裸奔 prompt", ja: "ユーザーは変数のみ、前置き・否定語・サイズはサーバー側レシピ", fr: "l'utilisateur donne les variables ; le serveur la recette — jamais de prompt brut", de: "Nutzer liefern Variablen, der Server das Rezept — nie Roh-Prompts" },
+        },
+        {
+          name: { en: "Routing + queue", zh: "路由与队列", ja: "ルーティング＋キュー", fr: "Routage + file", de: "Routing + Queue" },
+          detail: { en: "drafts on the fast cheap model, finals on the pro route, edits on a multimodal route; async job row with progress", zh: "草稿走快而省、定稿走 Pro、改图走多模态路由；异步任务带进度", ja: "下書きは高速モデル・決定稿はPro・編集はマルチモーダル、非同期ジョブ", fr: "brouillon rapide, final pro, édition multimodale ; job avec progression", de: "Draft schnell, Finale pro, Edits multimodal; Async-Job mit Status" },
+        },
+        {
+          name: { en: "Refine chain", zh: "精修链", ja: "加工チェーン", fr: "Chaîne de finition", de: "Veredelungskette" },
+          detail: { en: "upscale to 4K, inpaint regions, swap backgrounds — every step metered in credits", zh: "4K 放大、局部重绘、换背景——每一步都按额度计量", ja: "4K拡大・部分再描画・背景置換を全てクレジット計量", fr: "upscale 4K, inpainting, fond remplacé — chaque étape métrée", de: "4K-Upscale, Inpainting, Hintergrundtausch — jeder Schritt gemessen" },
+        },
+        {
+          name: { en: "Persist + deliver", zh: "落地与交付", ja: "保存と納品", fr: "Stockage + livraison", de: "Persistenz + Delivery" },
+          detail: { en: "provider URLs expire within an hour — each accepted image lands in YOUR storage before the UI ever shows it", zh: "供应商链接一小时即失效——每张被采纳的图先落到你自己的存储再展示", ja: "プロバイダURLは1時間で失効、採用画像はまず自ストレージへ", fr: "les URLs expirent dans l'heure — chaque visuel est d'abord copié chez vous", de: "Provider-URLs verfallen — jedes Bild zuerst ins eigene Storage" },
+        },
+        {
+          name: { en: "Batch + API", zh: "批量与 API", ja: "バッチ＋API", fr: "Batch + API", de: "Batch + API" },
+          detail: { en: "50–500 SKUs per run with parallel rendering; every published workflow is also a stable HTTP endpoint", zh: "50–500 个 SKU 并行跑；每个工作流同时是一个稳定的 HTTP 端点", ja: "50–500 SKU並列、各ワークフローがHTTPエンドポイントにも", fr: "50–500 SKU en parallèle ; chaque flux devient un endpoint HTTP", de: "50–500 SKUs parallel; jeder Workflow wird ein HTTP-Endpoint" },
+        },
+      ],
+      gates: [
+        { en: "Prompt screened by the moderation gate before generation", zh: "生成前先过提示词审查门", ja: "生成前にプロンプト審査ゲート", fr: "Prompt criblé avant génération", de: "Prompt vor Generierung gescreent" },
+        { en: "Credits reserved atomically, committed once per accepted image", zh: "额度原子预扣，仅在图被采纳时一次性结算", ja: "クレジットは原子的仮押さえ・採用時のみ確定", fr: "Crédits réservés atomiquement, commit par visuel accepté", de: "Credits atomisch reserviert, pro accepted Bild committet" },
+        { en: "Accepted cost = raw price × regenerate ratio (plan for 3–8)", zh: "单图有效成本 = 单价 × 重生成系数（按 3–8 预估）", ja: "実効コスト＝単価×再生成係数（3–8）", fr: "Coût réel = prix × ratio de régénération (3–8)", de: "Real cost = Preis × Regenerations-Faktor (3–8)" },
+      ],
     },
-    rag: {
-      question: {
-        en: "Who owns the generated posters?",
-        zh: "生成的海报归谁所有？",
-        ja: "生成したポスターの権利は？",
-        fr: "À qui appartiennent les affiches générées ?",
-        de: "Wem gehören die generierten Poster?",
-      },
-      answer: {
-        en: "You do — paid plans grant commercial use of every export; failed generations never spend your quota.",
-        zh: "归你——付费方案的所有导出均可商用；生成失败不扣你的额度。",
-        ja: "あなたです——有料プランの書き出しは商用可。失敗時はクォータを消費しません。",
-        fr: "Vous — les exports des offres payantes sont utilisables commercialement ; un échec ne consomme pas votre quota.",
-        de: "Du — Exporte aus Bezahlplänen sind kommerziell nutzbar; Fehler verbrauchen kein Kontingent.",
-      },
-      sources: [
-        { en: "License FAQ", zh: "授权 FAQ", ja: "ライセンス FAQ", fr: "FAQ licence", de: "Lizenz-FAQ" },
-        { en: "Credits policy", zh: "额度规则", ja: "クレジット規則", fr: "Politique de crédits", de: "Credit-Bedingungen" },
+    ops: {
+      routes: [
+        {
+          task: { en: "Draft / thumbnails", zh: "草稿缩略", ja: "下書き", fr: "Brouillons", de: "Drafts" },
+          primary: "Flux schnell-class (sub-second)",
+          fallback: "SDXL-turbo route",
+        },
+        {
+          task: { en: "Final brand assets", zh: "品牌定稿", ja: "決定稿", fr: "Visuels finaux", de: "Finale" },
+          primary: "Flux 2 Pro",
+          fallback: "SD 3.5 / GPT-Image",
+        },
+        {
+          task: { en: "Product edits", zh: "产品改图", ja: "商品編集", fr: "Éditions produit", de: "Produkt-Edits" },
+          primary: "multimodal edit route (Nano-Banana class)",
+          fallback: "inpaint chain",
+        },
+        {
+          task: { en: "Upscale", zh: "放大", ja: "拡大", fr: "Upscale", de: "Upscale" },
+          primary: "Real-ESRGAN 4K",
+          fallback: "provider-native upscale",
+        },
+      ],
+      billing: [
+        { en: "Credits per model × resolution tier — never raw calls", zh: "按模型×分辨率档位扣额度——不按裸调用", ja: "モデル×解像度のクレジット制（生コール不可）", fr: "Crédits par modèle × résolution — jamais brut", de: "Credits pro Modell × Auflösung — nie roh" },
+        { en: "Admin sees accepted-image cost, latency by route and spend per account from day one", zh: "后台从第一天就展示单图有效成本、路由延迟、账户花费", ja: "管理画面は初日から実効コスト・ルート別遅延・口座別支出", fr: "La console montre dès le jour 1 coût réel, latence par route, dépense par compte", de: "Admin zeigt ab Tag 1: echte Kosten, Latenz je Route, Spend pro Konto" },
+        { en: "Per-key caps + queue isolation stop batch jobs starving live requests", zh: "按密钥限额 + 队列隔离，批量任务挤不掉实时请求", ja: "キー上限＋キュー分離でバッチがリアルタイムを圧迫しない", fr: "Plafonds par clé + file isolée contre les voisins bruyants", de: "Key-Limits + Queue-Isolation gegen Noisy Neighbours" },
       ],
     },
     admin: {
-      stats: { users: "2,760", licenses: "612", revenue: "$14.8k", tickets: "5" },
+      stats: {
+        users: "2,760",
+        licenses: "612",
+        revenue: "$14.8k",
+        tickets: "5",
+      },
       activity: [
-        { en: "Prompt blocked: brand impersonation", zh: "提示词被拦截：冒用品牌", ja: "プロンプト遮断：ブランド偽装", fr: "Prompt bloqué : imitation de marque", de: "Prompt blockiert: Markenimitation" },
-        { en: "Batch #48 delivered: 40 posters", zh: "批量 #48 已交付：40 张", ja: "バッチ #48 完了：40枚", fr: "Lot #48 livré : 40 affiches", de: "Batch #48 fertig: 40 Poster" },
-        { en: "Refund: GPU job #77 failed", zh: "退款：任务 #77 失败", ja: "返還: ジョブ #77 失敗", fr: "Remboursement : job #77 échoué", de: "Erstattung: Job #77 fehlgeschlagen" },
+        { en: "Batch #48: 40 posters · $0.31 accepted-image cost at 2.6 regen ratio", zh: "批量 #48：40 张·重生成系数 2.6，单图有效成本 $0.31", ja: "バッチ#48：40枚・実効$0.31/枚（係数2.6）", fr: "Lot #48 : 40 affiches · 0,31 $/visuel (ratio 2,6)", de: "Batch #48: 40 Poster · $0,31/Bild (Ratio 2,6)" },
+        { en: "Prompt blocked by moderation (brand impersonation) — user notified", zh: "提示词被审查拦截（冒用品牌），已通知用户", ja: "プロンプト審査で遮断（ブランド偽装）・通知済み", fr: "Prompt bloqué (imitation de marque) — notifié", de: "Prompt blockiert (Markenimitation) — gemeldet" },
+        { en: "Flux route degraded → traffic auto-fell back to SD 3.5", zh: "Flux 路由劣化——流量自动回落到 SD 3.5", ja: "Flux劣化→SD3.5へ自動フォールバック", fr: "Route Flux dégradée → repli auto SD 3.5", de: "Flux degradiert → Auto-Fallback SD 3.5" },
+      ],
+      invoices: [
+        {
+          id: "INV-2301",
+          who: "studio@adagency.fr",
+          amount: "$29.00",
+          status: { en: "Paid", zh: "已支付", ja: "支払済", fr: "Payée", de: "Bezahlt" },
+        },
+        {
+          id: "INV-2302",
+          who: "ecom@brandkit.jp",
+          amount: "$29.00",
+          status: { en: "Paid", zh: "已支付", ja: "支払済", fr: "Payée", de: "Bezahlt" },
+        },
+        {
+          id: "INV-2303",
+          who: "indie@printlab.de",
+          amount: "$9.90",
+          status: { en: "Refunded", zh: "已退款", ja: "返金済", fr: "Remboursée", de: "Erstattet" },
+        },
       ],
     },
   },
   {
     slug: "askdocs",
+    ops: {
+      routes: [
+        {
+          task: { en: "Query routing", zh: "查询路由", ja: "クエリルーティング", fr: "Routage de requête", de: "Query-Routing" },
+          primary: "small fast model for routing & rewrites",
+          fallback: "heuristic classifier",
+        },
+        {
+          task: { en: "Final answers", zh: "最终回答", ja: "最終回答", fr: "Réponses finales", de: "Finale-Antworten" },
+          primary: "frontier model per plan",
+          fallback: "extractive answer (no LLM key)",
+        },
+        {
+          task: { en: "Embeddings", zh: "向量化", ja: "埋め込み", fr: "Plongements", de: "Embeddings" },
+          primary: "provider embedding lane",
+          fallback: "BM25-only degradation",
+        },
+      ],
+      billing: [
+        { en: "Per-seat plans + usage credits for heavy queryers", zh: "按席位订阅 + 重度使用者的额度计量", ja: "座席課金＋多用者の従量クレジット", fr: "Plans par siège + crédits pour gros usagers", de: "Seats + Credits für Vielnutzer" },
+        { en: "Token spend tracked per workspace and rolled into the invoice", zh: "Token 花费按工作区归集进账单", ja: "トークン支出はワークスペース別に請求へ集計", fr: "Spend de tokens agrégé par espace dans la facture", de: "Token-Spend pro Workspace in der Rechnung" },
+        { en: "Cache hits metered at zero — visible in the ledger", zh: "缓存命中零计量，账目可见", ja: "キャッシュ命中はゼロ計量・台帳表示", fr: "Cache à zéro — visible au registre", de: "Cache-Hits mit null gemessen — im Ledger sichtbar" },
+      ],
+    },
     group: "ai" as const,
     styleId: "ocean",
     category: { en: "AI Q&A", zh: "AI 问答", ja: "AI Q&A", fr: "Q&R IA", de: "KI-Q&A" },

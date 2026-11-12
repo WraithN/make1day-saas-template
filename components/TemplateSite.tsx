@@ -32,6 +32,9 @@ export type TemplateChrome = {
   oneTime: string;
   choose: string;
   tabWorkspaces: string;
+  tabWorkflow: string;
+  tabOps: string;
+  invoices: string;
   members: string;
   owner: string;
   member: string;
@@ -46,17 +49,28 @@ export type Surface =
   | "chat"
   | "rag"
   | "admin"
-  | "workspaces";
+  | "workspaces"
+  | "workflow"
+  | "ops";
 
-const SURFACES: { id: Surface; key: keyof TemplateChrome }[] = [
-  { id: "landing", key: "tabLanding" },
-  { id: "pricing", key: "tabPricing" },
-  { id: "login", key: "tabLogin" },
-  { id: "chat", key: "tabChat" },
-  { id: "rag", key: "tabRag" },
-  { id: "admin", key: "tabAdmin" },
-  { id: "workspaces", key: "tabWorkspaces" },
-];
+/**
+ * Tab set follows the VERTICAL: knowledge products show chat + RAG, pipeline
+ * products show workflow + model/billing ops; a face-swap-free video ad tool
+ * never gets a document-Q&A tab it has no reason to ship.
+ */
+function surfacesFor(tpl: TemplateMeta): { id: Surface; key: keyof TemplateChrome }[] {
+  return [
+    { id: "landing", key: "tabLanding" },
+    { id: "pricing", key: "tabPricing" },
+    { id: "login", key: "tabLogin" },
+    ...(tpl.chat ? [{ id: "chat" as Surface, key: "tabChat" as keyof TemplateChrome }] : []),
+    ...(tpl.rag ? [{ id: "rag" as Surface, key: "tabRag" as keyof TemplateChrome }] : []),
+    ...(tpl.workflow ? [{ id: "workflow" as Surface, key: "tabWorkflow" as keyof TemplateChrome }] : []),
+    ...(tpl.ops ? [{ id: "ops" as Surface, key: "tabOps" as keyof TemplateChrome }] : []),
+    { id: "admin", key: "tabAdmin" },
+    { id: "workspaces", key: "tabWorkspaces" },
+  ];
+}
 
 /**
  * A believable product site generated from a template: the surfaces the
@@ -96,6 +110,23 @@ export function TemplateSite({
     "w-full rounded-lg border border-[rgb(var(--line))] bg-[rgb(var(--bg))] px-3 py-2 text-[14px] outline-none focus:border-[rgb(var(--accent))]";
 
   const name = pick(tpl.name);
+  const surfaces = surfacesFor(tpl);
+  // Invoice rows: verticals author them explicitly; classic templates get
+  // generated ones from their real tier prices, so EVERY demo console shows
+  // billing — which is what buyers actually look for.
+  const PAID: TText = { en: "Paid", zh: "已支付", ja: "支払済", fr: "Payée", de: "Bezahlt" };
+  const REFUNDED: TText = { en: "Refunded", zh: "已退款", ja: "返金済", fr: "Remboursée", de: "Erstattet" };
+  const inv =
+    tpl.admin.invoices ??
+    tpl.tiers
+      .filter((x) => x.price !== "$0")
+      .slice(0, 2)
+      .map((x, i) => ({
+        id: `INV-${1041 + i}`,
+        who: `member${i + 1}@${tpl.slug.replace(/-/g, "")}.app`,
+        amount: `${x.price}.00${x.period === "mo" ? " /mo" : ""}`,
+        status: i === 1 ? REFUNDED : PAID,
+      }));
 
   return (
     <div className="ts-site relative overflow-hidden" style={wrapStyle}>
@@ -120,7 +151,7 @@ export function TemplateSite({
           aria-label={name}
           className="mt-4 flex flex-wrap gap-1.5 border-y border-[rgb(var(--line))] py-2"
         >
-          {SURFACES.map((s) => (
+          {surfaces.map((s) => (
             <button
               key={s.id}
               type="button"
@@ -256,7 +287,7 @@ export function TemplateSite({
         )}
 
         {/* ── AI chat ── */}
-        {surface === "chat" && (
+        {surface === "chat" && tpl.chat && (
           <section className="py-10">
             <div className={panel + " mx-auto max-w-xl"}>
               <div className="space-y-3">
@@ -284,7 +315,7 @@ export function TemplateSite({
         )}
 
         {/* ── RAG ── */}
-        {surface === "rag" && (
+        {surface === "rag" && tpl.rag && (
           <section className="py-10">
             <div className={panel + " mx-auto max-w-xl space-y-3"}>
               <div className="flex items-start gap-2">
@@ -344,6 +375,22 @@ export function TemplateSite({
               ))}
             </div>
             <div className={panel + " mt-3"}>
+              <div className="text-[13px] font-semibold">{t.invoices}</div>
+              <table className="mt-2 w-full text-[12px]">
+                <tbody>
+                  {inv.map((item) => (
+                    <tr key={item.id} className="border-b border-[rgb(var(--line))] last:border-0">
+                      <td className="py-1.5 pr-2 font-mono">{item.id}</td>
+                      <td className="py-1.5 pr-2 text-[rgb(var(--ink-soft))]">{item.who}</td>
+                      <td className="py-1.5 pr-2 font-semibold">{item.amount}</td>
+                      <td className="py-1.5 text-right text-[rgb(var(--muted))]">{pick(item.status)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className={panel + " mt-3"}>
               <div className="text-[13px] font-semibold">{t.activity}</div>
               <ul className="mt-2 space-y-1.5 text-[13px] text-[rgb(var(--ink-soft))]">
                 {tpl.admin.activity.map((a, i) => (
@@ -397,6 +444,80 @@ export function TemplateSite({
                 </div>
               ))}
             </div>
+          </section>
+        )}
+
+        {/* ── Pipeline workflow (scene verticals) ── */}
+        {surface === "workflow" && tpl.workflow && (
+          <section className="py-10">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-[18px] font-semibold">{t.tabWorkflow}</h2>
+              <span className="tag">{name}</span>
+            </div>
+            <p className="mt-2 text-[12px] text-[rgb(var(--muted))]">{pick(tpl.workflow.note)}</p>
+            <ol className="mt-4 space-y-2">
+              {tpl.workflow.steps.map((st, i) => (
+                <li key={i} className={panel + " flex gap-3 !p-3"}>
+                  <span
+                    className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-bold"
+                    style={solidStyle}
+                  >
+                    {i + 1}
+                  </span>
+                  <span>
+                    <span className="text-[14px] font-semibold">{pick(st.name)}</span>
+                    <span className="mt-0.5 block text-[12px] text-[rgb(var(--ink-soft))]">
+                      {pick(st.detail)}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {tpl.workflow.gates.map((g, i) => (
+                <span key={i} className="rounded-full border border-[rgb(var(--line))] px-2.5 py-1 text-[11px] text-[rgb(var(--ink-soft))]">
+                  ✓ {pick(g)}
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Model routing + billing plane ── */}
+        {surface === "ops" && tpl.ops && (
+          <section className="py-10">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-[18px] font-semibold">{t.tabOps}</h2>
+              <span className="tag">{name}</span>
+            </div>
+            <div className={panel + " mt-4"}>
+              <table className="w-full text-[12px]">
+                <thead>
+                  <tr className="border-b border-[rgb(var(--line))] text-left text-[rgb(var(--muted))]">
+                    <th className="py-1.5 pr-2 font-semibold">task</th>
+                    <th className="py-1.5 pr-2 font-semibold">primary</th>
+                    <th className="py-1.5 font-semibold">fallback</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tpl.ops.routes.map((r, i) => (
+                    <tr key={i} className="border-b border-[rgb(var(--line))] last:border-0">
+                      <td className="py-2 pr-2 text-[rgb(var(--ink-soft))]">{pick(r.task)}</td>
+                      <td className="py-2 pr-2 font-mono text-[11px]">{r.primary}</td>
+                      <td className="py-2 font-mono text-[11px] text-[rgb(var(--muted))]">{r.fallback}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <ul className="mt-3 space-y-1.5 text-[12px] text-[rgb(var(--ink-soft))]">
+              {tpl.ops.billing.map((b, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[rgb(var(--accent))]" />
+                  {pick(b)}
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 
