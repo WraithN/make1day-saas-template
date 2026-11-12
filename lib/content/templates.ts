@@ -62,6 +62,25 @@ export interface TemplateMeta {
     routes: { task: TText; primary: string; fallback: string }[];
     billing: TText[];
   };
+  /** Landing showcase: believable vertical output rendered in pure CSS —
+   *  posters, storyboard frames, cited answers or dashboard tiles. */
+  showcase?: {
+    kind: "dash" | "posters" | "frames" | "answers";
+    title: TText;
+    items: { title: TText; meta: TText }[];
+  };
+  /** Landing social proof: one quote + author. */
+  quote?: { text: TText; who: TText };
+  /** Workspaces surface: scene-authentic multi-tenant spaces that show WHY
+   *  isolation exists — own members, credits, assets and billing per space. */
+  workspaces?: {
+    note: TText;
+    spaces: {
+      name: TText;
+      detail: TText;
+      pools: { label: TText; value: string }[];
+    }[];
+  };
 }
 
 export const TEMPLATES: TemplateMeta[] = [
@@ -147,6 +166,61 @@ export const TEMPLATES: TemplateMeta[] = [
       sources: [
         { en: "Docs → Teams", zh: "文档 → 团队", ja: "ドキュメント → チーム", fr: "Docs → Équipes", de: "Doku → Teams" },
         { en: "Billing FAQ", zh: "计费 FAQ", ja: "請求 FAQ", fr: "FAQ facturation", de: "Abrechnungs-FAQ" },
+      ],
+    },
+    showcase: {
+      kind: "dash",
+      title: { en: "Inside the dashboard", zh: "仪表盘实时画面", ja: "ダッシュボードの現在", fr: "Dans le tableau de bord", de: "Im Dashboard live" },
+      items: [
+        {
+          title: { en: "MRR", zh: "月度经常性收入", ja: "月次経常収益", fr: "MRR", de: "MRR" },
+          meta: { en: "$41.2k · +18% MoM", zh: "$41.2k · 环比 +18%", ja: "$41.2k・前月比+18%", fr: "41,2 k$ · +18 %", de: "$41,2k · +18 % MoM" },
+        },
+        {
+          title: { en: "Activation", zh: "激活", ja: "激活", fr: "Activation", de: "Aktivierung" },
+          meta: { en: "trial → paid 32%", zh: "试用→付费 32%", ja: "トライアル→有料 32%", fr: "essai → payant 32 %", de: "Trial → zahlend 32 %" },
+        },
+        {
+          title: { en: "Tickets", zh: "工单", ja: "チケット", fr: "Tickets", de: "Tickets" },
+          meta: { en: "open 4 · first reply 2h", zh: "在办 4 · 首响 2 小时", ja: "未対応4・一次返信2h", fr: "4 ouverts · 1re réponse 2 h", de: "4 offen · Antwort 2 h" },
+        },
+      ],
+    },
+    quote: {
+      text: { en: "We replaced a Notion + Stripe + Zendesk patchwork with one login and one bill.", zh: "我们把 Notion+Stripe+Zendesk 的拼接摊子，换成了统一登录和一张账单。", ja: "Notion＋Stripe＋Zendesk の寄せ集めが、ログイン一つに集約。", fr: "Le patchwork Notion+Stripe+Zendesk est devenu une seule connexion.", de: "Ein Login statt Notion+Stripe+Zendesk-Flickwerk." },
+      who: { en: "Maya K. — founder, invoicing startup", zh: "Maya K.——发票应用创始人", ja: "Maya K.——請求アプリ創業者", fr: "Maya K. — fondatrice, startup de facturation", de: "Maya K. — Gründerin, Rechnungs-Startup" },
+    },
+    workspaces: {
+      note: { en: "Multi-tenant out of the box: your team and every client get an isolated space — own members, own data, own billing.", zh: "自带多租户：你的团队和每个客户各占独立空间——成员、数据、账单互不可见。", ja: "マルチテナント標準搭載：チームとクライアントごとに、メンバー・データ・課金を隔離。", fr: "Multi-tenant d’office : chaque client a son espace isolé — membres, données, facturation.", de: "Mandantenfähig ab Werk: pro Kunde ein isolierter Bereich — Mitglieder, Daten, Abrechnung." },
+      spaces: [
+        {
+          name: { en: "HQ", zh: "总部", ja: "本社", fr: "Siège", de: "HQ" },
+          detail: { en: "core team · global roles", zh: "核心团队 · 全局角色", ja: "コアチーム・全体ロール", fr: "équipe centrale · rôles globaux", de: "Kernteam · globale Rollen" },
+          pools: [
+            {
+              label: { en: "seats", zh: "席位", ja: "席数", fr: "sièges", de: "Seats" },
+              value: "18 / 25",
+            },
+            {
+              label: { en: "spend this month", zh: "本月花费", ja: "今月の支出", fr: "dépenses du mois", de: "Ausgaben/Monat" },
+              value: "$310",
+            },
+          ],
+        },
+        {
+          name: { en: "Client · Northwind", zh: "客户 · Northwind", ja: "クライアント · Northwind", fr: "Client · Northwind", de: "Kunde · Northwind" },
+          detail: { en: "scoped to this client only", zh: "仅此客户可见", ja: "このクライアントのみ閲覧可", fr: "limité à ce client", de: "nur dieser Kunde" },
+          pools: [
+            {
+              label: { en: "seats", zh: "席位", ja: "席数", fr: "sièges", de: "Seats" },
+              value: "6 / 10",
+            },
+            {
+              label: { en: "invoices", zh: "账单", ja: "請求書", fr: "factures", de: "Rechnungen" },
+              value: "24 paid",
+            },
+          ],
+        },
       ],
     },
     admin: {
@@ -242,6 +316,61 @@ export const TEMPLATES: TemplateMeta[] = [
         { en: "Plan comparison", zh: "方案对比", ja: "プラン比較", fr: "Comparatif", de: "Plan-Vergleich" },
       ],
     },
+    showcase: {
+      kind: "dash",
+      title: { en: "The store, both ends", zh: "店铺的前后场", ja: "店舗の表と裏", fr: "La boutique, des deux côtés", de: "Der Shop von beiden Seiten" },
+      items: [
+        {
+          title: { en: "GMV today", zh: "今日成交额", ja: "本日GMV", fr: "CA du jour", de: "Umsatz heute" },
+          meta: { en: "$12.4k · conv 3.1%", zh: "$12.4k · 转化 3.1%", ja: "$12.4k・CVR 3.1%", fr: "12,4 k$ · conv 3,1 %", de: "$12,4k · CVR 3,1 %" },
+        },
+        {
+          title: { en: "Refunds", zh: "退款", ja: "返金", fr: "Remboursements", de: "Rückerstattungen" },
+          meta: { en: "0.4% · auto-approve under $10", zh: "0.4% · <$10 自动同意", ja: "0.4%・$10未満自動承認", fr: "0,4 % · auto sous 10 $", de: "0,4 % · auto unter $10" },
+        },
+        {
+          title: { en: "Stock alerts", zh: "补货提醒", ja: "在庫アラート", fr: "Alertes stock", de: "Bestandswarnungen" },
+          meta: { en: "2 SKUs below cover", zh: "2 个 SKU 低于安全库存", ja: "2SKUが安全在庫割れ", fr: "2 SKU sous le seuil", de: "2 SKU unter Schwelle" },
+        },
+      ],
+    },
+    quote: {
+      text: { en: "Black Friday without a single spreadsheet in sight.", zh: "整个黑五，我们没有碰一张表格。", ja: "ブラックフライデーをスプレッドシートなしで乗り切った。", fr: "Un Black Friday sans le moindre tableur.", de: "Schwarzer Freitag ohne einzige Tabelle." },
+      who: { en: "Owen L. — owner, DTC skincare brand", zh: "Owen L.——DTC 护肤品牌主", ja: "Owen L.——DTCスキンケア運営", fr: "Owen L. — fondateur d’une marque skincare", de: "Owen L. — DTC-Skincare-Gründer" },
+    },
+    workspaces: {
+      note: { en: "Run many shops from one install: each storefront is a space with its own catalogue, payouts and members.", zh: "一套系统管多店：每个店铺独立空间——商品、回款、成员各自隔离。", ja: "1インストールで多店舗運営：店舗ごとに商品・入金・メンバーを分離。", fr: "Une instance, plusieurs boutiques : catalogue, paiements et membres isolés.", de: "Eine Installation, viele Shops — pro Shop ein eigener Bereich." },
+      spaces: [
+        {
+          name: { en: "Flagship", zh: "自营旗舰店", ja: "直営店", fr: "Boutique phare", de: "Flagship" },
+          detail: { en: "Shopify-synced catalogue", zh: "Shopify 同步的商品目录", ja: "Shopify同期カタログ", fr: "catalogue synchronisé Shopify", de: "Shopify-Synchron-Katalog" },
+          pools: [
+            {
+              label: { en: "SKUs synced", zh: "已同步 SKU", ja: "SKU同期", fr: "SKU synchronisés", de: "SKUs synchronisiert" },
+              value: "1,240",
+            },
+            {
+              label: { en: "payouts this month", zh: "本月回款", ja: "今月の入金", fr: "paiements du mois", de: "Auszahlungen/Monat" },
+              value: "$8,410",
+            },
+          ],
+        },
+        {
+          name: { en: "Client · Bloomly", zh: "客户 · Bloomly", ja: "クライアント · Bloomly", fr: "Client · Bloomly", de: "Kunde · Bloomly" },
+          detail: { en: "agency access, owner billing separate", zh: "代理权限与业主账单分离", ja: "代理アクセスと請求を分離", fr: "accès agence, facturation à part", de: "Agentur-Zugang, eigene Abrechnung" },
+          pools: [
+            {
+              label: { en: "SKUs synced", zh: "已同步 SKU", ja: "SKU同期", fr: "SKU synchronisés", de: "SKUs synchronisiert" },
+              value: "310",
+            },
+            {
+              label: { en: "payouts this month", zh: "本月回款", ja: "今月の入金", fr: "paiements du mois", de: "Auszahlungen/Monat" },
+              value: "$2,180",
+            },
+          ],
+        },
+      ],
+    },
     admin: {
       stats: { users: "3,420", licenses: "517", revenue: "$12.9k", tickets: "7" },
       activity: [
@@ -335,6 +464,61 @@ export const TEMPLATES: TemplateMeta[] = [
         { en: "Booking policy", zh: "预约政策", ja: "予約ポリシー", fr: "Politique de RDV", de: "Terminrichtlinie" },
       ],
     },
+    showcase: {
+      kind: "dash",
+      title: { en: "Today’s clinic board", zh: "今日诊所看板", ja: "本日の診察ボード", fr: "Tableau du jour du cabinet", de: "Tagesboard der Praxis" },
+      items: [
+        {
+          title: { en: "Next patient", zh: "下一位患者", ja: "次の患者", fr: "Patient suivant", de: "Nächster Patient" },
+          meta: { en: "14:20 · Dr. Lin · room 3", zh: "14:20 · 林医生 · 3 诊室", ja: "14:20・林医師・診察室3", fr: "14 h 20 · Dr Lin · salle 3", de: "14:20 · Dr. Lin · Raum 3" },
+        },
+        {
+          title: { en: "No-show rate", zh: "爽约率", ja: "無断キャンセル率", fr: "Taux d’absence", de: "No-Show-Quote" },
+          meta: { en: "4% · SMS reminders on", zh: "4% · 短信提醒已开启", ja: "4%・SMSリマインダー稼働", fr: "4 % · rappels SMS actifs", de: "4 % · SMS-Reminder an" },
+        },
+        {
+          title: { en: "Revenue / visit", zh: "客单收入", ja: "来院あたり売上", fr: "Revenu / visite", de: "Umsatz / Besuch" },
+          meta: { en: "$68 · +6% QoQ", zh: "$68 · 环比 +6%", ja: "$68・前四半期比+6%", fr: "68 $ · +6 %", de: "$68 · +6 %" },
+        },
+      ],
+    },
+    quote: {
+      text: { en: "The phone stopped being our calendar.", zh: "电话不再是我们的排班表。", ja: "電話がカレンダーではなくなった。", fr: "Le téléphone n’est plus notre agenda.", de: "Das Telefon ist nicht mehr unser Kalender." },
+      who: { en: "Priya S. — practice manager", zh: "Priya S.——诊所运营负责人", ja: "Priya S.——クリニック管理者", fr: "Priya S. — gestionnaire de cabinet", de: "Priya S. — Praxismanagerin" },
+    },
+    workspaces: {
+      note: { en: "Branch-per-space: staff, appointment books and billing stay scoped to the clinic each team belongs to.", zh: "一店一空间：员工、预约账本与账单按分院隔离。", ja: "分院ごとのスペース：スタッフ・予約台帳・請求を分院単位で分離。", fr: "Un espace par cabinet : personnel, agenda et facturation cloisonnés.", de: "Pro Filiale ein Bereich — Personal, Agenda und Abrechnung getrennt." },
+      spaces: [
+        {
+          name: { en: "Riverside branch", zh: "滨江门诊", ja: "リバーサイド院", fr: "Cabinet Riverside", de: "Filiale Riverside" },
+          detail: { en: "11 chairs · 3 dentists", zh: "11 张牙椅 · 3 名医生", ja: "椅11・歯科医3", fr: "11 fauteuils · 3 dentistes", de: "11 Stühle · 3 Zahnärzte" },
+          pools: [
+            {
+              label: { en: "appointments/wk", zh: "每周预约", ja: "予約/週", fr: "rendez-vous / sem", de: "Termine/Woche" },
+              value: "312",
+            },
+            {
+              label: { en: "patients", zh: "在册患者", ja: "患者数", fr: "patients", de: "Patienten" },
+              value: "4,900",
+            },
+          ],
+        },
+        {
+          name: { en: "Uptown branch", zh: "城北门诊", ja: "アプタウン院", fr: "Cabinet Uptown", de: "Filiale Uptown" },
+          detail: { en: "hygiene-only schedule", zh: "仅洁牙号源", ja: "クリーニング枠のみ", fr: "agenda hygiène uniquement", de: "nur Prophylaxe-Termine" },
+          pools: [
+            {
+              label: { en: "appointments/wk", zh: "每周预约", ja: "予約/週", fr: "rendez-vous / sem", de: "Termine/Woche" },
+              value: "188",
+            },
+            {
+              label: { en: "patients", zh: "在册患者", ja: "患者数", fr: "patients", de: "Patienten" },
+              value: "2,140",
+            },
+          ],
+        },
+      ],
+    },
     admin: {
       stats: { users: "860", licenses: "41", revenue: "$6.2k", tickets: "2" },
       activity: [
@@ -426,6 +610,61 @@ export const TEMPLATES: TemplateMeta[] = [
       sources: [
         { en: "Membership terms", zh: "会员条款", ja: "会員規約", fr: "Conditions d'abonnement", de: "Mitgliedsbedingungen" },
         { en: "Portal guide", zh: "门户指南", ja: "ポータルガイド", fr: "Guide du portail", de: "Portal-Handbuch" },
+      ],
+    },
+    showcase: {
+      kind: "dash",
+      title: { en: "Studio today", zh: "今日工作室", ja: "本日のスタジオ", fr: "Studio du jour", de: "Studio heute" },
+      items: [
+        {
+          title: { en: "Active members", zh: "活跃会员", ja: "アクティブ会員", fr: "Membres actifs", de: "Aktive Mitglieder" },
+          meta: { en: "612 · churn 3.1%", zh: "612 · 月流失 3.1%", ja: "612・解約率3.1%", fr: "612 · churn 3,1 %", de: "612 · Churn 3,1 %" },
+        },
+        {
+          title: { en: "Class fill", zh: "课程满员率", ja: "クラス充足率", fr: "Remplissage des cours", de: "Kursauslastung" },
+          meta: { en: "78% · 4 waitlisted today", zh: "78% · 今日候补 4 人", ja: "78%・本日待機4", fr: "78 % · 4 en attente", de: "78 % · 4 Wartende heute" },
+        },
+        {
+          title: { en: "PT hours", zh: "私教课时", ja: "パーソナル数", fr: "Heures PT", de: "PT-Stunden" },
+          meta: { en: "168 billed this month", zh: "本月已结 168 节", ja: "今月168コマ請求", fr: "168 facturées ce mois", de: "168 abgerechnet diesen Monat" },
+        },
+      ],
+    },
+    quote: {
+      text: { en: "Members sign up from Instagram; we never touch a paper form.", zh: "会员从 Instagram 进来报名，我们再没摸过纸质表。", ja: "会員はInstagramから申込、紙の申込書は消えた。", fr: "Les membres s’inscrivent via Instagram — fini le papier.", de: "Mitglieder buchen via Instagram — kein Papier mehr." },
+      who: { en: "Dana W. — studio owner", zh: "Dana W.——工作室主理人", ja: "Dana W.——スタジオオーナー", fr: "Dana W. — propriétaire de studio", de: "Dana W. — Studio-Inhaberin" },
+    },
+    workspaces: {
+      note: { en: "Every venue gets its own space — schedules, member lists and billing never leak across locations.", zh: "每个场馆一个空间——排期、会员名册和账单互不串门。", ja: "会場ごとにスペース：スケジュール・会員・請求が会場間で混ざらない。", fr: "Chaque salle a son espace — plannings, listes et facturation isolés.", de: "Jeder Standort ein Bereich — Pläne, Listen, Abrechnung getrennt." },
+      spaces: [
+        {
+          name: { en: "Riverside studio", zh: "滨江馆", ja: "リバーサイド店", fr: "Studio Riverside", de: "Studio Riverside" },
+          detail: { en: "26 classes/wk · 2 coaches", zh: "每周 26 节课 · 2 名教练", ja: "週26クラス・コーチ2", fr: "26 cours/sem · 2 coachs", de: "26 Kurse/Woche · 2 Coaches" },
+          pools: [
+            {
+              label: { en: "members", zh: "会员", ja: "会員", fr: "membres", de: "Mitglieder" },
+              value: "612",
+            },
+            {
+              label: { en: "check-ins today", zh: "今日签到", ja: "本日チェックイン", fr: "pointages du jour", de: "Check-ins heute" },
+              value: "143",
+            },
+          ],
+        },
+        {
+          name: { en: "Harbor studio", zh: "海港馆", ja: "ハーバー店", fr: "Studio Harbor", de: "Studio Harbor" },
+          detail: { en: "shared equipment catalogue", zh: "共用器材目录", ja: "共用設備カタログ", fr: "catalogue matériel partagé", de: "geteilter Gerätekatalog" },
+          pools: [
+            {
+              label: { en: "members", zh: "会员", ja: "会員", fr: "membres", de: "Mitglieder" },
+              value: "208",
+            },
+            {
+              label: { en: "check-ins today", zh: "今日签到", ja: "本日チェックイン", fr: "pointages du jour", de: "Check-ins heute" },
+              value: "61",
+            },
+          ],
+        },
       ],
     },
     admin: {
@@ -534,6 +773,65 @@ export const TEMPLATES: TemplateMeta[] = [
         { en: "$0.03–0.15 per rendered scene at draft tier", zh: "草渲档每镜 $0.03–0.15", ja: "下書きはシーン$0.03–0.15", fr: "0,03–0,15 $ par scène (brouillon)", de: "$0,03–0,15 pro Szene (Draft)" },
         { en: "A 60s ad: ~$0.5–1.5 with edge-tts + Seedance mini; $4–16 fully premium", zh: "60 秒成片约 $0.5–1.5（edge-tts+Seedance mini），全顶配 $4–16", ja: "60秒は$0.5–1.5（edge-tts+Seedance mini）・最高構成で$4–16", fr: "Pub 60 s : 0,5–1,5 $ (edge-tts + Seedance mini), 4–16 $ full premium", de: "60-Sekunden-Ad: $0,5–1,5 bzw. $4–16 premium" },
         { en: "Every provider's spend rolls into per-run totals and monthly invoices", zh: "各供应商花费自动汇总为单次运行与月度账单", ja: "プロバイダ別支出を実行別・月次請求に集計", fr: "Chaque dépense agrégée par run et par facture", de: "Provider-Ausgaben pro Run und Rechnung aggregiert" },
+      ],
+    },
+    showcase: {
+      kind: "frames",
+      title: { en: "Storyboard approved before any credit is spent", zh: "花额度之前，先审分镜", ja: "クレジット使用前に絵コンテ承認", fr: "Le storyboard validé avant toute dépense", de: "Storyboard-Freigabe vor jeder Ausgabe" },
+      items: [
+        {
+          title: { en: "Hook — pain", zh: "开场·痛点", ja: "Hook・課題", fr: "Accroche · douleur", de: "Hook · Schmerz" },
+          meta: { en: "close-up · dolly in · 0–3s", zh: "特写 · 推进 · 0–3s", ja: "接写・イン・0-3s", fr: "gros plan · travelling avant · 0–3 s", de: "Close-up · Dolly-in · 0–3 s" },
+        },
+        {
+          title: { en: "Problem", zh: "冲突", ja: "問題", fr: "Problème", de: "Problem" },
+          meta: { en: "over-shoulder · static · 3–8s", zh: "过肩 · 固定 · 3–8s", ja: "肩越し・固定・3-8s", fr: "par-dessus l’épaule · fixe · 3–8 s", de: "Over-shoulder · statisch · 3–8 s" },
+        },
+        {
+          title: { en: "Product demo", zh: "产品展示", ja: "商品デモ", fr: "Démo produit", de: "Produkt-Demo" },
+          meta: { en: "macro pan · spin · 8–14s", zh: "微移 · 旋转 · 8–14s", ja: "マクロ・回転・8-14s", fr: "macro · rotation · 8–14 s", de: "Macro-Schwenk · Spin · 8–14 s" },
+        },
+        {
+          title: { en: "CTA", zh: "行动号召", ja: "コールトゥアクション", fr: "Appel à l’action", de: "Handlungsaufruf" },
+          meta: { en: "medium · whip to logo · 14–18s", zh: "中景 · 甩镜到品牌 · 14–18s", ja: "ミディアム・ロゴへ・14-18s", fr: "plan moyen · fouetté au logo · 14–18 s", de: "Medium · Whip-to-Logo · 14–18 s" },
+        },
+      ],
+    },
+    quote: {
+      text: { en: "Approve the storyboard, then only the scenes I changed re-render. A 60-second ad cost $1.12.", zh: "确认分镜后才扣额度；改了哪几镜，就只重渲哪几镜。一条 60 秒广告 1.12 美元。", ja: "絵コンテ承認後に従量課金、変更したシーンだけ再描画。60秒広告で$1.12。", fr: "J’approuve le storyboard, seules les scènes modifiées sont relues. Une pub de 60 s : 1,12 $.", de: "Storyboard bestätigen, nur geänderte Szenen rendern — 60-Sekunden-Ad für $1,12." },
+      who: { en: "Jules R. — paid-social lead", zh: "Jules R.——投放负责人", ja: "Jules R.——広告運用リード", fr: "Jules R. — responsable social paid", de: "Jules R. — Paid-Social-Lead" },
+    },
+    workspaces: {
+      note: { en: "Agencies isolate every advertiser: own provider keys, brand rules and a separate cost ledger.", zh: "代运营按客户隔离：各家自己的模型密钥、品牌规范和独立成本账。", ja: "代理店は広告主ごとに分離：プロバイダキー・ブランドルール・コスト台帳を個別に。", fr: "Chaque annonceur a son espace : clés, règles de marque et ledger séparés.", de: "Jeder Advertiser ein Bereich: eigene Keys, Brand-Regeln, Kosten-Ledger." },
+      spaces: [
+        {
+          name: { en: "Client · Kettle & Co", zh: "客户 · Kettle & Co", ja: "クライアント · Kettle & Co", fr: "Client · Kettle & Co", de: "Kunde · Kettle & Co" },
+          detail: { en: "2 campaigns rendering · shared brand kit", zh: "2 个在渲项目 · 共享品牌套件", ja: "2 campaign・キット共有", fr: "2 campagnes en cours · kit partagé", de: "2 Kampagnen · geteiltes Brand-Kit" },
+          pools: [
+            {
+              label: { en: "renders this month", zh: "本月渲染", ja: "今月の描画", fr: "rendus du mois", de: "Renders/Monat" },
+              value: "118",
+            },
+            {
+              label: { en: "cost ledger", zh: "成本账", ja: "コスト台帳", fr: "journal de coûts", de: "Kosten-Ledger" },
+              value: "$132.40",
+            },
+          ],
+        },
+        {
+          name: { en: "Client · Lumen Skin", zh: "客户 · Lumen Skin", ja: "クライアント · Lumen Skin", fr: "Client · Lumen Skin", de: "Kunde · Lumen Skin" },
+          detail: { en: "voice + palette locked to its brand kit", zh: "配音与色板锁进该品牌套件", ja: "音声と色をキットに固定", fr: "voix + palette verrouillées sur son kit", de: "Voice + Palette aufs Kit gesperrt" },
+          pools: [
+            {
+              label: { en: "renders this month", zh: "本月渲染", ja: "今月の描画", fr: "rendus du mois", de: "Renders/Monat" },
+              value: "42",
+            },
+            {
+              label: { en: "cost ledger", zh: "成本账", ja: "コスト台帳", fr: "journal de coûts", de: "Kosten-Ledger" },
+              value: "$51.10",
+            },
+          ],
+        },
       ],
     },
     admin: {
@@ -667,6 +965,65 @@ export const TEMPLATES: TemplateMeta[] = [
         { en: "Credits per model × resolution tier — never raw calls", zh: "按模型×分辨率档位扣额度——不按裸调用", ja: "モデル×解像度のクレジット制（生コール不可）", fr: "Crédits par modèle × résolution — jamais brut", de: "Credits pro Modell × Auflösung — nie roh" },
         { en: "Admin sees accepted-image cost, latency by route and spend per account from day one", zh: "后台从第一天就展示单图有效成本、路由延迟、账户花费", ja: "管理画面は初日から実効コスト・ルート別遅延・口座別支出", fr: "La console montre dès le jour 1 coût réel, latence par route, dépense par compte", de: "Admin zeigt ab Tag 1: echte Kosten, Latenz je Route, Spend pro Konto" },
         { en: "Per-key caps + queue isolation stop batch jobs starving live requests", zh: "按密钥限额 + 队列隔离，批量任务挤不掉实时请求", ja: "キー上限＋キュー分離でバッチがリアルタイムを圧迫しない", fr: "Plafonds par clé + file isolée contre les voisins bruyants", de: "Key-Limits + Queue-Isolation gegen Noisy Neighbours" },
+      ],
+    },
+    showcase: {
+      kind: "posters",
+      title: { en: "Four campaigns, one brand kit", zh: "一套品牌套件，四路投放", ja: "キット一つ、展開四本", fr: "Quatre campagnes, un seul brand kit", de: "Vier Kampagnen, ein Brand-Kit" },
+      items: [
+        {
+          title: { en: "Hero drop", zh: "主打上新", ja: "ヒーロー画像", fr: "Visuel phare", de: "Hero-Motiv" },
+          meta: { en: "Flux 2 Pro · 3:4 · palette locked", zh: "Flux 2 Pro · 3:4 · 锁色板", ja: "Flux2Pro・3:4・色固定", fr: "Flux 2 Pro · 3:4 · palette verrouillée", de: "Flux 2 Pro · 3:4 · Palette fix" },
+        },
+        {
+          title: { en: "Sale story", zh: "促销故事图", ja: "セール絵巻", fr: "Story promo", de: "Sale-Story" },
+          meta: { en: "draft → final chain · 2.6 regen", zh: "草稿→定稿链 · 重生成 2.6", ja: "下書き→決定稿・係数2.6", fr: "brouillon → final · ratio 2,6", de: "Draft → Finale · Ratio 2,6" },
+        },
+        {
+          title: { en: "Product cutout", zh: "产品精修图", ja: "商品切り抜き", fr: "Découpe produit", de: "Produkt-Freisteller" },
+          meta: { en: "inpaint + 4K upscale", zh: "局部重绘 + 4K 放大", ja: "部分再描画＋4K", fr: "inpainting + upscale 4K", de: "Inpainting + 4K-Upscale" },
+        },
+        {
+          title: { en: "UGC test", zh: "达人种草图", ja: "UGC風テスト", fr: "Test UGC", de: "UGC-Test" },
+          meta: { en: "edit route · 1:1 · 3 variants", zh: "改图路由 · 1:1 · 3 版", ja: "編集ルート・1:1・3案", fr: "édition · 1:1 · 3 variantes", de: "Edit-Route · 1:1 · 3 Varianten" },
+        },
+      ],
+    },
+    quote: {
+      text: { en: "One kit in, every platform out — the designer bottleneck is gone.", zh: "一套套件进去，全平台物料出来——设计师不再是瓶颈。", ja: "キット一つで全プラットフォーム対応、デザイナーがボトルネックでない。", fr: "Un kit entrant, toutes les plateformes sortantes — le goulot design a disparu.", de: "Ein Kit rein, alle Plattformen raus — kein Designer-Flaschenhals." },
+      who: { en: "Sana B. — DTC brand owner", zh: "Sana B.——DTC 品牌主", ja: "Sana B.——DTCブランドオーナー", fr: "Sana B. — fondatrice DTC", de: "Sana B. — DTC-Gründerin" },
+    },
+    workspaces: {
+      note: { en: "Each advertiser gets an isolated kit: its own palette, product library, credits and per-key spend cap.", zh: "每个广告主一套独立套件：自己的色板、产品库、额度和按密钥限额。", ja: "広告主ごとにキットを分離：色・商品ライブラリ・クレジット・キー別上限。", fr: "Chaque annonceur a son kit isolé : palette, produits, crédits, plafond par clé.", de: "Jeder Kunde ein isoliertes Kit: Palette, Produktbibliothek, Credits, Key-Limit." },
+      spaces: [
+        {
+          name: { en: "Agency · Northwind", zh: "代理 · Northwind", ja: "代理店 · Northwind", fr: "Agence · Northwind", de: "Agentur · Northwind" },
+          detail: { en: "3 brand kits · 12 members", zh: "3 套品牌套件 · 12 名成员", ja: "キット3・メンバー12", fr: "3 brand kits · 12 membres", de: "3 Brand-Kits · 12 Mitglieder" },
+          pools: [
+            {
+              label: { en: "credits left", zh: "剩余额度", ja: "残クレジット", fr: "crédits restants", de: "Credits übrig" },
+              value: "2,140",
+            },
+            {
+              label: { en: "per-key cap", zh: "单密钥限额", ja: "キー別上限", fr: "plafond par clé", de: "Key-Limit" },
+              value: "$80/mo",
+            },
+          ],
+        },
+        {
+          name: { en: "Agency · Bloomly", zh: "代理 · Bloomly", ja: "代理店 · Bloomly", fr: "Agence · Bloomly", de: "Agentur · Bloomly" },
+          detail: { en: "separate keys and storage", zh: "独立密钥与存储", ja: "キーとストレージ分離", fr: "clés et stockage séparés", de: "eigene Keys & Storage" },
+          pools: [
+            {
+              label: { en: "credits left", zh: "剩余额度", ja: "残クレジット", fr: "crédits restants", de: "Credits übrig" },
+              value: "960",
+            },
+            {
+              label: { en: "per-key cap", zh: "单密钥限额", ja: "キー別上限", fr: "plafond par clé", de: "Key-Limit" },
+              value: "$40/mo",
+            },
+          ],
+        },
       ],
     },
     admin: {
@@ -809,6 +1166,61 @@ export const TEMPLATES: TemplateMeta[] = [
       sources: [
         { en: "Security overview", zh: "安全总览", ja: "セキュリティ概要", fr: "Vue d'ensemble sécurité", de: "Security-Überblick" },
         { en: "DPA", zh: "数据处理协议", ja: "DPA", fr: "DPA", de: "DPA" },
+      ],
+    },
+    showcase: {
+      kind: "answers",
+      title: { en: "Answers arrive with receipts", zh: "回答自带出处", ja: "回答には出典が付く", fr: "Les réponses viennent avec leurs sources", de: "Antworten mit Belegen" },
+      items: [
+        {
+          title: { en: "How do I rotate my API key?", zh: "如何轮换 API Key？", ja: "APIキーのローテーション方法は？", fr: "Comment pivoter ma clé API ?", de: "Wie rotiere ich meinen API-Key?" },
+          meta: { en: "2 sources · Settings → API", zh: "2 处引用 · 设置→API", ja: "2引用・設定→API", fr: "2 sources · Réglages → API", de: "2 Quellen · Settings → API" },
+        },
+        {
+          title: { en: "Is there a student discount?", zh: "有学生折扣吗？", ja: "学生割引はある？", fr: "Y a-t-il un tarif étudiant ?", de: "Gibt es Studentenrabatt?" },
+          meta: { en: "cited quote · Billing FAQ", zh: "引用原文 · 计费 FAQ", ja: "引用・Billing FAQ", fr: "citation · FAQ facturation", de: "Zitat · Billing-FAQ" },
+        },
+        {
+          title: { en: "Where is our data processed?", zh: "我们在哪处理数据？", ja: "データ処理の所在地は？", fr: "Où sont traitées nos données ?", de: "Wo werden unsere Daten verarbeitet?" },
+          meta: { en: "4 sources · DPA template", zh: "4 处引用 · DPA 模板", ja: "4引用・DPAテンプレ", fr: "4 sources · modèle DPA", de: "4 Quellen · DPA-Vorlage" },
+        },
+      ],
+    },
+    quote: {
+      text: { en: "Support volume fell 40% because the first answer is already the right one.", zh: "首答即对，客服总量掉了 40%。", ja: "最初の回答が正しいので、問い合わせが40%減った。", fr: "Le volume de support a baissé de 40 % — la première réponse est déjà la bonne.", de: "Support-Pensum −40 %, weil die erste Antwort schon stimmt." },
+      who: { en: "Tom H. — head of CX", zh: "Tom H.——客户体验负责人", ja: "Tom H.——CX責任者", fr: "Tom H. — responsable CX", de: "Tom H. — CX-Leiter" },
+    },
+    workspaces: {
+      note: { en: "Each customer — or each corpus — lives in its own workspace: separate connectors, indexes and members.", zh: "每个客户（或每套文档）一个工作区：连接器、索引、成员各自独立。", ja: "顧客ごと・コーパスごとにワークスペース：コネクタ・索引・メンバーを分離。", fr: "Chaque client — ou corpus — a son espace : connecteurs, index et membres distincts.", de: "Pro Kunde — oder Korpus — ein eigener Workspace: Konnektoren, Index, Mitglieder getrennt." },
+      spaces: [
+        {
+          name: { en: "Acme IT docs", zh: "Acme IT 文档", ja: "Acme IT ドキュメント", fr: "Docs IT Acme", de: "Acme-IT-Docs" },
+          detail: { en: "2 connectors · Confluence + PDF", zh: "2 个连接器 · Confluence + PDF", ja: "2コネクタ・Confluence+PDF", fr: "2 connecteurs · Confluence + PDF", de: "2 Konnektoren · Confluence + PDF" },
+          pools: [
+            {
+              label: { en: "indexed chunks", zh: "索引分块", ja: "インデックス分割", fr: "segments indexés", de: "indexierte Chunks" },
+              value: "18.4k",
+            },
+            {
+              label: { en: "answers/wk", zh: "每周回答", ja: "回答/週", fr: "réponses / sem", de: "Antworten/Woche" },
+              value: "3,110",
+            },
+          ],
+        },
+        {
+          name: { en: "HR handbook", zh: "HR 手册", ja: "HRハンドブック", fr: "Manual RH", de: "HR-Handbuch" },
+          detail: { en: "restricted index, editors only", zh: "受限索引 · 仅编辑可见", ja: "閲覧は編集者のみ", fr: "index restreint · éditeurs seuls", de: "index beschränkt · nur Editoren" },
+          pools: [
+            {
+              label: { en: "indexed chunks", zh: "索引分块", ja: "インデックス分割", fr: "segments indexés", de: "indexierte Chunks" },
+              value: "4.2k",
+            },
+            {
+              label: { en: "answers/wk", zh: "每周回答", ja: "回答/週", fr: "réponses / sem", de: "Antworten/Woche" },
+              value: "640",
+            },
+          ],
+        },
       ],
     },
     admin: {

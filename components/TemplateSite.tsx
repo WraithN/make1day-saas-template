@@ -111,6 +111,10 @@ export function TemplateSite({
 
   const name = pick(tpl.name);
   const surfaces = surfacesFor(tpl);
+  const sc = tpl.showcase;
+  const wstrip = tpl.workflow;
+  const qt = tpl.quote;
+  const wss = tpl.workspaces;
   // Invoice rows: verticals author them explicitly; classic templates get
   // generated ones from their real tier prices, so EVERY demo console shows
   // billing — which is what buyers actually look for.
@@ -193,6 +197,142 @@ export function TemplateSite({
                 <div key={i} className={panel}>
                   <div className="text-[15px] font-semibold">{pick(f)}</div>
                   <div className="mt-2 h-1 w-10 rounded-full bg-[rgb(var(--accent))]" />
+                </div>
+              ))}
+            </section>
+
+            {/* Pipeline strip: the real stage order, straight from the data */}
+            {wstrip && (
+              <section className="pb-8">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {wstrip.steps.map((st, i) => (
+                    <span key={i} className="flex items-center gap-1.5">
+                      {i > 0 && <span className="text-[11px] text-[rgb(var(--muted))]">→</span>}
+                      <span className="rounded-full border border-[rgb(var(--line))] px-2.5 py-1 text-[11px] font-semibold text-[rgb(var(--ink-soft))]">
+                        <span className="mr-1 font-mono text-[rgb(var(--accent))]">{i + 1}</span>
+                        {pick(st.name)}
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Vertical-authentic output, drawn in CSS — not stock photos */}
+            {sc && (
+              <section className="pb-10">
+                <h2 className="text-[18px] font-semibold">{pick(sc.title)}</h2>
+                <div
+                  className={
+                    "mt-4 grid gap-3 " +
+                    (sc.kind === "posters" || sc.kind === "frames"
+                      ? "grid-cols-2 sm:grid-cols-4"
+                      : "sm:grid-cols-3")
+                  }
+                >
+                  {sc.items.map((it, i) => {
+                    if (sc.kind === "posters")
+                      return (
+                        <div
+                          key={i}
+                          className="overflow-hidden rounded-xl border border-[rgb(var(--line))]"
+                          style={{
+                            background: `linear-gradient(165deg, rgb(var(--accent) / ${0.34 - 0.05 * i}), rgb(var(--accent) / 0.06))`,
+                          }}
+                        >
+                          <div className="relative aspect-[3/4] p-3">
+                            <span
+                              aria-hidden
+                              className="absolute right-2 top-2 h-6 w-6 rounded-full border-2 border-[rgb(var(--accent) / 0.45)]"
+                            />
+                            <div className="mt-[24%] text-[15px] font-black leading-snug tracking-tight">
+                              {pick(it.title)}
+                            </div>
+                            <div className="mt-2 h-0.5 w-8 bg-[rgb(var(--accent))]" />
+                            <div className="absolute inset-x-3 bottom-3 text-[10px] font-mono leading-relaxed text-[rgb(var(--muted))]">
+                              {pick(it.meta)}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    if (sc.kind === "frames")
+                      return (
+                        <div key={i} className="overflow-hidden rounded-xl border border-[rgb(var(--line))]">
+                          <div
+                            className="relative aspect-[16/10]"
+                            style={{
+                              background: `linear-gradient(150deg, rgb(var(--accent) / ${0.26 - 0.04 * i}), rgb(var(--ink) / 0.08))`,
+                            }}
+                          >
+                            <span aria-hidden className="absolute inset-x-0 top-0 block h-[9%] bg-black/70" />
+                            <span aria-hidden className="absolute inset-x-0 bottom-0 block h-[9%] bg-black/70" />
+                            <span className="absolute left-2 top-[13%] rounded bg-black/60 px-1.5 py-0.5 font-mono text-[10px] text-white">
+                              0{i + 1}
+                            </span>
+                            <span className="absolute bottom-[13%] right-2 rounded bg-black/60 px-1.5 py-0.5 text-right font-mono text-[10px] text-white">
+                              {pick(it.meta)}
+                            </span>
+                          </div>
+                          <div className="bg-[rgb(var(--bg))] px-3 py-2 text-[12px] font-semibold">
+                            {pick(it.title)}
+                          </div>
+                        </div>
+                      );
+                    if (sc.kind === "answers")
+                      return (
+                        <div key={i} className={panel + " !p-3"}>
+                          <div className="text-[13px] font-semibold leading-snug">{pick(it.title)}</div>
+                          <div className="mt-2 flex items-center gap-1.5 text-[11px] text-[rgb(var(--muted))]">
+                            <span className="rounded bg-[rgb(var(--accent) / 0.12)] px-1.5 py-0.5 font-mono font-semibold text-[rgb(var(--ink-soft))]">
+                              §
+                            </span>
+                            {pick(it.meta)}
+                          </div>
+                        </div>
+                      );
+                    const H = [34, 58, 42, 72, 50, 84, 62];
+                    return (
+                      <div key={i} className={panel + " !p-3"}>
+                        <div className="text-[11px] font-semibold uppercase tracking-wide text-[rgb(var(--muted))]">
+                          {pick(it.title)}
+                        </div>
+                        <div className="mt-1 text-[15px] font-bold">{pick(it.meta)}</div>
+                        <div className="mt-3 flex h-7 items-end gap-1" aria-hidden>
+                          {[0, 1, 2, 3, 4, 5, 6].map((j) => (
+                            <span
+                              key={j}
+                              className="flex-1 rounded-sm bg-[rgb(var(--accent))]"
+                              style={{ height: H[(i * 3 + j) % 7] + "%", opacity: 0.25 + 0.11 * ((j + i) % 5) }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* One quote + the numbers this product is running on */}
+            {qt && (
+              <section className="pb-8">
+                <figure className={panel} style={{ backgroundColor: "rgb(var(--accent) / 0.06)" }}>
+                  <blockquote className="text-[15px] font-medium leading-relaxed">“{pick(qt.text)}”</blockquote>
+                  <figcaption className="mt-2 text-[12px] text-[rgb(var(--muted))]">— {pick(qt.who)}</figcaption>
+                </figure>
+              </section>
+            )}
+            <section className="grid grid-cols-3 gap-3 border-t border-[rgb(var(--line))] pb-10 pt-6">
+              {(
+                [
+                  [tpl.admin.stats.users, t.statUsers],
+                  [tpl.admin.stats.revenue, t.statRevenue],
+                  [tpl.admin.stats.licenses, t.statLicenses],
+                ] as const
+              ).map(([v, l], i) => (
+                <div key={i} className="text-center">
+                  <div className="text-[20px] font-bold">{v}</div>
+                  <div className="mt-0.5 text-[11px] text-[rgb(var(--muted))]">{l}</div>
                 </div>
               ))}
             </section>
@@ -408,42 +548,87 @@ export function TemplateSite({
         {surface === "workspaces" && (
           <section className="py-10">
             <h2 className="text-[18px] font-semibold">{t.tabWorkspaces}</h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {[
-                { org: `${name} HQ`, role: t.owner, members: 8, active: true },
-                { org: `${name} Studio`, role: t.member, members: 3, active: false },
-              ].map((o, i) => (
-                <div
-                  key={i}
-                  className={
-                    panel +
-                    (o.active
-                      ? " border-[rgb(var(--accent))] ring-1 ring-[rgb(var(--accent))]"
-                      : "")
-                  }
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[15px] font-semibold">{o.org}</span>
-                    {o.active && (
-                      <span className="tag" style={solidStyle}>
-                        {t.activeWs}
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-1 text-[12px] text-[rgb(var(--muted))]">
-                    {o.role} · {o.members} {t.members}
-                  </div>
-                  <button
-                    type="button"
-                    className={(o.active ? ghostBtn : solidBtn) + " mt-3 w-full"}
-                    style={o.active ? undefined : solidStyle}
-                    disabled={o.active}
-                  >
-                    {o.active ? t.activeWs : t.switch}
-                  </button>
+            {wss ? (
+              <>
+                <p className="mt-1 max-w-2xl text-[12px] leading-relaxed text-[rgb(var(--muted))]">
+                  {pick(wss.note)}
+                </p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {wss.spaces.map((sp, i) => (
+                    <div
+                      key={i}
+                      className={
+                        panel +
+                        (i === 0 ? " border-[rgb(var(--accent))] ring-1 ring-[rgb(var(--accent))]" : "")
+                      }
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[15px] font-semibold">{pick(sp.name)}</span>
+                        {i === 0 && (
+                          <span className="tag" style={solidStyle}>
+                            {t.activeWs}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-1 text-[12px] text-[rgb(var(--muted))]">{pick(sp.detail)}</div>
+                      <div className="mt-3 space-y-1.5">
+                        {sp.pools.map((p, j) => (
+                          <div key={j} className="flex items-center justify-between gap-2 text-[12px]">
+                            <span className="text-[rgb(var(--ink-soft))]">{pick(p.label)}</span>
+                            <span className="font-mono font-semibold">{p.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        className={(i === 0 ? ghostBtn : solidBtn) + " mt-3 w-full"}
+                        style={i === 0 ? undefined : solidStyle}
+                        disabled={i === 0}
+                      >
+                        {i === 0 ? t.activeWs : t.switch}
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            ) : (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {[
+                  { org: `${name} HQ`, role: t.owner, members: 8, active: true },
+                  { org: `${name} Studio`, role: t.member, members: 3, active: false },
+                ].map((o, i) => (
+                  <div
+                    key={i}
+                    className={
+                      panel +
+                      (o.active
+                        ? " border-[rgb(var(--accent))] ring-1 ring-[rgb(var(--accent))]"
+                        : "")
+                    }
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[15px] font-semibold">{o.org}</span>
+                      {o.active && (
+                        <span className="tag" style={solidStyle}>
+                          {t.activeWs}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-1 text-[12px] text-[rgb(var(--muted))]">
+                      {o.role} · {o.members} {t.members}
+                    </div>
+                    <button
+                      type="button"
+                      className={(o.active ? ghostBtn : solidBtn) + " mt-3 w-full"}
+                      style={o.active ? undefined : solidStyle}
+                      disabled={o.active}
+                    >
+                      {o.active ? t.activeWs : t.switch}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         )}
 
