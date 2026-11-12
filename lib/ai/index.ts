@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { env } from "@/lib/env";
 import { resolveAiConfig, type AiProviderKey } from "./providers";
+import { getRouting, recordUsage, estimateTokens } from "@/lib/billing";
 
 export type ChatMessage = {
   role: "system" | "user" | "assistant";
@@ -40,7 +41,12 @@ function geminiClient(apiKey: string): GoogleGenerativeAI {
  * so the UI never hard-fails (handy for demos on a misconfigured key).
  */
 export async function chat(providerKey: string, messages: ChatMessage[]): Promise<string> {
-  const cfg = resolveAiConfig(providerKey);
+  // Admin routing (the /admin/models console) overrides the env default.
+  const route = await getRouting("chat");
+  const key = providerKey?.trim() || route?.provider || env.aiProvider();
+  const base = resolveAiConfig(key);
+  const cfg = route?.model ? { ...base, model: route.model } : base;
+  void providerKey;
 
   if (cfg.kind === "openai-compatible") {
     if (!cfg.apiKey) return "\n[AI error] No API key configured for this provider.";
@@ -51,6 +57,13 @@ export async function chat(providerKey: string, messages: ChatMessage[]): Promis
         messages,
         stream: false,
         temperature: 0.4,
+      });
+      await recordUsage({
+        lane: "chat",
+        provider: key,
+        model: cfg.model,
+        inputTokens: completion.usage?.prompt_tokens,
+        outputTokens: completion.usage?.completion_tokens,
       });
       return completion.choices[0]?.message?.content ?? "";
     } catch (err) {
@@ -71,6 +84,13 @@ export async function chat(providerKey: string, messages: ChatMessage[]): Promis
         max_tokens: 1024,
         system: system || undefined,
         messages: conv,
+      });
+      await recordUsage({
+        lane: "chat",
+        provider: key,
+        model: cfg.model,
+        inputTokens: msg.usage?.input_tokens,
+        outputTokens: msg.usage?.output_tokens,
       });
       return msg.content
         .map((b) => (b.type === "text" ? b.text : ""))
@@ -96,6 +116,14 @@ export async function chat(providerKey: string, messages: ChatMessage[]): Promis
         systemInstruction: system || undefined,
       });
       const result = await model.generateContent({ contents });
+      const um = (result.response as any).usageMetadata;
+      await recordUsage({
+        lane: "chat",
+        provider: key,
+        model: cfg.model,
+        inputTokens: um?.promptTokenCount,
+        outputTokens: um?.candidatesTokenCount,
+      });
       return result.response.text();
     } catch (err) {
       return `\n[AI error] ${(err as Error).message}`;
@@ -140,9 +168,10 @@ export async function* streamChatChunks(
   providerKey: string | undefined,
   messages: ChatMessage[],
 ): AsyncGenerator<string> {
-  const cfg = resolveAiConfig(
-    providerKey && providerKey.trim() ? providerKey.trim() : env.aiProvider(),
-  );
+  const route = await getRouting("chat");
+  const key = providerKey?.trim() || route?.provider || env.aiProvider();
+  const base = resolveAiConfig(key);
+  const cfg = route?.model ? { ...base, model: route.model } : base;
 
   if (cfg.kind === "openai-compatible") {
     if (!cfg.apiKey) {
@@ -150,15 +179,31 @@ export async function* streamChatChunks(
       return;
     }
     const client = openaiClient(cfg.baseURL, cfg.apiKey);
-    const completion = await client.chat.completions.create({
+    const completion: any = await client.chat.completions.create({
       model: cfg.model,
       messages,
       stream: true,
       temperature: 0.4,
+      // Ask compatible endpoints for a final usage chunk (OpenAI standard;
+      // endpoints that ignore it fall through to the character estimate).
+      stream_options: { include_usage: true },
     });
+    let usage: { input?: number; output?: number } | null = null;
+    let outChars = 0;
     for await (const chunk of completion) {
-      const text = chunk.choices[0]?.delta?.content;
-      if (text) yield text;
+      const text = chunk.choices?.[0]?.delta?.content;
+      if (text) {
+        outChars += text.length;
+        yield text;
+      }
+      const u = (chunk as any).usage;
+      if (u) usage = { input: u.prompt_tokens, output: u.completion_tokens };
+    }
+    if (usage) {
+      await recordUsage({ lane: "chat", provider: key, model: cfg.model, inputTokens: usage.input, outputTokens: usage.output });
+    } else {
+      const est = estimateTokens(outChars);
+      await recordUsage({ lane: "chat", provider: key, model: cfg.model, outputTokens: est.outputTokens, source: "estimated" });
     }
     return;
   }
@@ -180,10 +225,23 @@ export async function* streamChatChunks(
       messages: conv,
       stream: true,
     });
+    let aUsage: { input?: number; output?: number } | null = null;
+    let aChars = 0;
     for await (const event of stream) {
       if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+        aChars += event.delta.text.length;
         yield event.delta.text;
       }
+      const u = (event as any).usage;
+      if ((event as any).type === "message_delta" && u) {
+        aUsage = { input: u.input_tokens, output: u.output_tokens };
+      }
+    }
+    if (aUsage) {
+      await recordUsage({ lane: "chat", provider: key, model: cfg.model, inputTokens: aUsage.input, outputTokens: aUsage.output });
+    } else {
+      const est = estimateTokens(aChars);
+      await recordUsage({ lane: "chat", provider: key, model: cfg.model, outputTokens: est.outputTokens, source: "estimated" });
     }
     return;
   }
@@ -206,9 +264,22 @@ export async function* streamChatChunks(
       systemInstruction: system || undefined,
     });
     const result = await model.generateContentStream({ contents });
+    let gUsage: { input?: number; output?: number } | null = null;
+    let gChars = 0;
     for await (const chunk of result.stream) {
       const text = chunk.text();
-      if (text) yield text;
+      if (text) {
+        gChars += text.length;
+        yield text;
+      }
+      const um = (chunk as any).usageMetadata;
+      if (um) gUsage = { input: um.promptTokenCount, output: um.candidatesTokenCount };
+    }
+    if (gUsage) {
+      await recordUsage({ lane: "chat", provider: key, model: cfg.model, inputTokens: gUsage.input, outputTokens: gUsage.output });
+    } else {
+      const est = estimateTokens(gChars);
+      await recordUsage({ lane: "chat", provider: key, model: cfg.model, outputTokens: est.outputTokens, source: "estimated" });
     }
     return;
   }

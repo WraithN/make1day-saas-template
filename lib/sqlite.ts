@@ -280,6 +280,41 @@ CREATE TABLE IF NOT EXISTS video_usage (
   PRIMARY KEY (user_id, month)
 );
 
+-- Model billing (lib/billing.ts): admin routing + price sheet + usage ledger.
+CREATE TABLE IF NOT EXISTS model_routing (
+  lane                      TEXT PRIMARY KEY,
+  provider                  TEXT NOT NULL DEFAULT '',
+  model                     TEXT NOT NULL DEFAULT '',
+  fallback_provider         TEXT NOT NULL DEFAULT '',
+  fallback_model            TEXT NOT NULL DEFAULT '',
+  budget_usd_per_user_month REAL NOT NULL DEFAULT 0,
+  updated_at                TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS model_prices (
+  lane               TEXT PRIMARY KEY,
+  mode               TEXT NOT NULL DEFAULT 'tokens',
+  input_usd_per_1k   REAL NOT NULL DEFAULT 0,
+  output_usd_per_1k  REAL NOT NULL DEFAULT 0,
+  unit_usd           REAL NOT NULL DEFAULT 0,
+  unit               TEXT NOT NULL DEFAULT '',
+  updated_at         TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS usage_events (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  day          TEXT NOT NULL,
+  user_id      TEXT,
+  lane         TEXT NOT NULL,
+  provider     TEXT NOT NULL,
+  model        TEXT NOT NULL,
+  input_units  REAL NOT NULL DEFAULT 0,
+  output_units REAL NOT NULL DEFAULT 0,
+  cost_usd     REAL NOT NULL DEFAULT 0,
+  source       TEXT NOT NULL DEFAULT 'usage',
+  created_at   TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_usage_events_day ON usage_events(day);
+CREATE INDEX IF NOT EXISTS idx_usage_events_user ON usage_events(user_id, day);
+
 -- One-time auth tokens for the LOCAL SQLite auth path. The raw token is NEVER
 -- stored: only its SHA-256 hash. The row is deleted on first use (one-time),
 -- and expires_at enforces a hard deadline. The Supabase path uses Supabase

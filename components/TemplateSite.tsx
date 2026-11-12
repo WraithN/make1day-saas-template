@@ -35,6 +35,10 @@ export type TemplateChrome = {
   tabWorkflow: string;
   tabOps: string;
   invoices: string;
+  headerProviders: string;
+  headerUnit: string;
+  headerPrice: string;
+  opsConsoleNote: string;
   members: string;
   owner: string;
   member: string;
@@ -86,6 +90,8 @@ export function TemplateSite({
   t: TemplateChrome;
 }) {
   const [surface, setSurface] = useState<Surface>("landing");
+  // Demo-only: which provider each ops-console lane row has selected.
+  const [laneSel, setLaneSel] = useState<Record<number, number>>({});
   const pick = (x: TText) => x[lang] ?? x.en;
 
   const wrapStyle = {
@@ -665,7 +671,7 @@ export function TemplateSite({
           </section>
         )}
 
-        {/* ── Model routing + billing plane ── */}
+        {/* ── Model routing + billing plane (mirrors the shipped /admin/models) ── */}
         {surface === "ops" && tpl.ops && (
           <section className="py-10">
             <div className="flex items-center justify-between gap-2">
@@ -673,24 +679,67 @@ export function TemplateSite({
               <span className="tag">{name}</span>
             </div>
             <div className={panel + " mt-4"}>
-              <table className="w-full text-[12px]">
-                <thead>
-                  <tr className="border-b border-[rgb(var(--line))] text-left text-[rgb(var(--muted))]">
-                    <th className="py-1.5 pr-2 font-semibold">task</th>
-                    <th className="py-1.5 pr-2 font-semibold">primary</th>
-                    <th className="py-1.5 font-semibold">fallback</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tpl.ops.routes.map((r, i) => (
-                    <tr key={i} className="border-b border-[rgb(var(--line))] last:border-0">
-                      <td className="py-2 pr-2 text-[rgb(var(--ink-soft))]">{pick(r.task)}</td>
-                      <td className="py-2 pr-2 font-mono text-[11px]">{r.primary}</td>
-                      <td className="py-2 font-mono text-[11px] text-[rgb(var(--muted))]">{r.fallback}</td>
+              {tpl.ops.lanes ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-[12px]">
+                    <thead>
+                      <tr className="border-b border-[rgb(var(--line))] text-left text-[rgb(var(--muted))]">
+                        <th className="py-1.5 pr-3 font-semibold">task</th>
+                        <th className="py-1.5 pr-3 font-semibold">{t.headerProviders}</th>
+                        <th className="py-1.5 pr-3 font-semibold">{t.headerUnit}</th>
+                        <th className="py-1.5 font-semibold">{t.headerPrice}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tpl.ops.lanes.map((l, i) => {
+                        const sel = laneSel[i] ?? 0;
+                        return (
+                          <tr key={i} className="border-b border-[rgb(var(--line))] last:border-0">
+                            <td className="py-2 pr-3 text-[rgb(var(--ink-soft))]">{pick(l.task)}</td>
+                            <td className="py-2 pr-3">
+                              <select
+                                aria-label={pick(l.task)}
+                                value={sel}
+                                onChange={(e) =>
+                                  setLaneSel((s) => ({ ...s, [i]: Number(e.target.value) }))
+                                }
+                                className="rounded-md border border-[rgb(var(--line))] bg-[rgb(var(--bg))] px-2 py-1 text-[12px]"
+                              >
+                                {l.providers.map((pv, j) => (
+                                  <option key={j} value={j}>
+                                    {pv}
+                                  </option>
+                                ))}
+                              </select>
+                            </td>
+                            <td className="py-2 pr-3">{pick(l.unitLabel)}</td>
+                            <td className="py-2 font-mono font-semibold">{pick(l.unitPrice)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <table className="w-full text-[12px]">
+                  <thead>
+                    <tr className="border-b border-[rgb(var(--line))] text-left text-[rgb(var(--muted))]">
+                      <th className="py-1.5 pr-2 font-semibold">task</th>
+                      <th className="py-1.5 pr-2 font-semibold">primary</th>
+                      <th className="py-1.5 font-semibold">fallback</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {tpl.ops.routes.map((r, i) => (
+                      <tr key={i} className="border-b border-[rgb(var(--line))] last:border-0">
+                        <td className="py-2 pr-2 text-[rgb(var(--ink-soft))]">{pick(r.task)}</td>
+                        <td className="py-2 pr-2 font-mono text-[11px]">{r.primary}</td>
+                        <td className="py-2 font-mono text-[11px] text-[rgb(var(--muted))]">{r.fallback}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
             <ul className="mt-3 space-y-1.5 text-[12px] text-[rgb(var(--ink-soft))]">
               {tpl.ops.billing.map((b, i) => (
@@ -700,6 +749,11 @@ export function TemplateSite({
                 </li>
               ))}
             </ul>
+            {tpl.ops.lanes && (
+              <p className="mt-3 border-t border-[rgb(var(--line))] pt-3 text-[11px] leading-relaxed text-[rgb(var(--muted))]">
+                {t.opsConsoleNote}
+              </p>
+            )}
           </section>
         )}
 

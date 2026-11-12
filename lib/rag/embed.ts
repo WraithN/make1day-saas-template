@@ -7,12 +7,15 @@
 // Ollama / vLLM, etc. No key → returns null and the caller degrades to BM25.
 
 import { env } from "@/lib/env";
+import { getRouting, recordUsage } from "@/lib/billing";
 
 export type EmbeddingConfig = {
   apiKey: string;
   baseUrl: string;
   model: string;
   dimensions: number;
+  /** Which env provider lane the key came from (ledger label only). */
+  sourceProvider?: string;
 };
 
 /** Returns null when no embedding key is configured. */
@@ -29,6 +32,7 @@ export function embeddingConfig(): EmbeddingConfig | null {
 
 type EmbeddingResponse = {
   data?: { index: number; embedding: number[] }[];
+  usage?: { prompt_tokens?: number; total_tokens?: number };
   error?: { message?: string };
 };
 
@@ -60,6 +64,16 @@ async function requestBatch(
   if (vectors.length !== input.length || vectors.some((v) => !Array.isArray(v))) {
     return null;
   }
+  // Meter the retrieval spend: providers return real token usage here;
+  // otherwise fall back to a ~4 chars/token estimate.
+  const tokens = json.usage?.total_tokens ?? json.usage?.prompt_tokens ?? Math.round(input.join("").length / 4);
+  await recordUsage({
+    lane: "embed",
+    provider: cfg.sourceProvider ?? env.aiProvider(),
+    model: cfg.model,
+    inputTokens: tokens,
+    source: json.usage ? "usage" : "estimated",
+  });
   return vectors;
 }
 
@@ -67,8 +81,11 @@ const BATCH_SIZE = 32;
 
 /** Embed a list of texts. Returns null on missing key / any API failure. */
 export async function embedTexts(texts: string[]): Promise<number[][] | null> {
-  const cfg = embeddingConfig();
-  if (!cfg || texts.length === 0) return null;
+  const base = embeddingConfig();
+  if (!base || texts.length === 0) return null;
+  // The /admin/models console can point embeddings at another model.
+  const route = await getRouting("embed");
+  const cfg = route?.model ? { ...base, model: route.model } : base;
 
   try {
     const out: number[][] = [];

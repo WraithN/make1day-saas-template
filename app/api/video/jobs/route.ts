@@ -12,8 +12,10 @@ import { logger } from "@/lib/logger";
 import {
   videoConfigured,
   submitFaceSwap,
+  faceSwapModel,
 } from "@/lib/video/fal";
 import { consumeCredits, costOf, CREDITS_PER_MONTH, refundCredits } from "@/lib/video/quota";
+import { recordUsage } from "@/lib/billing";
 import { insertJob, listJobs } from "@/lib/video/store";
 import { getVideoTemplate, templateSourceUrl } from "@/lib/content/video-templates";
 import { screenPrompt, blocked as isBlocked } from "@/lib/moderation";
@@ -156,6 +158,17 @@ export async function POST(req: Request) {
       credits: cost,
       consent_at: new Date().toISOString(),
       error: null,
+    });
+    // Cost ledger: fal bills per request and does not report money back on
+    // the queue handle, so this row is an ESTIMATE at the admin's unit price
+    // (source="priced") - the ledger labels it as such, honestly.
+    await recordUsage({
+      lane: "video",
+      provider: "fal",
+      model: faceSwapModel(),
+      units: 1,
+      userId,
+      source: "priced",
     });
     return NextResponse.json({ jobId: job.id, credits: quota }, { status: 202 });
   } catch (err) {

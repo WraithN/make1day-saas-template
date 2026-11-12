@@ -106,6 +106,8 @@ const ADMIN_FILES = [
   "app/admin/users/page.tsx",
   "app/admin/stats/page.tsx",
   "app/admin/models/page.tsx",
+  "app/api/admin/models/route.ts",
+  "components/console/ModelConsole.tsx",
   "app/admin/system/page.tsx",
   // Role-management endpoint is only meaningful with the admin console.
   "app/api/admin/users/route.ts",

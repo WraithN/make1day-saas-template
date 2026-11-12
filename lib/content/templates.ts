@@ -59,6 +59,14 @@ export interface TemplateMeta {
   /** Model-routing + billing plane: what admins actually configure in an
    *  AI SaaS (providers per task, fallbacks, unit economics). */
   ops?: {
+    /** Lane rows for the interactive console demo: each lane lets you pick
+     *  providers and see the unit price the shipped backend would meter. */
+    lanes?: {
+      task: TText;
+      providers: string[];
+      unitLabel: TText;
+      unitPrice: TText;
+    }[];
     routes: { task: TText; primary: string; fallback: string }[];
     billing: TText[];
   };
@@ -603,6 +611,33 @@ export const TEMPLATES: TemplateMeta[] = [
       ],
     },
     ops: {
+      lanes: [
+      {
+        task: { en: "Script & chat edits", zh: "脚本与对话修改", ja: "脚本・対話編集", fr: "Script & éditions", de: "Skript & Edits" },
+        providers: ["DeepSeek", "OpenAI", "Anthropic", "Gemini", "Local rule templates (offline)"],
+        unitLabel: { en: "$/1k tokens in/out", zh: "$/1k token 入/出", ja: "$/1kトークン 入出力", fr: "$/1k jetons in/out", de: "$/1k Tokens ein/aus" },
+        unitPrice: { en: "$0.15 / $0.60", zh: "$0.15 / $0.60", ja: "$0.15/$0.60", fr: "$0.15/$0.60", de: "$0.15/$0.60" },
+      },
+      {
+        task: { en: "Scene videos", zh: "分镜视频", ja: "シーン動画", fr: "Vidéos de scène", de: "Szenen-Videos" },
+        providers: ["Seedance", "Kling", "Veo", "Wan", "Hailuo", "CogVideoX", "Jimeng"],
+        unitLabel: { en: "$/clip", zh: "$/条片段", ja: "$/クリップ", fr: "$/clip", de: "$/Clip" },
+        unitPrice: { en: "$0.20–1.20", zh: "$0.20–1.20", ja: "$0.20–1.20", fr: "$0,20–1,20", de: "$0,20–1,20" },
+      },
+      {
+        task: { en: "Voiceover", zh: "配音", ja: "ナレーション", fr: "Voix off", de: "Synchronisation" },
+        providers: ["edge-tts (free)", "ElevenLabs", "CosyVoice"],
+        unitLabel: { en: "$/1k characters", zh: "$/1k 字符", ja: "$/1k文字", fr: "$/1k caractères", de: "$/1k Zeichen" },
+        unitPrice: { en: "$0 / $1.40", zh: "$0 / $1.40", ja: "$0/$1.40", fr: "$0/$1,40", de: "$0/$1,40" },
+      },
+      {
+        task: { en: "Music & SFX", zh: "音乐音效", ja: "音楽・SE", fr: "Musique & SFX", de: "Musik & SFX" },
+        providers: ["Local synth (zero cost)", "Licensed library"],
+        unitLabel: { en: "$/track", zh: "$/轨", ja: "$/トラック", fr: "$/piste", de: "$/Track" },
+        unitPrice: { en: "$0–3", zh: "$0–3", ja: "$0–3", fr: "$0–3", de: "$0–3" },
+      },
+      ],
+
       routes: [
         {
           task: { en: "Script & chat edits", zh: "脚本与对话修改", ja: "脚本・対話編集", fr: "Script & éditions", de: "Skript & Edits" },
@@ -795,6 +830,33 @@ export const TEMPLATES: TemplateMeta[] = [
       ],
     },
     ops: {
+      lanes: [
+      {
+        task: { en: "Drafts & thumbnails", zh: "草稿缩略", ja: "下書き", fr: "Brouillons", de: "Drafts" },
+        providers: ["Flux schnell-class", "SDXL-turbo"],
+        unitLabel: { en: "$/image", zh: "$/图", ja: "$/枚", fr: "$/image", de: "$/Bild" },
+        unitPrice: { en: "$0.003", zh: "$0.003", ja: "$0.003", fr: "$0.003", de: "$0.003" },
+      },
+      {
+        task: { en: "Final brand assets", zh: "品牌定稿", ja: "決定稿", fr: "Visuels finaux", de: "Finale" },
+        providers: ["Flux 2 Pro", "SD 3.5", "GPT-Image"],
+        unitLabel: { en: "$/image", zh: "$/图", ja: "$/枚", fr: "$/image", de: "$/Bild" },
+        unitPrice: { en: "$0.05", zh: "$0.05", ja: "$0.05", fr: "$0.05", de: "$0.05" },
+      },
+      {
+        task: { en: "Product edits", zh: "产品改图", ja: "商品編集", fr: "Éditions produit", de: "Produkt-Edits" },
+        providers: ["Multimodal edit (Nano-Banana class)", "Inpaint chain"],
+        unitLabel: { en: "$/image", zh: "$/图", ja: "$/枚", fr: "$/image", de: "$/Bild" },
+        unitPrice: { en: "$0.039", zh: "$0.039", ja: "$0.039", fr: "$0.039", de: "$0.039" },
+      },
+      {
+        task: { en: "Upscale", zh: "放大", ja: "拡大", fr: "Upscale", de: "Upscale" },
+        providers: ["Real-ESRGAN 4K", "Provider-native upscale"],
+        unitLabel: { en: "$/image", zh: "$/图", ja: "$/枚", fr: "$/image", de: "$/Bild" },
+        unitPrice: { en: "$0.002", zh: "$0.002", ja: "$0.002", fr: "$0.002", de: "$0.002" },
+      },
+      ],
+
       routes: [
         {
           task: { en: "Draft / thumbnails", zh: "草稿缩略", ja: "下書き", fr: "Brouillons", de: "Drafts" },
@@ -919,6 +981,27 @@ export const TEMPLATES: TemplateMeta[] = [
   {
     slug: "askdocs",
     ops: {
+      lanes: [
+      {
+        task: { en: "Query routing", zh: "查询路由", ja: "クエリルーティング", fr: "Routage de requête", de: "Query-Routing" },
+        providers: ["GPT-4o-mini", "DeepSeek", "Heuristic rules (no key)"],
+        unitLabel: { en: "$/1k tokens", zh: "$/1k token", ja: "$/1kトークン", fr: "$/1k jetons", de: "$/1k Tokens" },
+        unitPrice: { en: "$0.00015–0.0006", zh: "$0.00015–0.0006", ja: "$0.00015–0.0006", fr: "$0.00015–0.0006", de: "$0.00015–0.0006" },
+      },
+      {
+        task: { en: "Final answers", zh: "最终回答", ja: "最終回答", fr: "Réponses finales", de: "Finale Antworten" },
+        providers: ["Frontier model per plan", "Extractive answer (no key)"],
+        unitLabel: { en: "$/1k tokens", zh: "$/1k token", ja: "$/1kトークン", fr: "$/1k jetons", de: "$/1k Tokens" },
+        unitPrice: { en: "$0.0006–0.01", zh: "$0.0006–0.01", ja: "$0.0006–0.01", fr: "$0.0006–0.01", de: "$0.0006–0.01" },
+      },
+      {
+        task: { en: "Embeddings", zh: "向量化", ja: "埋め込み", fr: "Plongements", de: "Embeddings" },
+        providers: ["text-embedding-3-small", "BM25-only (no vectors)"],
+        unitLabel: { en: "$/1M tokens", zh: "$/1M token", ja: "$/1Mトークン", fr: "$/1M jetons", de: "$/1M Tokens" },
+        unitPrice: { en: "$0.02 / $0", zh: "$0.02 / $0", ja: "$0.02/$0", fr: "$0.02/$0", de: "$0.02/$0" },
+      },
+      ],
+
       routes: [
         {
           task: { en: "Query routing", zh: "查询路由", ja: "クエリルーティング", fr: "Routage de requête", de: "Query-Routing" },
