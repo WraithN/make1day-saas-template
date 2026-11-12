@@ -102,6 +102,9 @@ export interface PaymentProvider {
 export type PortalParams = {
   customerId: string;
   returnUrl: string;
+  /** Signed-in user's email. Waffo Pancake has no customer ids: its portal
+   *  SSO signs the customer in by the SAME buyerIdentity used at checkout. */
+  buyerEmail?: string;
 };
 
 export type PortalResult = {

@@ -3,6 +3,7 @@ import { getCanonicalLang } from "@/lib/i18n-server";
 import { langAlternatePaths, variantCanonical } from "@/lib/seo-alternates";
 import Link from "next/link";
 import { env } from "@/lib/env";
+import { paymentProviderLabel } from "@/lib/payments";
 
 // Every identity string on this page resolves from lib/env.ts. Hard-coding a
 // company name, mailbox or jurisdiction here is how the old policy ended up
@@ -247,7 +248,10 @@ export default function PrivacyPage() {
             <li>
               <strong className="text-ink">Payments:</strong> one of Stripe,
               Creem, PayPal, Waffo (Pancake or Acquiring) or Lemon Squeezy —
-              buyer email, order metadata and webhook payloads.
+              buyer email, order metadata and webhook payloads. This store
+              currently sells through <strong className="text-ink">{env.paymentProvider() === "waffo" ? "Waffo Pancake" : paymentProviderLabel()}</strong>{" "}
+              as Merchant of Record: card data is handled exclusively by them
+              under PCI-DSS and is never stored on our servers.
             </li>
             <li>
               <strong className="text-ink">Database / auth:</strong> Supabase,
@@ -293,11 +297,14 @@ export default function PrivacyPage() {
           <p>
             The providers above may process data in the United States, the EU
             or other jurisdictions, so transfers outside your country of
-            residence can occur. It is the operator&apos;s responsibility to
-            put the appropriate data processing agreements and transfer
-            safeguards in place with those providers before launch. The
-            repository contains a fill-in DPA template for that purpose; it is
-            not a signed agreement and not legal advice.
+            residence can occur. Where such a transfer is subject to GDPR or
+            UK GDPR, we rely on the EU Standard Contractual Clauses (SCC) — or
+            another lawful transfer mechanism such as an adequacy decision —
+            together with the data processing agreements each provider offers.
+            It is the operator&apos;s responsibility to put those agreements
+            and transfer safeguards in place with those providers before
+            launch. The repository contains a fill-in DPA template for that
+            purpose; it is not a signed agreement and not legal advice.
             {DPA_URL ? (
               <>
                 {" "}Our DPA is available at{" "}
@@ -352,7 +359,13 @@ export default function PrivacyPage() {
             own, replacing the address with an irreversible tombstone.
             Otherwise write to{" "}
             <span className="font-mono">{PRIVACY_EMAIL}</span> and we will
-            verify the request before acting on it. Clearing browser storage
+            verify the request before acting on it; requests are handled within
+            30 calendar days. If you consider that our processing infringes
+            your data-protection rights, you may also lodge a complaint with
+            the supervisory authority in your country of residence. We send
+            only transactional and service messages (license keys, receipts,
+            renewal and security notices); we do not run marketing campaigns,
+            so there is nothing to opt out of beyond those service essentials. Clearing browser storage
             removes only your local preferences and consent choice —{" "}
             <strong className="text-ink">
               it does not delete server-side records
@@ -371,7 +384,10 @@ export default function PrivacyPage() {
             constant-time comparisons, one-time tokens are stored only as
             hashes, and analytics cookies are httpOnly. No method of
             transmission or storage is perfectly secure, so we cannot
-            guarantee absolute security.
+            guarantee absolute security. If a security incident affecting your
+            personal data occurs, we notify affected users and, where the law
+            requires it, the competent supervisory authority within 72 hours of
+            becoming aware of the breach.
           </p>
         </section>
 
@@ -392,8 +408,10 @@ export default function PrivacyPage() {
           </h2>
           <p>
             We may update this policy as the product changes. Material changes
-            are reflected by the &ldquo;Last updated&rdquo; date above and, where
-            appropriate, by a notice on the site.
+            are announced at least 15 days before taking effect where you have
+            a registered email with us, are reflected by the &ldquo;Last
+            updated&rdquo; date above and, where appropriate, by a notice on
+            the site.
           </p>
         </section>
 
@@ -405,6 +423,9 @@ export default function PrivacyPage() {
             Data controller: <strong className="text-ink">{ENTITY}</strong>.
             <br />
             Privacy requests: <span className="font-mono">{PRIVACY_EMAIL}</span>.
+            <br />
+            Data Protection Officer: not appointed — at this scale privacy
+            requests are handled directly by the operator at the address above.
             <br />
             Site: <span className="font-mono">{SITE_URL}</span>.
           </p>

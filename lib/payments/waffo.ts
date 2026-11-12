@@ -12,6 +12,8 @@ import type {
   NormalizedSubEvent,
   PaymentProvider,
   PlanId,
+  PortalParams,
+  PortalResult,
 } from "./types";
 import { toMajor } from "./types";
 
@@ -533,6 +535,50 @@ export const waffoProvider: PaymentProvider = {
     return isPancake()
       ? normalizePancakeEvent(verifyPancakeWebhook(rawBody, headers))
       : normalizeAcquiringEvent(verifyAcquiringWebhook(rawBody, headers));
+  },
+
+  /**
+   * Waffo Pancake Customer Portal SSO: mint a short-lived portal session
+   * (POST /v1/actions/auth/issue-session-token with purpose:"portal") and
+   * send the browser to portalUrl + "#token=…". This is the ONLINE
+   * self-service cancellation flow Waffo's merchant review requires
+   * ("not just email"): the portal lets the customer cancel or reactivate
+   * their subscription without us. Acquiring has no documented portal.
+   * Requires WAFFO_STORE_ID + WAFFO_MERCHANT_ID + WAFFO_PRIVATE_KEY; the
+   * buyerIdentity MUST equal the email passed at checkout.
+   */
+  async createPortalSession(p: PortalParams): Promise<PortalResult | null> {
+    if (!isPancake()) return null;
+    const storeId = env.waffoStoreId();
+    const buyerIdentity = (p.buyerEmail || "").trim() || p.customerId;
+    if (!storeId || !buyerIdentity) return null;
+    const reqPath = "/v1/actions/auth/issue-session-token";
+    const body = JSON.stringify({
+      storeId,
+      buyerIdentity,
+      purpose: "portal",
+    });
+    const res = await fetch(`${env.waffoApiBase()}${reqPath}`, {
+      method: "POST",
+      headers: pancakeSignedHeaders("POST", reqPath, body),
+      body,
+      signal: AbortSignal.timeout(9000),
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      throw new Error(`waffo_portal_http_${res.status}: ${text.slice(0, 200)}`);
+    }
+    let json: { data?: { portalUrl?: string; token?: string } };
+    try {
+      json = JSON.parse(text);
+    } catch {
+      throw new Error(`waffo_portal_bad_json: ${text.slice(0, 120)}`);
+    }
+    const portalUrl = json?.data?.portalUrl;
+    const token = json?.data?.token;
+    if (!portalUrl || !token) return null;
+    // Bearer credential in the fragment: mint-on-click, never logged.
+    return { url: `${portalUrl}#token=${token}` };
   },
 };
 

@@ -34,19 +34,24 @@ export async function POST(req: Request) {
       { status: 422 },
     );
   }
-  if (!sub.provider_customer_id) {
+  const provider = getPaymentProvider();
+  // Waffo Pancake has no gateway customer ids: its portal SSO signs the
+  // person in with the SAME buyer email that was passed at checkout, so an
+  // email on file is enough — don't block the online cancellation flow just
+  // because provider_customer_id is empty.
+  if (!sub.provider_customer_id && !(provider.name === "waffo" && user.email)) {
     return NextResponse.json(
       { error: "No billing customer on file", reason: "no_customer" },
       { status: 422 },
     );
   }
 
-  const provider = getPaymentProvider();
   const portal = provider.createPortalSession
     ? await provider
         .createPortalSession({
-          customerId: sub.provider_customer_id,
+          customerId: sub.provider_customer_id ?? "",
           returnUrl: `${env.siteUrl()}/account/billing`,
+          buyerEmail: user.email ?? undefined,
         })
         .catch((err) => {
           logger.warn("portal session failed", {
