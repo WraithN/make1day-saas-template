@@ -40,6 +40,59 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
+// One-tap vertical starter configs. Every id below is validated against
+// config.ts unions by TypeScript at build time.
+const PRESETS: { id: string; labelKey: string; patch: Partial<BuilderConfig> }[] = [
+  {
+    id: "saas",
+    labelKey: "builder.preset.saas",
+    patch: {
+      auth: ["email", "google"],
+      payment: ["waffo"],
+      ai: [],
+      features: ["landing", "dashboard", "account", "admin"],
+      style: "slate",
+      skills: ["frontend", "ui", "backend", "testing", "auth", "payments", "database", "deploy", "agents"],
+    },
+  },
+  {
+    id: "video",
+    labelKey: "builder.preset.video",
+    patch: {
+      auth: ["email", "google"],
+      payment: ["waffo"],
+      ai: ["openai"],
+      features: ["landing", "dashboard", "account", "admin", "premium", "video"],
+      style: "midnight",
+      skills: ["frontend", "ui", "backend", "testing", "seo", "auth", "payments", "database", "i18n", "deploy", "agents", "video"],
+    },
+  },
+  {
+    id: "image",
+    labelKey: "builder.preset.image",
+    patch: {
+      auth: ["email", "google"],
+      payment: ["waffo"],
+      ai: ["openai"],
+      features: ["landing", "dashboard", "account", "admin", "premium"],
+      style: "candy",
+      skills: ["frontend", "ui", "backend", "testing", "seo", "auth", "payments", "database", "i18n", "deploy", "agents"],
+    },
+  },
+  {
+    id: "qa",
+    labelKey: "builder.preset.qa",
+    patch: {
+      auth: ["email", "google"],
+      payment: ["waffo"],
+      ai: ["openai"],
+      features: ["landing", "dashboard", "account", "admin", "rag", "premium"],
+      style: "ocean",
+      skills: ["frontend", "ui", "backend", "testing", "seo", "auth", "payments", "database", "rag", "i18n", "deploy", "agents"],
+    },
+  },
+];
+
 export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
   const { t } = useLanguage();
   const [config, setConfig] = useState<BuilderConfig>(() =>
@@ -50,6 +103,8 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
   const [needLicense, setNeedLicense] = useState(false);
   const [previewBusy, setPreviewBusy] = useState(false);
   const [previewErr, setPreviewErr] = useState("");
+  const [preset, setPreset] = useState("");
+  const [allStyles, setAllStyles] = useState(false);
 
   function set<K extends keyof BuilderConfig>(key: K, value: BuilderConfig[K]) {
     setConfig((c) => ({ ...c, [key]: value }));
@@ -155,6 +210,32 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
     <div className="grid gap-6 lg:grid-cols-[1fr_360px] lg:gap-8">
       {/* ── Left: configuration ───────────────────────────── */}
       <div className="space-y-8">
+        {/* Scene presets: one tap → a sensible vertical starter config; every
+            control below still overrides it freely. */}
+        <div>
+          <div className="eyebrow mb-3">{t("builder.presetTitle")}</div>
+          <div className="flex flex-wrap gap-2">
+            {PRESETS.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => {
+                  setConfig((c) => ({ ...c, ...p.patch }));
+                  setPreset(p.id);
+                }}
+                className={
+                  "rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition " +
+                  (preset === p.id
+                    ? "border-accent bg-accent/10 text-accent"
+                    : "border-line hover:border-accent/50")
+                }
+              >
+                {t(p.labelKey)}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <Section eyebrow={t("builder.s01")} title={t("builder.s01title")}>
           <input
             className="input max-w-sm"
@@ -231,7 +312,7 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
 
         <Section eyebrow={t("builder.s06")} title={t("builder.s06title")}>
           <div className="grid gap-3 sm:grid-cols-2">
-            {STYLE_OPTIONS.map((o) => {
+            {(allStyles ? STYLE_OPTIONS : STYLE_OPTIONS.slice(0, 4)).map((o) => {
               const pal = PALETTES[o.id];
               const active = config.style === o.id;
               return (
@@ -269,6 +350,16 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
               );
             })}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setAllStyles((v) => !v)}
+            className="mt-3 text-[13px] font-semibold text-accent hover:underline"
+          >
+            {allStyles
+              ? t("builder.styleLess")
+              : t("builder.styleMore").replace("{n}", String(STYLE_OPTIONS.length))}
+          </button>
 
           {/* Local, contained preview of the chosen style — does NOT recolor
               the make1day.dev site. */}

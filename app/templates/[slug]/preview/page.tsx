@@ -62,7 +62,6 @@ export default async function TemplatePreviewPage({
     oneTime: tr(lang, "templates.demo.oneTime"),
     choose: tr(lang, "templates.demo.choose"),
     tabWorkspaces: tr(lang, "templates.tab.workspaces"),
-    tabVideo: tr(lang, "templates.tab.video"),
     members: tr(lang, "templates.demo.members"),
     owner: tr(lang, "templates.demo.owner"),
     member: tr(lang, "templates.demo.member"),

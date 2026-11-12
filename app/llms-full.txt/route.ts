@@ -90,7 +90,8 @@ endpoints ARE enabled (every generated project ships them live, with the
 screening compiled in), every user-supplied string routed to a generation
 model (assistant chat POST /api/ai, RAG questions POST /api/rag/query,
 video-workflow inputs POST /api/video/jobs) is screened BEFORE generation by
-a moderation API (Creem Moderation API when configured) — "deny" and "flag"
+the active gateway's official moderation API (Waffo Prompt Sift or Creem
+Moderation, whichever is configured) — "deny" and "flag"
 both block, transport failures fail closed with 503, 5s timeout. Deployments
 without a moderation key enforce a local prohibited-content blocklist as
 fallback. The public Acceptable Use Policy (NSFW zero tolerance + filtering

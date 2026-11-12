@@ -24,6 +24,8 @@ export interface TemplateTier {
 
 export interface TemplateMeta {
   slug: string;
+  /** Scene grouping for the showroom: "ai" verticals first, classics below. */
+  group: "ai" | "classic";
   styleId: StyleId;
   /** Short category chip shown on the card + preview nav. */
   category: TText;
@@ -45,23 +47,13 @@ export interface TemplateMeta {
     stats: { users: string; licenses: string; revenue: string; tickets: string };
     activity: TText[];
   };
-  /**
-   * Video-workflow studio surface (static demo, no live generation): shown
-   * only for templates that ship the AI video-workflow module. Steps mirror
-   * the shipped code's guardrails: template pick -> portrait-rights
-   * attestation -> render with a visible AI label; credits refund on failure.
-   */
-  studio?: {
-    note: TText;
-    steps: TText[];
-    templates: { name: TText; seconds: number }[];
-    outputs: { label: TText; badge: TText }[];
-  };
+
 }
 
 export const TEMPLATES: TemplateMeta[] = [
   {
     slug: "aurora-saas",
+    group: "classic" as const,
     styleId: "aurora",
     category: { en: "SaaS", zh: "SaaS", ja: "SaaS", fr: "SaaS", de: "SaaS" },
     name: { en: "Aurora SaaS", zh: "极光 SaaS", ja: "Aurora SaaS", fr: "Aurora SaaS", de: "Aurora SaaS" },
@@ -154,6 +146,7 @@ export const TEMPLATES: TemplateMeta[] = [
   },
   {
     slug: "pixel-store",
+    group: "classic" as const,
     styleId: "pixel",
     category: { en: "Store", zh: "商店", ja: "ストア", fr: "Boutique", de: "Shop" },
     name: { en: "Pixel Store", zh: "像素商店", ja: "Pixel Store", fr: "Pixel Store", de: "Pixel Store" },
@@ -246,6 +239,7 @@ export const TEMPLATES: TemplateMeta[] = [
   },
   {
     slug: "emerald-clinic",
+    group: "classic" as const,
     styleId: "emerald",
     category: { en: "Local", zh: "本地", ja: "地元", fr: "Local", de: "Lokal" },
     name: { en: "Emerald Care", zh: "翠安诊所", ja: "Emerald Care", fr: "Emerald Care", de: "Emerald Care" },
@@ -338,6 +332,7 @@ export const TEMPLATES: TemplateMeta[] = [
   },
   {
     slug: "ignite-fit",
+    group: "classic" as const,
     styleId: "sunset",
     category: { en: "Fitness", zh: "健身", ja: "フィットネス", fr: "Fitness", de: "Fitness" },
     name: { en: "Ignite Fit", zh: "燃动健身", ja: "Ignite Fit", fr: "Ignite Fit", de: "Ignite Fit" },
@@ -430,6 +425,7 @@ export const TEMPLATES: TemplateMeta[] = [
   },
   {
     slug: "reel-forge",
+    group: "ai" as const,
     styleId: "midnight",
     category: { en: "Video", zh: "视频", ja: "動画", fr: "Vidéo", de: "Video" },
     name: { en: "Reel Forge", zh: "Reel 锻造坊", ja: "Reel Forge", fr: "Reel Forge", de: "Reel Forge" },
@@ -519,32 +515,194 @@ export const TEMPLATES: TemplateMeta[] = [
         { en: "Rights attestation recorded: u_8842", zh: "已记录肖像权确认：u_8842", ja: "権利確認を記録: u_8842", fr: "Attestation enregistrée : u_8842", de: "Rechte-Bestätigung: u_8842" },
       ],
     },
-    studio: {
-      note: {
-        en: "Static demo of the video-workflow module — in a real build it runs on YOUR provider keys.",
-        zh: "视频工作流模块的静态演示——真实部署里用你自己的供应商密钥运行。",
-        ja: "動画ワークフロー・モジュールの静的デモ——実運用ではあなた自身のプロバイダキーで動きます。",
-        fr: "Démo statique du module de flux vidéo — en production, sur VOS clés prestataire.",
-        de: "Statische Demo des Video-Workflow-Moduls — im Ernstlauf mit DEINEN Provider-Keys.",
+  },
+  {
+    slug: "poster-forge",
+    group: "ai" as const,
+    styleId: "candy",
+    category: { en: "AI Image", zh: "AI 图片", ja: "AI 画像", fr: "Image IA", de: "KI-Bild" },
+    name: { en: "Poster Forge", zh: "海报熔炉", ja: "Poster Forge", fr: "Poster Forge", de: "Poster Forge" },
+    heroTitle: {
+      en: "One brief, a hundred scroll-stopping posters.",
+      zh: "一句需求，一百张抓眼海报。",
+      ja: "一言のブリーフから、目を引くポスターを100枚。",
+      fr: "Un brief, cent affiches qui arrêtent le scroll.",
+      de: "Ein Briefing, hundert Scroll-Stopper-Poster.",
+    },
+    heroSubtitle: {
+      en: "An AI image SaaS: briefs in, brand-consistent posters out — prompt screening included.",
+      zh: "AI 图片生成 SaaS：输入需求，产出符合品牌的海报——内置提示词审查。",
+      ja: "AI 画像 SaaS：ブリーフを入れるとブランドに合うポスターが出力——プロンプト審査組み込み。",
+      fr: "Un SaaS d'image IA : le brief entre, l'affiche on-brand sort — criblage inclus.",
+      de: "Ein KI-Bild-SaaS: Briefing rein, markenkonsistentes Poster raus — Screening inklusive.",
+    },
+    features: [
+      { en: "Style-locked generation", zh: "风格锁定生成", ja: "スタイル固定生成", fr: "Génération style verrouillé", de: "Style-fixierte Generierung" },
+      { en: "Batch poster sets", zh: "海报批量出图", ja: "ポスター一括出力", fr: "Lots d'affiches", de: "Poster-Batches" },
+      { en: "Prompt moderation built in", zh: "内置提示词审查", ja: "プロンプト審査内蔵", fr: "Criblage de prompts intégré", de: "Prompt-Screening integriert" },
+    ],
+    primaryCta: { en: "Forge a poster", zh: "生成一张海报", ja: "ポスターを作る", fr: "Créer une affiche", de: "Poster erstellen" },
+    tiers: [
+      {
+        name: { en: "Free", zh: "免费", ja: "無料", fr: "Gratuit", de: "Gratis" },
+        price: "$0",
+        period: "mo",
+        features: [
+          { en: "10 images / month", zh: "每月 10 张", ja: "月 10 枚", fr: "10 images / mois", de: "10 Bilder/Monat" },
+          { en: "Watermarked exports", zh: "带水印导出", ja: "ウォーターマーク付き", fr: "Exports filigranés", de: "Mit Wasserzeichen" },
+        ],
       },
-      steps: [
-        { en: "Pick a trending template", zh: "选一个热门模板", ja: "トレンドテンプレを選択", fr: "Choisir un modèle tendance", de: "Trendvorlage wählen" },
-        { en: "Confirm portrait rights", zh: "确认肖像权", ja: "肖像権を確認", fr: "Confirmer les droits à l'image", de: "Bildrechte bestätigen" },
-        { en: "Render & download (AI-labeled)", zh: "渲染下载（带 AI 标识）", ja: "レンダリング＆ダウンロード（AI ラベル）", fr: "Rendre et télécharger (label IA)", de: "Rendern & laden (KI-Label)" },
+      {
+        name: { en: "Brand", zh: "品牌版", ja: "ブランド", fr: "Marque", de: "Brand" },
+        price: "$29",
+        period: "mo",
+        highlight: true,
+        features: [
+          { en: "200 images / month", zh: "每月 200 张", ja: "月 200 枚", fr: "200 images / mois", de: "200 Bilder/Monat" },
+          { en: "Custom brand styles", zh: "自定义品牌风格", ja: "ブランドスタイル自作", fr: "Styles de marque perso", de: "Eigene Markenstyles" },
+          { en: "API access", zh: "API 接入", ja: "API 接続", fr: "Accès API", de: "API-Zugang" },
+        ],
+      },
+    ],
+    chat: {
+      user: {
+        en: "Write the prompt for a launch poster: neon ramen shop, midnight vibe.",
+        zh: "给开业海报写提示词：霓虹拉面店，午夜氛围。",
+        ja: "オープン記念ポスターのプロンプトを：ネオンラーメン屋、真夜中の雰囲気。",
+        fr: "Un prompt d'affiche : ramenerie néon, ambiance minuit.",
+        de: "Prompt für ein Launch-Poster: Neon-Ramen, Mitternachts-Vibe.",
+      },
+      assistant: {
+        en: "Try: 'steaming tonkotsu bowl under pink neon rain, wet asphalt reflections, 35mm, moody rim light' — keep the brand pink locked.",
+        zh: "可以试：'粉色霓虹雨下热气腾腾的豚骨拉面碗，湿润沥青倒影，35mm，情绪化轮廓光'——锁定品牌粉。",
+        ja: "おすすめ：'ピンクのネオン雨の中の豚骨ラーメン、濡れたアスファルトの反射、35mm、情緒的なリムライト'——ブランドピンク固定で。",
+        fr: "Essaie : 'bol tonkotsu fumant sous pluie néon rose, reflets asphalt mouillé, 35 mm, rim light' — verrouille le rose de la marque.",
+        de: "Versuch: 'dampfende Tonkotsu-Schale im rosa Neonregen, nasse Asphaltreflexe, 35mm, Mood-Rimlight' — Markenpink gesperrt.",
+      },
+    },
+    rag: {
+      question: {
+        en: "Who owns the generated posters?",
+        zh: "生成的海报归谁所有？",
+        ja: "生成したポスターの権利は？",
+        fr: "À qui appartiennent les affiches générées ?",
+        de: "Wem gehören die generierten Poster?",
+      },
+      answer: {
+        en: "You do — paid plans grant commercial use of every export; failed generations never spend your quota.",
+        zh: "归你——付费方案的所有导出均可商用；生成失败不扣你的额度。",
+        ja: "あなたです——有料プランの書き出しは商用可。失敗時はクォータを消費しません。",
+        fr: "Vous — les exports des offres payantes sont utilisables commercialement ; un échec ne consomme pas votre quota.",
+        de: "Du — Exporte aus Bezahlplänen sind kommerziell nutzbar; Fehler verbrauchen kein Kontingent.",
+      },
+      sources: [
+        { en: "License FAQ", zh: "授权 FAQ", ja: "ライセンス FAQ", fr: "FAQ licence", de: "Lizenz-FAQ" },
+        { en: "Credits policy", zh: "额度规则", ja: "クレジット規則", fr: "Politique de crédits", de: "Credit-Bedingungen" },
       ],
-      templates: [
-        { name: { en: "Dance hook", zh: "热舞卡点", ja: "ダンスフック", fr: "Hook dansé", de: "Tanz-Hook" }, seconds: 15 },
-        { name: { en: "Product spin", zh: "商品旋转", ja: "商品スピン", fr: "Spin produit", de: "Produkt-Spin" }, seconds: 20 },
-        { name: { en: "Outfit swap reel", zh: "穿搭切换秀", ja: "コーデ切替リール", fr: "Reel change de tenue", de: "Outfit-Wechsel-Reel" }, seconds: 25 },
-      ],
-      outputs: [
-        {
-          label: { en: "hook-01.mp4 · 1080×1920", zh: "hook-01.mp4 · 1080×1920", ja: "hook-01.mp4 · 1080×1920", fr: "hook-01.mp4 · 1080×1920", de: "hook-01.mp4 · 1080×1920" },
-          badge: { en: "AI-generated", zh: "AI 生成", ja: "AI 生成", fr: "Généré par IA", de: "KI-generiert" },
-        },
+    },
+    admin: {
+      stats: { users: "2,760", licenses: "612", revenue: "$14.8k", tickets: "5" },
+      activity: [
+        { en: "Prompt blocked: brand impersonation", zh: "提示词被拦截：冒用品牌", ja: "プロンプト遮断：ブランド偽装", fr: "Prompt bloqué : imitation de marque", de: "Prompt blockiert: Markenimitation" },
+        { en: "Batch #48 delivered: 40 posters", zh: "批量 #48 已交付：40 张", ja: "バッチ #48 完了：40枚", fr: "Lot #48 livré : 40 affiches", de: "Batch #48 fertig: 40 Poster" },
+        { en: "Refund: GPU job #77 failed", zh: "退款：任务 #77 失败", ja: "返還: ジョブ #77 失敗", fr: "Remboursement : job #77 échoué", de: "Erstattung: Job #77 fehlgeschlagen" },
       ],
     },
   },
+  {
+    slug: "askdocs",
+    group: "ai" as const,
+    styleId: "ocean",
+    category: { en: "AI Q&A", zh: "AI 问答", ja: "AI Q&A", fr: "Q&R IA", de: "KI-Q&A" },
+    name: { en: "AskDocs", zh: "文档问答", ja: "AskDocs", fr: "AskDocs", de: "AskDocs" },
+    heroTitle: {
+      en: "Ask your documents. Get answers with receipts.",
+      zh: "向你的文档提问，答案自带出处。",
+      ja: "ドキュメントに質問、根拠付きで回答。",
+      fr: "Interrogez vos documents. Réponses avec sources.",
+      de: "Frag deine Dokumente. Antworten mit Belegen.",
+    },
+    heroSubtitle: {
+      en: "A knowledge Q&A SaaS: hybrid retrieval, cited answers, your data stays yours.",
+      zh: "知识问答 SaaS：混合检索、引用作答，数据始终归你。",
+      ja: "知識 Q&A SaaS：ハイブリッド検索と引用回答、データはあなたのもの。",
+      fr: "Un SaaS de Q&R documentaire : retrieval hybride, réponses citées, données privées.",
+      de: "Ein Wissens-Q&A-SaaS: hybride Suche, zitierte Antworten, deine Daten bleiben deine.",
+    },
+    features: [
+      { en: "Cited answers, always", zh: "答案必带引用", ja: "必ず引用付き回答", fr: "Réponses citées, toujours", de: "Immer mit Quellenangabe" },
+      { en: "Vector + keyword hybrid", zh: "向量+关键词混合检索", ja: "ベクトル+キーワード検索", fr: "Hybride vectoriel + mots-clés", de: "Vektor + Keyword hybrid" },
+      { en: "Per-workspace isolation", zh: "按工作区隔离数据", ja: "ワークスペース別分離", fr: "Isolation par espace", de: "Mandantentrennung" },
+    ],
+    primaryCta: { en: "Ask something", zh: "提个问题", ja: "質問してみる", fr: "Posez une question", de: "Frag etwas" },
+    tiers: [
+      {
+        name: { en: "Solo", zh: "个人", ja: "ソロ", fr: "Solo", de: "Solo" },
+        price: "$0",
+        period: "mo",
+        features: [
+          { en: "1 workspace, 50 docs", zh: "1 个工作区，50 篇文档", ja: "1 WS・ドキュメント50件", fr: "1 espace, 50 docs", de: "1 Workspace, 50 Docs" },
+          { en: "Community support", zh: "社区支持", ja: "コミュニティ支援", fr: "Support communautaire", de: "Community-Support" },
+        ],
+      },
+      {
+        name: { en: "Team", zh: "团队版", ja: "チーム", fr: "Équipe", de: "Team" },
+        price: "$39",
+        period: "mo",
+        highlight: true,
+        features: [
+          { en: "Unlimited docs", zh: "文档不限量", ja: "ドキュメント無制限", fr: "Docs illimitées", de: "Unbegrenzte Docs" },
+          { en: "SSO + audit trail", zh: "SSO 与审计日志", ja: "SSO＋監査ログ", fr: "SSO + journal d'audit", de: "SSO + Audit-Log" },
+          { en: "Priority answers", zh: "优先算力", ja: "優先処理", fr: "Calcul prioritaire", de: "Vorrang-Berechnung" },
+        ],
+      },
+    ],
+    chat: {
+      user: {
+        en: "Summarize the termination clauses in our vendor contract.",
+        zh: "总结我们供应商合同的终止条款。",
+        ja: "ベンダー契約の解約条項をまとめて。",
+        fr: "Résume les clauses de résiliation du contrat fournisseur.",
+        de: "Fasse die Kündigungsklauseln des Lieferantenvertrags zusammen.",
+      },
+      assistant: {
+        en: "Three paths to exit: 30-day convenience clause [p.4], material breach with 15-day cure [p.7], and insolvency trigger [p.9]. Want the exact wording?",
+        zh: "三种退出路径：30 天任意解约 [第4页]、重大违约 15 天补救期 [第7页]、破产触发 [第9页]。要原文吗？",
+        ja: "退卡路線は3つ：30日任意解除[p.4]、重大违约＋15日治癒[p.7]、破産トリガー[p.9]。原文が必要ですか？",
+        fr: "Trois sorties : résiliation 30 j [p.4], manquement grave + 15 j [p.7], insolvabilité [p.9]. Le texte exact ?",
+        de: "Drei Auswege: 30-Tage-Kündigung [S.4], Verstoß + 15 Tage [S.7], Insolvenz [S.9]. Wortlaut gefällig?",
+      },
+    },
+    rag: {
+      question: {
+        en: "Is our data used to train any model?",
+        zh: "我们的数据会被拿去训练模型吗？",
+        ja: "データはモデル学習に使われますか？",
+        fr: "Nos données servent-elles à entraîner un modèle ?",
+        de: "Werden unsere Daten zum Training genutzt?",
+      },
+      answer: {
+        en: "No — retrieval runs over your workspace only, prompts are screened before generation, and nothing is used for training.",
+        zh: "不会——检索仅在你的工作区内进行，提示词在生成前经过审查，绝不用于训练。",
+        ja: "いいえ——検索は自分のワークスペースのみ。プロンプトは生成前に審査され、学習には使いません。",
+        fr: "Non — retrieval uniquement sur votre espace, prompts criblés avant génération, zéro entraînement.",
+        de: "Nein — Retrieval nur in deinem Workspace, Prompts vor Generierung gescreent, kein Training damit.",
+      },
+      sources: [
+        { en: "Security overview", zh: "安全总览", ja: "セキュリティ概要", fr: "Vue d'ensemble sécurité", de: "Security-Überblick" },
+        { en: "DPA", zh: "数据处理协议", ja: "DPA", fr: "DPA", de: "DPA" },
+      ],
+    },
+    admin: {
+      stats: { users: "1,890", licenses: "433", revenue: "$11.2k", tickets: "3" },
+      activity: [
+        { en: "Workspace 'Legal' indexed 210 docs", zh: "工作区「Legal」已索引 210 篇文档", ja: "WS 'Legal'：210件をインデックス", fr: "Espace « Legal » : 210 docs indexés", de: "Workspace 'Legal': 210 Docs indexiert" },
+        { en: "SSO login: finance@corp.io", zh: "SSO 登录：finance@corp.io", ja: "SSO ログイン: finance@corp.io", fr: "Connexion SSO : finance@corp.io", de: "SSO-Login: finance@corp.io" },
+        { en: "Query screened + answered with 4 citations", zh: "问题通过审查并带 4 条引用作答", ja: "審査済み・引用4件で回答", fr: "Question criblée + 4 citations", de: "Abfrage gescreent + 4 Quellen" },
+      ],
+    },
+  },
+
 ];
 
 export function getTemplate(slug: string): TemplateMeta | undefined {

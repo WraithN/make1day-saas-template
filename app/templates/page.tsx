@@ -60,13 +60,25 @@ export default async function TemplatesPage() {
         </div>
       </section>
 
-      <section className="wrap pb-20">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {TEMPLATES.map((tpl) => (
-            <TemplateCard key={tpl.slug} tpl={tpl} lang={lang} />
-          ))}
-        </div>
-      </section>
+      {(["ai", "classic"] as const).map((grp) => {
+        const items = TEMPLATES.filter((tpl) => tpl.group === grp);
+        if (!items.length) return null;
+        return (
+          <section key={grp} className="wrap pb-14">
+            <h2 className="mb-5 text-[22px] font-semibold">
+              <Trans k={grp === "ai" ? "templates.groupAi" : "templates.groupClassic"} lang={lang} />
+            </h2>
+            <p className="-mt-3 mb-6 text-[13px] text-muted">
+              <Trans k={grp === "ai" ? "templates.groupAiNote" : "templates.groupClassicNote"} lang={lang} />
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((tpl) => (
+                <TemplateCard key={tpl.slug} tpl={tpl} lang={lang} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </>
   );
 }
