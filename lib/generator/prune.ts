@@ -663,222 +663,139 @@ ${labels}
 `;
 }
 
-/** Tailored lib/ai/index.ts — SDK imports + chat branches for selected only. */
+/** Tailored lib/ai/index.ts - Vercel AI SDK code for the selected providers only. */
 export function buildAiIndex(selected: AiProvider[]): string {
   const openaiSel = selected.includes("openai");
   const anthSel = selected.includes("anthropic");
   const gemSel = selected.includes("gemini");
 
-  const sdkImports: string[] = [];
-  if (openaiSel) sdkImports.push(`import OpenAI from "openai";`);
-  if (anthSel) sdkImports.push(`import Anthropic from "@anthropic-ai/sdk";`);
-  if (gemSel) sdkImports.push(`import { GoogleGenerativeAI } from "@google/generative-ai";`);
-
-  const clientFns: string[] = [];
+  const imports: string[] = [
+    "import { generateText, streamText, type ModelMessage } from \"ai\";",
+  ];
   if (openaiSel) {
-    clientFns.push(`const openaiCache = new Map<string, OpenAI>();
-function openaiClient(baseURL: string, apiKey: string): OpenAI {
-  const cacheKey = \`\${baseURL}::\${apiKey}\`;
-  let c = openaiCache.get(cacheKey);
-  if (!c) {
-    c = new OpenAI({ apiKey, baseURL });
-    openaiCache.set(cacheKey, c);
+    imports.push("import { createOpenAI } from \"@ai-sdk/openai\";");
+    imports.push("import { createOpenAICompatible } from \"@ai-sdk/openai-compatible\";");
   }
-  return c;
-}`);
-  }
-  if (anthSel) {
-    clientFns.push(`let _anthropic: Anthropic | null = null;
-function anthropicClient(apiKey: string): Anthropic {
-  if (!_anthropic) _anthropic = new Anthropic({ apiKey });
-  return _anthropic;
-}`);
-  }
-  if (gemSel) {
-    clientFns.push(`let _gemini: GoogleGenerativeAI | null = null;
-function geminiClient(apiKey: string): GoogleGenerativeAI {
-  if (!_gemini) _gemini = new GoogleGenerativeAI(apiKey);
-  return _gemini;
-}`);
-  }
+  if (anthSel) imports.push("import { createAnthropic } from \"@ai-sdk/anthropic\";");
+  if (gemSel) imports.push("import { createGoogleGenerativeAI } from \"@ai-sdk/google\";");
+  imports.push("import { env } from \"@/lib/env\";");
+  imports.push("import { resolveAiConfig, type AiProviderKey, type ProviderConfig } from \"./providers\";");
+  imports.push("import { getRouting, recordUsage, estimateTokens } from \"@/lib/billing\";");
 
-  const branches: string[] = [];
-  if (openaiSel) {
-    branches.push(`  if (cfg.kind === "openai-compatible") {
-    if (!cfg.apiKey) return "\\n[AI error] No API key configured for this provider.";
-    try {
-      const client = openaiClient(cfg.baseURL, cfg.apiKey);
-      const completion = await client.chat.completions.create({
-        model: cfg.model,
-        messages,
-        stream: false,
-        temperature: 0.4,
-      });
-      return completion.choices[0]?.message?.content ?? "";
-    } catch (err) {
-      return \`\\n[AI error] \${(err as Error).message}\`;
-    }
-  }`);
-  }
+  const modelBranches: string[] = [];
   if (anthSel) {
-    branches.push(`  if (cfg.kind === "anthropic") {
-    if (!cfg.apiKey) return "\\n[AI error] No Anthropic API key configured.";
-    try {
-      const client = anthropicClient(cfg.apiKey);
-      const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\\n");
-      const conv = messages
-        .filter((m) => m.role !== "system")
-        .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
-      const msg = await client.messages.create({
-        model: cfg.model,
-        max_tokens: 1024,
-        system: system || undefined,
-        messages: conv,
-      });
-      return msg.content
-        .map((b) => (b.type === "text" ? b.text : ""))
-        .join("");
-    } catch (err) {
-      return \`\\n[AI error] \${(err as Error).message}\`;
-    }
+    modelBranches.push(`  if (cfg.kind === "anthropic") {
+    return createAnthropic({ apiKey: cfg.apiKey }).chat(cfg.model);
   }`);
   }
   if (gemSel) {
-    branches.push(`  if (cfg.kind === "gemini") {
-    if (!cfg.apiKey) return "\\n[AI error] No Gemini API key configured.";
-    try {
-      const client = geminiClient(cfg.apiKey);
-      const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\\n");
-      const contents = messages
-        .filter((m) => m.role !== "system")
-        .map((m) => ({
-          role: m.role === "assistant" ? "model" : "user",
-          parts: [{ text: m.content }],
-        }));
-      const model = client.getGenerativeModel({
-        model: cfg.model,
-        systemInstruction: system || undefined,
-      });
-      const result = await model.generateContent({ contents });
-      return result.response.text();
-    } catch (err) {
-      return \`\\n[AI error] \${(err as Error).message}\`;
-    }
+    modelBranches.push(`  if (cfg.kind === "gemini") {
+    return createGoogleGenerativeAI({ apiKey: cfg.apiKey })(cfg.model);
   }`);
   }
-
-  const streamBranches: string[] = [];
   if (openaiSel) {
-    streamBranches.push(`  if (cfg.kind === "openai-compatible") {
-    if (!cfg.apiKey) {
-      yield NO_KEY_TEXT;
-      return;
-    }
-    const client = openaiClient(cfg.baseURL, cfg.apiKey);
-    const completion = await client.chat.completions.create({
-      model: cfg.model,
-      messages,
-      stream: true,
-      temperature: 0.4,
-    });
-    for await (const chunk of completion) {
-      const text = chunk.choices[0]?.delta?.content;
-      if (text) yield text;
-    }
-    return;
-  }`);
+    modelBranches.push(`  // OpenAI itself gets the first-party provider; custom or
+  // compatible endpoints use the OpenAI-compatible provider instead.
+  if (key === "openai" && cfg.baseURL === "https://api.openai.com/v1") {
+    return createOpenAI({ apiKey: cfg.apiKey }).chat(cfg.model);
   }
-  if (anthSel) {
-    streamBranches.push(`  if (cfg.kind === "anthropic") {
-    if (!cfg.apiKey) {
-      yield NO_KEY_TEXT;
-      return;
-    }
-    const client = anthropicClient(cfg.apiKey);
-    const system = messages.filter((m) => m.role === "system").map((m) => m.content).join(" ");
-    const conv = messages
-      .filter((m) => m.role !== "system")
-      .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
-    const stream = await client.messages.create({
-      model: cfg.model,
-      max_tokens: 1024,
-      system: system || undefined,
-      messages: conv,
-      stream: true,
-    });
-    for await (const event of stream) {
-      if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
-        yield event.delta.text;
-      }
-    }
-    return;
-  }`);
-  }
-  if (gemSel) {
-    streamBranches.push(`  if (cfg.kind === "gemini") {
-    if (!cfg.apiKey) {
-      yield NO_KEY_TEXT;
-      return;
-    }
-    const client = geminiClient(cfg.apiKey);
-    const system = messages.filter((m) => m.role === "system").map((m) => m.content).join(" ");
-    const contents = messages
-      .filter((m) => m.role !== "system")
-      .map((m) => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }],
-      }));
-    const model = client.getGenerativeModel({
-      model: cfg.model,
-      systemInstruction: system || undefined,
-    });
-    const result = await model.generateContentStream({ contents });
-    for await (const chunk of result.stream) {
-      const text = chunk.text();
-      if (text) yield text;
-    }
-    return;
-  }`);
+  return createOpenAICompatible({
+    name: key,
+    baseURL: cfg.baseURL,
+    apiKey: cfg.apiKey,
+  })(cfg.model);`);
   }
 
-  return `import { env } from "@/lib/env";
-${sdkImports.join("\n")}
-import { resolveAiConfig, type AiProviderKey } from "./providers";
+  return imports.join("\n") + `
 
 export type ChatMessage = {
   role: "system" | "user" | "assistant";
   content: string;
 };
 
-// ── Lazy client caches (constructed on first use, never at import time) ──
-${clientFns.join("\n\n")}
+/** Build the AI SDK language model for a resolved provider config. */
+function languageModel(key: string, cfg: ProviderConfig) {
+${modelBranches.join("\n")}
+  // No selected provider matches this config (possible when AI is
+  // configured without providers); fail fast with a typed never.
+  void key;
+  return null as never;
+}
+
+/** provider key + effective config, honoring the admin routing override. */
+async function effective(
+  keyArg: string | undefined,
+): Promise<{ key: string; cfg: ProviderConfig }> {
+  const route = await getRouting("chat");
+  const key = keyArg?.trim() || route?.provider || env.aiProvider();
+  const base = resolveAiConfig(key);
+  const cfg = route?.model ? { ...base, model: route.model } : base;
+  return { key, cfg };
+}
+
+type SdkUsage = { inputTokens?: number; outputTokens?: number } | null | undefined;
+
+async function meter(
+  key: string,
+  cfg: ProviderConfig,
+  usage: SdkUsage,
+  outChars?: number,
+): Promise<void> {
+  if (usage && (usage.inputTokens || usage.outputTokens)) {
+    await recordUsage({
+      lane: "chat",
+      provider: key,
+      model: cfg.model,
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+      source: "usage",
+    });
+    return;
+  }
+  const est = estimateTokens(outChars ?? 0);
+  if (est.outputTokens > 0) {
+    await recordUsage({
+      lane: "chat",
+      provider: key,
+      model: cfg.model,
+      outputTokens: est.outputTokens,
+      source: "estimated",
+    });
+  }
+}
 
 /**
  * Send chat messages to the chosen provider and return a single string.
- * Any provider/network error is swallowed and returned as a readable message
- * so the UI never hard-fails (handy for demos on a misconfigured key).
+ * Any provider/network error is returned as a readable message so the UI
+ * never hard-fails.
  */
 export async function chat(providerKey: string, messages: ChatMessage[]): Promise<string> {
-  const cfg = resolveAiConfig(providerKey);
-
-${branches.join("\n\n")}
-
-  return "\\n[AI error] Unknown provider.";
+  const { key, cfg } = await effective(providerKey);
+  if (!cfg.apiKey) return "\\n[AI error] No API key configured for this provider.";
+  try {
+    const result = await generateText({
+      model: languageModel(key, cfg),
+      messages: messages as ModelMessage[],
+      temperature: 0.4,
+    });
+    await meter(key, cfg, result.usage as SdkUsage);
+    return result.text;
+  } catch (err) {
+    return "\\n[AI error] " + (err as Error).message;
+  }
 }
 
 /**
- * Backwards-compatible helper used by /api/ai. Falls back to the configured
- * default provider when none is requested.
+ * Backwards-compatible helper used by /api/ai. Falls back to the
+ * configured default provider (or the admin routing) when none is set.
  */
 export async function streamChat(messages: ChatMessage[], provider?: string): Promise<string> {
-  const key = provider && provider.trim() ? provider.trim() : env.aiProvider();
-  return chat(key, messages);
+  return chat(provider ?? "", messages);
 }
 
 /**
- * Whether the selected provider has an API key configured. /api/ai uses this
- * to decide between the built-in demo reply and a real (streamed) call, so a
- * configured-but-broken provider never masquerades as a normal answer.
+ * Whether the selected provider has an API key configured. /api/ai uses
+ * this to decide between the built-in demo reply and a real streamed call.
  */
 export function hasAiProviderKey(providerKey?: string): boolean {
   const key = providerKey && providerKey.trim() ? providerKey.trim() : env.aiProvider();
@@ -891,26 +808,42 @@ const NO_KEY_TEXT =
   "Until then the endpoint returns the built-in demo reply.";
 
 /**
- * Real token streaming: each yield is one incremental text chunk from the
- * provider. Errors are deliberately NOT swallowed - a provider that has a key
- * but fails throws, so the caller can log the real error and surface a clear
- * failure instead of a fake friendly answer.
+ * Real token streaming via the AI SDK: each yield is one incremental
+ * chunk. Errors are deliberately NOT swallowed - a provider that has a
+ * key but fails throws, so the caller logs the real error instead of
+ * surfacing a fake friendly answer.
  */
 export async function* streamChatChunks(
   providerKey: string | undefined,
   messages: ChatMessage[],
 ): AsyncGenerator<string> {
-  const cfg = resolveAiConfig(
-    providerKey && providerKey.trim() ? providerKey.trim() : env.aiProvider(),
-  );
-
-${streamBranches.join("\n\n")}
+  const { key, cfg } = await effective(providerKey);
+  if (!cfg.apiKey) {
+    yield NO_KEY_TEXT;
+    return;
+  }
+  const result = streamText({
+    model: languageModel(key, cfg),
+    messages: messages as ModelMessage[],
+    temperature: 0.4,
+  });
+  let outChars = 0;
+  for await (const delta of result.textStream) {
+    outChars += delta.length;
+    yield delta;
+  }
+  let usage: SdkUsage = null;
+  try {
+    usage = (await result.usage) as SdkUsage;
+  } catch {
+    usage = null;
+  }
+  await meter(key, cfg, usage, outChars);
 }
 
 export type { AiProviderKey };
 `;
 }
-
 // ── Console-aware rewrites ────────────────────────────────────────────────
 
 /** Where a signed-in user lands when the user console is not selected. */
