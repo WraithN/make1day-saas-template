@@ -105,6 +105,7 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
   const [previewErr, setPreviewErr] = useState("");
   const [preset, setPreset] = useState("");
   const [allStyles, setAllStyles] = useState(false);
+  const [allSkills, setAllSkills] = useState(false);
 
   function set<K extends keyof BuilderConfig>(key: K, value: BuilderConfig[K]) {
     setConfig((c) => ({ ...c, [key]: value }));
@@ -385,7 +386,7 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
             {t("builder.s08hint")}
           </p>
           <div className="flex flex-wrap gap-2">
-            {SKILL_OPTIONS.map((o) => (
+            {(allSkills ? SKILL_OPTIONS : SKILL_OPTIONS.slice(0, 6)).map((o) => (
               <Chip
                 key={o.id}
                 active={config.skills.includes(o.id)}
@@ -398,6 +399,16 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
               </Chip>
             ))}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setAllSkills((v) => !v)}
+            className="mt-3 text-[13px] font-semibold text-accent hover:underline"
+          >
+            {allSkills
+              ? t("builder.skillLess")
+              : t("builder.skillMore").replace("{n}", String(SKILL_OPTIONS.length))}
+          </button>
         </Section>
       </div>
 

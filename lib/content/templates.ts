@@ -117,7 +117,7 @@ export const TEMPLATES: TemplateMeta[] = [
         period: "mo",
         features: [
           { en: "1 project", zh: "1 个项目", ja: "プロジェクト 1 件", fr: "1 projet", de: "1 Projekt" },
-          { en: "Community support", zh: "社区支持", ja: "コミュニティ支援", fr: "Support communautaire", de: "Community-Support" },
+          { en: "Email support", zh: "邮件支持", ja: "メールサポート", fr: "Support par e-mail", de: "E-Mail-Support" },
         ],
       },
       {
@@ -973,7 +973,7 @@ export const TEMPLATES: TemplateMeta[] = [
         period: "mo",
         features: [
           { en: "1 workspace, 50 docs", zh: "1 个工作区，50 篇文档", ja: "1 WS・ドキュメント50件", fr: "1 espace, 50 docs", de: "1 Workspace, 50 Docs" },
-          { en: "Community support", zh: "社区支持", ja: "コミュニティ支援", fr: "Support communautaire", de: "Community-Support" },
+          { en: "Email support", zh: "邮件支持", ja: "メールサポート", fr: "Support par e-mail", de: "E-Mail-Support" },
         ],
       },
       {
