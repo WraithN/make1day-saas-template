@@ -71,6 +71,7 @@ export type EntitlementReason =
   | "subscription"
   | "free-preview"
   | "update-window-expired"
+  | "care-requires-buyout"
   | "denied";
 
 export type Entitlement = {
@@ -323,7 +324,10 @@ export async function extendUpdatesForEmail(
   );
 }
 
-/** Auto-claim: a signed-in buyer whose email matches an issued license. */
+/** Auto-claim: a signed-in buyer whose email matches an issued license.
+ *  Prefers a Buyout row over a later Care row — Care alone is not a source
+ *  license, and a buyout owner who also pays Care must keep downloading
+ *  under the plan they actually bought. */
 export async function findLicenseByEmail(
   email: string | undefined,
 ): Promise<LicenseRecord | null> {
@@ -336,25 +340,31 @@ export async function findLicenseByEmail(
       .select("*")
       .eq("email", normalized)
       .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (data) {
+      .limit(10);
+    const rows: any[] = data || [];
+    const pick = rows.find((r) => r.plan === "buyout") || rows[0];
+    if (pick) {
       return {
-        jti: data.jti,
-        key: data.key,
-        email: data.email ?? undefined,
-        plan: data.plan,
-        orderId: data.order_id ?? undefined,
-        createdAt: data.created_at,
-        expiresAt: data.expires_at ?? null,
-        updatesUntil: data.updates_until ?? null,
+        jti: pick.jti,
+        key: pick.key,
+        email: pick.email ?? undefined,
+        plan: pick.plan,
+        orderId: pick.order_id ?? undefined,
+        createdAt: pick.created_at,
+        expiresAt: pick.expires_at ?? null,
+        updatesUntil: pick.updates_until ?? null,
       } as LicenseRecord;
     }
   }
-  const row = get<LicenseRow>(
-    "SELECT * FROM licenses WHERE email = ? ORDER BY created_at DESC LIMIT 1",
-    normalized,
-  );
+  const row =
+    get<LicenseRow>(
+      "SELECT * FROM licenses WHERE email = ? AND plan = 'buyout' ORDER BY created_at DESC LIMIT 1",
+      normalized,
+    ) ??
+    get<LicenseRow>(
+      "SELECT * FROM licenses WHERE email = ? ORDER BY created_at DESC LIMIT 1",
+      normalized,
+    );
   if (!row) return null;
   const found = rowToLicense(row);
   if (found.expiresAt && Date.parse(found.expiresAt) < Date.now()) return null;
@@ -688,6 +698,20 @@ export async function checkEntitlement(
   if (key) {
     const payload = verifyLicenseKey(key);
     if (payload) {
+      // Care is NOT a source license: it re-opens a Buyout holder's update
+      // window (see syncSubscriptionGrant) and buys support. Without a
+      // Buyout on the account, a Care key can never unlock the full ZIP —
+      // otherwise subscribe($13) → download → cancel would replace the
+      // $249 purchase outright.
+      if (payload.plan === "care") {
+        return {
+          allowed: false,
+          reason: "care-requires-buyout",
+          plan: "care",
+          jti: payload.jti,
+          email: payload.email,
+        };
+      }
       // Buyout keys gate the 12-month free-update window here.
       if (
         payload.plan === "buyout" &&
@@ -714,7 +738,10 @@ export async function checkEntitlement(
     }
   }
 
-  // 2. Signed-in buyer: active subscription OR license claimed by email.
+  // 2. Signed-in buyer: a Buyout entitlement only. A lone Care subscription
+  //    does NOT unlock the source (same subscribe→cancel hole as the key
+  //    path); Care re-opens the update window of a Buyout the email owns,
+  //    which the license-email branch below resolves.
   try {
     const { getCurrentUser, getSubscription } = await import(
       "@/lib/subscriptions"
@@ -724,21 +751,27 @@ export async function checkEntitlement(
       const sub = await getSubscription(user.id);
       if (
         sub &&
-        (sub.status === "active" || sub.status === "trialing") &&
-        (sub.plan === "buyout" ||
-          (sub.plan === "care" &&
-            (!sub.current_period_end ||
-              Date.parse(sub.current_period_end) > Date.now())))
+        sub.plan === "buyout" &&
+        (sub.status === "active" || sub.status === "trialing")
       ) {
         return {
           allowed: true,
           reason: "subscription",
-          plan: sub.plan === "buyout" ? "buyout" : "care",
+          plan: "buyout",
           email: user.email,
         };
       }
       const owned = await findLicenseByEmail(user.email);
       if (owned) {
+        // Care-only claim: support + window re-open, no source download.
+        if (owned.plan === "care") {
+          return {
+            allowed: false,
+            reason: "care-requires-buyout",
+            plan: "care",
+            email: owned.email,
+          };
+        }
         // Buyout key claimed by email also gates the 12-month window.
         if (
           owned.plan === "buyout" &&

@@ -49,11 +49,16 @@ export async function POST(req: Request) {
   if (!entitlement.allowed) {
     const trial = ensureTrialToken(req);
     const updatesExpired = entitlement.reason === "update-window-expired";
+    const careAlone = entitlement.reason === "care-requires-buyout";
     const res = NextResponse.json(
       {
         error: "license_required",
-        code: updatesExpired ? "UPDATES_EXPIRED" : "PAYMENT_REQUIRED",
-        pricingUrl: "/pricing",
+        code: careAlone
+          ? "CARE_NEEDS_BUYOUT"
+          : updatesExpired
+            ? "UPDATES_EXPIRED"
+            : "PAYMENT_REQUIRED",
+        pricingUrl: careAlone ? "/pricing#buyout" : "/pricing",
         licenseUrl: "/license",
         // A Care subscription re-opens the update window for an expired Buyout.
         careUrl: updatesExpired ? "/pricing#care" : undefined,

@@ -42,7 +42,7 @@ function post(key) {
     body: JSON.stringify({
       appName: "Test App",
       auth: [],
-      payment: "none",
+      payment: ["none"],
       ai: [],
       features: [],
       deploy: "selfhost",
@@ -77,6 +77,12 @@ const cases = [
     key: makeKey({ updatesUntilSec: null }),
     expectStatus: null,
     expectCode: null,
+  },
+  {
+    name: "care key alone (no Buyout source entitlement)",
+    key: makeKey({ plan: "care" }),
+    expectStatus: 402,
+    expectCode: "CARE_NEEDS_BUYOUT",
   },
   {
     name: "bogus key (invalid signature)",
