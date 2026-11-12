@@ -231,7 +231,7 @@ export function LicensePanel({
         ) : (
           <button
             type="button"
-            className="mt-3 text-xs text-muted underline-offset-2 hover:underline"
+            className="mt-3 block w-fit text-xs text-muted underline-offset-2 hover:underline"
             onClick={() => setSwap(true)}
           >
             {s.swapKey}
