@@ -235,6 +235,10 @@ export const dict: Record<Lang, Record<string, string>> = {
     "cta.create": "Create account",
     "cta.compare": "Compare plans",
 
+    "home.tstars.eyebrow": "IN EVERY BUILD",
+    "home.tstars.title": "A testimonial wall, wired into your landing page",
+    "home.tstars.intro": "Every generated project ships the same drop-in component: masonry cards for real customer voices, avatar or initials, optional link to the original post. No design work, no dependencies.",
+    "home.tstars.sample": "The quotes above are sample content shipped with the template — replace them in app/page.tsx (TESTIMONIALS) with what your users actually say, or set the array to [] to hide the section.",
     "pricing.eyebrow": "PRICING",
     "pricing.heading": "Simple, clone-and-launch.",
     "pricing.subtitle":
@@ -760,6 +764,10 @@ export const dict: Record<Lang, Record<string, string>> = {
     "cta.create": "创建账号",
     "cta.compare": "对比套餐",
 
+    "home.tstars.eyebrow": "每个生成包自带",
+    "home.tstars.title": "案例墙组件，直接长在你的首页上",
+    "home.tstars.intro": "你生成的每个项目都自带同款组件：瀑布式评价卡片、头像或缩写、可链回原始帖子。不用设计，不装依赖。",
+    "home.tstars.sample": "上面的引语是模板自带的示例内容——上线前把 app/page.tsx 里的 TESTIMONIALS 换成用户的真实评价；没有评价就把数组清空，区块自动隐藏。",
     "pricing.eyebrow": "定价",
     "pricing.heading": "简单，克隆即上线。",
     "pricing.subtitle": "免费开始。当你准备好向自己的客户收费时再升级。",
@@ -1266,6 +1274,10 @@ export const dict: Record<Lang, Record<string, string>> = {
     "cta.create": "アカウント作成",
     "cta.compare": "プランを比較",
 
+    "home.tstars.eyebrow": "すべてのビルドに同梱",
+    "home.tstars.title": "証言ウォール部品をランディングページに標準実装",
+    "home.tstars.intro": "生成されたプロジェクトはすべて同じ部品を同梱：瀑布形式の声カード、アバターまたはイニシャル、元の投稿へのリンクも可。デザイン作業も追加依存も不要。",
+    "home.tstars.sample": "上の引用はテンプレート同梱のサンプルです。公開前に app/page.tsx の TESTIMONIALS を実際の声へ差し替え、声が無ければ配列を空にするとセクションは非表示になります。",
     "pricing.eyebrow": "料金",
     "pricing.heading": "シンプル、クローン即公開。",
     "pricing.subtitle": "無料で開始。自社の顧客に課金する準備ができたらアップグレード。",
@@ -1742,6 +1754,10 @@ export const dict: Record<Lang, Record<string, string>> = {
     "cta.create": "Créer un compte",
     "cta.compare": "Comparer les forfaits",
 
+    "home.tstars.eyebrow": "INCLUS DANS CHAQUE BUILD",
+    "home.tstars.title": "Un mur de témoignages, intégré à votre page d'accueil",
+    "home.tstars.intro": "Chaque projet généré embarque le même composant : cartes en mosaïque pour les voix réelles de clients, avatar ou initiales, lien optionnel vers le post d'origine. Sans design ni dépendance.",
+    "home.tstars.sample": "Les citations ci-dessus sont du contenu d'exemple livré avec le modèle — remplacez-les dans app/page.tsx (TESTIMONIALS) par les vrais retours de vos utilisateurs, ou videz le tableau pour masquer la section.",
     "pricing.eyebrow": "TARIFS",
     "pricing.heading": "Simple, clonez et lancez.",
     "pricing.subtitle": "Gratuit pour commencer. Passez à un forfait quand vous facturez vos clients.",
@@ -2233,6 +2249,10 @@ export const dict: Record<Lang, Record<string, string>> = {
     "cta.create": "Konto erstellen",
     "cta.compare": "Tarife vergleichen",
 
+    "home.tstars.eyebrow": "IN JEDEM BUILD",
+    "home.tstars.title": "Testimonial-Wand, eingebaut in eure Landingpage",
+    "home.tstars.intro": "Jedes generierte Projekt enthält dieselbe Komponente: Masonry-Karten für echte Kundenstimmen, Avatar oder Initialen, optionaler Link zum Originalpost. Kein Designaufwand, keine Abhängigkeiten.",
+    "home.tstars.sample": "Die Zitate oben sind Beispieldaten aus dem Template — ersetzen Sie sie in app/page.tsx (TESTIMONIALS) durch echte Nutzerstimmen, oder leeren Sie das Array, um den Abschnitt auszublenden.",
     "pricing.eyebrow": "PREISE",
     "pricing.heading": "Einfach, klonen und starten.",
     "pricing.subtitle": "Kostenlos starten. Upgraden Sie, wenn Sie bereit sind, Ihre eigenen Kunden zu berechnen.",

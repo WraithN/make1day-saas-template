@@ -278,6 +278,7 @@ const SITE_MARKETING_FILES = [
   "app/templates/page.tsx",
   "app/templates/[slug]/preview/page.tsx",
   "components/home/TemplateGallerySection.tsx",
+  "components/home/TestimonialShowcase.tsx",
   "components/TemplateSite.tsx",
   "components/TemplateCard.tsx",
   "lib/content/templates.ts",
@@ -475,6 +476,7 @@ async function verifyCase(entry, doBuild) {
     "scripts/export-local-profiles.mjs",
     "scripts/rebrand.mjs",
     "scripts/agents-lint.mjs",
+    "components/TestimonialWall.tsx",
   ]) {
     assert(exists(rel), `missing ${rel}`);
   }
@@ -496,6 +498,19 @@ async function verifyCase(entry, doBuild) {
   assert(
     (config.style === "doodle") === shippedCss.includes("--doodle-ink"),
     "doodle CSS leaked into (or is missing from) the generated stylesheet",
+  );
+
+  // The testimonial wall ships in every build: the component file (checked
+  // above) must be WIRED into the generated landing page, and its demo data
+  // must stay labelled as sample content — never fake praise.
+  const shippedHome = await read("app/page.tsx");
+  assert(
+    shippedHome.includes("TestimonialWall items={TESTIMONIALS}"),
+    "generated home must render the testimonial wall",
+  );
+  assert(
+    shippedHome.includes("SAMPLE QUOTES"),
+    "generated testimonial data must stay labelled as sample content",
   );
 
   // Site-only endpoints must never leak into a customer project.

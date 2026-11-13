@@ -4,6 +4,7 @@ import { BoundarySection } from "@/components/home/BoundarySection";
 import { PitfallSection } from "@/components/home/PitfallSection";
 import { ThemePreviewSection } from "@/components/home/ThemePreviewSection";
 import { FeatureMatrix } from "@/components/home/FeatureMatrix";
+import { TestimonialShowcase } from "@/components/home/TestimonialShowcase";
 import { BlogTeaser } from "@/components/home/BlogTeaser";
 import { HandDrawnDeco } from "@/components/home/HandDrawnDeco";
 import { TemplateGallerySection } from "@/components/home/TemplateGallerySection";
@@ -158,6 +159,7 @@ export default async function HomePage() {
 
       {/* 功能亮点 — generator capability highlights */}
       <FeatureMatrix lang={lang} />
+      <TestimonialShowcase lang={lang} />
 
       {/* 模板预览 — curated themes → /styles */}
       <ThemePreviewSection lang={lang} />

@@ -21,6 +21,7 @@ const APP_COPY: Record<Lang, Record<string, string>> = {
       "A production-ready Next.js starter. Sign in to explore the dashboard, or set your plans below.",
     "app.hero.cta": "Get started",
     "app.hero.pricing": "See pricing",
+    "app.tstars.title": "What builders say",
     "app.stack.title": "What is in this build",
     "app.stack.subtitle":
       "Only the modules you selected are included. Everything below is real, runnable code — no placeholders.",
@@ -52,6 +53,7 @@ const APP_COPY: Record<Lang, Record<string, string>> = {
     "app.hero.subtitle": "一个可直接上线的 Next.js 起步工程。登录后可体验控制台，也可以在下面配置你的套餐。",
     "app.hero.cta": "开始使用",
     "app.hero.pricing": "查看定价",
+    "app.tstars.title": "用户的声音",
     "app.stack.title": "本次构建包含",
     "app.stack.subtitle": "只保留你勾选的模块。下面每一项都是真实可运行的代码，不是占位说明。",
     "app.stack.auth": "登录方式",
@@ -81,6 +83,7 @@ const APP_COPY: Record<Lang, Record<string, string>> = {
     "app.hero.subtitle": "本番対応の Next.js スターターです。ログインしてダッシュボードを試すか、下でプランを設定してください。",
     "app.hero.cta": "はじめる",
     "app.hero.pricing": "料金を見る",
+    "app.tstars.title": "導入者の声",
     "app.stack.title": "このビルドに含まれるもの",
     "app.stack.subtitle": "選択したモジュールだけが含まれます。以下はすべて実際に動作するコードです。",
     "app.stack.auth": "認証",
@@ -111,6 +114,7 @@ const APP_COPY: Record<Lang, Record<string, string>> = {
       "Un starter Next.js prêt pour la production. Connectez-vous pour explorer le tableau de bord, ou définissez vos offres ci-dessous.",
     "app.hero.cta": "Commencer",
     "app.hero.pricing": "Voir les tarifs",
+    "app.tstars.title": "Ce qu'en disent les builders",
     "app.stack.title": "Contenu de cette version",
     "app.stack.subtitle":
       "Seuls les modules sélectionnés sont inclus. Tout ce qui suit est du code réel et exécutable.",
@@ -143,6 +147,7 @@ const APP_COPY: Record<Lang, Record<string, string>> = {
       "Ein produktionsreifes Next.js-Starterprojekt. Melde dich an, um das Dashboard zu erkunden, oder lege unten deine Tarife fest.",
     "app.hero.cta": "Loslegen",
     "app.hero.pricing": "Preise ansehen",
+    "app.tstars.title": "Was Builder sagen",
     "app.stack.title": "In diesem Build enthalten",
     "app.stack.subtitle":
       "Nur die ausgewählten Module sind enthalten. Alles unten ist echter, ausführbarer Code.",
@@ -299,6 +304,7 @@ export function buildCustomerHome(config: BuilderConfig): string {
 // the module cards below to describe your own product.
 import Link from "next/link";
 import { getLang, tr } from "@/lib/i18n-server";
+import { TestimonialWall, type Testimonial } from "@/components/TestimonialWall";
 
 const APP_NAME = ${name};
 
@@ -313,6 +319,34 @@ const METRICS: { label: string; value: string }[] = ${
       ? `[\n            ${metricsJs},\n          ]`
       : "[]"
   };
+
+// SAMPLE QUOTES — placeholder social proof so the wall renders out of the
+// box. Replace each entry with a real customer voice (link it with \`url\`),
+// or set TESTIMONIALS = [] to hide the section entirely. Never ship invented
+// praise as if it were real: it is the fastest way to lose a customer's trust
+// and, in some markets, a legal problem.
+const TESTIMONIALS: Testimonial[] = [
+  {
+    quote: "Went from clone to first paying customer in six days. The webhook and license plumbing was already done - I only wrote the product.",
+    name: "Maya K.",
+    handle: "@mayabuilds",
+  },
+  {
+    quote: "The generated AGENTS.md meant my coding agent understood the repo immediately. First starter where the AI needed zero hand-holding.",
+    name: "Tomas R.",
+    handle: "@tomasr_dev",
+  },
+  {
+    quote: "Deleted whole folders I hadn't opted into and it still compiled. That alone is worth the price.",
+    name: "Priya N.",
+    handle: "@priyaships",
+  },
+  {
+    quote: "The per-run cost ledger caught a bad prompt route that was eating a third of my AI budget.",
+    name: "Jonas W.",
+    handle: "@jonasw",
+  },
+];
 
 export default async function HomePage() {
   const lang = await getLang();
@@ -337,6 +371,10 @@ export default async function HomePage() {
         </div>
       </section>
 ${pipelineSection}
+      <section className="wrap py-16">
+        <div className="eyebrow mb-6">{c("app.tstars.title")}</div>
+        <TestimonialWall items={TESTIMONIALS} />
+      </section>
       <section className="wrap pb-20">
         <h2 className="text-2xl font-semibold">{c("app.stack.title")}</h2>
         <p className="mt-2 max-w-2xl text-sm text-ink-soft">

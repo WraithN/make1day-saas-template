@@ -310,6 +310,11 @@ const SITE_MARKETING_FILES = [
   "app/templates/page.tsx",
   "app/templates/[slug]/preview/page.tsx",
   "components/home/TemplateGallerySection.tsx",
+  // Testimonial showcase on OUR home page. The wall COMPONENT itself
+  // (components/TestimonialWall.tsx) ships in every customer ZIP and is
+  // imported by the generated landing page — only this site-only wrapper with
+  // our sample copy is stripped.
+  "components/home/TestimonialShowcase.tsx",
   "components/TemplateSite.tsx",
   "components/TemplateCard.tsx",
   "lib/content/templates.ts",

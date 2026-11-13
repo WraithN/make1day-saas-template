@@ -205,6 +205,73 @@ export function TemplateSite({
               ))}
             </section>
 
+            {/* Testimonial wall — mirrors what every generated landing page
+                ships (components/TestimonialWall.tsx), rendered in this
+                preview's own panel style. Demo content, labelled as such. */}
+            <section className="pb-10">
+              <h2 className="text-[18px] font-semibold">
+                {pick({
+                  en: "What builders say",
+                  zh: "用户的声音",
+                  ja: "導入者の声",
+                  fr: "Ce qu'en disent les builders",
+                  de: "Was Builder sagen",
+                })}
+              </h2>
+              <div className="mt-4 columns-1 gap-3 sm:columns-2 lg:columns-3">
+                {[
+                  {
+                    q: "Went from clone to first paying customer in six days. The webhook and license plumbing was already done.",
+                    n: "Maya K.",
+                    h: "@mayabuilds",
+                  },
+                  {
+                    q: "The generated AGENTS.md meant my coding agent understood the repo immediately.",
+                    n: "Tomas R.",
+                    h: "@tomasr_dev",
+                  },
+                  {
+                    q: "Deleted whole folders I hadn't opted into and it still compiled.",
+                    n: "Priya N.",
+                    h: "@priyaships",
+                  },
+                  {
+                    q: "The per-run cost ledger caught a bad prompt route eating a third of my budget.",
+                    n: "Jonas W.",
+                    h: "@jonasw",
+                  },
+                ].map((x) => (
+                  <div key={x.n} className={panel + " mb-3 break-inside-avoid"}>
+                    <p className="text-[13px] leading-relaxed">{x.q}</p>
+                    <div className="mt-3 flex items-center gap-2.5">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[rgb(var(--line))] text-[11px] font-semibold text-[rgb(var(--ink-soft))]">
+                        {x.n
+                          .split(/\s+/)
+                          .map((w) => w[0])
+                          .join("")
+                          .slice(0, 2)}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="truncate text-[13px] font-semibold">{x.n}</div>
+                        <div className="truncate text-[11px] text-[rgb(var(--muted))]">
+                          {x.h}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-2 text-[11px] text-[rgb(var(--muted))]">
+                {pick({
+                  en: "Demo content — your build ships this component with your own quotes.",
+                  zh: "示例内容——你的生成包自带同款组件，替换为你自己的评价。",
+                  ja: "デモ内容——生成パッケージには同じ部品が入り、引用は差し替え可能です。",
+                  fr: "Contenu de démo — votre build embarque ce composant avec vos propres citations.",
+                  de: "Demo-Inhalt — euer Build enthält diese Komponente mit euren eigenen Zitaten.",
+                })}
+              </p>
+            </section>
+
             {/* Pipeline strip: the real stage order, straight from the data */}
             {wstrip && (
               <section className="pb-8">
