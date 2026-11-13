@@ -28,17 +28,22 @@ node scripts/setup-wizard.mjs     # local 127.0.0.1 page to paste keys -> .env.l
    RUN the CLI yourself with the user (`supabase login` + `supabase link` +
    `supabase projects api-keys` to fetch the URL/anon - do not make the
    user copy these by hand; `vercel login` + `vercel link`; `gh auth
-   login`; `wrangler login`). THEN run `node scripts/setup-wizard.mjs`: the
-   page is deliberately small - cards for the providers THIS build selected
-   (from app-template.config.json), each asking only for console-issued
-   secrets (gateway private/webhook keys + product ids, AI api keys, mail
-   key, admin password). A progress badge shows what's still missing; a
-   collapsed Advanced drawer keeps the remaining env vars reachable. Keys
+   login`; `wrangler login`). THEN run `node scripts/setup-wizard.mjs`:
+   the page is two tabbed cards - one Payments tab per selected gateway
+   (active tab = the buyer's first pick) and one Providers card (Supabase,
+   AI keys, email, admin, OAuth). It only asks for console-issued secrets;
+   the CLI commands it shows are labelled "the AI agent runs these for
+   you" - you are that agent. A progress badge tracks what's still missing;
+   a collapsed Advanced drawer keeps the remaining env vars reachable. Keys
    go to `.env.local` (0600, blank = keep existing); never echo them into
-   chat or logs.
+   chat or logs. UI follows ?lang= / cookie / Accept-Language (en/zh/ja/fr/de).
    Illustrated guides: screenshots live at `docs/screenshots/<PREFIX>.png`;
-   if a figure says "not captured yet", walk the user through the provider
-   dashboard from the printed console URL instead of inventing steps.
+   when a location line has no image yet, walk the user through the provider
+   dashboard from its console URL instead of inventing steps. OAuth client
+   secrets (Google/GitHub/Apple/Microsoft) are configured in SUPABASE
+   DASHBOARD → Authentication → Providers with the shared redirect URI
+   `https://<ref>.supabase.co/auth/v1/callback` - they are NOT `.env.local`
+   values; the wizard's OAuth tab lists where to create each client.
 4. **Verify.** `npm install`, then `npm run dev`, then hit
    `http://localhost:3000/api/payments/self-check` → `missing` must be empty
    for the selected gateway. Supabase: `npx supabase db push` after the URL
