@@ -211,39 +211,79 @@ function guideVars(g, config) {
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-function renderCards() {
-  const config = readConfigNow();
-  const have = existingEnv();
-  const cards = [];
-  for (const g of GUIDES) {
-    if (!g.match(config)) continue;
-    const vars = guideVars(g, config);
-    if (!vars.length) continue;
-    const done = vars.filter((v) => (have.get(v.name) || "").trim().length > 0).length;
-    const steps = [];
-    if (g.cli.length) {
-      steps.push(`<ol class="steps"><li>Run in a terminal:${g.cli.map((c) => `<div class="cmd"><code>${esc(c)}</code><button type="button" class="cp" data-cmd="${esc(c)}">copy</button></div>`).join("")}</li>` +
-        `<li>Then the dashboard values below (the CLI gives you the project ref; the anon key: <code>npx supabase projects api-keys --project-ref &lt;ref&gt;</code>).</li></ol>`);
-    } else if (g.where) {
-      steps.push(`<p class="where">${esc(g.where)}</p>`);
-    }
-    const fields = vars.map((v) => {
-      const filled = (have.get(v.name) || "").trim();
-      return `<label class="field${filled ? " filled" : ""}">
+const PAY_IDS = ["waffo", "stripe", "creem", "paypal", "lemonsqueezy"];
+const PAY_LABELS = { waffo: "Waffo", stripe: "Stripe", creem: "Creem", paypal: "PayPal", lemonsqueezy: "Lemon Squeezy" };
+
+function fieldHtml(v, have) {
+  const filled = (have.get(v.name) || "").trim();
+  return `<label class="field${filled ? " filled" : ""}">
   <span class="k">${esc(v.label || v.name)}${filled ? ' <em class="ok">set</em>' : ""}</span>
   <span class="kname">${esc(v.name)}</span>
   <input name="${esc(v.name)}" type="${v.secret === false ? "text" : "password"}" placeholder="${esc(filled ? "•••• leave blank to keep" : v.example || "paste value")}" autocomplete="off" spellcheck="false">
   ${v.howto ? `<span class="h">${esc(v.howto)}</span>` : ""}
 </label>`;
-    }).join("\n");
+}
+
+function guideInner(g, vars, have) {
+  const steps = [];
+  if (g.cli.length) {
+    steps.push(`<ol class="steps"><li>Run in a terminal:${g.cli.map((c) => `<div class="cmd"><code>${esc(c)}</code><button type="button" class="cp" data-cmd="${esc(c)}">copy</button></div>`).join("")}</li>` +
+      `<li>Then the dashboard values below (the CLI gives you the project ref; the anon key: <code>npx supabase projects api-keys --project-ref &lt;ref&gt;</code>).</li></ol>`);
+  } else if (g.where) {
+    steps.push(`<p class="where">${esc(g.where)}</p>`);
+  }
+  const dash = g.console ? `<a class="dash" href="${esc(g.console.url)}" target="_blank" rel="noopener">${esc(g.console.label)} ↗</a>` : "";
+  return [dash, steps.join("\n"), vars.map((v) => fieldHtml(v, have)).join("\n")].join("\n");
+}
+
+function renderCards() {
+  const config = readConfigNow();
+  const have = existingEnv();
+  const cards = [];
+  const payments = [];
+  let payIndex = -1;
+  for (const g of GUIDES) {
+    if (!g.match(config)) continue;
+    const vars = guideVars(g, config);
+    if (!vars.length) continue;
+    if (PAY_IDS.includes(g.id)) {
+      payments.push({ g, vars });
+      if (payIndex < 0) {
+        payIndex = cards.length;
+        cards.push(""); // placeholder for the merged tabbed card
+      }
+      continue;
+    }
+    const done = vars.filter((v) => (have.get(v.name) || "").trim().length > 0).length;
     cards.push(`<section class="card" id="${g.id}">
   <header><h2>${esc(g.title)}</h2><span class="badge" data-total="${vars.length}" data-done="${done}">${done}/${vars.length}</span></header>
-  ${g.console ? `<a class="dash" href="${esc(g.console.url)}" target="_blank" rel="noopener">${esc(g.console.label)} ↗</a>` : ""}
-  ${steps.join("\n")}
-  ${fields}
+  ${guideInner(g, vars, have)}
 </section>`);
   }
-  return cards.join("\n");
+  if (payments.length) {
+    // ONE Payments card with a tab per gateway. Default tab = the buyer's
+    // selected gateway; with several selected, the FIRST in config.payment.
+    const selected = (config?.payment || []).filter((p) => payments.some((x) => x.g.id === p));
+    const order = [...payments].sort((a, b) => {
+      const ia = selected.indexOf(a.g.id);
+      const ib = selected.indexOf(b.g.id);
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
+    const total = order.reduce((n, p) => n + p.vars.length, 0);
+    const done = order.reduce((n, p) => n + p.vars.filter((v) => (have.get(v.name) || "").trim().length > 0).length, 0);
+    const tabs = order
+      .map((p, i) => `<button type="button" role="tab" aria-selected="${i === 0}" class="tab${i === 0 ? " active" : ""}" data-tab="${p.g.id}">${esc(PAY_LABELS[p.g.id] || p.g.title)}</button>`)
+      .join("");
+    const panels = order
+      .map((p, i) => `<div class="panel${i === 0 ? " active" : ""}" id="tab-${p.g.id}"${i === 0 ? "" : " hidden"}>${guideInner(p.g, p.vars, have)}</div>`)
+      .join("\n");
+    cards[payIndex] = `<section class="card wide" id="payments">
+  <header><h2>Payments</h2><span class="badge" data-total="${total}" data-done="${done}">${done}/${total}</span></header>
+  <div class="tabs" role="tablist">${tabs}</div>
+  ${panels}
+</section>`;
+  }
+  return cards.filter(Boolean).join("\n");
 }
 
 function render() {
@@ -276,6 +316,12 @@ function render() {
  .badge.complete{color:#07211c;background:#5eead4;border-color:#5eead4}
  .dash{display:inline-block;font-size:12.5px;color:#7cc7f5;text-decoration:none;margin:0 0 8px}
  .dash:hover{text-decoration:underline}
+ .card.wide{grid-column:1/-1}
+ .tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+ .tab{background:transparent;border:1px solid #232830;border-radius:99px;color:#9aa3ad;font-size:12.5px;font-weight:600;padding:5px 14px;cursor:pointer}
+ .tab:hover{color:#e8eaed;border-color:#3a4250}
+ .tab.active{background:#5eead4;border-color:#5eead4;color:#07211c}
+ .panel[hidden]{display:none}
  .where{font-size:12.5px;color:#9aa3ad;margin:2px 0 10px}
  .steps{margin:2px 0 10px;padding-left:18px;font-size:12.5px;color:#9aa3ad}
  .cmd{display:flex;align-items:center;gap:8px;margin:3px 0}
@@ -313,7 +359,13 @@ function refresh(){
   document.getElementById("prog").style.width=(100*d/Math.max(t,1))+"%";
 }
 document.addEventListener("click",e=>{
-  if(e.target.classList.contains("cp")){navigator.clipboard.writeText(e.target.dataset.cmd);e.target.textContent="copied";setTimeout(()=>e.target.textContent="copy",1200);}
+  if(e.target.classList.contains("cp")){navigator.clipboard.writeText(e.target.dataset.cmd);e.target.textContent="copied";setTimeout(()=>e.target.textContent="copy",1200);return;}
+  const tab=e.target.closest(".tab");
+  if(tab){
+    const card=tab.closest(".card");
+    card.querySelectorAll(".tab").forEach(x=>{const on=x===tab;x.classList.toggle("active",on);x.setAttribute("aria-selected",on);});
+    card.querySelectorAll(".panel").forEach(p=>{const on=p.id==="tab-"+tab.dataset.tab;p.hidden=!on;p.classList.toggle("active",on);});
+  }
 });
 async function save(){
   const data={};
