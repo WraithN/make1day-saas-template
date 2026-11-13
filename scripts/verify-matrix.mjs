@@ -49,12 +49,14 @@ const c = (overrides) => ({ ...BASE, ...overrides });
 const ALL_SKILLS = [
   "frontend", "ui", "backend", "testing", "seo", "auth",
   "payments", "database", "rag", "i18n", "deploy", "agents",
+  "video", "workflow", "canvas", "compliance",
 ];
 
-// 18 representative combinations: all 6 payment choices, all 16 styles,
+// 20 representative combinations: all 6 payment choices, all 16 styles,
 // all 3 deploy targets, RAG on/off, dashboard on/off, both consoles on/off
 // and each console alone, multitenancy on/off, skills empty/full,
-// auth/AI provider variations.
+// auth/AI provider variations, the durable-workflow + canvas + compliance
+// stack, and a video-module build.
 const CASES = [
   { id: "default-waffo-midnight", config: c({}) },
   { id: "stripe-candy", config: c({ payment: ["stripe"], style: "candy" }) },
@@ -111,6 +113,20 @@ const CASES = [
   {
     id: "creem-mono-all-skills",
     config: c({ payment: ["creem"], style: "mono", skills: ALL_SKILLS }),
+  },
+  {
+    // Durable pipelines + canvas + compliance: the full "n8n-style, as code"
+    // stack must survive pruning together with the consoles it renders into.
+    id: "inngest-durable",
+    config: c({
+      style: "neon",
+      ai: ["openai"],
+      features: ["landing", "dashboard", "account", "admin", "video"],
+      skills: [
+        "frontend", "backend", "testing", "payments",
+        "video", "workflow", "canvas", "compliance",
+      ],
+    }),
   },
   {
     // Only the user console: /admin must be pruned AND its shortcut in the
@@ -289,7 +305,7 @@ function assert(condition, message) {
 
 // Guard the documented case count: adding/removing a case means the README,
 // CI workflow and machine-readable docs numbers must be updated too.
-assert(CASES.length === 19, `expected 19 matrix cases, got ${CASES.length}`);
+assert(CASES.length === 20, `expected 20 matrix cases, got ${CASES.length}`);
 
 function dirSizeKb(dir) {
   let total = 0;
@@ -622,6 +638,22 @@ async function verifyCase(entry, doBuild) {
     "video skill must ship exactly when the video skill is selected",
   );
   assert(
+    exists("lib/workflows.ts") === config.skills.includes("workflow"),
+    "inngest workflow module must ship exactly when the workflow skill is selected",
+  );
+  assert(
+    exists("app/admin/workflows/page.tsx") === config.skills.includes("canvas"),
+    "pipeline canvas must ship exactly when the canvas skill is selected",
+  );
+  assert(
+    exists("contracts/payment-compliance.json") === config.skills.includes("compliance"),
+    "payment compliance contract must ship exactly when the compliance skill is selected",
+  );
+  assert(
+    exists("scripts/payment-compliance-check.mjs") === config.skills.includes("compliance"),
+    "compliance self-check CLI must ship exactly when the compliance skill is selected",
+  );
+  assert(
     exists("app/dashboard/page.tsx") === config.features.includes("dashboard"),
     "dashboard route must be pruned exactly when dashboard is unchecked",
   );
@@ -753,14 +785,14 @@ async function verifyCase(entry, doBuild) {
   const docSpec = JSON.parse(await read("ai/doc-spec.json"));
   assert(docSpec.config?.style === config.style, "ai/doc-spec.json style mismatch");
   assert(docSpec.labels?.skills?.length === config.skills.length, "doc-spec skill count mismatch");
-  assert(docSpec.catalog?.skills?.length === 13, "doc-spec catalogue must contain all 13 skills");
+  assert(docSpec.catalog?.skills?.length === 16, "doc-spec catalogue must contain all 16 skills");
   assert(
     Object.keys(docSpec.catalog?.styles ?? {}).length === 16,
     "doc-spec catalogue must contain all 16 palettes",
   );
   const skillsIndex = await read("skills/README.md");
   assert(
-    skillsIndex.includes(`${config.skills.length} of 13`),
+    skillsIndex.includes(`${config.skills.length} of 16`),
     "skills/README.md was not regenerated for this build",
   );
 

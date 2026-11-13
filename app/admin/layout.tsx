@@ -99,6 +99,7 @@ export default async function AdminLayout({
     { href: "/admin/access", label: c["admin.nav.access"] },
     { href: "/admin/stats", label: c["admin.nav.stats"] },
     { href: "/admin/models", label: c["admin.nav.models"] },
+    { href: "/admin/workflows", label: c["admin.nav.workflows"] },
     { href: "/admin/system", label: c["admin.nav.system"] },
     { href: "/admin/tickets", label: c["admin.nav.tickets"] },
   ];

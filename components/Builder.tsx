@@ -64,7 +64,7 @@ const PRESETS: { id: string; labelKey: string; patch: Partial<BuilderConfig> }[]
       ai: ["openai"],
       features: ["landing", "dashboard", "account", "admin", "premium", "video"],
       style: "midnight",
-      skills: ["frontend", "ui", "backend", "testing", "seo", "auth", "payments", "database", "i18n", "deploy", "agents", "video"],
+      skills: ["frontend", "ui", "backend", "testing", "seo", "auth", "payments", "database", "i18n", "deploy", "agents", "video", "workflow", "canvas", "compliance"],
     },
   },
   {

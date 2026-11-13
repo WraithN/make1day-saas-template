@@ -143,6 +143,16 @@ export function buildEnvExample(c: BuilderConfig): string {
     lines.push(``);
   }
 
+  if (c.skills.includes("workflow")) {
+    lines.push(`# ── Inngest durable workflows (skill: workflow) ──────────────────`);
+    lines.push(`# Local: npm run inngest:dev (Dev Server on :8288) + this app. Point`);
+    lines.push(`# the Inngest project at https://your-app/api/inngest in production.`);
+    lines.push(`# INNGEST_EVENT_KEY=dev key or production event key`);
+    lines.push(`# INNGEST_SIGNING_KEY=production signing key (skip locally)`);
+    lines.push(`# INNGEST_APP_ID defaults to the app slug`);
+    lines.push(``);
+  }
+
   if (c.features.includes("rag")) {
     lines.push(`# ── RAG hybrid retrieval (BM25 + embeddings, RRF fusion) ─────`);
     lines.push(`# OpenAI-compatible /embeddings. Falls back to OPENAI_API_KEY, so one`);

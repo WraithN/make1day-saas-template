@@ -41,6 +41,9 @@ const SKILL_FILES: Record<SkillId, string> = {
   deploy: "skills/deploy.md",
   agents: "skills/agent-workflow.md",
   video: "skills/video.md",
+  workflow: "skills/inngest-workflow.md",
+  canvas: "skills/pipeline-canvas.md",
+  compliance: "skills/payment-compliance.md",
 };
 
 /** Skill id → globs used by the generated scoped rules. */
@@ -58,6 +61,9 @@ export const SKILL_GLOBS: Record<SkillId, string[]> = {
   deploy: ["next.config.mjs", "wrangler.toml", "middleware.ts"],
   agents: ["AGENTS.md", "design.md", "ai/**", "skills/**"],
   video: ["lib/video/**", "app/video/**", "app/api/video/**"],
+  workflow: ["inngest/**", "app/api/inngest/**", "app/api/pipeline/**", "lib/workflows.ts"],
+  canvas: ["app/admin/workflows/**", "components/console/WorkflowCanvas.tsx"],
+  compliance: ["contracts/**", "scripts/payment-compliance-check.mjs"],
 };
 
 /** Skill id → filename, exposed so the doc generator can build a real index. */
@@ -334,6 +340,28 @@ const GENERATOR_FILES = [
 ];
 
 /** Source files that should be excluded from the generated zip. */
+// Inngest workflow module: functions, serve endpoint, trigger, run store.
+const WORKFLOW_FILES = [
+  "inngest/client.ts",
+  "inngest/functions.ts",
+  "app/api/inngest/route.ts",
+  "app/api/pipeline/run/route.ts",
+  "lib/workflows.ts",
+  "supabase/migrations/0016_workflows.sql",
+];
+
+// Pipeline canvas: admin page + xyflow client (needs the workflow store).
+const CANVAS_FILES = [
+  "app/admin/workflows/page.tsx",
+  "components/console/WorkflowCanvas.tsx",
+];
+
+// Payment compliance pack: machine-readable contract + self-check script.
+const COMPLIANCE_FILES = [
+  "contracts/payment-compliance.json",
+  "scripts/payment-compliance-check.mjs",
+];
+
 export function computeSkip(config: BuilderConfig): Set<string> {
   const skip = new Set<string>(SITE_ONLY_FILES);
   // make1day's marketing site must never appear in a customer's project.
@@ -391,6 +419,17 @@ export function computeSkip(config: BuilderConfig): Set<string> {
   // credits, deep-synthesis labeling. Pruned whole when unselected.
   if (!config.features.includes("video")) {
     for (const f of VIDEO_FILES) skip.add(f);
+  }
+
+  // Durable workflow module (skill-driven, like the consoles).
+  if (!config.skills.includes("workflow")) {
+    for (const file of WORKFLOW_FILES) skip.add(file);
+  }
+  if (!config.skills.includes("canvas")) {
+    for (const file of CANVAS_FILES) skip.add(file);
+  }
+  if (!config.skills.includes("compliance")) {
+    for (const file of COMPLIANCE_FILES) skip.add(file);
   }
 
   // Multi-tenancy: drop the workspace UI + API routes + helper when OFF, or

@@ -1,37 +1,41 @@
 ---
 name: video
-description: Build or extend the video studio (consent-gated face-swap) module - fal.ai jobs, credits, labeling, webhook.
+description: AI video & image workflow module - consent, safety filters, labeling, credits, provider ops
+globs: lib/video/**, app/video/**, app/api/video/**
 ---
 
-# Skill: Video Studio (face-swap)
+# Skill: AI Video Workflow (source module)
 
-## What ships with the feature
-- `lib/video/fal.ts` — fal.ai queue adapter (submit / poll / result / webhook HMAC).
-- `lib/video/quota.ts` — monthly credits (Care = 6/mo; 480p=1, 720p=2, 1080p=5) with refund-on-failure.
-- `lib/video/store.ts` — dual-backend (Supabase RLS / local SQLite) job ledger.
-- `app/video` + `app/video/studio` — gallery and consent-first studio UI (session-gated by middleware).
-- `app/api/video/jobs`, `app/api/video/jobs/[id]`, `app/api/video/webhook`.
-- `supabase/migrations/0013_video.sql` (owner-only RLS on both tables).
+This project ships the VIDEO WORKFLOW AS SOURCE: template-driven generation
+jobs that run on YOUR hosting with YOUR provider keys (fal via
+`@fal-ai/client`). The seller of this template delivers code, not hosted
+generation, not media credits, not consent to process other people's faces.
 
-## Rules of the road
-1. **Consent before compute.** The API rejects any payload without `consent: true`;
-   the checkbox copy (five languages) names the prohibited categories. Do not
-   add routes that bypass it.
-2. **Label everything.** Outputs keep the visible AI-generated label (deep-synthesis
-   rules: CN 《互联网信息服务深度合成管理规定》, EU AI Act Art.50). No de-watermark tooling, ever.
-3. **Money-safe credits.** Reserve → submit → refund on any failure path, including
-   webhook FAILED and lazy-sync FAILED. Add new failure paths with a refund.
-4. **Webhook discipline.** Raw-body HMAC, timing-safe compare, fail closed when
-   VIDEO_WEBHOOK_SECRET is unset in production (same contract as payments).
-5. **Assets are the customer's.** Template clips come from
-   `VIDEO_TEMPLATE_<ID>_URL`; never commit binary media. New template = entry in
-   `lib/content/video-templates.ts` (five-language name/tag) + env doc line.
-6. **Provider keys stay server-side** (`FAL_KEY`); the studio renders a configuration
-   notice when missing instead of erroring at click time.
+## Do
+- Create a job only with explicit `consent:true`; persist `consent_at` as the
+  audit trail. Own-face-or-written-consent, full stop.
+- Keep the visible "AI-generated" label on every output path.
+- Reserve credits BEFORE submit, refund on ANY provider failure or cancel -
+  a dead job must never eat the subscriber's monthly budget.
+- Route through the model console: provider lanes, unit prices and the cost
+  ledger live in `lib/billing.ts` / `/admin/models`; the studio reads them.
+- Treat template clips as customer-hosted assets (`VIDEO_TEMPLATE_<ID>_URL`).
+- Gate the studio by your own subscription plan (the shipped demo checks an
+  active subscription or demo mode) - you own the pricing semantics.
 
-## Extending
-- New resolution: add to `COST_BY_RESOLUTION` + the studio select + i18n note.
-- New provider: implement submit/poll/result behind `lib/video/fal.ts`'s shape and
-  select via `VIDEO_PROVIDER`; keep the webhook verifier per-provider.
-- Storage of results (Supabase Storage/S3, 7-day retention) is the planned phase 2;
-  until then `output_url` points at the provider's signed URL.
+## Don't
+- Never add a face-swap entry point that skips consent, a watermark-removal
+  path, or any flow that impersonates a real person. Payment providers' AUPs
+  (and most jurisdictions) treat this as grounds for instant delisting -
+  consent UIs do not cure prohibited use cases.
+- Never bundle binary media in the repo; the ZIP must stay a codebase.
+- Never log or persist raw provider keys; mask them in admin surfaces.
+- Do not run the studio on the make1day store deployment (it sells source and
+  switches `SHOW_VIDEO_STUDIO=false` accordingly); this module is for YOUR
+  deployment.
+
+## Verify before claiming done
+1. `npm run compliance:check` (if the payment-compliance skill is bundled).
+2. Job matrix: consent=false rejected · credits reserved→refunded on failure ·
+   label present in output · webhook verifies before mutating state.
+3. `/admin/models` shows the video lane with the key you configured, masked.

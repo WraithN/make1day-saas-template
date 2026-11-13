@@ -64,6 +64,7 @@ const ROOT_OK = [
   "app",
   "components",
   "lib",
+  "inngest",
   "supabase",
   "public",
   "skills",
@@ -191,6 +192,9 @@ export async function listProjectFiles(
   if (config.deploy === "cloudflare") {
     files.push("wrangler.toml", "open-next.config.ts.example");
   }
+  if (config.skills.includes("compliance")) {
+    files.push("scripts/payment-compliance-check.mjs", "contracts/payment-compliance.json");
+  }
 
   return Array.from(new Set(files)).sort();
 }
@@ -246,6 +250,12 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     // The downloaded project owns its AI docs: one command rebuilds every
     // contract file, another refreshes Cursor / Claude Code integrations.
     next["ai:docs"] = "node scripts/ai-docs.mjs";
+    if (config.skills.includes("compliance")) {
+      next["compliance:check"] = "node scripts/payment-compliance-check.mjs";
+    }
+    if (config.skills.includes("workflow")) {
+      next["inngest:dev"] = "npx -y inngest-cli@latest dev";
+    }
     next["ai:setup"] = "node scripts/ai-setup.mjs";
     if (config.deploy === "cloudflare") {
       // Official OpenNext Cloudflare adapter scripts. The adapter itself is
@@ -355,6 +365,16 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
   // /admin/tickets is a make1day-site-only page. The admin console (when it
   // ships at all) must not link to a route that is absent from the ZIP.
   await rewrite("app/admin/layout.tsx", pruneTicketsNav);
+  // The workflow canvas is a selectable skill: without it the nav entry
+  // would point at a route that was pruned from the ZIP.
+  if (!config.skills.includes("canvas")) {
+    await rewrite("app/admin/layout.tsx", (s) =>
+      s.replace(
+        /\s*\{ href: "\/admin\/workflows", label: c\["admin\.nav\.workflows"\] \},/,
+        "",
+      ),
+    );
+  }
 
   // The customer project keeps its own webhook, but NOT this site's key-email
   // pipeline (lib/license-delivery + lib/mail are operator-only and pruned).
@@ -497,6 +517,18 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
   if (config.deploy === "cloudflare") {
     zip.file("wrangler.toml", buildWranglerToml(config));
     zip.file("open-next.config.ts.example", buildOpenNextConfigExample());
+  }
+  // Payment compliance pack: the machine-readable gateway contract plus the
+  // self-check CLI advertised by 'npm run compliance:check'.
+  if (config.skills.includes("compliance")) {
+    zip.file(
+      "scripts/payment-compliance-check.mjs",
+      await fs.readFile(path.join(root, "scripts/payment-compliance-check.mjs"), "utf8"),
+    );
+    zip.file(
+      "contracts/payment-compliance.json",
+      await fs.readFile(path.join(root, "contracts/payment-compliance.json"), "utf8"),
+    );
   }
 
   // Final white-label pass. Individual rewrites above cover the pages we

@@ -59,7 +59,10 @@ export type SkillId =
   | "i18n"
   | "deploy"
   | "agents"
-  | "video";
+  | "video"
+  | "workflow"
+  | "canvas"
+  | "compliance";
 
 export interface BuilderConfig {
   appName: string;
@@ -226,6 +229,21 @@ export const SKILL_OPTIONS: { id: SkillId; label: string; note: string }[] = [
     label: "AI Video Workflow",
     note: "Template-driven generation jobs on your own provider keys, consent attestation, AI labeling",
   },
+  {
+    id: "workflow",
+    label: "Inngest Workflows",
+    note: "Durable pipeline steps (script → storyboard → quote → render → assemble) with per-step retry, resume and cost memoization",
+  },
+  {
+    id: "canvas",
+    label: "Pipeline Canvas",
+    note: "Visual workflow graph in the admin console (@xyflow/react) - needs the Inngest workflows skill",
+  },
+  {
+    id: "compliance",
+    label: "Payment Compliance",
+    note: "Per-gateway compliance contract (webhook signing, refunds, dispute SLA, AUP) + one-command self-check script",
+  },
 ];
 
 export const DEFAULT_CONFIG: BuilderConfig = {
@@ -249,6 +267,9 @@ export const DEFAULT_CONFIG: BuilderConfig = {
     "i18n",
     "deploy",
     "agents",
+    "workflow",
+    "canvas",
+    "compliance",
   ],
 };
 

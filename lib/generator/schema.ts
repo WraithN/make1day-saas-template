@@ -88,9 +88,16 @@ export const builderConfigSchema = z.object({
         "deploy",
         "agents",
         "video",
+        "workflow",
+        "canvas",
+        "compliance",
       ]),
     )
-    .max(13),
+    .max(16)
+    .refine(
+      (arr) => !arr.includes("canvas") || arr.includes("workflow"),
+      "The Pipeline Canvas skill renders Inngest workflow runs - select the Inngest workflows skill too",
+    ),
 });
 
 export type ValidatedBuilderConfig = z.infer<typeof builderConfigSchema>;

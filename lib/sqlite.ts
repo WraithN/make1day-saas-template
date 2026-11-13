@@ -315,6 +315,20 @@ CREATE TABLE IF NOT EXISTS usage_events (
 CREATE INDEX IF NOT EXISTS idx_usage_events_day ON usage_events(day);
 CREATE INDEX IF NOT EXISTS idx_usage_events_user ON usage_events(user_id, day);
 
+-- Inngest workflow runs (skills: workflow / canvas).
+CREATE TABLE IF NOT EXISTS workflow_runs (
+  id         TEXT PRIMARY KEY,
+  pipeline   TEXT NOT NULL,
+  status     TEXT NOT NULL DEFAULT 'queued',
+  steps      TEXT NOT NULL DEFAULT '[]',
+  input      TEXT NOT NULL DEFAULT '{}',
+  output_url TEXT,
+  error      TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_workflow_runs_created ON workflow_runs(created_at DESC);
+
 -- One-time auth tokens for the LOCAL SQLite auth path. The raw token is NEVER
 -- stored: only its SHA-256 hash. The row is deleted on first use (one-time),
 -- and expires_at enforces a hard deadline. The Supabase path uses Supabase
