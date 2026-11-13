@@ -29,9 +29,14 @@ node scripts/setup-wizard.mjs     # local 127.0.0.1 page to paste keys -> .env.l
    `supabase projects api-keys` to fetch the URL/anon - do not make the
    user copy these by hand; `vercel login` + `vercel link`; `gh auth
    login`; `wrangler login`). THEN run `node scripts/setup-wizard.mjs`:
-   the page is two tabbed cards - one Payments tab per selected gateway
-   (active tab = the buyer's first pick) and one Providers card (Supabase,
-   AI keys, email, admin, OAuth). It only asks for console-issued secrets;
+    the page is two tabbed cards, ordered deliberately: the Providers card
+    FIRST (Supabase, AI keys, email, admin, OAuth, Deploy - database before
+    payments, because gateway products cannot exist until the app does),
+    then one Payments tab per selected gateway (active tab = the buyer's
+    first pick). The Deploy tab carries NEXT_PUBLIC_SITE_URL (injected at
+    BUILD time - set before the first prod build!), CRON_SECRET,
+    ADMIN_EMAILS and the vercel/wrangler commands for the chosen target.
+    It only asks for console-issued secrets;
    the CLI commands it shows are labelled "the AI agent runs these for
    you" - you are that agent. A progress badge tracks what's still missing;
    a collapsed Advanced drawer keeps the remaining env vars reachable. Keys
