@@ -187,6 +187,9 @@ export const env = {
   waffoPriceCare: () => opt("WAFFO_PRICE_ID_CARE"),
   waffoPriceBuyoutStudio: () => opt("WAFFO_PRICE_ID_BUYOUT_STUDIO"),
   waffoPriceBuyoutStudioBf: () => opt("WAFFO_PRICE_ID_BUYOUT_STUDIO_BF"),
+  // $1 founder window. Optional slot: no BF variant, not required by the
+  // config self-check, and the Founder card on /pricing hides when unset.
+  waffoPriceFounder: () => opt("WAFFO_PRICE_ID_FOUNDER"),
 
   // ── Black Friday campaign (reserved hook; OFF by default) ──────
   // The /black-friday page shows promo pricing + a countdown. To charge the
@@ -472,13 +475,19 @@ export function licenseGateStatus(): {
  * keep working. For gateways without dedicated BUYOUT/CARE ids, the PRO slot
  * is the one-time Buyout product and the SCALE slot is the recurring Care plan.
  */
-export type PricePlan = "buyout" | "care" | "pro" | "scale";
+export type PricePlan = "buyout" | "care" | "pro" | "scale" | "founder";
 /** Buyout package; a "studio" checkout resolves the STUDIO product slot. */
 export type BuyoutPackage = "core" | "studio";
 
 /** Resolve the price/plan id for a plan under the active payment provider. */
 export function priceForPlan(plan: PricePlan, pkg?: BuyoutPackage): string | null {
   const provider = env.paymentProvider().split(",")[0].trim();
+  // The founder slot exists only as a Waffo Pancake product; every other
+  // gateway answers null, so their adapters refuse checkout instead of
+  // silently charging the regular Buyout product for a "$1" click.
+  if (plan === "founder") {
+    return provider === "waffo" ? env.waffoPriceFounder() || null : null;
+  }
   const isBuyout = plan === "buyout" || plan === "pro";
   const valueOrFallback = (primary: string, fallback: string) =>
     primary || fallback || null;
@@ -517,6 +526,8 @@ export function priceForPlan(plan: PricePlan, pkg?: BuyoutPackage): string | nul
  */
 export function priceForPlanBf(plan: PricePlan, pkg?: BuyoutPackage): string | null {
   if (!env.blackFridayActive()) return null;
+  // $1 is already below any campaign price — the founder window has no BF variant.
+  if (plan === "founder") return null;
   const provider = env.paymentProvider().split(",")[0].trim();
   const isBuyout = plan === "buyout" || plan === "pro";
   const bf = (buyoutId: string, careId: string) =>

@@ -188,7 +188,7 @@ defaults to `none`, no host scheduler is configured by this repo, and no real
 sandbox payment has been run for every gateway. `/faq`, `llms.txt` and
 `llms-full.txt` describe exactly this — never claim untested live delivery.
 
-Editorial / GEO surface: `lib/content/blog.ts` holds 9 articles (each with a
+Editorial / GEO surface: `lib/content/blog.ts` holds 15 articles (each with a
 localised structured FAQ, aliases for legacy slugs and an `updated` date) and
 `lib/content/faq.ts` holds 21 EN + 21 ZH answers. `app/blog/[slug]/page.tsx`
 emits BlogPosting + FAQPage + BreadcrumbList JSON-LD; `app/blog/page.tsx` emits

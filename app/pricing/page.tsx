@@ -20,7 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // Keep the structured-data amounts in sync with the cards below: both read
 // lib/pricing.ts so a reprice or a campaign window can never desync them.
-import { PRICES, STUDIO_UPGRADE, bfActive, effectivePrice } from "@/lib/pricing";
+import { PRICES, STUDIO_UPGRADE, FOUNDER_PRICE, bfActive, effectivePrice } from "@/lib/pricing";
+import { FounderCard } from "@/components/FounderCard";
 
 export default async function PricingPage() {
   const lang = await getLang();
@@ -166,6 +167,17 @@ export default async function PricingPage() {
         },
         url: `${site}/pricing`,
       },
+      ...(priceForPlan("founder")
+        ? [
+            {
+              "@type": "Offer",
+              name: "Founder License — $1 launch window, Buyout Core rights",
+              price: String(FOUNDER_PRICE),
+              priceCurrency: "USD",
+              url: `${site}/pricing`,
+            },
+          ]
+        : []),
     ],
   };
 
@@ -195,6 +207,13 @@ export default async function PricingPage() {
       <div className="mt-10">
         <PricingCards plans={plans} paymentsReady={primaryPaymentsReady()} />
       </div>
+
+      <FounderCard
+        priceId={priceForPlan("founder")}
+        paymentsReady={primaryPaymentsReady()}
+        price={`$${FOUNDER_PRICE}`}
+        wasPrice={`$${PRICES.buyout.regular}`}
+      />
 
       <CustomService
         bookingUrl={env.bookingUrl()}

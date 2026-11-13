@@ -9,11 +9,22 @@ import { TemplateCard } from "@/components/TemplateCard";
 export async function generateMetadata(): Promise<Metadata> {
   const lang = await getLang();
   // The root layout's title template appends "· make1day.dev" — don't add it here.
-  const title = lang === "zh" ? "样板间" : "Templates";
-  const description =
-    lang === "zh"
-      ? "看看每个 make1day.dev 模板真实生成的站点——点击即可在线预览。"
-      : "See a live preview of the site each make1day.dev template generates — click to open it.";
+  const titles: Record<string, string> = {
+    en: "SaaS Website Templates",
+    zh: "样板间",
+    ja: "SaaS ウェブサイトテンプレート",
+    fr: "Modèles de sites SaaS",
+    de: "SaaS-Website-Vorlagen",
+  };
+  const descriptions: Record<string, string> = {
+    en: "A live SaaS website template for every scene - auth, billing, admin, AI already wired. Open the real generated site, then download the source.",
+    zh: "看看每个 make1day.dev 模板真实生成的站点——点击即可在线预览。",
+    ja: "すべての SaaS ウェブサイトテンプレートの生成済み実サイトを一括プレビュー。ソースはワンクリックで取得。",
+    fr: "Chaque modèle de site SaaS livré en site réel - auth, facturation, admin, IA déjà câblés. Ouvrez l'aperçu, téléchargez la source.",
+    de: "Jedes SaaS-Website-Template als echtes generierte Site - Auth, Billing, Admin, KI verdrahtet. Vorschau öffnen, Quellcode herunterladen.",
+  };
+  const title = titles[lang] ?? titles.en;
+  const description = descriptions[lang] ?? descriptions.en;
   const canonical = variantCanonical("/templates", await getCanonicalLang());
   return {
     title,

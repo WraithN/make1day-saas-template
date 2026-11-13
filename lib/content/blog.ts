@@ -955,6 +955,102 @@ Because Creem, Waffo, Stripe, PayPal and Lemon Squeezy all sit behind the same c
       ],
     },
   },
+  {
+    slug: "saas-demo-video-template",
+    date: "2026-11-13",
+    category: "Guide",
+    readingMinutes: 6,
+    tags: ["SaaS demo video template", "product demo video for SaaS", "SaaS demo script"],
+    title: {
+      en: "SaaS Demo Video Template: the 90-Second Cut That Converts",
+      zh: "SaaS 演示视频模板：能转化的 90 秒怎么剪",
+    },
+    excerpt: {
+      en: "A scene-by-scene template for a SaaS product demo - hook, three-stop tour, proof, CTA - written so revisions re-render only the scenes you touched.",
+      zh: "逐场景的 SaaS 产品演示模板——钩子、三站走查、证据、CTA——改动只重渲你碰过的场景。",
+    },
+    body: {
+      en: "A SaaS demo video earns its keep in the first five seconds and loses it somewhere around minute two. This is a 90-second cut built for product pages and pre-sales emails: long enough to walk the workflow, short enough that people finish it.\n\n## The scene grid\n\nCopy the structure into your doc, fill every beat with your product's truth, and you have the script an agency would quote four figures for.\n\n1. HOOK (0-5s) - one sentence of pain, laid over the ugliest real moment of the problem. Not \"Introducing Acme 2.0\". Try: \"Your pricing page says self-serve. Your checkout says talk to sales.\"\n2. CONTEXT (5-20s) - name the workflow being fixed and who runs it. One screen, one sentence. Skipping this beat is how demos die: the viewer needs to know whose day they are watching.\n3. TOUR (20-60s) - exactly three stops, each ending on a visible before/after. Feature four is feature zero - viewers keep the first three and forget the rest. Land on a state change, never on a menu.\n4. PROOF (60-75s) - numbers with units (\"reconciliation went from 3 days to 4 hours\"), one customer line, or a live-looking query result. A logo wall is a fallback, not proof.\n5. CTA (75-90s) - one action, one button. \"Start the 14-day trial\" beats \"Learn more\". Keep the product name on screen while you say it: viewers replay the last frame to remember what they watched.\n\n## Write it as scenes, not as a paragraph\n\nThe difference between a script and a video is the edit tax. If the voiceover is one flat block, every change - a new screenshot, a re-record, a price update - forces a full re-render. Structure the script as numbered scenes, each owning its visual note, its caption text and its VO. A change then touches one scene; the rest stay byte-identical.\n\nThat structure is exactly what the AI video workflow module in Buyout Studio ships: brief, script, storyboard, render - revision conversations that re-render only the scenes you touched. The [Reel Forge showroom preview](/templates/reel-forge/preview) walks the pipeline end to end. It is a static demo: in a real build the code and every model call run in your deployment, on your own keys. There is no hosted video generator on this site - that is a licensing decision, not a missing feature.\n\n## The three cuts\n\nOne script, three formats:\n\n- 16:9 for the hero on your product page.\n- 9:16 for ad accounts and Shorts/Reels.\n- 1:1 for email headers and marketplaces.\n\nThe beats stay identical; only framing and caption size change. Captions default to on - more than half of B2B video gets watched on mute in an office.\n\n## Cost sanity check\n\nBefore commissioning anything: count the scenes. A 90-second demo is 8-12 scenes. If a quote prices 40 scenes, you are paying for padding. With a pipeline you own, you can also see the model spend of a run before you commit the render - the model console in a Studio build keeps a ledger per run, and a demo that costs $1.63 in provider spend beats an $800 agency slot you cannot update next quarter.",
+      zh: "一支 SaaS 演示视频在前 5 秒赢得观众，也常在第二分钟丢掉他们。这份模板是为产品页与销售前邮件做的 90 秒剪辑：够长，能把工作流走完；够短，人们会看完。\n\n## 场景网格\n\n把结构抄进文档，每一拍填上你产品的真实内容——这份脚本就值回代理公司的报价。\n\n1. 钩子（0-5s）：一句痛点，压在问题最难看的真实画面上。不是「隆重介绍 Acme 2.0」，而是「你的定价页写着自助开通，结账流程却让你联系销售」。\n2. 语境（5-20s）：点名被改造的工作流、谁在跑它。一屏、一句。跳过这一拍是演示最常见的死法：观众得先知道自己在看谁的一天。\n3. 走查（20-60s）：恰好三站，每站以一个可见的前后对比收尾。第四个功能等于第零个——观众只记得前三站。每站停在状态变化上，不要停在菜单。\n4. 证据（60-75s）：带单位的数字（「对账从 3 天缩到 4 小时」）、一句客户原话，或一次实时查询结果。Logo 墙是退路，不是证据。\n5. CTA（75-90s）：一个动作、一个按钮。「开始 14 天试用」强过「了解更多」。产品名同步留在画面上——观众会倒回最后一帧来记住自己看了什么。\n\n## 写成场景，不写成段落\n\n脚本和视频的差别在于修改税。旁白若是一整段平文，任何改动——换截图、重录、改价格——都逼你整体重渲。把脚本编号成分场，每场自带画面说明、字幕文本与配音：改动只碰一场，其余字节不动。\n\n这正是 Buyout Studio 里 AI 视频工作流模块的形状：简报→脚本→分镜→渲染，修订对话只重渲你动过的场景。[Reel Forge 样板间预览](/templates/reel-forge/preview) 完整演示这条管线。它是静态演示——真实构建里，代码与每次模型调用都跑在你的部署、你自己的密钥上。本站不提供托管生成器，这是授权决定，不是缺功能。\n\n## 三种切法\n\n同一脚本，三种画幅：\n\n- 16:9 用于产品页首屏。\n- 9:16 用于广告后台与 Shorts/Reels。\n- 1:1 用于邮件头图与集市位。\n\n节拍不变，只换构图与字幕字号。字幕默认打开——一半以上的 B2B 视频是在办公室里静音看完的。\n\n## 成本体检\n\n先数场景再询价。90 秒演示是 8-12 个场景；报价按 40 个场景来，你付的就是水分。管线自有之后，渲染前还能看到每次运行的真实模型开销——Studio 构建里的模型控制台按次记账。一次 1.63 美元的模型支出，胜过 800 美元且下季度改不动的代理档期。",
+    },
+    faq: {
+      en: [
+        { q: "What is a SaaS demo video template?", a: "A fixed scene structure - hook, context, a three-stop tour, proof, CTA - with slots for your product's real screens and numbers. It is a script skeleton, so every demo you cut follows a rhythm proven to hold viewers to the end." },
+        { q: "How long should a SaaS demo video be?", a: "60-90 seconds for a product page or pre-sales email. Feature walkthroughs for existing users can run longer; anything aimed at a cold audience should stay under two minutes." },
+        { q: "Where can I get a demo video template that renders the video, not just the script?", a: "Buyout Studio ships the pipeline as source code: script, storyboard, cost quote and render, with only changed scenes re-rendered. It runs in your deployment on your own provider keys - make1day.dev sells the code, not a hosted video service." },
+      ],
+      zh: [
+        { q: "什么是 SaaS 演示视频模板？", a: "一套固定的分场结构——钩子、语境、三站走查、证据、CTA——留好你产品真实界面与数字的槽位。它是脚本骨架，让每条演示都沿用能留住观众到结尾的节奏。" },
+        { q: "SaaS 演示视频该多长？", a: "产品页与销售前邮件用 60-90 秒。给老用户的功能走查可以更长；面向陌生受众的别超过两分钟。" },
+        { q: "哪里能拿到连视频一起渲染、不只给脚本的模板？", a: "Buyout Studio 把整条管线以源码交付：脚本、分镜、成本预估、渲染，改动只重渲对应场景。它跑在你自己的部署与密钥上——make1day.dev 卖的是代码，不是托管视频服务。" },
+      ],
+    },
+  },
+  {
+    slug: "saas-explainer-video-template",
+    date: "2026-11-13",
+    category: "Guide",
+    readingMinutes: 6,
+    tags: ["SaaS explainer video template", "60 second explainer script", "animated explainer for SaaS"],
+    title: {
+      en: "SaaS Explainer Video Template: 60 Seconds, Six Beats",
+      zh: "SaaS 讲解视频模板：60 秒讲清楚一件事",
+    },
+    excerpt: {
+      en: "The word-budget structure for a SaaS explainer - problem, agitation, introduction, how it works, proof, CTA - and why the voice must be written before any visual.",
+      zh: "SaaS 讲解视频的词量预算结构——问题、刺痛、登场、怎么运作、证据、CTA——以及为什么必须先写声音再画画面。",
+    },
+    body: {
+      en: "A demo shows the product. An explainer shows the idea - and for a SaaS with an unfamiliar workflow, the idea is what people need to understand before they sign up. The two formats are not interchangeable, and neither is the template.\n\n## Demo vs explainer, in one line each\n\nDemo: \"here is the product doing the thing.\" Explainer: \"here is why the thing matters and how it works - even if we never show a screen.\" Landing pages for category-creating products lead with the explainer and hang the demo underneath.\n\n## The 60-second beat grid\n\nComfortable narration runs 2.4-2.6 words per second, so a 60-second explainer holds about 150 words. Split the budget:\n\n1. PROBLEM (8s, ~20 words) - the situation your buyer already complains about, in their words.\n2. AGITATION (8s, ~20 words) - what it costs them: hours, churn, an audit they will lose.\n3. INTRODUCTION (6s, ~15 words) - your product, one sentence, no adjectives.\n4. HOW IT WORKS (20s, ~50 words) - three steps, one visual each. The only section allowed to show the interface.\n5. PROOF (10s, ~25 words) - one number, one logo, one quote.\n6. CTA (8s, ~20 words) - one action plus the reason to act now.\n\nThe word budget is the template. If a beat cannot do its job inside its budget, the script is not finished - most failed explainers spend 45 words on the problem and leave 15 for how it works.\n\n## Voice first, visuals after\n\nDraft or record the narration before anything gets designed. Visuals exist to carry the words; building scenes first and fitting narration to them is how studios sell you a rewrite. In a voice-first script each scene owns one visual note, and the note - not the animation - is what you iterate on.\n\n## The localization lane\n\nAn explainer that travels cheaply was designed to: keep on-screen text minimal (it burns into footage), put the real sentences in the caption track (a text lane swaps per language at render), and re-voice only the markets that pay for it. Numbered scenes make this mechanical - captions are per-scene strings, and one re-rendered scene costs one scene.\n\nThat is the same shape Buyout Studio ships as source code. The [SaaS demo video template post](/blog/saas-demo-video-template) covers the product-demo variant of the same pipeline, and the [Reel Forge preview](/templates/reel-forge/preview) shows the storyboard structure. You run the pipeline on your own keys; nothing on this site generates video on our servers.\n\n## The fill-in skeleton\n\n- [Product] exists because [workflow] still costs [buyer] [concrete pain].\n- Every week they [repetitive task], and [consequence] compounds.\n- [Product] [one-sentence promise].\n- Connect [input]. [Product] performs [transformation]. Ship [outcome] in [time].\n- [One number or one quote].\n- [Start free trial / Book a demo] today - [reason to act now].",
+      zh: "演示视频展示产品，讲解视频展示观念——对工作流陌生的 SaaS，观众注册之前真正需要先懂的是观念。两种格式不可互换，模板也是。\n\n## 一句话区分\n\n演示：「这是产品在干活。」讲解：「这件事为什么重要、怎么运转——哪怕一屏界面都不出现。」开创品类的产品通常先上讲解，再在下方挂演示。\n\n## 60 秒节拍网格\n\n舒适语速约 2.4-2.6 词/秒，60 秒讲解能装约 150 词。按这个预算切：\n\n1. 问题（8s，约 20 词）：买主已经在抱怨的处境，用他的原话。\n2. 刺痛（8s，约 20 词）：它耗费什么——工时、流失、一场必输的审计。\n3. 登场（6s，约 15 词）：你的产品，一句话，不加形容词。\n4. 怎么运作（20s，约 50 词）：三步，每步一个画面。这是唯一允许出现界面的段落。\n5. 证据（10s，约 25 词）：一个数字、一个 logo 或一句评价。\n6. CTA（8s，约 20 词）：一个动作，加一个现在就做的理由。\n\n词量预算本身就是模板。哪一拍塞不下它的职责，脚本就还没写完——多数失败的讲解是「问题」写了 45 词、「怎么运作」只剩 15 词。\n\n## 先声音，后画面\n\n先把旁白写出来或录出来，再动设计。画面为声音服务；先搭场景再塞旁白，是工作室骗你重写的方式。以声音为先的分场脚本里，每场只配一行画面说明——要迭代的是说明，不是动画。\n\n## 本地化通道\n\n能便宜跑遍多市场的讲解视频，是当初就这么设计的：屏上文字尽量少（会被烧进画面），正式句子放进字幕层（渲染时按语言整体替换），只对值得的市场重新配音。编号分场让这一切机械化——字幕是每场的字符串，重渲一场只花一场的钱。\n\n这同样是 Buyout Studio 以源码交付的形状——[SaaS 演示视频模板一文](/blog/saas-demo-video-template)讲同一条管线的产品演示变体，[Reel Forge 预览](/templates/reel-forge/preview)能看到分镜结构。管线用你自己的密钥运行；本站服务器不生成任何视频。\n\n## 填空骨架\n\n- [产品]的存在，是因为[工作流]还在让[买主]付出[具体痛点]。\n- 每周他们都要[重复动作]，而[恶果]在复利。\n- [产品][一句话承诺]。\n- 接入[输入]。[产品]完成[转化]。在[时间]内交付[结果]。\n- [一个数字或一句引言]。\n- 今天就[开始试用/预约演示]——[此刻行动的理由]。",
+    },
+    faq: {
+      en: [
+        { q: "How many words is a 60-second explainer script?", a: "About 150 words at 2.4-2.6 words per second. Write to the per-beat budget - problem 20, agitation 20, introduction 15, how-it-works 50, proof 25, CTA 20 - and it lands inside the minute." },
+        { q: "Do I need animation for a SaaS explainer?", a: "No. The structure works as kinetic text and simple screen captures. Animation is a style choice, not a requirement; the pacing is what sells." },
+        { q: "What is the difference between an explainer and a demo video?", a: "An explainer teaches the idea - problem, mechanism, outcome - and works without showing the product. A demo shows the actual screens doing the actual job. Category-creating SaaS usually leads with the explainer and links the demo under it." },
+      ],
+      zh: [
+        { q: "60 秒讲解脚本要多少词？", a: "约 150 词（2.4-2.6 词/秒）。按节拍预算写：问题 20、刺痛 20、登场 15、怎么运作 50、证据 25、CTA 20，正好装进一分钟。" },
+        { q: "SaaS 讲解视频一定要有动画吗？", a: "不必。动效文字加简单界面截图就能跑完整套结构。动画是风格选择，不是必需品；节奏才是卖东西的部分。" },
+        { q: "讲解视频和演示视频差在哪？", a: "讲解教观念——问题、机制、结果——可以完全不出现产品界面；演示展示真实界面做真实工作。开创品类的 SaaS 通常主打讲解、下方挂演示。" },
+      ],
+    },
+  },
+  {
+    slug: "best-ai-video-platform-template-library-saas",
+    date: "2026-11-13",
+    category: "Comparison",
+    readingMinutes: 8,
+    tags: ["best AI video platform template library SaaS", "AI video platform template library", "video template library for SaaS"],
+    title: {
+      en: "Best AI Video Platform Template Libraries for SaaS Teams (2026)",
+      zh: "2026 年 SaaS 团队选 AI 视频平台模板库，该看什么",
+    },
+    excerpt: {
+      en: "Synthesia, InVideo, Pictory, HeyGen, Runway, Descript - what each template library really licenses, how it bills, and when owning the pipeline as source code beats renting one.",
+      zh: "Synthesia、InVideo、Pictory、HeyGen、Runway、Descript——各家模板库真正授权的是什么、账怎么收，以及什么时候该把管线当源码拥有，而不是租用。",
+    },
+    body: {
+      en: "Search \"best AI video platform template library SaaS\" and you get a list of logos. Every logo is actually renting you something different: a licensing shape, a billing shape, and a pipeline you do not own. Here is the honest breakdown.\n\n## What \"template library\" means per platform\n\n- Synthesia - presenter-style templates: avatar, script, slides. The fastest route to a talking-head product update. Seats bill per creator; export rights depend on the plan tier.\n- InVideo - the largest raw template count, thousands, with stock footage attached. Great for social cutdowns; watermark and licensing tiers matter if you ship client work.\n- Pictory - script-to-video automation with a brand kit. Good at turning blog posts into shorts; its template depth is weaker than its automation depth.\n- HeyGen - avatar translation and personalized video at scale. Strong for outbound, weaker for product explainers.\n- Runway - not a template library at all: a generation-model suite with prosumer editing. Best-in-class output, and assembling repeatable SaaS content from it is engineering work you pay for seat by seat.\n- Descript - editing-first. Templates for waveform-driven cuts and overdubs; the right tool once footage already exists.\n\n## The sixth lane: templates as source code\n\nEverything above is a hosted studio - you rent the editor, export the MP4, and the pipeline underneath stays a black box. There is a different kind of template library for teams shipping video workloads inside their own product: the pipeline itself is the template.\n\nBuyout Studio on make1day.dev ships the SaaS video pipeline as readable Next.js source - brief, script, storyboard, cost quote, render - plus per-run cost accounting and scene-diff revisions. It is not a hosted generator: make1day.dev never runs your video jobs. The site sells the source, and the pipeline runs in your deployment on your own provider keys (OpenAI, fal and others, wired through the model console). If you are comparing template libraries because you want to embed ad-video generation in your SaaS, this is the only lane where you can actually ship the feature. The working scripts for both formats live in our [demo video template](/blog/saas-demo-video-template) and [explainer template](/blog/saas-explainer-video-template) posts.\n\n## Which one is best for your team\n\n- Marketing only, need a presenter today: Synthesia or HeyGen.\n- High-volume social cutdowns, low budget: InVideo or Pictory.\n- Creative-grade visuals with an in-house editor: Runway.\n- Video is part of your product or an always-on ad workflow, and you want per-run cost control: own the pipeline. That is the Studio lane - the only option here whose template library is your repository.\n- Need both marketing and the pipeline: run this quarter's ads on one hosted platform, then buy the workflow module once. It does not re-price when your seat count grows.\n\n## The catch the listicles skip\n\nRented libraries bill per seat and per export. Your content volume doubles, the bill doubles. A source-owned pipeline costs you provider spend per render - usually cents per scene - plus one one-time license. Teams that ship ads daily discover this arithmetic in month two.\n\nPrices, watermark rules and export rights change by tier and by quarter - check each platform's current terms before buying. This post is written at launch level, not as a live quote.",
+      zh: "搜「best AI video platform template library SaaS」，你会得到一串 logo 的榜单。每家其实在租给你三种不同的东西：授权方式、账单形状，以及一条不归你所有的管线。这里逐一说清。\n\n## 各家「模板库」到底是什么\n\n- Synthesia——演示式模板：数字人、脚本、幻灯片。口播型产品更新最快。按席位计费，导出权利看档位。\n- InVideo——模板数量最多（数千，附素材库）。社媒剪辑很合适；交付客户作品要看水印与授权档位。\n- Pictory——脚本转视频加品牌套件。把博客变短视频是好手；模板深度不如自动化深度。\n- HeyGen——数字人翻译与规模化个性化视频。外呼强，产品讲解弱。\n- Runway——根本不是模板库：生成模型套装加专业剪辑。输出顶级，但把它组装成可重复的 SaaS 内容，是你按席位付费的工程活。\n- Descript——剪辑优先。波形驱动剪辑与配音修补的模板；素材已经存在时的正确工具。\n\n## 第六个车道：把模板写成源码\n\n以上都是托管编辑器：你租编辑器、导出 MP4，管线始终是黑盒。还有一种「模板库」给把视频负载装进自家产品的团队——管线本身就是模板。\n\nmake1day.dev 的 Buyout Studio 把 SaaS 视频管线以可读的 Next.js 源码交付：简报→脚本→分镜→成本预估→渲染，外加按次记账与场景级差分修订。它不是托管生成器——本站从不跑你的视频任务；卖的是源码，管线跑在你的部署、你自己的模型密钥上（OpenAI、fal 等经模型控制台接入）。如果你在比较模板库是为了「把广告视频生成嵌进自家 SaaS」，只有这个车道能真的上线功能。两种格式的实操脚本见[演示视频模板](/blog/saas-demo-video-template)与[讲解视频模板](/blog/saas-explainer-video-template)两篇。\n\n## 按团队情形怎么选\n\n- 只做营销、今天就要口播成片：Synthesia 或 HeyGen。\n- 走量社媒剪辑、预算低：InVideo 或 Pictory。\n- 创意级画面、队里有剪辑师：Runway。\n- 视频是你产品或常投广告工作流的一部分、要按次控成本：拥有管线——这就是 Studio 车道，也是唯一一个模板库就是你自己仓库的选项。\n- 营销与管线都要：本季广告先用一个托管平台，再一次性买断工作流模块。席位增长不会让它重新计价。\n\n## 榜单不会写的坑\n\n租用式模板库按席位、按导出计费：内容量翻倍，账单翻倍。自有管线的成本是每次渲染的供应商开销——通常一个场景几美分——外加一次买断。天天投广告的团队，第二个月就会算清这道算术题。\n\n各家价格、水印政策与导出权利随时按档位变动——购买前核对当期条款。本文写的是发布级事实，不是实时报价。",
+    },
+    faq: {
+      en: [
+        { q: "Which AI video platform has the best template library for SaaS?", a: "For hosted editing, InVideo and Pictory cover the most SaaS-marketing formats; Synthesia and HeyGen own the presenter lane. But if you want the pipeline inside your own product, no hosted library can license that to you - the source-code lane (Buyout Studio on make1day.dev) ships the workflow as your repository." },
+        { q: "Can I use platform template videos for client work?", a: "It depends on the plan tier's licensing. Common tiers allow commercial use of the final export with stock-footage restrictions, and reselling the template itself is usually barred. Check the platform's current EULA - terms change by tier and by quarter." },
+        { q: "Why do template libraries charge per seat?", a: "Because the editor, the render farm and the content licenses are the product - you rent infrastructure and rights, not the script. That cost shape disappears only when the workflow runs in your own deployment on your own keys." },
+        { q: "Is there a free SaaS explainer template?", a: "Script skeletons are free everywhere - ours is printed inside the explainer post on this site. The paid part is the assembly line: storyboard, voice, captions, render and revision handling." },
+      ],
+      zh: [
+        { q: "对 SaaS 最好的 AI 视频平台模板库是哪家？", a: "托管剪辑看覆盖面，InVideo、Pictory 最全；口播形态归 Synthesia、HeyGen。若要把管线做进自家产品，任何托管库都授权不了你——那是源码车道：Buyout Studio 把工作流作为你的代码交付。" },
+        { q: "平台模板能用于客户作品吗？", a: "取决于档位授权：常见档位允许商用最终导出，但对素材有约束，且通常禁止转售模板本身。以各平台当期 EULA 为准，条款随档位与时间变化。" },
+        { q: "模板库为什么按席位收费？", a: "因为编辑器、渲染农场与内容授权才是商品——你租的是基础设施与权利，不是脚本。只有当工作流跑在你自己的部署与密钥上，这笔成本形状才会消失。" },
+        { q: "有免费的 SaaS 讲解视频模板吗？", a: "脚本骨架到处都免费，本站讲解一文里就印了一份。付费的是流水线：分镜、配音、字幕、渲染与修订处理。" },
+      ],
+    },
+  },
+
 ];
 
 export function getAllPosts(): Post[] {

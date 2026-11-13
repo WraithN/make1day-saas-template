@@ -4,9 +4,12 @@
 
 /**
  * Plans sold on /pricing: "buyout" is one-time, "care" is monthly.
+ * "founder" is the env-gated $1 launch window: it charges a dedicated Waffo
+ * product but its checkout metadata still says plan=buyout (package core), so
+ * entitlements downstream never learn a third plan.
  * "pro" / "scale" are the legacy price-slot names kept for compatibility.
  */
-export type PlanId = "buyout" | "care" | "pro" | "scale";
+export type PlanId = "buyout" | "care" | "pro" | "scale" | "founder";
 
 /** Buyout packages: Core (no AI workflow module) vs Studio (with the
  *  AI video/image workflow + the model-routing admin console). Same plan

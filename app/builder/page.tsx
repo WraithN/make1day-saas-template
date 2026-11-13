@@ -9,9 +9,9 @@ import { HreflangLinks } from "@/components/HreflangLinks";
 export async function generateMetadata(): Promise<Metadata> {
   const canonical = variantCanonical("/builder", await getCanonicalLang());
   return {
-    title: "SaaS Template Generator",
+    title: "SaaS Website Template Generator",
     description:
-      "Pick your stack, auth, payments and AI providers, then download a production-ready AI SaaS starter.",
+      "Pick your stack, auth, payments and AI providers, then download a production-ready SaaS website template as a buildable Next.js project.",
     // Indexable on purpose: /builder is the main conversion page. robots.ts
     // explicitly allows it and sitemap.ts ranks it 0.9 — a page-level noindex
     // here would silently override both.

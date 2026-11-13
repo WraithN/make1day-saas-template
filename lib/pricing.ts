@@ -41,6 +41,10 @@ export const STUDIO_UPGRADE = {
   premium: 100,
 } as const;
 
+/** $1 launch-window offer. Real rights = Buyout Core (webhook metadata says
+ *  plan=buyout); the card itself is env-gated on WAFFO_PRICE_ID_FOUNDER. */
+export const FOUNDER_PRICE = 1;
+
 export function bfActive(): boolean {
   return env.blackFridayActive();
 }

@@ -352,7 +352,7 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
 
 - Marketing pages: /, /builder, /pricing, /support, /faq, /compare,
   /templates, /blog, /rag (demo), /license (noindex), /privacy, /terms.
-- Editorial inventory: 9 long-form articles on /blog (guides, comparisons,
+- Editorial inventory: 15 long-form articles on /blog (guides, comparisons,
   checklists and long-tail GEO topics), each with its own FAQ and a Markdown
   variant; /faq carries 21 verified answers in English and 21 in 中文, with
   JA/FR/DE falling back to English. Legacy slugs still resolve but canonicalise

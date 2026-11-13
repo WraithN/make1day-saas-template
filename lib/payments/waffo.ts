@@ -49,7 +49,7 @@ import { toMajor } from "./types";
 // ───────────────────────────────────────────────────────────────
 
 export function isOneTimePlan(plan: PlanId): boolean {
-  return plan === "buyout" || plan === "pro";
+  return plan === "buyout" || plan === "pro" || plan === "founder";
 }
 
 function isPancake(): boolean {
@@ -137,7 +137,7 @@ async function createCheckoutPancake(
     : priceForPlan(p.plan, pkg);
   if (!productId) {
     throw new Error(
-      `No Waffo Pancake product configured for plan "${p.plan}". Set WAFFO_PRICE_ID_BUYOUT / WAFFO_PRICE_ID_CARE.`,
+      `No Waffo Pancake product configured for plan "${p.plan}". Set WAFFO_PRICE_ID_BUYOUT / WAFFO_PRICE_ID_CARE / WAFFO_PRICE_ID_FOUNDER.`,
     );
   }
 
@@ -626,6 +626,8 @@ export function waffoConfigSummary() {
     priceIdsConfigured: {
       buyout: !!priceForPlan("buyout"),
       care: !!priceForPlan("care"),
+      // Optional launch slot — presence only, never a missing-var blocker.
+      founder: !!priceForPlan("founder"),
     },
     missing,
     ready: missing.length === 0,

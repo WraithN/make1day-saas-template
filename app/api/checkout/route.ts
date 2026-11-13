@@ -40,7 +40,7 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   const parsed = z
     .object({
-      plan: z.enum(["buyout", "care"]),
+      plan: z.enum(["buyout", "care", "founder"]),
       /** Which buyout package to charge; only meaningful for plan=buyout. */
       buyoutPackage: z.enum(["core", "studio"]).optional(),
       blackFriday: z.boolean().optional(),

@@ -291,6 +291,9 @@ const SITE_MARKETING_FILES = [
   // too — it renders the promo and imports nothing customer-specific.
   "components/BlackFridayPlans.tsx",
   "components/BlackFridayCountdown.tsx",
+  // The $1 founder strip is make1day's own launch promo (env-gated on
+  // WAFFO_PRICE_ID_FOUNDER); the generated pricing page never imports it.
+  "components/FounderCard.tsx",
   "components/LicensePanel.tsx",
   // Home-page-only marketing sections. The customer home page is generated
   // from their own BuilderConfig and imports none of these.
