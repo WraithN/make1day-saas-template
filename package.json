@@ -23,7 +23,8 @@
     "rag:bench": "node scripts/rag-bench.mjs",
     "rebrand": "node scripts/rebrand.mjs",
     "agents:lint": "node scripts/agents-lint.mjs",
-    "smoke:moderation": "node scripts/smoke-moderation.cjs"
+    "smoke:moderation": "node scripts/smoke-moderation.cjs",
+    "compliance:check": "node scripts/payment-compliance-check.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.103",
