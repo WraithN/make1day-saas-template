@@ -10,7 +10,8 @@
  *
  * Checks:
  *   1. anonymous POST /api/generate -> 402 license_required + preview offer
- *   2. anonymous POST /api/generate/preview -> 200 ZIP with NO application source
+ *   2. anonymous POST /api/generate/preview -> 200 skeleton ZIP with NO
+ *      application source (configs + themed placeholder page only)
  *   3. the signed visitor AND trusted-network quota both hold (spoofed XFF,
  *      and a cleared cookie, must not mint another preview)
  *   4. a valid offline SK1 license key unlocks the full source ZIP
@@ -201,8 +202,26 @@ async function runChecks() {
       names.join(", ").slice(0, 180),
     );
     check(
-      "preview ZIP contains NO application source",
-      !names.some((n) => /\.(tsx?|jsx?|sql|mdc)$/.test(n) || n.startsWith("app/")),
+      "preview ZIP is skeleton-only (no lib/components/skills/api source)",
+      !names.some(
+        (n) =>
+          n.startsWith("lib/") ||
+          n.startsWith("components/") ||
+          n.startsWith("skills/") ||
+          n.startsWith("app/api/") ||
+          n.startsWith("supabase/") ||
+          n.startsWith("contracts/") ||
+          /\.(test|spec)\.[tj]sx?$/.test(n),
+      ),
+      names.join(", ").slice(0, 180),
+    );
+    check(
+      "preview ZIP boots: placeholder app + configs present",
+      names.includes("app/page.tsx") &&
+        names.includes("app/layout.tsx") &&
+        names.includes("app/globals.css") &&
+        names.includes("package.json") &&
+        names.includes("tsconfig.json"),
       names.join(", ").slice(0, 180),
     );
   }
