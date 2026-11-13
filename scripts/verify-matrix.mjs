@@ -770,7 +770,7 @@ async function verifyCase(entry, doBuild) {
   const expectedRules =
     7 + (hasPayments ? 1 : 0) +
     (config.features.includes("rag") ? 1 : 0) +
-    (config.features.includes("video") ? 1 : 0) +
+    (config.features.includes("video") || config.skills.includes("video") ? 1 : 0) +
     (hasAccount ? 1 : 0) + (hasAdmin ? 1 : 0) + config.skills.length;
   assert(
     ruleFiles.length === expectedRules,
