@@ -24,14 +24,21 @@ node scripts/setup-wizard.mjs     # local 127.0.0.1 page to paste keys -> .env.l
    doctor printed. `--fix` auto-runs only the `npm i -g ...` ones; for
    brew/winget/apt, hand the user the command - never run a system package
    manager without their explicit yes.
-3. **Configure keys.** Run `node scripts/setup-wizard.mjs`. It serves a page
-   on **127.0.0.1:7777** only, built live from `.env.example`, so the fields
-   always match THIS build's `lib/env.ts`. Each section has an illustrated
-   guide slot: screenshots live at `docs/screenshots/<PREFIX>.png` - if a
-   figure reports "not captured yet", walk the user through the provider
-   dashboard from its docs link instead of inventing steps.
-   The wizard writes filled values into `.env.local` (mode 0600, blank =
-   keep existing). Never echo secret values into chat or logs.
+3. **Connect, then keys.** For every provider whose CLI can do the setup,
+   RUN the CLI yourself with the user (`supabase login` + `supabase link` +
+   `supabase projects api-keys` to fetch the URL/anon - do not make the
+   user copy these by hand; `vercel login` + `vercel link`; `gh auth
+   login`; `wrangler login`). THEN run `node scripts/setup-wizard.mjs`: the
+   page is deliberately small - cards for the providers THIS build selected
+   (from app-template.config.json), each asking only for console-issued
+   secrets (gateway private/webhook keys + product ids, AI api keys, mail
+   key, admin password). A progress badge shows what's still missing; a
+   collapsed Advanced drawer keeps the remaining env vars reachable. Keys
+   go to `.env.local` (0600, blank = keep existing); never echo them into
+   chat or logs.
+   Illustrated guides: screenshots live at `docs/screenshots/<PREFIX>.png`;
+   if a figure says "not captured yet", walk the user through the provider
+   dashboard from the printed console URL instead of inventing steps.
 4. **Verify.** `npm install`, then `npm run dev`, then hit
    `http://localhost:3000/api/payments/self-check` → `missing` must be empty
    for the selected gateway. Supabase: `npx supabase db push` after the URL
