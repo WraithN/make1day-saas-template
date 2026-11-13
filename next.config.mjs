@@ -14,6 +14,9 @@ const GENERATOR_SOURCES = [
   "./contracts/**/*",
   "./supabase/**/*",
   "./scripts/**/*",
+  // the fill-in DPA template is a customer-facing compliance asset; the rest
+  // of docs/ stays site-internal.
+  "./docs/dpa-template.md",
   "./middleware.ts",
   "./package.json",
   "./tsconfig.json",

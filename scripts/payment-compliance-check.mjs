@@ -82,6 +82,8 @@ for (const g of enabled) {
   });
   if (missing.length) add("WARN", `${g} env vars not documented in .env.example: ${missing.join(", ")}`);
   else add("PASS", `${g} required env vars are documented`);
+  if (!(spec.policySources || []).length)
+    add("WARN", `${g} has no policySources in the contract - add the platform's live policy URLs`);
 }
 
 // ── live probes (optional) ─────────────────────────────────────────────────
@@ -98,6 +100,31 @@ if (siteUrl) {
   add("INFO", "pass --url=https://your-domain to probe /terms and /privacy live");
 }
 
+// ── policy review queue (the agent workflow's fetch list) ──────────────────
+// The checker proves the LOCAL side is wired; the platform side must be
+// re-read live, because provider policies change and this contract is a
+// snapshot. We print exactly what to fetch so no step depends on memory.
+function printPolicyQueue() {
+  if (enabled.length) {
+    console.log("\nPOLICY REVIEW QUEUE - fetch each URL live, diff against the");
+    console.log("contract's obligations, and let the LIVE text win (update the");
+    console.log("contract in the same PR). Never recite platform terms from memory.\n");
+    for (const g of enabled) {
+      for (const s of contract.gateways[g].policySources || []) {
+        console.log(`  ${g.padEnd(12)} ${s.url}`);
+        console.log(`${" ".repeat(14)}${s.label}`);
+      }
+    }
+  }
+  if (contract.dataProtection) {
+    console.log("\nDATA-PROTECTION CHECKLIST (engineering support, not legal advice):");
+    for (const r of contract.dataProtection.regions) {
+      console.log(`  ${r.law}  <${r.source}>`);
+      for (const e of r.engineering || []) console.log(`     - ${e}`);
+    }
+  }
+}
+
 // ── report ──────────────────────────────────────────────────────────────────
 let fails = 0;
 let warns = 0;
@@ -110,4 +137,5 @@ console.log(`\ncompliance: ${enabled.length ? enabled.join(", ") : "no gateway d
 if (!enabled.length) {
   console.log("NOTE: no payment gateway detected in lib/payments/index.ts - checkout is 'none'.");
 }
+printPolicyQueue();
 process.exit(fails ? 1 : 0);

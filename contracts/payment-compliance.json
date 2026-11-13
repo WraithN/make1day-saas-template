@@ -19,59 +19,228 @@
       "webhook endpoint must verify signatures BEFORE any business logic",
       "one-time vs recurring plans must be distinct products at the gateway",
       "support contact e-mail on the site must be a monitored mailbox"
-    ]
+    ],
+    "policyReview": "Before first launch and after any gateway change: FETCH each selected gateway's policySources live (web fetch tool or operator pastes the current text), diff against the obligations recorded here, and let the live text win - update this contract in the same PR. Never recite platform terms from memory."
   },
   "gateways": {
     "waffo": {
       "flavor": "pancake",
       "webhookSignature": "RSA-SHA256 over `${t}.${rawBody}` (header t=<ms>,v1=<base64>), verified with the platform public key per environment",
-      "requiredEnv": ["WAFFO_ENVIRONMENT", "WAFFO_PRICE_ID_BUYOUT", "WAFFO_PRICE_ID_CARE", "WAFFO_WEBHOOK_PUBLIC_KEY_TEST (or _PROD)"],
-      "events": ["checkout.completed", "subscription.activated", "subscription.renewed", "subscription.canceling", "subscription.canceled", "refund.succeeded"],
-      "ignoreEvents": ["subscription.payment_succeeded (pure receipt; provisioning on it double-grants)"],
+      "requiredEnv": [
+        "WAFFO_ENVIRONMENT",
+        "WAFFO_PRICE_ID_BUYOUT",
+        "WAFFO_PRICE_ID_CARE",
+        "WAFFO_WEBHOOK_PUBLIC_KEY_TEST (or _PROD)"
+      ],
+      "events": [
+        "checkout.completed",
+        "subscription.activated",
+        "subscription.renewed",
+        "subscription.canceling",
+        "subscription.canceled",
+        "refund.succeeded"
+      ],
+      "ignoreEvents": [
+        "subscription.payment_succeeded (pure receipt; provisioning on it double-grants)"
+      ],
       "obligations": [
         "Merchant of Record: Waffo is the seller of record - invoices and refunds flow through them",
         "AUP: no prohibited categories (hosted face-swap entry points, adult, gambling...); digital template downloads are allowed",
         "dispute/respond within 72h via portal",
         "successUrl must point back to your app",
         "buyer identity: checkout email is the license identity"
+      ],
+      "policySources": [
+        {
+          "label": "Waffo developer docs (products, checkout, webhooks, AUP notes)",
+          "url": "https://docs.waffo.ai"
+        },
+        {
+          "label": "Pancake merchant dashboard - the store policies YOUR account agreed to",
+          "url": "https://pancake.waffo.ai"
+        }
       ]
     },
     "stripe": {
       "webhookSignature": "Stripe-Signature t,v1 HMAC with the webhook signing secret; verify on the raw body",
-      "requiredEnv": ["STRIPE_SECRET_KEY (or restricted key)", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ID_BUYOUT", "STRIPE_PRICE_ID_CARE"],
-      "events": ["checkout.session.completed", "customer.subscription.created", "customer.subscription.deleted", "charge.refunded"],
+      "requiredEnv": [
+        "STRIPE_SECRET_KEY (or restricted key)",
+        "STRIPE_WEBHOOK_SECRET",
+        "STRIPE_PRICE_ID_BUYOUT",
+        "STRIPE_PRICE_ID_CARE"
+      ],
+      "events": [
+        "checkout.session.completed",
+        "customer.subscription.created",
+        "customer.subscription.deleted",
+        "charge.refunded"
+      ],
       "obligations": [
         "use a restricted API key, never the secret root key, in production",
         "recurring prices must be real recurring Price objects",
         "billing portal must be reachable for self-serve cancellation"
+      ],
+      "policySources": [
+        {
+          "label": "Stripe Restricted Business Rules",
+          "url": "https://stripe.com/legal/restricted-businesses"
+        },
+        {
+          "label": "Stripe docs (review, issuing and compliance requirements)",
+          "url": "https://docs.stripe.com"
+        }
       ]
     },
     "creem": {
       "webhookSignature": "CREEM-API-SIGNATURE HMAC sha256 over raw body with the webhook secret",
-      "requiredEnv": ["CREEM_API_KEY", "CREEM_WEBHOOK_SECRET", "CREEM_PRICE_ID_BUYOUT", "CREEM_PRICE_ID_CARE"],
-      "events": ["checkout.completed", "subscription.active", "subscription.canceled", "refund.succeeded"],
+      "requiredEnv": [
+        "CREEM_API_KEY",
+        "CREEM_WEBHOOK_SECRET",
+        "CREEM_PRICE_ID_BUYOUT",
+        "CREEM_PRICE_ID_CARE"
+      ],
+      "events": [
+        "checkout.completed",
+        "subscription.active",
+        "subscription.canceled",
+        "refund.succeeded"
+      ],
       "obligations": [
         "MoR seller of record is Creem",
         "product type one_time vs subscription must match the plan semantics"
+      ],
+      "policySources": [
+        {
+          "label": "Creem docs (MoR obligations, product rules)",
+          "url": "https://docs.creem.io"
+        },
+        {
+          "label": "Creem site (terms entry point)",
+          "url": "https://www.creem.io"
+        }
       ]
     },
     "paypal": {
       "webhookSignature": "PAYPAL-AUTH-CERT + transmission HMAC verification via verify-webhook-signature API on the raw body",
-      "requiredEnv": ["PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET", "PAYPAL_PLAN_ID_BUYOUT", "PAYPAL_PLAN_ID_CARE"],
-      "events": ["PAYMENT.CAPTURE.COMPLETED", "BILLING.SUBSCRIPTION.ACTIVATED", "BILLING.SUBSCRIPTION.CANCELLED"],
+      "requiredEnv": [
+        "PAYPAL_CLIENT_ID",
+        "PAYPAL_CLIENT_SECRET",
+        "PAYPAL_PLAN_ID_BUYOUT",
+        "PAYPAL_PLAN_ID_CARE"
+      ],
+      "events": [
+        "PAYMENT.CAPTURE.COMPLETED",
+        "BILLING.SUBSCRIPTION.ACTIVATED",
+        "BILLING.SUBSCRIPTION.CANCELLED"
+      ],
       "obligations": [
         "no billing portal today (documented gap) - cancellation route must exist in-app",
         "user approval at capture time is mandatory for subscriptions"
+      ],
+      "policySources": [
+        {
+          "label": "PayPal Acceptable Use Policy",
+          "url": "https://www.paypal.com/us/legalhub/acceptableuse.fld"
+        },
+        {
+          "label": "PayPal developer docs (webhooks, subscriptions)",
+          "url": "https://developer.paypal.com"
+        }
       ]
     },
     "lemonsqueezy": {
       "webhookSignature": "X-Signature HMAC sha256 with the webhook secret over the raw body",
-      "requiredEnv": ["LEMONSQUEEZY_API_KEY", "LEMONSQUEEZY_WEBHOOK_SECRET", "LEMONSQUEEZY_VARIANT_ID_BUYOUT", "LEMONSQUEEZY_VARIANT_ID_CARE"],
-      "events": ["order_payment_success", "subscription_payment_success", "subscription_cancelled", "refund_created"],
+      "requiredEnv": [
+        "LEMONSQUEEZY_API_KEY",
+        "LEMONSQUEEZY_WEBHOOK_SECRET",
+        "LEMONSQUEEZY_VARIANT_ID_BUYOUT",
+        "LEMONSQUEEZY_VARIANT_ID_CARE"
+      ],
+      "events": [
+        "order_payment_success",
+        "subscription_payment_success",
+        "subscription_cancelled",
+        "refund_created"
+      ],
       "obligations": [
         "custom data echo location on webhooks must be re-verified against your account (documented uncertainty)",
         "store checkout links must carry variant + license grant semantics consistently"
+      ],
+      "policySources": [
+        {
+          "label": "Lemon Squeezy Terms of Service",
+          "url": "https://www.lemonsqueezy.com/terms"
+        },
+        {
+          "label": "Lemon Squeezy docs",
+          "url": "https://docs.lemonsqueezy.com"
+        }
       ]
     }
+  },
+  "dataProtection": {
+    "note": "Engineering support for regional data-protection law. Distinguish YOUR BUILD (what the generated project contains) from YOUR TODO (capabilities pruned as operator-side: implement them yourself). This is not legal advice; lawful basis, registrations and processor agreements stay the operator's responsibility.",
+    "regions": [
+      {
+        "law": "GDPR (EU/EEA)",
+        "source": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+        "engineering": [
+          "in your build: CookieConsent component + no ad trackers; /terms and /privacy pages exist as placeholders - REPLACE the copy before launch",
+          "your todo: access/export/erasure endpoints (the starter prunes its reference /api/privacy/* as operator-side - implement equivalents or document who answers requests)",
+          "your todo: retention schedule - prune includes no /api/cron/retention; wire one with a CRON secret, 90-day default is a reasonable start",
+          "your todo: consent + breach evidence trail (append-only events table or your processor's audit log; keep the support mailbox monitored for the 72h path)",
+          "in your build: docs/dpa-template.md ships with this package - fill it out per processor (gateway, hosting, mail) before B2B selling",
+          "cross-border: name each processor (Supabase, your gateway, your mail provider) on the privacy page - never hard-code, resolve copy through env config"
+        ]
+      },
+      {
+        "law": "UK GDPR",
+        "source": "https://www.legislation.gov.uk/uksi/2018/1204/contents",
+        "engineering": [
+          "same controls as GDPR; state the UK in the data map when serving UK buyers"
+        ]
+      },
+      {
+        "law": "CCPA/CPRA (California, US)",
+        "source": "https://oag.ca.gov/privacy/ccpa",
+        "engineering": [
+          "Do Not Sell/Share: honored by construction - the starter ships no ad or tracking scripts; keep it that way",
+          "notice at collection: your /privacy placeholder must list every entity and mailbox you actually use",
+          "your todo: 45-day access/deletion handling - same DSR surface as GDPR above"
+        ]
+      },
+      {
+        "law": "LGPD (Brazil)",
+        "source": "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm",
+        "engineering": [
+          "GDPR-shaped controls carry it; add a pt-BR privacy page when targeting BR traffic"
+        ]
+      },
+      {
+        "law": "PDPA (Singapore)",
+        "source": "https://www.pdpc.gov.sg",
+        "engineering": [
+          "consent + purpose notice + DPO contact on /privacy"
+        ]
+      },
+      {
+        "law": "DPDP Act (India)",
+        "source": "https://www.meity.gov.in",
+        "engineering": [
+          "verifiable-consent expectations for minors' data: video/AI features must not target minors"
+        ]
+      }
+    ],
+    "triggers": [
+      "合规修复",
+      "合规审核",
+      "合规改进",
+      "compliance fix",
+      "compliance audit",
+      "compliance review",
+      "compliance improvement",
+      "before first deploy",
+      "after any payments change"
+    ]
   }
 }

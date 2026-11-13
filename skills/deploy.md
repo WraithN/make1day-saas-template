@@ -31,3 +31,10 @@ globs: .env.example, next.config.mjs, wrangler.toml, middleware.ts, app/**/route
 
 ## Verify
 `npx tsc --noEmit` → clean `next build` → `next start` smoke-test `/`, `/pricing`, `/llms.txt` → `/api/payments/self-check` returns `ready: true`.
+
+## Deploy gate (mandatory before first production release)
+`npm run compliance:check --url="https://<staging-or-production>"` must exit
+`0` — the compliance skill's audit workflow (detect → fetch live platform
+policies → local checks → data-protection checklist → fix) is the release
+review; wire the command into CI after build and block publishing on its
+exit code. Re-run after ANY payments change, even post-launch.

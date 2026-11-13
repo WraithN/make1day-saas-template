@@ -63,7 +63,7 @@ export const SKILL_GLOBS: Record<SkillId, string[]> = {
   video: ["lib/video/**", "app/video/**", "app/api/video/**"],
   workflow: ["inngest/**", "app/api/inngest/**", "app/api/pipeline/**", "lib/workflows.ts"],
   canvas: ["app/admin/workflows/**", "components/console/WorkflowCanvas.tsx"],
-  compliance: ["contracts/**", "scripts/payment-compliance-check.mjs"],
+  compliance: ["contracts/**", "scripts/payment-compliance-check.mjs", "lib/payments/**", "app/api/webhook/**", "app/terms/**", "app/privacy/**"],
 };
 
 /** Skill id → filename, exposed so the doc generator can build a real index. */

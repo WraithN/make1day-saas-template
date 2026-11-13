@@ -242,7 +242,7 @@ export const SKILL_OPTIONS: { id: SkillId; label: string; note: string }[] = [
   {
     id: "compliance",
     label: "Payment Compliance",
-    note: "Per-gateway compliance contract (webhook signing, refunds, dispute SLA, AUP) + one-command self-check script",
+    note: "Per-gateway compliance contract + live policy-review queue + GDPR/CCPA data-protection checklist; one-command self-check that gates deploys",
   },
 ];
 
