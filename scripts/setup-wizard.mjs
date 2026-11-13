@@ -286,6 +286,34 @@ const GUIDES = [
     isOAuth: true,
     vars: [{ name: "NEXT_PUBLIC_OAUTH_PROVIDERS", label: "Enabled providers (comma list)", example: "google,github", secret: false }],
   },
+  {
+    id: "deploy",
+    group: "providers",
+    match: () => true,
+    tab: { en: "Deploy", zh: "部署", ja: "デプロイ", fr: "Déploiement", de: "Deploy" },
+    cliFor: (cfg) =>
+      cfg?.deploy === "cloudflare"
+        ? ["npm i -g wrangler", "wrangler login", "wrangler secret put LICENSE_SECRET", "npm run build && npx wrangler deploy"]
+        : cfg?.deploy === "selfhost"
+          ? []
+          : ["npm i -g vercel", "vercel login", "vercel link", "vercel env add NEXT_PUBLIC_SITE_URL production"],
+    links: [
+      { url: "https://vercel.com/dashboard", label: { en: "Vercel dashboard", zh: "Vercel 控制台", ja: "Vercel コンソール", fr: "Console Vercel", de: "Vercel-Dashboard" } },
+      { url: "https://one.dash.cloudflare.com", label: { en: "Cloudflare dashboard", zh: "Cloudflare 控制台", ja: "Cloudflare コンソール", fr: "Console Cloudflare", de: "Cloudflare-Dashboard" } },
+    ],
+    location: {
+      en: "NEXT_PUBLIC_SITE_URL is baked in at BUILD time - set it before the first production build. Vercel: Project → Settings → Environment Variables (or vercel env add). Cloudflare: Workers & Pages → your app → Settings → Variables and Secrets (secrets via wrangler secret put; note Workers has no disk, so Supabase is mandatory there). Once the domain is live: register /api/webhook in each payment dashboard and schedule POST /api/cron/* with your host's timer.",
+      zh: "NEXT_PUBLIC_SITE_URL 在构建期注入——首次生产构建前必须设好。Vercel：Project → Settings → Environment Variables（或 vercel env add）。Cloudflare：Workers & Pages → 应用 → Settings → Variables and Secrets（密钥用 wrangler secret put；Workers 无磁盘，必须配 Supabase）。域名生效后：去各支付后台登记 /api/webhook，并用宿主定时器排 POST /api/cron/* 任务。",
+      ja: "NEXT_PUBLIC_SITE_URL はビルド時に焼き込まれます - 初回本番ビルド前に設定必須。Vercel: Project → Settings → Environment Variables。Cloudflare: Workers & Pages → アプリ → Settings → Variables and Secrets（secret は wrangler secret put。Workers にディスクはないため Supabase 必須）。ドメイン確定後に /api/webhook を各ゲートウェイへ登録し、ホストのタイマーで POST /api/cron/* を定期実行してください。",
+      fr: "NEXT_PUBLIC_SITE_URL est injecté au BUILD - à définir avant le premier build de prod. Vercel : Project → Settings → Environment Variables. Cloudflare : Workers & Pages → app → Settings → Variables and Secrets (secrets via wrangler secret put ; pas de disque sur Workers, Supabase obligatoire). Domaine actif : déclarez /api/webhook dans chaque passerelle et planifiez POST /api/cron/* avec le timer de l'hôte.",
+      de: "NEXT_PUBLIC_SITE_URL wird beim BUILD eingebrannt - vor dem ersten Produktiv-Build setzen. Vercel: Project → Settings → Environment Variables. Cloudflare: Workers & Pages → App → Settings → Variables and Secrets (Secrets über wrangler secret put; Workers haben keine Disk, Supabase Pflicht). Nach der Domain: /api/webhook in jedem Gateway eintragen und POST /api/cron/* mit dem Host-Timer planen.",
+    },
+    vars: [
+      { name: "NEXT_PUBLIC_SITE_URL", label: "Public site URL (set BEFORE first build)", example: "https://app.yourdomain.dev", secret: false },
+      { name: "CRON_SECRET", label: "Cron endpoints token" },
+      { name: "ADMIN_EMAILS", label: "Admin email allowlist (comma list)", secret: false },
+    ],
+  },
 ];
 
 function guideVars(g, config) {
@@ -342,14 +370,19 @@ function fieldHtml(v, have, T) {
 </label>`;
 }
 
-function guideInner(g, vars, have, L, T) {
+function guideInner(g, vars, have, L, T, config) {
   const parts = [];
-  if (g.cli?.length) {
-    parts.push(`<p class="agenthint">🤖 ${T("agentRuns")}</p><div class="cmds">${g.cli
+  const cli = typeof g.cliFor === "function" ? g.cliFor(config || {}) || [] : g.cli || [];
+  if (cli.length) {
+    parts.push(`<p class="agenthint">🤖 ${T("agentRuns")}</p><div class="cmds">${cli
       .map((c) => `<div class="cmd"><code>${esc(c)}</code><button type="button" class="cp" data-cmd="${esc(c)}">${T("copy")}</button></div>`)
       .join("")}</div>`);
   }
-  if (g.console) parts.push(`<a class="dash" href="${esc(g.console.url)}" target="_blank" rel="noopener">${T("dash")} ↗</a>`);
+  if (g.links) {
+    parts.push(g.links.map((a) => `<a class="dash" href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.label[L] || a.label.en)} ↗</a>`).join(" "));
+  } else if (g.console) {
+    parts.push(`<a class="dash" href="${esc(g.console.url)}" target="_blank" rel="noopener">${T("dash")} ↗</a>`);
+  }
   if (g.isOAuth) {
     parts.push(`<p class="where">${T("oauthIntro")}</p>
 <ol class="oauth">
@@ -367,14 +400,14 @@ function guideInner(g, vars, have, L, T) {
   return parts.join("\n");
 }
 
-function tabbedCard(id, title, groups, have, L, T) {
+function tabbedCard(id, title, groups, have, L, T, config) {
   const total = groups.reduce((n, x) => n + x.vars.length, 0);
   const done = groups.reduce((n, x) => n + x.vars.filter((v) => (have.get(v.name) || "").trim().length > 0).length, 0);
   const tabs = groups
     .map((x, i) => `<button type="button" role="tab" aria-selected="${i === 0}" class="tab${i === 0 ? " active" : ""}" data-tab="${x.g.id}">${esc(x.g.tab[L] || x.g.tab.en)}</button>`)
     .join("");
   const panels = groups
-    .map((x, i) => `<div class="panel${i === 0 ? " active" : ""}" id="tab-${x.g.id}"${i === 0 ? "" : " hidden"}>${guideInner(x.g, x.vars, have, L, T)}</div>`)
+    .map((x, i) => `<div class="panel${i === 0 ? " active" : ""}" id="tab-${x.g.id}"${i === 0 ? "" : " hidden"}>${guideInner(x.g, x.vars, have, L, T, config)}</div>`)
     .join("\n");
   return `<section class="card wide" id="${id}">
   <header><h2>${esc(title)}</h2><span class="badge" data-total="${total}" data-done="${done}">${done}/${total}</span></header>
@@ -403,9 +436,11 @@ function render(L) {
       return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
     });
   const others = visible.filter((x) => x.g.group === "providers");
+  // Providers first: the database / AI / deploy wiring happens before a
+  // gateway product even exists - payment configuration comes later.
   const cards = [];
-  if (payments.length) cards.push(tabbedCard("payments", T("payments"), payments, have, L, T));
-  if (others.length) cards.push(tabbedCard("providers", T("providers"), others, have, L, T));
+  if (others.length) cards.push(tabbedCard("providers", T("providers"), others, have, L, T, config));
+  if (payments.length) cards.push(tabbedCard("payments", T("payments"), payments, have, L, T, config));
   const advFields = advancedVars
     .map((n) => {
       const filled = (have.get(n) || "").trim();
