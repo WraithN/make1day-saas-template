@@ -161,9 +161,10 @@ const VIDEO_FILES = [
   "lib/video/store.ts",
   "lib/content/video-templates.ts",
   "supabase/migrations/0013_video.sql",
-  "skills/video.md",
-  "ai/rules/video.md",
 ];
+// NOTE: skills/video.md and the generated ai/rules/video.md are NOT listed
+// here - the playbook and its scoped rule follow the VIDEO *skill* (doc-set
+// generation), while this list prunes the studio's *code* with the feature.
 
 // Multi-tenancy: when OFF, drop the workspace UI + its API routes + helpers so
 // the generated project has no org scaffolding. lib/org.ts is the tenant helper
