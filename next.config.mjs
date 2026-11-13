@@ -10,6 +10,8 @@ const GENERATOR_SOURCES = [
   "./lib/**/*",
   "./public/**/*",
   "./skills/**/*",
+  "./inngest/**/*",
+  "./contracts/**/*",
   "./supabase/**/*",
   "./scripts/**/*",
   "./middleware.ts",
