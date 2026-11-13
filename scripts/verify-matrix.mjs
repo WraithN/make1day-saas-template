@@ -477,9 +477,6 @@ async function verifyCase(entry, doBuild) {
     "scripts/rebrand.mjs",
     "scripts/agents-lint.mjs",
     "components/TestimonialWall.tsx",
-    // the compliance skill claims the fill-in DPA ships in the package -
-    // CI must keep that claim true
-    "docs/dpa-template.md",
   ]) {
     assert(exists(rel), `missing ${rel}`);
   }
@@ -678,6 +675,12 @@ async function verifyCase(entry, doBuild) {
   assert(
     exists("scripts/payment-compliance-check.mjs") === config.skills.includes("compliance"),
     "compliance self-check CLI must ship exactly when the compliance skill is selected",
+  );
+  // The compliance skill claims the fill-in DPA ships in the package -
+  // keep the claim true in both directions.
+  assert(
+    exists("docs/dpa-template.md") === config.skills.includes("compliance"),
+    "dpa-template must ship exactly when the compliance skill is selected",
   );
   assert(
     exists("app/dashboard/page.tsx") === config.features.includes("dashboard"),

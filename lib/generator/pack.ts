@@ -194,6 +194,9 @@ export async function listProjectFiles(
   }
   if (config.skills.includes("compliance")) {
     files.push("scripts/payment-compliance-check.mjs", "contracts/payment-compliance.json");
+    // The compliance skill promises the fill-in DPA lives in the package;
+    // docs/ as a whole stays site-internal - only this file crosses over.
+    files.push("docs/dpa-template.md");
   }
 
   return Array.from(new Set(files)).sort();
@@ -518,8 +521,9 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     zip.file("wrangler.toml", buildWranglerToml(config));
     zip.file("open-next.config.ts.example", buildOpenNextConfigExample());
   }
-  // Payment compliance pack: the machine-readable gateway contract plus the
-  // self-check CLI advertised by 'npm run compliance:check'.
+  // Payment compliance pack: the machine-readable gateway contract, the
+  // self-check CLI advertised by 'npm run compliance:check', and the
+  // fill-in DPA template the compliance skill's checklist points at.
   if (config.skills.includes("compliance")) {
     zip.file(
       "scripts/payment-compliance-check.mjs",
@@ -528,6 +532,10 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     zip.file(
       "contracts/payment-compliance.json",
       await fs.readFile(path.join(root, "contracts/payment-compliance.json"), "utf8"),
+    );
+    zip.file(
+      "docs/dpa-template.md",
+      await fs.readFile(path.join(root, "docs/dpa-template.md"), "utf8"),
     );
   }
 
