@@ -477,6 +477,9 @@ async function verifyCase(entry, doBuild) {
     "scripts/rebrand.mjs",
     "scripts/agents-lint.mjs",
     "components/TestimonialWall.tsx",
+    // the compliance skill claims the fill-in DPA ships in the package -
+    // CI must keep that claim true
+    "docs/dpa-template.md",
   ]) {
     assert(exists(rel), `missing ${rel}`);
   }
