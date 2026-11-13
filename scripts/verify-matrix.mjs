@@ -638,6 +638,10 @@ async function verifyCase(entry, doBuild) {
     "video skill must ship exactly when the video skill is selected",
   );
   assert(
+    exists("inngest/functions.ts") === config.skills.includes("workflow"),
+    "inngest module files must ship exactly when the workflow skill is selected",
+  );
+  assert(
     exists("lib/workflows.ts") === config.skills.includes("workflow"),
     "inngest workflow module must ship exactly when the workflow skill is selected",
   );
