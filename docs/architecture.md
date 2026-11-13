@@ -56,7 +56,7 @@ Two cross-cutting rules hold the whole thing together:
   Supabase and local SQLite. Business modules call one accessor layer; swapping
   backends is an env change, not a code change.
 - **Entitlement**: full source ZIPs require a license / subscription / matched
-  purchase email; anonymous callers can only get a source-free preview package.
+  purchase email; anonymous callers can only get a skeleton preview package.
   `LICENSE_GATE=auto` is fail-safe in production.
 
 ## 2. Generated template (the customer ZIP)

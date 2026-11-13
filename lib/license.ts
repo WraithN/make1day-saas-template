@@ -30,7 +30,7 @@ import { all, get, run, tx } from "@/lib/sqlite";
 // ───────────────────────────────────────────────────────────────
 
 export const LICENSE_COOKIE = "sk_license";
-export const LICENSE_HEADER = "x-shipkit-license";
+export const LICENSE_HEADER = "x-app-license";
 /** Signed, httpOnly cookie that carries the anonymous preview identity. */
 export const TRIAL_COOKIE = "sk_trial";
 
@@ -141,7 +141,7 @@ export function verifyLicenseKey(key: string): LicensePayload | null {
 
 // ── Store: Supabase when configured, local SQLite otherwise ────────────────
 //
-// The local store is a single SQLite database (.data/shipkit.db) instead of a
+// The local store is a single SQLite database (.data/app.db) instead of a
 // pile of JSON files: transactions keep the free-quota counter correct under
 // concurrent requests, and the admin console can query it directly.
 

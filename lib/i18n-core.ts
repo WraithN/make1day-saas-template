@@ -278,7 +278,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "pricing.poweredBy": "Secure checkout powered by {provider}",
     "pricing.forever": "forever",
     "pricing.free.f1": "Everything in the builder, with live theme previews",
-    "pricing.free.f2": "Free preview pack: the file list and design tokens of your build",
+    "pricing.free.f2": "Free preview pack: a runnable project skeleton, the file list and design tokens",
     "pricing.free.f3": "No account, no card. A preview downloads in seconds",
     "pricing.pro.f1": "Everything in Free",
     "pricing.pro.f2": "Unlimited AI chat",
@@ -443,7 +443,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "builderPage.body":
       "Choose the components you want — auth, payments, AI providers, features and deploy target. We package a clean, buildable Next.js project pre-configured to exactly those picks. No boilerplate you don't need.",
 
-    "demoConsole.title": "shipkit — terminal",
+    "demoConsole.title": "make1day — terminal",
     "demoConsole.hint": "# Click below to watch make1day.dev scaffold a full MVP.",
     "demoConsole.btn": "Generate MVP scaffold",
     "demoConsole.running": "Scaffolding…",
@@ -806,7 +806,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "pricing.poweredBy": "由 {provider} 提供安全结账",
     "pricing.forever": "永久免费",
     "pricing.free.f1": "配置器全功能开放，主题实时预览",
-    "pricing.free.f2": "免费预览包：文件清单和设计令牌",
+    "pricing.free.f2": "免费预览包：可运行的工程骨架、文件清单和设计令牌",
     "pricing.free.f3": "不用注册、不用绑卡，几秒就能下载预览",
     "pricing.pro.f1": "Free 的全部功能",
     "pricing.pro.f2": "无限 AI 对话",
@@ -969,7 +969,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "builderPage.body":
       "选择你想要的组件——登录、计费、AI 供应商、功能与部署目标。我们会打包一个干净、可直接构建的 Next.js 项目，并按你的选择预配置好。绝不多给用不上的样板。",
 
-    "demoConsole.title": "shipkit — 终端",
+    "demoConsole.title": "make1day — 终端",
     "demoConsole.hint": "# 点击下方，看 make1day.dev 如何搭建一个完整 MVP。",
     "demoConsole.btn": "生成 MVP 脚手架",
     "demoConsole.running": "正在搭建…",
@@ -1316,7 +1316,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "pricing.poweredBy": "安全な決済は {provider} が提供",
     "pricing.forever": "永続無料",
     "pricing.free.f1": "ビルダーの全機能が無料で使え、テーマはライブプレビュー",
-    "pricing.free.f2": "無料プレビューパック：ファイル一覧とデザイントークン",
+    "pricing.free.f2": "無料プレビューパック：実行可能なプロジェクト骨格、ファイル一覧とデザイントークン",
     "pricing.free.f3": "登録もカードも不要。数秒でプレビューを取得",
     "pricing.pro.f1": "Free の全機能",
     "pricing.pro.f2": "無制限 AI チャット",
@@ -1474,7 +1474,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "builderPage.body":
       "必要なコンポーネントを選ぶ——認証、決済、AI プロバイダ、機能、デプロイ先。選んだ通りに事前設定された、きれいでビルド可能な Next.js プロジェクトを梱包します。不要なボイラープレートは入りません。",
 
-    "demoConsole.title": "shipkit — ターミナル",
+    "demoConsole.title": "make1day — ターミナル",
     "demoConsole.hint": "# 下をクリックすると、make1day.dev が MVP を組み上げる様子が見られます。",
     "demoConsole.btn": "MVP スキャフォールドを生成",
     "demoConsole.running": "構築中…",
@@ -1796,7 +1796,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "pricing.poweredBy": "Paiement sécurisé par {provider}",
     "pricing.forever": "pour toujours",
     "pricing.free.f1": "Toutes les fonctions du constructeur, aperçu des thèmes en direct",
-    "pricing.free.f2": "Pack d'aperçu gratuit : liste des fichiers et tokens de design",
+    "pricing.free.f2": "Pack d'aperçu gratuit : squelette de projet exécutable, liste des fichiers et tokens de design",
     "pricing.free.f3": "Sans compte, sans carte. L'aperçu se télécharge en quelques secondes",
     "pricing.pro.f1": "Tout le forfait Free",
     "pricing.pro.f2": "Chat IA illimité",
@@ -1955,7 +1955,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "builderPage.body":
       "Choisissez les composants — auth, paiements, fournisseurs IA, fonctionnalités et cible de déploiement. Nous empaquetons un projet Next.js propre et compilable, préconfiguré exactement selon vos choix. Pas de boilerplate inutile.",
 
-    "demoConsole.title": "shipkit — terminal",
+    "demoConsole.title": "make1day — terminal",
     "demoConsole.hint": "# Cliquez ci-dessous pour voir make1day.dev échafauder un MVP complet.",
     "demoConsole.btn": "Générer l'échafaudage MVP",
     "demoConsole.running": "Échafaudage…",
@@ -2291,7 +2291,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "pricing.poweredBy": "Sicheres Checkout von {provider} bereitgestellt",
     "pricing.forever": "dauerhaft",
     "pricing.free.f1": "Voller Builder, Live-Theme-Vorschau",
-    "pricing.free.f2": "Kostenloses Preview-Paket: Dateiliste und Design-Tokens",
+    "pricing.free.f2": "Kostenloses Preview-Paket: lauffähiges Projektskelett, Dateiliste und Design-Tokens",
     "pricing.free.f3": "Ohne Konto, ohne Karte. Vorschau in Sekunden geladen",
     "pricing.pro.f1": "Alles aus Free",
     "pricing.pro.f2": "Uneingeschränkter KI-Chat",
@@ -2449,7 +2449,7 @@ export const dict: Record<Lang, Record<string, string>> = {
     "builderPage.title": "Ihr AI-SaaS-Starter, {{g}}auf Ihre Art{{/g}}.",
     "builderPage.body": "Wählen Sie die Komponenten, die Sie wollen — Auth, Zahlungen, KI-Anbieter, Funktionen und Deployment-Ziel. Wir packen ein sauberes, buildbares Next.js-Projekt, das exakt auf diese Auswahl vorkonfiguriert ist. Kein Boilerplate, das Sie nicht brauchen.",
 
-    "demoConsole.title": "shipkit — Terminal",
+    "demoConsole.title": "make1day — Terminal",
     "demoConsole.hint": "# Klicken Sie unten, um make1day.dev ein vollständiges MVP gerüsten zu sehen.",
     "demoConsole.btn": "MVP-Gerüst generieren",
     "demoConsole.running": "Gerüst wird erstellt…",

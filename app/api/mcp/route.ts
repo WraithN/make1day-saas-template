@@ -24,9 +24,9 @@ const MAX_ZIP_BYTES = 4_000_000;
 
 /** Only resources with a real, same-origin HTTP backing are advertised. */
 const MCP_RESOURCES = [
-  { uri: "shipkit:///llms.txt", name: "llms.txt", mimeType: "text/plain", path: "/llms.txt" },
-  { uri: "shipkit:///llms-full.txt", name: "llms-full.txt", mimeType: "text/plain", path: "/llms-full.txt" },
-  { uri: "shipkit:///openapi.json", name: "OpenAPI 3.1", mimeType: "application/json", path: "/openapi.json" },
+  { uri: "make1day:///llms.txt", name: "llms.txt", mimeType: "text/plain", path: "/llms.txt" },
+  { uri: "make1day:///llms-full.txt", name: "llms-full.txt", mimeType: "text/plain", path: "/llms-full.txt" },
+  { uri: "make1day:///openapi.json", name: "OpenAPI 3.1", mimeType: "application/json", path: "/openapi.json" },
 ] as const;
 
 /**
@@ -219,7 +219,7 @@ function agentDelivery() {
     files: {
       "AGENTS.md": "Root contract: selections, commands, boundaries, scoped-rule index, definition of done",
       "design.md": "Style-locked visual system for the chosen palette",
-      "shipkit.config.json": "SOURCE OF TRUTH for Builder selections — edit this, then run npm run ai:docs",
+      "app-template.config.json": "SOURCE OF TRUTH for Builder selections — edit this, then run npm run ai:docs",
       "ai/doc-spec.json": "Full option catalogue + all 11 palettes used to re-derive labels and style",
       "ai/rules/*.md": "Scoped rules with globs frontmatter (core, style, api, auth, payments, database, rag, i18n, deploy + one per skill)",
       ".cursor/rules/*.mdc": "Same rules in Cursor's native format",
@@ -276,7 +276,7 @@ async function handleToolCall(
         licenseGate: {
           enabled: isLicenseGateEnabled(),
           freePreview:
-            "A source-free preview package (file inventory + theme tokens) is available without a license via POST /api/generate/preview",
+            "A skeleton preview package (runnable scaffold + file inventory + theme tokens) is available without a license via POST /api/generate/preview",
           onDenied: { status: 402, code: "PAYMENT_REQUIRED", pricingUrl: "/pricing", licenseUrl: "/license" },
           note: "Add licenseKey to the POST body if you already bought a license.",
         },
@@ -313,7 +313,7 @@ async function handleToolCall(
         result: text({
           ...payload,
           zip: {
-            filename: `${typed.appName.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-shipkit.zip`,
+            filename: `${typed.appName.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-make1day-template.zip`,
             byteLength: zip.byteLength,
             encoding: "base64",
             base64: Buffer.from(zip).toString("base64"),

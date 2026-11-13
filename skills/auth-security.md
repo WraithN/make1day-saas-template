@@ -20,7 +20,7 @@ Use this skill for sign-in, session handling, protected routes and demo mode.
 - OAuth buttons must be enabled in **both** the env list and the Supabase dashboard; otherwise the provider 400s.
 - `app/auth/callback/route.ts` exchanges the code for a session. Keep it a Route Handler with `runtime = "nodejs"`.
 - Demo mode (`lib/demo.ts`) is gated by `NEXT_PUBLIC_ENABLE_DEMO` **and** the absence of real Supabase config. Never enable it in production.
-- After login, redirects go to `/dashboard` — unless the dashboard was pruned at generation time, in which case they were rewritten to `/`. Check `shipkit.config.json` before changing them.
+- After login, redirects go to `/dashboard` — unless the dashboard was pruned at generation time, in which case they were rewritten to `/`. Check `app-template.config.json` before changing them.
 - `/admin` is protected by Basic Auth only when `ADMIN_USER` / `ADMIN_PASSWORD` are set. Do not remove that check.
 
 ## Session patterns

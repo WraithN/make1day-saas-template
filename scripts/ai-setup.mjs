@@ -34,7 +34,7 @@ if (!fs.existsSync(specPath)) {
 }
 const spec = JSON.parse(fs.readFileSync(specPath, "utf8"));
 // Same source-of-truth rule as ai:docs — the Builder manifest wins.
-const manifestPath = path.join(ROOT, "shipkit.config.json");
+const manifestPath = path.join(ROOT, "app-template.config.json");
 if (fs.existsSync(manifestPath)) {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   spec.config = { ...spec.config, ...(manifest.config ?? manifest) };

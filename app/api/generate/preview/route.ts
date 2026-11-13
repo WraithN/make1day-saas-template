@@ -87,9 +87,9 @@ export async function POST(req: Request) {
       status: 200,
       headers: {
         "Content-Type": "application/zip",
-        "Content-Disposition": `attachment; filename="${slug}-shipkit-preview.zip"`,
+        "Content-Disposition": `attachment; filename="${slug}-make1day-template-preview.zip"`,
         "Cache-Control": "no-store",
-        "X-ShipKit-Entitlement": entitlement.reason,
+        "X-App-Entitlement": entitlement.reason,
       },
     });
     if (trial.isNew) {

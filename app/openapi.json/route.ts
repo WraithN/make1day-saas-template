@@ -28,7 +28,7 @@ export function GET() {
       version: "1.0.0",
       summary: "Configurable Next.js SaaS starter generator, licensing and payments",
       description:
-        "make1day.dev sells a configurable Next.js 15 SaaS starter. The Builder posts a selection to /api/generate and receives a pruned, buildable, agent-native ZIP containing AGENTS.md, design.md, scoped rules, Cursor rules, CLAUDE.md and up to 16 skills. An MCP endpoint lets coding agents assemble a valid configuration programmatically. Source downloads are gated by an offline license key or an active subscription / email claim — the source ZIP is the product, so anonymous visitors never receive it. A source-free preview package is available without a license. Note: on this store the hosted generation endpoints (/api/ai, /api/rag/query, /api/rag/ingest, /api/video/jobs and the /video /rag demo pages) return 404 — make1day.dev sells the source and operates no public generation surface; those endpoints ship ENABLED inside generated projects, with prompt screening compiled in. Full human/agent-readable overview: /llms-full.txt. Go-live notes: docs/waffo-launch-checklist.md.",
+        "make1day.dev sells a configurable Next.js 15 SaaS starter. The Builder posts a selection to /api/generate and receives a pruned, buildable, agent-native ZIP containing AGENTS.md, design.md, scoped rules, Cursor rules, CLAUDE.md and up to 18 skills. An MCP endpoint lets coding agents assemble a valid configuration programmatically. Source downloads are gated by an offline license key or an active subscription / email claim — the source ZIP is the product, so anonymous visitors never receive it. A license-free preview package ships the runnable project skeleton (configs, themed placeholder page, env contract) without any application source. Note: on this store the hosted generation endpoints (/api/ai, /api/rag/query, /api/rag/ingest, /api/video/jobs and the /video /rag demo pages) return 404 — make1day.dev sells the source and operates no public generation surface; those endpoints ship ENABLED inside generated projects, with prompt screening compiled in. Full human/agent-readable overview: /llms-full.txt. Go-live notes: docs/waffo-launch-checklist.md.",
     },
     servers: [{ url: SITE, description: "make1day.dev site" }],
     tags: [
@@ -88,10 +88,10 @@ export function GET() {
               description: "Generated project archive",
               headers: {
                 "Content-Disposition": {
-                  description: 'attachment; filename="<slug>-shipkit.zip"',
+                  description: 'attachment; filename="<slug>-make1day-template.zip"',
                   schema: { type: "string" },
                 },
-                "X-ShipKit-Entitlement": {
+                "X-App-Entitlement": {
                   description: "Which rule allowed the download (never the key itself)",
                   schema: { type: "string" },
                 },
@@ -107,7 +107,7 @@ export function GET() {
       "/api/generate/preview": {
         post: {
           tags: ["Generator"],
-          summary: "Download a source-free preview of the configured build",
+          summary: "Download the runnable skeleton preview of the configured build",
           description:
             "Anonymous visitors may download a preview package that contains the FILE INVENTORY of the configured build plus the design tokens — never application source. The quota is counted per signed visitor token and per trusted network.",
           requestBody: {
@@ -123,10 +123,10 @@ export function GET() {
               description: "Preview package archive",
               headers: {
                 "Content-Disposition": {
-                  description: 'attachment; filename="<slug>-shipkit-preview.zip"',
+                  description: 'attachment; filename="<slug>-make1day-template-preview.zip"',
                   schema: { type: "string" },
                 },
-                "X-ShipKit-Entitlement": {
+                "X-App-Entitlement": {
                   description: "Which rule allowed the preview (never the token itself)",
                   schema: { type: "string" },
                 },

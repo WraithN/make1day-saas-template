@@ -78,7 +78,7 @@ pruned, buildable Next.js project pre-configured to those exact selections.
 
 | Plan | Price | What the buyer gets |
 |---|---|---|
-| Free demo | $0 | Browse the site, configure any build and download a source-free preview (file inventory + design tokens, never source code). Full source ZIP is 402 without entitlement |
+| Free demo | $0 | Browse the site, configure any build and download a skeleton preview (runnable skeleton + file inventory + design tokens - no application source). Full source ZIP is 402 without entitlement |
 | Buyout Core | $249 one-time ($174 Black Friday) | Full source of every core module (auth, billing, admin, multi-tenancy, RAG), permanent offline license key, 12 months free updates then Care, license for your own products (no resale/redistribution as template). Does NOT include the AI video-workflow module |
 | Buyout Studio | $349 one-time ($274 Black Friday) | Everything in Core plus the AI video & image workflow source module (script → storyboard → cost quote → render → conversational diff-edit) and the model-routing admin console (provider lanes, fallbacks, budgets, per-run cost ledger). New AI modules land here first |
 | Care | $19/mo ($13/mo Black Friday) | Consumption + adaptation service AROUND an owned Buyout (never a substitute — a Care plan alone cannot download the source): re-opens the 12-month update window, Care-first modules, monthly-recast agent contract (skills/rules/AGENTS.md), upstream merge patches as mergeable diffs, 12h first-response SLA; entitlement expires with the period |
@@ -127,7 +127,7 @@ POST /api/generate accepts this JSON (all fields required except licenseKey):
 Response: 200 application/zip (attachment), or 402 PAYMENT_REQUIRED with
 { error, code, pricingUrl, licenseUrl } when no entitlement applies, 400 on an
 invalid config, 500 on packaging failure. Response header
-X-ShipKit-Entitlement reports which rule allowed the download (this header
+X-App-Entitlement reports which rule allowed the download (this header
 name is a technical identifier and is deliberately not rebranded).
 
 Pruning is REAL, not a manifest flag:
@@ -155,7 +155,7 @@ Pruning is REAL, not a manifest flag:
 - Site-only npm scripts are removed; ai:docs / ai:setup are ADDED instead.
 
 Every ZIP contains: .env.example (with LICENSE_GATE=off), README.md,
-shipkit.config.json (the exact selections), ai/doc-spec.json, AGENTS.md,
+app-template.config.json (the exact selections), ai/doc-spec.json, AGENTS.md,
 design.md, ai/rules/*.md, .cursor/rules/*.mdc, CLAUDE.md, skills/README.md,
 the selected skills/*.md playbooks and the three offline ai-*.mjs scripts.
 
@@ -163,9 +163,9 @@ the selected skills/*.md playbooks and the three offline ai-*.mjs scripts.
 
 One renderer, one spec, zero drift:
   lib/generator/spec.ts -> ai/doc-spec.json (config cache + FULL catalogue of
-  16 skills and 11 palettes) -> scripts/lib/ai-docs.mjs (deriveSpec +
+  18 skills and 11 palettes) -> scripts/lib/ai-docs.mjs (deriveSpec +
   buildDocSet) -> pack.ts (site) AND scripts/ai-docs.mjs (customer project).
-  shipkit.config.json is the SOURCE OF TRUTH: both CLIs re-read it on every
+  app-template.config.json is the SOURCE OF TRUTH: both CLIs re-read it on every
   run and re-derive labels + style from the catalogue, so editing selections
   really changes the documents.
 
@@ -188,7 +188,7 @@ One renderer, one spec, zero drift:
 - skills/*.md — 13 playbooks: frontend, UI, backend, testing, SEO, auth,
   payments, database, RAG, i18n, deploy, agent workflow, video.
 - npm run ai:docs — deterministic rebuild of ALL documents from
-  shipkit.config.json + ai/doc-spec.json; npm run ai:setup refreshes only
+  app-template.config.json + ai/doc-spec.json; npm run ai:setup refreshes only
   Cursor / Claude Code integrations (--tool all|cursor|claude). --dry-run
   reports diffs. A freshly extracted ZIP reports 0 changed files.
 
@@ -215,7 +215,7 @@ Admin console (feature=admin, route /admin):
                       profiles table when SUPABASE_SERVICE_ROLE_KEY is set,
                       otherwise the local SQLite mirror (accounts, roles,
                       licenses, orders, operator account) in
-                      .data/shipkit.db — roles are editable in both. Each row
+                      .data/app.db — roles are editable in both. Each row
                       says where it came from.
   /admin/licenses     issued keys, plan, email, order id
   /admin/stats        first-party pageview aggregates
@@ -295,7 +295,7 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
 | Method | Path | Purpose | Auth |
 |---|---|---|---|
 | POST | /api/generate | Build + download the source ZIP | license / subscription |
-| POST | /api/generate/preview | Build + download the source-free preview | anonymous (quota) |
+| POST | /api/generate/preview | Build + download the skeleton preview | anonymous (quota) |
 | POST | /api/license | Redeem a key into an httpOnly cookie | public |
 | GET | /api/license | Key + gate status | cookie |
 | DELETE | /api/license | Clear the key cookie | public |
@@ -401,7 +401,7 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
   "node scripts/verify-matrix.mjs --all". 20 cases cover all 6 gateways, all
   11 styles, all 3 deploy targets, RAG/dashboard/skills on-off, AND both
   consoles on / off / each alone; each case downloads a real ZIP, asserts
-  AGENTS.md / scoped rules / Cursor rules / CLAUDE.md / 16 skills / ai:docs
+  AGENTS.md / scoped rules / Cursor rules / CLAUDE.md / 18 skills / ai:docs
   scripts / console pruning / no dead console links, then runs tsc --noEmit
   inside the extracted project.
 - Supabase migrations: 0001_init.sql, 0002_rag.sql, 0003_licenses.sql,
@@ -502,7 +502,7 @@ Compared with ShipFast (~$199), Divjoy (~$199), VibeReady ($149-399),
 Makerkit (~$299), Supastarter ($299-1,499) and Open SaaS ($0): make1day.dev is the
 only one in this set that BOTH prunes unselected modules out of the downloaded
 source AND generates a root AGENTS.md, a style-specific design.md, scoped rules
-and 16 skills — all rebuildable with npm run ai:docs — at a $249 regular price,
+and 18 skills — all rebuildable with npm run ai:docs — at a $249 regular price,
 with llms.txt/llms-full.txt, an OpenAPI 3.1 contract, an MCP scaffold_project
 tool, selectable user/admin consoles and a public 20-case build matrix.
 Deep B2B multi-tenancy/IaC remains the stronger choice at Makerkit,

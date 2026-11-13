@@ -3,7 +3,7 @@
  * Export the local account / role store so it can be moved into Supabase.
  *
  * The admin console stores accounts and roles in the local SQLite database
- * (`.data/shipkit.db`, table `profiles`) whenever SUPABASE_SERVICE_ROLE_KEY is
+ * (`.data/app.db`, table `profiles`) whenever SUPABASE_SERVICE_ROLE_KEY is
  * not configured. When you switch to Supabase, those roles have to come along
  * — this script reads them out and prints them in a form you can import.
  *
@@ -11,7 +11,7 @@
  *   node scripts/export-local-profiles.mjs              # JSON to stdout
  *   node scripts/export-local-profiles.mjs --sql        # SQL for Supabase
  *   node scripts/export-local-profiles.mjs --out profiles.json
- *   SQLITE_PATH=/var/lib/shipkit.db node scripts/export-local-profiles.mjs
+ *   SQLITE_PATH=/var/lib/app.db node scripts/export-local-profiles.mjs
  *
  * The JSON shape matches the Supabase `profiles` table
  * (supabase/migrations/0004_profiles_rbac.sql), so a small script can insert
@@ -42,7 +42,7 @@ const dbPath = custom
   ? path.isAbsolute(custom)
     ? custom
     : path.join(process.cwd(), custom)
-  : path.join(process.cwd(), ".data", "shipkit.db");
+  : path.join(process.cwd(), ".data", "app.db");
 
 if (!existsSync(dbPath)) {
   console.error(`ERROR: no local database at ${dbPath}`);

@@ -8,7 +8,7 @@
  *   npm run ai:docs
  *   node scripts/ai-docs.mjs --dry-run
  *
- * `shipkit.config.json` is the SOURCE OF TRUTH for selections; ai/doc-spec.json
+ * `app-template.config.json` is the SOURCE OF TRUTH for selections; ai/doc-spec.json
  * carries the full option catalogue, palettes and rendering constants. Edit
  * the manifest (or the spec's catalogue) first — never hand-edit AGENTS.md,
  * design.md, ai/rules/*, skills/README.md, .cursor/rules/* or CLAUDE.md,
@@ -46,8 +46,8 @@ if (!spec?.config || !spec?.style || !spec?.labels) {
 }
 
 // The Builder manifest wins over the cached config inside doc-spec.json.
-// Without this, editing shipkit.config.json would NOT change any document.
-const manifestPath = path.join(ROOT, "shipkit.config.json");
+// Without this, editing app-template.config.json would NOT change any document.
+const manifestPath = path.join(ROOT, "app-template.config.json");
 if (fs.existsSync(manifestPath)) {
   try {
     const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
@@ -56,7 +56,7 @@ if (fs.existsSync(manifestPath)) {
       spec.config = { ...spec.config, ...picks };
     }
   } catch (err) {
-    console.error(`Could not parse shipkit.config.json: ${err.message}`);
+    console.error(`Could not parse app-template.config.json: ${err.message}`);
     process.exit(1);
   }
 }
@@ -84,7 +84,7 @@ const cursor = Object.keys(docs).filter((k) => k.startsWith(".cursor/rules/")).l
 
 console.log(
   `${dryRun ? "[dry-run] " : ""}ai:docs — ${Object.keys(docs).length} documents, ` +
-    `${rules} scoped rules, ${cursor} Cursor rules, ${effective.labels.skills.length} skills (source: shipkit.config.json)`,
+    `${rules} scoped rules, ${cursor} Cursor rules, ${effective.labels.skills.length} skills (source: app-template.config.json)`,
 );
 console.log(
   dryRun

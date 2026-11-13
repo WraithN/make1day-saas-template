@@ -46,7 +46,7 @@ const globals = globalThis as unknown as { __skSqlite?: SqliteDatabase };
 export function dbPath(): string {
   const custom = process.env.SQLITE_PATH?.trim();
   if (custom) return path.isAbsolute(custom) ? custom : path.join(process.cwd(), custom);
-  return path.join(process.cwd(), ".data", "shipkit.db");
+  return path.join(process.cwd(), ".data", "app.db");
 }
 
 function loadSqlite(): SqliteModule {

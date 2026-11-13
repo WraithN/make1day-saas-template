@@ -1,7 +1,7 @@
 // Customer-owned site pages for the generated ZIP.
 //
 // make1day's own marketing pages (home, pricing, blog, compare, faq, license)
-// describe SHIPKIT — its $249 source license, its competitors, its SEO posts.
+// describe make1day.dev — its $249 source license, its competitors, its SEO posts.
 // Shipping them inside a customer's starter meant the customer's own site
 // was silently advertising our product instead of theirs. This module builds
 // a neutral, brand-free starter home + pricing page from the BuilderConfig,
@@ -677,10 +677,10 @@ export function neutralizeBrand(source: string, appName: string): string {
   // Wire-level identifiers are NOT branding. A cosmetic rebrand must never
   // rename a header/cookie/filename that an issued key or client depends on.
   const KEEP = [
-    "X-ShipKit-Entitlement",
-    "x-shipkit-license",
-    "shipkit.config.json",
-    "shipkit.db",
+    "X-App-Entitlement",
+    "x-app-license",
+    "app-template.config.json",
+    "app.db",
     "SK1.",
   ];
   const slug = appName.toLowerCase().replace(/[^a-z0-9]+/g, "");

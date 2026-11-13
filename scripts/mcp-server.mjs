@@ -6,17 +6,17 @@
  * the same protocol over HTTP at /api/mcp. This bridge only forwards lines,
  * so tool definitions and the license gate stay on the server.
  *
- *   SHIPKIT_MCP_URL=https://make1day.com node scripts/mcp-server.mjs
+ *   APP_MCP_URL=https://make1day.com node scripts/mcp-server.mjs
  *
  * Cursor (~/.cursor/mcp.json):
- *   { "mcpServers": { "shipkit": {
+ *   { "mcpServers": { "make1day": {
  *       "command": "node",
  *       "args": ["<abs path>/scripts/mcp-server.mjs"],
- *       "env": { "SHIPKIT_MCP_URL": "https://make1day.com" }
+ *       "env": { "APP_MCP_URL": "https://make1day.com" }
  *   } } }
  *
  * Claude Code:
- *   claude mcp add shipkit -- node <abs path>/scripts/mcp-server.mjs
+ *   claude mcp add make1day -- node <abs path>/scripts/mcp-server.mjs
  *
  * stdout carries JSON-RPC only; diagnostics go to stderr.
  */
@@ -24,11 +24,11 @@ import readline from "node:readline";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-const BASE = (process.env.SHIPKIT_MCP_URL ?? "http://127.0.0.1:3000").replace(/\/+$/, "");
+const BASE = (process.env.APP_MCP_URL ?? "http://127.0.0.1:3000").replace(/\/+$/, "");
 const ENDPOINT = `${BASE}/api/mcp`;
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
-console.error(`[shipkit-mcp] forwarding to ${ENDPOINT} (bridge: ${HERE})`);
+console.error(`[app-mcp] forwarding to ${ENDPOINT} (bridge: ${HERE})`);
 
 const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
 
@@ -57,7 +57,7 @@ rl.on("line", async (line) => {
     // Pass through verbatim so protocolVersion / ids stay untouched.
     process.stdout.write(text.replace(/\s+$/, "") + "\n");
   } catch (err) {
-    console.error(`[shipkit-mcp] ${err.message}`);
+    console.error(`[app-mcp] ${err.message}`);
     reply(msg?.id, -32603, `Upstream unavailable: ${err.message}`);
   }
 });

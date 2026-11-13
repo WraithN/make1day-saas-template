@@ -38,9 +38,9 @@ export function GET() {
         licenseKey: {
           type: "apiKey",
           in: "header",
-          name: "x-shipkit-license",
+          name: "x-app-license",
           description:
-            "Offline HMAC license key. Required for full source generation; a free source-free preview needs no key.",
+            "Offline HMAC license key. Required for full source generation; the free skeleton preview needs no key.",
         },
       },
       defaultInputModes: ["text/plain", "application/json"],
@@ -92,7 +92,7 @@ export function GET() {
       limitations: [
         "No A2A task lifecycle, no SSE or streaming transport, no push notifications.",
         "MCP is stateless JSON-RPC: tools/resources only, no sampling, prompts or subscriptions.",
-        "Full source ZIPs require a paid entitlement; anonymous callers receive a 402 plus a source-free preview.",
+        "Full source ZIPs require a paid entitlement; anonymous callers receive a 402 plus the skeleton preview.",
         "Local SQLite and the in-memory RAG index are not durable on serverless.",
       ],
     },

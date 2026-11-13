@@ -91,9 +91,11 @@ export const builderConfigSchema = z.object({
         "workflow",
         "canvas",
         "compliance",
+        "setup",
+        "grill",
       ]),
     )
-    .max(16)
+    .max(18)
     .refine(
       (arr) => !arr.includes("canvas") || arr.includes("workflow"),
       "The Pipeline Canvas skill renders Inngest workflow runs - select the Inngest workflows skill too",

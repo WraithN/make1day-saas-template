@@ -2,7 +2,7 @@
 // Usage: node scripts/audit-template.mjs <extracted-zip-dir> <full|min>
 // Companion to scripts/verify-matrix.mjs: the matrix proves the ZIP compiles;
 // this proves every PROMISED module/skill/doc actually ships (or is pruned)
-// for the selection recorded in shipkit.config.json.
+// for the selection recorded in app-template.config.json.
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
@@ -27,7 +27,7 @@ for (const p of [
   "AGENTS.md",
   "CLAUDE.md",
   "design.md",
-  "shipkit.config.json",
+  "app-template.config.json",
   "ai/doc-spec.json",
   "ai/README.md",
   "README.md",

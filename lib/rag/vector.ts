@@ -16,13 +16,13 @@ import type { RagChunk, RagHit } from "./types";
 const PG_DIMENSIONS = 1536; // must match vector(1536) in 0002_rag.sql
 
 const globalRef = globalThis as unknown as {
-  __shipkitRagVectors?: Map<string, number[]>;
-  __shipkitRagPgWarned?: boolean;
+  __tplRagVectors?: Map<string, number[]>;
+  __tplRagPgWarned?: boolean;
 };
 
 const vectors: Map<string, number[]> =
-  globalRef.__shipkitRagVectors ??
-  (globalRef.__shipkitRagVectors = new Map());
+  globalRef.__tplRagVectors ??
+  (globalRef.__tplRagVectors = new Map());
 
 export function putVectors(
   entries: { id: string; embedding: number[] }[],
@@ -76,8 +76,8 @@ export function isPgvectorEnabled(): boolean {
     return false;
   }
   if (env.embeddingDimensions() !== PG_DIMENSIONS) {
-    if (!globalRef.__shipkitRagPgWarned) {
-      globalRef.__shipkitRagPgWarned = true;
+    if (!globalRef.__tplRagPgWarned) {
+      globalRef.__tplRagPgWarned = true;
       console.warn(
         `RAG pgvector requires EMBEDDING_DIMENSIONS=${PG_DIMENSIONS}; ` +
           `using the in-memory vector store instead.`,

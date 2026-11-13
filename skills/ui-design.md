@@ -1,6 +1,6 @@
 ---
 name: ui-design
-description: Apply make1day's visual design system — tokens, spacing scale, component patterns, and accessibility — when creating or restyling UI so it stays coherent with the chosen style palette.
+description: Apply the project's visual design system - tokens, spacing, components, accessibility - when creating or restyling UI, and run the six-point design review before shipping any screen. TRIGGER ON: "改样式", "美化", "设计一下", "UI 检查", "design review", new components/pages - and always before a UI change is committed.
 ---
 
 # Skill: UI Design (make1day)
@@ -51,3 +51,21 @@ The goal is a cohesive look that respects the active style palette.
 - Don't break the radius system with one-off `rounded-3xl`.
 
 Preview a new palette's "feel" using the Builder's contained StylePreview before committing to a look.
+
+## Design review (run before any UI change ships)
+Six checks, in order; fix in this order too:
+1. **Hierarchy** - one H1 per page; is the primary action the loudest thing
+   in its region? Squint test: the page should still show one clear focus.
+2. **Contrast** - body text ≥4.5:1 against its background IN BOTH palettes
+   (`html.light` flips tokens; muted-on-surface is the usual failure).
+   Never ship a token pair you haven't seen in both modes.
+3. **States** - hover, focus-visible, disabled, loading, empty, error all
+   exist and look intentional; a form with no error state is unfinished.
+4. **Touch** - targets ≥44px tall at 390px viewport; no two actions within
+   8px of each other; tables get horizontal scroll, not crushed columns.
+5. **Consistency** - colors only from tokens, radii only from `--radius`,
+   spacing from the 4/8/12/16/24/32/48 scale; grep your diff for stray
+   `#[0-9a-f]` or `text-(blue|green|red)-`.
+6. **Copy** - labels say what happens ("Download the ZIP", not "Submit");
+   errors say what to do next. A screen that needs a tooltip to be
+   understood needs a copy fix.

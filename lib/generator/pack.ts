@@ -1,4 +1,4 @@
-// Packs the make1day source tree into a customized template ZIP.
+// Packs the make1day.dev source tree into a customized template ZIP.
 // The generated project is the same source that builds cleanly, but unselected
 // modules are genuinely pruned (see ./prune) and the rest is pre-configured to
 // the user's picks, with package.json renamed.
@@ -169,7 +169,7 @@ export async function listProjectFiles(
     "package.json",
     ".env.example",
     "README.md",
-    "shipkit.config.json",
+    "app-template.config.json",
     "app/globals.css",
     "lib/payments/index.ts",
   );
@@ -197,6 +197,9 @@ export async function listProjectFiles(
     // The compliance skill promises the fill-in DPA lives in the package;
     // docs/ as a whole stays site-internal - only this file crosses over.
     files.push("docs/dpa-template.md");
+  }
+  if (config.skills.includes("setup")) {
+    files.push("scripts/setup-doctor.mjs", "scripts/setup-wizard.mjs");
   }
 
   return Array.from(new Set(files)).sort();
@@ -255,6 +258,10 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     next["ai:docs"] = "node scripts/ai-docs.mjs";
     if (config.skills.includes("compliance")) {
       next["compliance:check"] = "node scripts/payment-compliance-check.mjs";
+    }
+    if (config.skills.includes("setup")) {
+      next["setup:doctor"] = "node scripts/setup-doctor.mjs";
+      next["setup:wizard"] = "node scripts/setup-wizard.mjs";
     }
     if (config.skills.includes("workflow")) {
       next["inngest:dev"] = "npx -y inngest-cli@latest dev";
@@ -476,7 +483,7 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
   // Generated, selection-driven files.
   zip.file(".env.example", buildEnvExample(config));
   zip.file("README.md", buildReadme(config));
-  zip.file("shipkit.config.json", buildConfigJson(config));
+  zip.file("app-template.config.json", buildConfigJson(config));
 
   // LICENSE is copied verbatim from ROOT_OK, so it still names OUR company.
   // Re-sign it to the customer: a white-label ZIP must not carry our brand.
@@ -536,6 +543,19 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     zip.file(
       "docs/dpa-template.md",
       await fs.readFile(path.join(root, "docs/dpa-template.md"), "utf8"),
+    );
+  }
+  // Environment onboarding: the doctor (toolchain detection + installs) and
+  // the wizard (loopback-only page that writes .env.local) ship with the
+  // setup skill.
+  if (config.skills.includes("setup")) {
+    zip.file(
+      "scripts/setup-doctor.mjs",
+      await fs.readFile(path.join(root, "scripts/setup-doctor.mjs"), "utf8"),
+    );
+    zip.file(
+      "scripts/setup-wizard.mjs",
+      await fs.readFile(path.join(root, "scripts/setup-wizard.mjs"), "utf8"),
     );
   }
 

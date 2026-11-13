@@ -350,7 +350,7 @@ touches card data. After the buyer finishes, they are returned to
   issue a second one.
 - `POST /api/generate` requires a license or an active subscription/email
   claim — an anonymous visitor never receives the source ZIP (the download IS
-  the product). `POST /api/generate/preview` hands out a source-free preview
+  the product). `POST /api/generate/preview` hands out a skeleton preview
   (file inventory + design tokens) under a per-visitor + per-network quota.
   Set `LICENSE_SECRET` and run `supabase/migrations/0003_licenses.sql`; inspect
   keys at `/admin/licenses`.

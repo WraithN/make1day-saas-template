@@ -62,7 +62,9 @@ export type SkillId =
   | "video"
   | "workflow"
   | "canvas"
-  | "compliance";
+  | "compliance"
+  | "setup"
+  | "grill";
 
 export interface BuilderConfig {
   appName: string;
@@ -244,6 +246,16 @@ export const SKILL_OPTIONS: { id: SkillId; label: string; note: string }[] = [
     label: "Payment Compliance",
     note: "Per-gateway compliance contract + live policy-review queue + GDPR/CCPA data-protection checklist; one-command self-check that gates deploys",
   },
+  {
+    id: "setup",
+    label: "Setup & Onboarding",
+    note: "Environment doctor (Node/git/Vercel/Supabase/wrangler/gh detection + installs) and a local browser wizard that writes your keys into .env.local",
+  },
+  {
+    id: "grill",
+    label: "Grill Me (requirements)",
+    note: "Before coding a new feature, the agent interviews you: job, persona, success test, scope edges, data, failure modes, rollback",
+  },
 ];
 
 export const DEFAULT_CONFIG: BuilderConfig = {
@@ -270,6 +282,8 @@ export const DEFAULT_CONFIG: BuilderConfig = {
     "workflow",
     "canvas",
     "compliance",
+    "setup",
+    "grill",
   ],
 };
 
@@ -281,6 +295,6 @@ export function slugify(name: string): string {
       .trim()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
-      .slice(0, 40) || "shipkit-app"
+      .slice(0, 40) || "my-app"
   );
 }

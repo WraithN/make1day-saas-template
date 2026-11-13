@@ -49,14 +49,14 @@ node scripts/verify-matrix.mjs --case default-waffo-midnight --build --publish
 
 ## 断言清单（也是回归护栏）
 
-- 必需存在：`package.json`、`tsconfig.json`、`.env.example`、`README.md`、`LICENSE`、`shipkit.config.json`、`design.md`、**`AGENTS.md`**、`CLAUDE.md`、`ai/doc-spec.json`、`ai/README.md`、`ai/rules/README.md`、`ai/rules/core.md`、`.cursor/rules/core.mdc`、`scripts/lib/ai-docs.mjs`、`scripts/ai-docs.mjs`、`scripts/ai-setup.mjs`
+- 必需存在：`package.json`、`tsconfig.json`、`.env.example`、`README.md`、`LICENSE`、`app-template.config.json`、`design.md`、**`AGENTS.md`**、`CLAUDE.md`、`ai/doc-spec.json`、`ai/README.md`、`ai/rules/README.md`、`ai/rules/core.md`、`.cursor/rules/core.mdc`、`scripts/lib/ai-docs.mjs`、`scripts/ai-docs.mjs`、`scripts/ai-setup.mjs`
 - **旧的小写 `agents.md` 不得出现**（大小写不敏感文件系统会与 `AGENTS.md` 冲突）
 - 站点专属端点**不得**出现在客户 ZIP：`payments/self-check`、`llms.txt`、`llms-full.txt`、`openapi.json`、`api/mcp`（`SITE_ONLY_FILES`）；站点营销页 `templates/page.tsx`、`templates/[slug]/preview/page.tsx`、`components/TemplateSite.tsx`、`components/TemplateCard.tsx`、`components/home/TemplateGallerySection.tsx`、`lib/content/templates.ts` 同样不得出现（`SITE_MARKETING_FILES`）
 - 支付适配器只保留选中的那一个；`payment=none` 时五个全剪且生成 `lib/payments/none.ts`
 - `rag` / `dashboard` 未选时对应文件必须消失；未选的 12 个 `skills/*.md` 必须消失
 - **两套后台**：`app/account/page.tsx` / `app/admin/users/page.tsx` 与勾选状态严格一致；共享层（`lib/console.ts`、`lib/content/console.ts`）在且仅在至少一个后台被选时存在
 - **无死链**：`account` 被剪时 `Nav.tsx`、`app/login/page.tsx`、`app/auth/callback/route.ts` 不得再含 `/account` 字面；只留 `account` 时 `app/account/layout.tsx` 不得再含指向 `/admin` 的常量
-- `shipkit.config.json` 与 `ai/doc-spec.json` 的 style/payment/deploy/skills 与请求一致
+- `app-template.config.json` 与 `ai/doc-spec.json` 的 style/payment/deploy/skills 与请求一致
 - 站点专用 npm scripts（`waffo:preflight`、`verify:matrix`）不得进入客户 `package.json`；`ai:docs` / `ai:setup` **必须存在**
 - `design.md` 非空、`AGENTS.md` >2000 字符且含本构建 style 与 `npm run ai:docs`；`CLAUDE.md` 含 `@AGENTS.md` / `@design.md`
 - scoped rules **精确等于** `7 常驻 + payment(启用时) + rag + account + admin(各自选中时) + 选中 skills 数`，`.cursor/rules/*.mdc` 数量与 `ai/rules/*.md` 完全一致；`skills/README.md` 显示「N of 13」

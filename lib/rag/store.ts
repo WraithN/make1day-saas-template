@@ -16,14 +16,14 @@ type Stored = { doc: RagDocument; chunks: RagChunk[] };
 
 // Keep the store on globalThis so dev HMR / duplicate module instances share it.
 const globalRef = globalThis as unknown as {
-  __shipkitRagStore?: Map<string, Stored>;
-  __shipkitRagIndexed?: Set<string>;
-  __shipkitRagIndexing?: Promise<void> | null;
+  __tplRagStore?: Map<string, Stored>;
+  __tplRagIndexed?: Set<string>;
+  __tplRagIndexing?: Promise<void> | null;
 };
 const documents: Map<string, Stored> =
-  globalRef.__shipkitRagStore ?? (globalRef.__shipkitRagStore = new Map());
+  globalRef.__tplRagStore ?? (globalRef.__tplRagStore = new Map());
 const indexed: Set<string> =
-  globalRef.__shipkitRagIndexed ?? (globalRef.__shipkitRagIndexed = new Set());
+  globalRef.__tplRagIndexed ?? (globalRef.__tplRagIndexed = new Set());
 
 let sequence = 0;
 function nextId(prefix: string): string {
@@ -110,12 +110,12 @@ export async function ensureSeededAsync(): Promise<void> {
     return;
   }
   // Coalesce concurrent first requests (serverless cold starts).
-  if (!globalRef.__shipkitRagIndexing) {
-    globalRef.__shipkitRagIndexing = indexChunks(allChunks()).finally(() => {
-      globalRef.__shipkitRagIndexing = null;
+  if (!globalRef.__tplRagIndexing) {
+    globalRef.__tplRagIndexing = indexChunks(allChunks()).finally(() => {
+      globalRef.__tplRagIndexing = null;
     });
   }
-  await globalRef.__shipkitRagIndexing;
+  await globalRef.__tplRagIndexing;
 }
 
 // Seed docs make the very first query useful even before the user ingests

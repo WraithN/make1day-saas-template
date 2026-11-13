@@ -44,6 +44,8 @@ const SKILL_FILES: Record<SkillId, string> = {
   workflow: "skills/inngest-workflow.md",
   canvas: "skills/pipeline-canvas.md",
   compliance: "skills/payment-compliance.md",
+  setup: "skills/setup-env.md",
+  grill: "skills/grill-me.md",
 };
 
 /** Skill id → globs used by the generated scoped rules. */
@@ -64,6 +66,8 @@ export const SKILL_GLOBS: Record<SkillId, string[]> = {
   workflow: ["inngest/**", "app/api/inngest/**", "app/api/pipeline/**", "lib/workflows.ts"],
   canvas: ["app/admin/workflows/**", "components/console/WorkflowCanvas.tsx"],
   compliance: ["contracts/**", "scripts/payment-compliance-check.mjs", "lib/payments/**", "app/api/webhook/**", "app/terms/**", "app/privacy/**"],
+  setup: [".env.example", "scripts/setup-doctor.mjs", "scripts/setup-wizard.mjs", "package.json"],
+  grill: ["docs/requirements/**", "ai/doc-spec.json", "app/**", "components/**", "lib/**"],
 };
 
 /** Skill id → filename, exposed so the doc generator can build a real index. */

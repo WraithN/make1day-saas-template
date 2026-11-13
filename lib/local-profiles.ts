@@ -5,7 +5,7 @@
 // REAL role store even when Supabase is not configured yet. Deriving roles
 // from licenses left the role column read-only, which made the local install
 // look broken. This module gives the local install the same capability the
-// hosted one has, backed by `.data/shipkit.db`.
+// hosted one has, backed by `.data/app.db`.
 //
 // The switching contract (the same one the license / order / stats layers
 // already use):

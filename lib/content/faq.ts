@@ -34,7 +34,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "How do I get my license key after paying?",
-        a: "The full source ZIP requires a **Buyout license ($249, or $174 during Black Friday)** — one-time, the source is yours forever, with 12 months of free rebuild updates. **Care ($19/mo, $13 on Black Friday) is a subscription around that license, not a substitute for it:** it re-opens your update window after the free 12 months, ships new modules first, delivers upstream merge patches and buys 12-hour priority support. A Care plan alone cannot download the full source. Buyout is refundable within 14 days; Care can be cancelled anytime from the billing portal.\n\n**After a paid webhook**, the key is emailed to the checkout address automatically, idempotent per issued key. A failed send is queued in `mail_outbox` and retried by a cron endpoint.\n\n**You can also:**\n\n- Sign in with the email you paid with and open `/account/licenses`\n- Paste an offline key into `/license`\n- Use the claim form on `/license` to request a re-send if you checked out as a guest or used a different login email\n\nReal delivery still requires configuring a mail provider and a host scheduler — those are deployment steps, not missing code.\n\n**No license yet?** Download a free, source-free preview: the complete file inventory of your build plus the design tokens (no source code). The gate protects this site only; the project you download ships with it disabled.",
+        a: "The full source ZIP requires a **Buyout license ($249, or $174 during Black Friday)** — one-time, the source is yours forever, with 12 months of free rebuild updates. **Care ($19/mo, $13 on Black Friday) is a subscription around that license, not a substitute for it:** it re-opens your update window after the free 12 months, ships new modules first, delivers upstream merge patches and buys 12-hour priority support. A Care plan alone cannot download the full source. Buyout is refundable within 14 days; Care can be cancelled anytime from the billing portal.\n\n**After a paid webhook**, the key is emailed to the checkout address automatically, idempotent per issued key. A failed send is queued in `mail_outbox` and retried by a cron endpoint.\n\n**You can also:**\n\n- Sign in with the email you paid with and open `/account/licenses`\n- Paste an offline key into `/license`\n- Use the claim form on `/license` to request a re-send if you checked out as a guest or used a different login email\n\nReal delivery still requires configuring a mail provider and a host scheduler — those are deployment steps, not missing code.\n\n**No license yet?** Download a free preview: the runnable project skeleton of your build (configs + themed placeholder page), the complete file inventory and the design tokens - no application source. The gate protects this site only; the project you download ships with it disabled.",
       },
       {
         q: "What is a Next.js SaaS boilerplate?",
@@ -62,7 +62,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "What AI coding documents come inside the downloaded ZIP?",
-        a: "A complete, agent-readable docs set:\n\n- root `AGENTS.md` — repo contract and definition of done\n- a style-locked `design.md`\n- scoped rules in `ai/rules/*.md`\n- `.cursor/rules/*.mdc` for Cursor\n- `CLAUDE.md` for Claude Code\n- up to 12 `skills/*.md` playbooks\n\nAfter changing `shipkit.config.json`, run `npm run ai:docs` to rebuild all of them from one shared renderer.\n\nThis site's `llms.txt`, `llms-full.txt` and MCP endpoint are site-only and pruned from every customer ZIP.",
+        a: "A complete, agent-readable docs set:\n\n- root `AGENTS.md` — repo contract and definition of done\n- a style-locked `design.md`\n- scoped rules in `ai/rules/*.md`\n- `.cursor/rules/*.mdc` for Cursor\n- `CLAUDE.md` for Claude Code\n- up to 12 `skills/*.md` playbooks\n\nAfter changing `make1day.config.json`, run `npm run ai:docs` to rebuild all of them from one shared renderer.\n\nThis site's `llms.txt`, `llms-full.txt` and MCP endpoint are site-only and pruned from every customer ZIP.",
       },
       {
         q: "Can I reskin or white-label it?",
@@ -154,7 +154,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "下载的 ZIP 里有哪些给 AI coding agent 用的文档？",
-        a: "一套完整的、机器可读的文档：\n\n- 根目录 `AGENTS.md`——仓库契约与完成定义\n- 锁定所选风格的 `design.md`\n- `ai/rules/*.md` 的 scoped rules\n- 给 Cursor 的 `.cursor/rules/*.mdc`\n- 给 Claude Code 的 `CLAUDE.md`\n- 最多 12 份 `skills/*.md` playbook\n\n改完 `shipkit.config.json` 后执行 `npm run ai:docs`，会用同一份渲染器重建全部文档。\n\n本站的 `llms.txt`、`llms-full.txt` 与 MCP 端点属于站点专属，每个客户 ZIP 都会剪掉。",
+        a: "一套完整的、机器可读的文档：\n\n- 根目录 `AGENTS.md`——仓库契约与完成定义\n- 锁定所选风格的 `design.md`\n- `ai/rules/*.md` 的 scoped rules\n- 给 Cursor 的 `.cursor/rules/*.mdc`\n- 给 Claude Code 的 `CLAUDE.md`\n- 最多 12 份 `skills/*.md` playbook\n\n改完 `make1day.config.json` 后执行 `npm run ai:docs`，会用同一份渲染器重建全部文档。\n\n本站的 `llms.txt`、`llms-full.txt` 与 MCP 端点属于站点专属，每个客户 ZIP 都会剪掉。",
       },
       {
         q: "可以换肤 / 白标吗？",

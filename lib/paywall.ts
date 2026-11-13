@@ -25,7 +25,7 @@ import { isLicenseGateEnabled } from "@/lib/env";
 // ───────────────────────────────────────────────────────────────
 
 const DEFAULT_ROUTES = ["/premium"];
-const LICENSE_HEADER = "x-shipkit-license";
+const LICENSE_HEADER = "x-app-license";
 const LICENSE_COOKIE = "sk_license";
 
 /**

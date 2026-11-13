@@ -4,13 +4,16 @@
 // visitors therefore never receive application source code — not even a
 // "Lite" build, because a Lite build still hands over most of the kit.
 //
-// What they get instead is a shop window:
+// What they get instead is a shop window WITH a runnable frame:
 //
+//   package.json + tsconfig + configs   a real project skeleton (installs)
+//   app/                               placeholder layout/page in YOUR style
+//   .env.example                       the env contract of YOUR config
 //   README.md              what this preview is, and how to unlock the build
 //   PREVIEW.md             the file inventory of the paid build, module by
 //                          module, with a one-line description of every file
 //   inventory.json         the same inventory, machine-readable
-//   shipkit.config.json    the configuration this preview was built from
+//   app-template.config.json  the configuration this preview was built from
 //   theme/tokens.css       the selected palette as real CSS variables
 //   theme/tokens.json      the same palette, machine-readable
 //   LICENSE                the MIT license the full build ships with
@@ -23,8 +26,8 @@
 import JSZip from "jszip";
 import type { BuilderConfig } from "./config";
 import { slugify } from "./config";
-import { PALETTES } from "./themes";
-import { buildConfigJson } from "./templates";
+import { PALETTES, buildGlobalsCss } from "./themes";
+import { buildConfigJson, buildEnvExample } from "./templates";
 import { listProjectFiles } from "./pack";
 
 /** Human-readable label for a path segment. */
@@ -212,9 +215,10 @@ function tokensJson(style: BuilderConfig["style"]) {
 }
 
 /**
- * Build the free preview ZIP. It never contains application source code —
- * only the inventory of the paid build, the chosen theme tokens and the
- * configuration.
+ * Build the free preview ZIP. It contains the complete project SKELETON —
+ * configs, one real themed page you can run, and your .env.example — but
+ * never application source: auth, payments, RAG, consoles and the agent
+ * docs live only in the paid build.
  */
 export async function buildPreviewZip(
   config: BuilderConfig,
@@ -225,7 +229,7 @@ export async function buildPreviewZip(
   const groups = groupFiles(files);
 
   const inventory = {
-    generator: "shipkit",
+    generator: "template-generator",
     version: 1,
     preview: true,
     appName: config.appName,
@@ -243,9 +247,11 @@ export async function buildPreviewZip(
   );
   md.push("");
   md.push(
-    "It contains no application source code on purpose: the download *is* the product. " +
-      "What you get here is the complete inventory of the build you configured — " +
-      "every file, what it does — plus the design tokens of the style you picked.",
+    "You hold a runnable project SKELETON: package.json, tsconfig, Tailwind v4 wiring, " +
+      "your chosen style as the real app/globals.css, a themed placeholder landing page and " +
+      "your .env.example. It boots with `npm install && npm run dev`. What it deliberately " +
+      "does NOT contain is the product itself: auth, payments, AI, RAG, consoles, the agent " +
+      "docs and every module below are the paid build — the download *is* the product.",
   );
   md.push("");
   md.push("## What a license unlocks");
@@ -255,7 +261,9 @@ export async function buildPreviewZip(
   );
   md.push("- Every module above, wired together and type-checked (`tsc --noEmit` clean)");
   md.push("- `AGENTS.md`, `design.md`, scoped rules under `ai/rules/`, Cursor rules and `CLAUDE.md`");
-  md.push("- The 12 agent skill playbooks in `skills/`");
+  md.push(
+    "- Every agent skill playbook in `skills/` (the preview ships none of them)",
+  );
   md.push("- Supabase migrations with row-level security, seed SQL and the local SQLite fallback");
   md.push("- `npm run ai:docs` — regenerate every contract file from your config");
   md.push("");
@@ -294,16 +302,25 @@ export async function buildPreviewZip(
   readme.push(`# ${config.appName} — make1day preview package`);
   readme.push("");
   readme.push(
-    "This is a **preview**, not the template. It deliberately contains no application " +
-      "source code: it shows you exactly what the paid build contains and which design " +
-      "tokens it uses.",
+    "This is a **preview**, not the product. It ships a runnable project SKELETON — " +
+      "configs, your chosen style as the real `app/globals.css`, a placeholder landing " +
+      "page and `.env.example` — plus the full inventory of what the paid build adds. " +
+      "No application source: auth, payments, AI, RAG, consoles and the agent docs are " +
+      "the license unlock.",
   );
+  readme.push("");
+  readme.push("```bash");
+  readme.push("npm install && npm run dev   # the skeleton boots in your chosen style");
+  readme.push("```");
   readme.push("");
   readme.push("| File | What it is |");
   readme.push("| --- | --- |");
+  readme.push("| `package.json` + `tsconfig.json` + configs | The real project skeleton — installs and runs |");
+  readme.push("| `app/` | Placeholder layout/page + your selected style's globals.css |");
+  readme.push("| `.env.example` | The env contract of YOUR configuration |");
   readme.push("| `PREVIEW.md` | The full file inventory of the build you configured |");
   readme.push("| `inventory.json` | The same inventory, machine-readable |");
-  readme.push("| `shipkit.config.json` | The builder configuration this preview was made from |");
+  readme.push("| `app-template.config.json` | The builder configuration this preview was made from |");
   readme.push("| `theme/tokens.css` | The design tokens of your chosen style |");
   readme.push("| `theme/tokens.json` | The same palette, machine-readable |");
   readme.push("");
@@ -315,9 +332,134 @@ export async function buildPreviewZip(
   zip.file("README.md", readme.join("\n"));
 
   zip.file("inventory.json", JSON.stringify(inventory, null, 2) + "\n");
-  zip.file("shipkit.config.json", buildConfigJson(config));
+  zip.file("app-template.config.json", buildConfigJson(config));
   zip.file("theme/tokens.css", tokensCss(config.style));
   zip.file("theme/tokens.json", tokensJson(config.style) + "\n");
+
+  // ── Runnable project skeleton ────────────────────────────────────────────
+  // `npm install && npm run dev` boots a real page in YOUR chosen style.
+  // Only the two placeholder files under app/ are ours; every real module
+  // (auth, payments, AI, RAG, consoles, agent docs) is the paid unlock.
+  const minimalDeps = {
+    next: "^15.5.0",
+    react: "^19.1.0",
+    "react-dom": "^19.1.0",
+  };
+  zip.file(
+    "package.json",
+    JSON.stringify(
+      {
+        name: slug,
+        version: "0.1.0",
+        private: true,
+        description: `${config.appName} - preview skeleton generated by the make1day builder. Unlock the full source with a license key.`,
+        scripts: {
+          dev: "next dev",
+          build: "next build",
+          start: "next start",
+          typecheck: "tsc --noEmit",
+        },
+        dependencies: minimalDeps,
+        devDependencies: {
+          "@tailwindcss/postcss": "^4.1.0",
+          "@types/node": "^22.0.0",
+          "@types/react": "^19.1.0",
+          "@types/react-dom": "^19.1.0",
+          tailwindcss: "^4.1.0",
+          typescript: "^5.7.0",
+        },
+      },
+      null,
+      2,
+    ) + "\n",
+  );
+  zip.file(
+    "tsconfig.json",
+    JSON.stringify(
+      {
+        compilerOptions: {
+          target: "ES2017",
+          lib: ["dom", "dom.iterable", "esnext"],
+          allowJs: true,
+          skipLibCheck: true,
+          strict: true,
+          noEmit: true,
+          esModuleInterop: true,
+          module: "esnext",
+          moduleResolution: "bundler",
+          resolveJsonModule: true,
+          isolatedModules: true,
+          jsx: "preserve",
+          incremental: true,
+          plugins: [{ name: "next" }],
+          paths: { "@/*": ["./*"] },
+        },
+        include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+        exclude: ["node_modules"],
+      },
+      null,
+      2,
+    ) + "\n",
+  );
+  zip.file(
+    "next.config.mjs",
+    "/** @type {import('next').NextConfig} */\nconst nextConfig = {};\n\nexport default nextConfig;\n",
+  );
+  zip.file(
+    "postcss.config.mjs",
+    'export default { plugins: { "@tailwindcss/postcss": {} } };\n',
+  );
+  zip.file("app/globals.css", buildGlobalsCss(config.style));
+  zip.file(
+    "app/layout.tsx",
+    `// Preview skeleton layout - the full build ships the real layout: Nav,
+// footer, language system and theme wiring.
+import "./globals.css";
+
+export const metadata = {
+  title: ${JSON.stringify(config.appName)},
+  description: "Preview skeleton generated by the make1day builder.",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+`,
+  );
+  zip.file(
+    "app/page.tsx",
+    `// Preview skeleton landing - replace it with the real generated pages:
+// hero, pricing, auth, dashboard and consoles arrive with your license.
+export default function Home() {
+  return (
+    <main className="wrap py-24">
+      <div className="eyebrow">PREVIEW SKELETON</div>
+      <h1 className="text-4xl font-bold mt-4">${config.appName}</h1>
+      <p className="mt-4 text-[15px] text-ink-soft" style={{ maxWidth: 560 }}>
+        This is the build skeleton in the "${config.style}" style: configs,
+        theme tokens and a runnable page. Paste your license key in the
+        builder and regenerate to download the complete source - auth,
+        payments, AI, RAG, consoles and the agent-native docs.
+      </p>
+      <pre className="mt-8 rounded-xl border p-4 text-[13px] overflow-auto">npm install && npm run dev</pre>
+    </main>
+  );
+}
+`,
+  );
+  zip.file(".env.example", buildEnvExample(config));
+  zip.file(
+    ".gitignore",
+    "node_modules/\n.next/\n.env*\n*.tsbuildinfo\nnext-env.d.ts\n.DS_Store\n",
+  );
 
   // The MIT license the full build ships with.
   try {

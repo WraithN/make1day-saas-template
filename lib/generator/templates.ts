@@ -1,4 +1,4 @@
-﻿// Render the generated template's .env.example, README.md and shipkit.config.json
+﻿// Render the generated template's .env.example, README.md and app-template.config.json
 // from a BuilderConfig. The generated project is the SAME source as make1day, but
 // pre-configured to exactly the user's selections.
 
@@ -186,7 +186,7 @@ export function buildEnvExample(c: BuilderConfig): string {
   lines.push(`# sessions AND the user directory with roles live in one local SQLite`);
   lines.push(`# database (Node's built-in \`node:sqlite\` — no native dependency).`);
   lines.push(`# The file is created on first use; SQLITE_PATH relocates it.`);
-  lines.push(`# SQLITE_PATH=.data/shipkit.db`);
+  lines.push(`# SQLITE_PATH=.data/app.db`);
   lines.push(`# Without SUPABASE_SERVICE_ROLE_KEY the admin console reads and writes`);
   lines.push(`# accounts + roles here. Set the service-role key above to move them`);
   lines.push(`# to Supabase Auth + the \`profiles\` table — no code change. Migrate`);
@@ -287,11 +287,11 @@ export function buildReadme(c: BuilderConfig): string {
   lines.push(`| \`skills/*.md\` | Any agent | Focused playbooks, one per concern |`);
   lines.push(``);
   lines.push("```bash");
-  lines.push(`npm run ai:docs    # rebuild ALL of the above from shipkit.config.json`);
+  lines.push(`npm run ai:docs    # rebuild ALL of the above from app-template.config.json`);
   lines.push(`npm run ai:setup   # refresh .cursor/rules + CLAUDE.md only`);
   lines.push("```");
   lines.push(``);
-  lines.push(`Edit \`shipkit.config.json\` (the source of truth), then run \`ai:docs\` —`);
+  lines.push(`Edit \`app-template.config.json\` (the source of truth), then run \`ai:docs\` —`);
   lines.push(`never hand-edit the generated files. See \`ai/README.md\` for details.`);
   lines.push(``);
 
@@ -431,7 +431,7 @@ export function buildReadme(c: BuilderConfig): string {
 export function buildConfigJson(c: BuilderConfig): string {
   return JSON.stringify(
     {
-      generator: "shipkit",
+      generator: "template-generator",
       version: 1,
       generatedAt: new Date().toISOString(),
       config: c,

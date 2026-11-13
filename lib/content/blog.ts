@@ -284,7 +284,7 @@ By late 2026, LLM streaming, multiple model providers, token or credit metering,
 
 ## The delivery layer nobody else needs
 
-Because the product IS the download, this project has to solve things a fixed starter does not: an HMAC license key or subscription gate that fails closed in production, a source-free anonymous preview with signed visitor tokens, six payment adapters with one verification contract, five-language copy, a Supabase/SQLite switch driven purely by env, and a matrix that downloads and type-checks every representative build. None of that is an AI capability — it is what makes selling configurable source code possible.
+Because the product IS the download, this project has to solve things a fixed starter does not: an HMAC license key or subscription gate that fails closed in production, a skeleton-only anonymous preview with signed visitor tokens, six payment adapters with one verification contract, five-language copy, a Supabase/SQLite switch driven purely by env, and a matrix that downloads and type-checks every representative build. None of that is an AI capability — it is what makes selling configurable source code possible.
 
 ## Honest limits
 
@@ -526,7 +526,7 @@ The ZIP contains the product, not the machine that makes it. The generator direc
 
 ## 4. The paywall must not follow the customer
 
-Our site requires an HMAC license key, an active subscription or an email claim before it emits a source ZIP, and production fails closed even when the signing secret is missing. The customer's own project ships with that gate defaulted to off — in source, not just in .env.example, which nobody copies. Anonymous visitors can still take a source-free preview: the file inventory and design tokens, with a signed visitor token and a two-bucket quota.
+Our site requires an HMAC license key, an active subscription or an email claim before it emits a source ZIP, and production fails closed even when the signing secret is missing. The customer's own project ships with that gate defaulted to off — in source, not just in .env.example, which nobody copies. Anonymous visitors can still take the skeleton preview: the project skeleton, file inventory and design tokens, with a signed visitor token and a two-bucket quota.
 
 ## Verify it yourself
 
@@ -559,7 +559,7 @@ ZIP 里是商品，不是造商品的机器。生成器目录、builder 路由�
       en: [
         { q: "Does the generated ZIP contain the generator itself?", a: "No. The generator modules, the builder page and the generate API are pruned. Buying one build gives you one project, not the factory that produces builds." },
         { q: "Is the license gate active in the downloaded project?", a: "No. The customer's own lib/env.ts is rewritten so licenseGateMode() defaults to off in source. Only this site enforces the paywall, and it fails closed in production." },
-        { q: "What is in the anonymous preview?", a: "A source-free package: the complete file inventory for your configuration, design tokens and a README-style PREVIEW.md. No source files. It is rate-limited by a signed visitor token plus a trusted-network bucket." },
+        { q: "What is in the anonymous preview?", a: "A runnable skeleton preview: configs, a themed placeholder page, the complete file inventory, design tokens and a README-style PREVIEW.md - no application source. It is rate-limited by a signed visitor token plus a trusted-network bucket." },
       ],
       zh: [
         { q: "生成的 ZIP 里含生成器本身吗？", a: "不含。生成器模块、builder 页面、generate 接口都会被剪掉。买一份构建 = 拿到一个项目，不是拿到生产构建的工厂。" },

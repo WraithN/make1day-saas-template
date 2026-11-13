@@ -1,6 +1,6 @@
 // One-off: replace leftover visible "SHIPKIT …" UI brand strings in i18n with
 // "make1day …". These are human-readable eyebrow labels (blog/builder), NOT the
-// protected wire identifiers (X-ShipKit-Entitlement / shipkit.db / sk_* / SK1).
+// protected wire identifiers (X-App-Entitlement / app.db / sk_* / SK1).
 // The customer generator already rewrites "make1day" -> appName, so this keeps
 // white-labeling intact.
 import fs from "node:fs";

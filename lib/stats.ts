@@ -5,7 +5,7 @@ import { logger } from "@/lib/logger";
 // site. It stores an aggregate map of path -> count. In production (a service
 // role key configured) the count lives in the `pageviews` table so it survives
 // serverless instances / restarts. Without Supabase it falls back to the local
-// SQLite database (.data/shipkit.db) — dev only, not durable on ephemeral FS.
+// SQLite database (.data/app.db) — dev only, not durable on ephemeral FS.
 
 export type Stats = {
   total: number;

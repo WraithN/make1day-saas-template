@@ -35,7 +35,7 @@ const PAGE_DIGESTS: Record<string, Digest> = {
       "Pick auth, payment gateway, AI providers, features, deploy target and visual style; the server returns a source ZIP containing only the selected modules.",
     facts: [
       "The ZIP is the product: a paid entitlement (offline license key, active subscription or a claimed email license) is required for the full source download.",
-      "Anonymous visitors may request a source-free preview: the build's file inventory plus design tokens.",
+      "Anonymous visitors may request the skeleton preview: a runnable project scaffold plus the build's file inventory and design tokens.",
       "Six payment adapters share one checkout/webhook contract: Waffo Pancake (default), Waffo Acquiring, Stripe, Creem, PayPal and Lemon Squeezy.",
       "Storage switches between Supabase and local SQLite purely by SUPABASE_SERVICE_ROLE_KEY; all five UI languages (EN/ZH/JA/FR/DE) ship with every build.",
       "18 representative configurations are downloaded, pruned and type-checked in the build matrix; 11 visual styles are available.",

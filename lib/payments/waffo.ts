@@ -150,7 +150,7 @@ async function createCheckoutPancake(
       plan: oneTime ? "buyout" : "care",
       ...(oneTime && p.buyoutPackage ? { pkg: p.buyoutPackage } : {}),
       userId: p.userId ?? "",
-      source: "shipkit",
+      source: "make1day",
     },
     successUrl: p.successUrl,
   };

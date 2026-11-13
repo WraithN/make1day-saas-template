@@ -3,8 +3,8 @@
 // Replaces the make1day product name (and legacy ShipKit / ShipYourProduct /
 // Uncorne strings that may survive in older downloads) with your own brand
 // across every text file in a target directory. Wire-level identifiers such as
-// `shipkit.config.json`, `sk_*` cookies, `SK1.` key prefixes and the
-// `X-ShipKit-Entitlement` header are intentionally NOT rewritten — renaming
+// `app-template.config.json`, `sk_*` cookies, `SK1.` key prefixes and the
+// `X-App-Entitlement` header are intentionally NOT rewritten — renaming
 // them would break already-issued license keys.
 //
 // Usage:
@@ -47,10 +47,10 @@ const TEXT_EXT = new Set([
 // Wire contracts: renamed only by a deliberate key rotation, never by a
 // cosmetic rebrand.
 const KEEP = [
-  "X-ShipKit-Entitlement",
-  "x-shipkit-license",
-  "shipkit.config.json",
-  "shipkit.db",
+  "X-App-Entitlement",
+  "x-app-license",
+  "app-template.config.json",
+  "app.db",
   "SK1.",
 ];
 
@@ -58,7 +58,7 @@ const KEEP = [
 function projectBrand() {
   try {
     const cfg = JSON.parse(
-      fs.readFileSync(path.join(ROOT, "shipkit.config.json"), "utf8"),
+      fs.readFileSync(path.join(ROOT, "app-template.config.json"), "utf8"),
     );
     return cfg?.config?.appName ?? "";
   } catch {
@@ -72,7 +72,7 @@ const BRAND_WORDS = [
   "ShipKit",
   "Uncorne",
 ].filter(Boolean);
-const DOMAINS = ["make1day.com", "shipkit.dev", "uncorne.com"];
+const DOMAINS = ["make1day.com", "uncorne.com"];
 
 function isTextFile(file) {
   if (file === "LICENSE") return true;

@@ -2,7 +2,7 @@
  * End-to-end smoke test for the source-ZIP license gate and the P0 stripping.
  *
  * Self-contained: it starts its own `next start` with a throwaway SQLite DB,
- * so it is repeatable on the same day and never touches .data/shipkit.db.
+ * so it is repeatable on the same day and never touches .data/app.db.
  *
  *   node scripts/smoke-license-gate.cjs
  *   SMOKE_BASE_URL=http://127.0.0.1:3002 node scripts/smoke-license-gate.cjs
@@ -182,7 +182,7 @@ async function runChecks() {
   const deniedBody = await denied.json();
   check("anonymous /api/generate is 402", denied.status === 402, `status=${denied.status}`);
   check(
-    "402 offers the source-free preview instead of the product",
+    "402 offers the skeleton preview instead of the product",
     deniedBody.error === "license_required" && deniedBody.previewAvailable === true,
     JSON.stringify(deniedBody),
   );
@@ -234,8 +234,8 @@ async function runChecks() {
   );
   check(
     "response names the entitlement reason",
-    (paid.headers.get("x-shipkit-entitlement") ?? "").length > 0,
-    `header=${paid.headers.get("x-shipkit-entitlement")}`,
+    (paid.headers.get("x-app-entitlement") ?? "").length > 0,
+    `header=${paid.headers.get("x-app-entitlement")}`,
   );
 
   if (paid.status === 200) {

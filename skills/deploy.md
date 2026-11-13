@@ -16,7 +16,7 @@ globs: .env.example, next.config.mjs, wrangler.toml, middleware.ts, app/**/route
 | Target | Notes |
 | --- | --- |
 | Vercel | Default. Push to GitHub, import, mirror `.env.local`, register `https://<domain>/api/webhook`. |
-| Self-host | `npm run build && npm run start`; Node process, `.data/shipkit.db` SQLite persists. |
+| Self-host | `npm run build && npm run start`; Node process, `.data/app.db` SQLite persists. |
 | Cloudflare | Workers + `@opennextjs/cloudflare` + `wrangler.toml` with `nodejs_compat` (main `.open-next/worker.js`, assets `.open-next/assets`). `npm run preview` / `npm run deploy`; copy `open-next.config.ts.example` to `open-next.config.ts` first. **Known gap:** `node:sqlite` local storage needs a writable disk, which Workers does not provide — configure Supabase before deploying. The in-memory RAG index is also lost on cold starts. |
 
 ## Runtime rules
@@ -27,7 +27,7 @@ globs: .env.example, next.config.mjs, wrangler.toml, middleware.ts, app/**/route
 ## Local build hygiene
 - **Never run `next dev` and `next build` against the same `.next` directory.** The dev server overwrites `app-paths-manifest.json` and `next start` will 404 every route.
 - Clean sequence: stop dev → delete `.next` → `next build` → `next start`.
-- `.data/shipkit.db` and the RAG in-memory index are process-local; on serverless they vanish on cold start. Use Supabase for both.
+- `.data/app.db` and the RAG in-memory index are process-local; on serverless they vanish on cold start. Use Supabase for both.
 
 ## Verify
 `npx tsc --noEmit` → clean `next build` → `next start` smoke-test `/`, `/pricing`, `/llms.txt` → `/api/payments/self-check` returns `ready: true`.

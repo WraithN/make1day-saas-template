@@ -177,7 +177,7 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
       }
       setNeedLicense(false);
       const blob = await res.blob();
-      downloadBlob(blob, `${slug}-shipkit.zip`);
+      downloadBlob(blob, `${slug}-make1day-template.zip`);
     } catch {
       setErr("Network error");
     } finally {
@@ -207,7 +207,7 @@ export function Builder({ initialStyle }: { initialStyle?: StyleId }) {
         return;
       }
       const blob = await res.blob();
-      downloadBlob(blob, `${slug}-shipkit-preview.zip`);
+      downloadBlob(blob, `${slug}-make1day-template-preview.zip`);
     } catch {
       setPreviewErr("Network error");
     } finally {

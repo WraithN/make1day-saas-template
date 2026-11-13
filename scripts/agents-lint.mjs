@@ -37,7 +37,7 @@ const warn = (msg) => warnings.push(msg);
 // Competitor names are intentionally NOT here — a generated project may mention
 // competitors in its own copy, and "brand leak" only means OUR product.
 const BRANDS = ["ShipKit", "ShipYourProduct", "Uncorne", "make1day"];
-const KEEP_WIRE = /X-ShipKit-Entitlement|shipkit\.config\.json|x-shipkit-license|shipkit\.db|SK1\./;
+const KEEP_WIRE = /SK1\./;
 
 const generated = read("ai/doc-spec.json") !== null;
 
@@ -90,7 +90,7 @@ if (generated) {
     "ai/rules/core.md",
     ".cursor/rules/core.mdc",
     "skills/README.md",
-    "shipkit.config.json",
+    "app-template.config.json",
   ]) {
     if (read(rel) === null) fail(`missing agent contract file: ${rel}`);
   }

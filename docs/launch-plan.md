@@ -16,7 +16,7 @@ self-check 接线。
 **已拍板/已配**：支付网关 = **Creem**（`PAYMENT_PROVIDER=creem`，仓库代码默认
 仍是 waffo，MoR 场景保留）；邮件 = **Resend**（`MAIL_FROM=noreply@mail.uncorne.com`、
 reply-to `support@uncorne.com`；发信子域 `mail.uncorne.com` 待 Resend 控制台验证
-+ Cloudflare 加 DNS）；`SQLITE_PATH=/tmp/shipkit.db` 仅作 Supabase 不可用时的降级；
++ Cloudflare 加 DNS）；`SQLITE_PATH=/tmp/app.db` 仅作 Supabase 不可用时的降级；
 Vercel 环境变量是**部署快照**——改完必须重新部署才生效。
 
 **仍缺（按序）**：① Creem test key + webhook secret + 6 个产品价格 ID → 沙箱演练 →

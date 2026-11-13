@@ -179,7 +179,7 @@ export default function PrivacyPage() {
           </h2>
           <p>
             With no database credentials configured, all of the tables above
-            live in a local SQLite file (<span className="font-mono">.data/shipkit.db</span>)
+            live in a local SQLite file (<span className="font-mono">.data/app.db</span>)
             on the server running this site — not in your own Supabase project.
             When <span className="font-mono">SUPABASE_SERVICE_ROLE_KEY</span> is
             set, the same records are written to the operator&apos;s Supabase

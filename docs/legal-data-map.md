@@ -70,7 +70,7 @@ access logs are outside this application and follow the host's own policy.
 
 ## 3. Storage location
 
-- **No `SUPABASE_SERVICE_ROLE_KEY`** → local SQLite `.data/shipkit.db` on the
+- **No `SUPABASE_SERVICE_ROLE_KEY`** → local SQLite `.data/app.db` on the
   site's own server (not the buyer's project).
 - **With service-role key** → the operator's Supabase project + migrations
   `0001`–`0011`. Migration `0011` adds the delivery / governance tables and

@@ -62,7 +62,7 @@ export async function POST(req: Request) {
         licenseUrl: "/license",
         // A Care subscription re-opens the update window for an expired Buyout.
         careUrl: updatesExpired ? "/pricing#care" : undefined,
-        // A free, source-free preview is always offered next to the paywall.
+        // A free skeleton preview is always offered next to the paywall.
         previewAvailable: true,
         previewUrl: "/api/generate/preview",
         previewRemaining:
@@ -132,10 +132,10 @@ export async function POST(req: Request) {
       status: 200,
       headers: {
         "Content-Type": "application/zip",
-        "Content-Disposition": `attachment; filename="${slug}-shipkit.zip"`,
+        "Content-Disposition": `attachment; filename="${slug}-make1day-template.zip"`,
         "Cache-Control": "no-store",
         // Never leak the key; this header is only for debugging/telemetry.
-        "X-ShipKit-Entitlement": entitlement.reason,
+        "X-App-Entitlement": entitlement.reason,
       },
     });
   } catch (err) {

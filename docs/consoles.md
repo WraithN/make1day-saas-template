@@ -70,7 +70,7 @@
   `plan`、`amount numeric(12,2)`、`currency`、`status`、`created_at`。
 - 写入：webhook 落地后由 `app/api/webhook/route.ts` 调 `recordOrder()`，按
   `provider + provider_order_id` **幂等 upsert**；Supabase 不可用时回退到本地
-  SQLite 库（`.data/shipkit.db`，`node:sqlite` 内置模块，无需原生依赖）。
+  SQLite 库（`.data/app.db`，`node:sqlite` 内置模块，无需原生依赖）。
 - 读取：`listOrders()` 取最近 100 条给 `/admin/orders`。
 
 四种支付商（Stripe / Creem / PayPal / Waffo）的 `verifyWebhook` 在归一化事件
@@ -123,7 +123,7 @@
 - **统计 durable**：`lib/stats.ts` 在配置 `SUPABASE_SERVICE_ROLE_KEY` 时把
   pageview 计数写入 `pageviews` 表（原子自增 RPC `increment_pageview`，
   `supabase/migrations/0006_observability.sql`），serverless / 多实例下不再丢失；
-  未配置时回退到本地 SQLite 库（`.data/shipkit.db`，仅本地开发，非持久）。
+  未配置时回退到本地 SQLite 库（`.data/app.db`，仅本地开发，非持久）。
 - **会话级事件**：`lib/traffic.ts` 记录 `view / cta / checkout / conversion`
   四类事件，带访客与会话 id（30 分钟无活动断新会话），据此算出跳出率、CTR、
   转化率与嵌套漏斗。访客 id 是不透明随机 token（HttpOnly first-party cookie），
@@ -140,7 +140,7 @@
 | 部署形态 | 用户目录来源 | 角色来源 | 角色可写 |
 |---|---|---|---|
 | 配了 `SUPABASE_SERVICE_ROLE_KEY` | Supabase Auth 完整列表 | Supabase `profiles` 表 | 是（service role 直写，绕过 RLS） |
-| 未配置（本地开发 / 自托管） | 本地 SQLite `profiles` 表 + 已签发授权 + 订单 + 运营者账号 | 本地 SQLite `profiles` 表 | **是**（真实写入 `.data/shipkit.db`） |
+| 未配置（本地开发 / 自托管） | 本地 SQLite `profiles` 表 + 已签发授权 + 订单 + 运营者账号 | 本地 SQLite `profiles` 表 | **是**（真实写入 `.data/app.db`） |
 
 实现要点：
 
@@ -227,7 +227,7 @@ SUPABASE_SERVICE_ROLE_KEY=<service role>        # 配了它：用户目录与角
 ```
 
 未配置 `SUPABASE_SERVICE_ROLE_KEY` 时，后台照常可用：账户与角色存在本地
-`.data/shipkit.db`（`profiles` 表），角色列可正常修改。配置该变量后，后台会
+`.data/app.db`（`profiles` 表），角色列可正常修改。配置该变量后，后台会
 **自动切换**到 Supabase Auth + `profiles` 表，业务代码无需改动；切换前用
 `npm run export:profiles` 把本地角色导出即可。
 

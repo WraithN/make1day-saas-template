@@ -82,7 +82,7 @@ type SkillInfo = {
 };
 
 export interface AiDocSpec {
-  generator: "shipkit-ai-docs";
+  generator: "app-ai-docs";
   version: 1;
   appName: string;
   slug: string;
@@ -100,7 +100,7 @@ export interface AiDocSpec {
   /**
    * FULL catalogue of every option, not just the selected ones. The downloaded
    * project's `npm run ai:docs` uses this to re-derive labels and the style
-   * after the user edits shipkit.config.json — no TS/Next runtime needed.
+   * after the user edits app-template.config.json — no TS/Next runtime needed.
    */
   catalog: {
     auth: { id: string; label: string }[];
@@ -160,7 +160,7 @@ export function buildAiDocSpec(c: BuilderConfig): AiDocSpec {
     ids.map((id) => pick(arr, id)).filter((x): x is T => !!x);
 
   return {
-    generator: "shipkit-ai-docs",
+    generator: "app-ai-docs",
     version: 1,
     appName: c.appName.trim() || "My SaaS",
     slug: slugify(c.appName),

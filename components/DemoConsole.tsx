@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useLanguage } from "@/lib/i18n";
 
 const STEPS: string[] = [
-  "$ shipkit new my-ai-saas",
+  "$ npm run dev",
   "  ✓ scaffolding Next.js 15 + TypeScript + Tailwind",
   "  ✓ wiring Supabase auth (email magic-link + OAuth)",
   "  ✓ adding Waffo checkout (Buyout + Care)",

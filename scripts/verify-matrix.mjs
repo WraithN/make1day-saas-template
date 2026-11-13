@@ -49,7 +49,7 @@ const c = (overrides) => ({ ...BASE, ...overrides });
 const ALL_SKILLS = [
   "frontend", "ui", "backend", "testing", "seo", "auth",
   "payments", "database", "rag", "i18n", "deploy", "agents",
-  "video", "workflow", "canvas", "compliance",
+  "video", "workflow", "canvas", "compliance", "setup", "grill",
 ];
 
 // 20 representative combinations: all 6 payment choices, all 16 styles,
@@ -201,6 +201,12 @@ const SKILL_FILES = {
   i18n: "skills/i18n.md",
   deploy: "skills/deploy.md",
   agents: "skills/agent-workflow.md",
+  video: "skills/video.md",
+  workflow: "skills/inngest-workflow.md",
+  canvas: "skills/pipeline-canvas.md",
+  compliance: "skills/payment-compliance.md",
+  setup: "skills/setup-env.md",
+  grill: "skills/grill-me.md",
 };
 const SITE_ONLY_FILES = [
   "app/api/payments/self-check/route.ts",
@@ -461,7 +467,7 @@ async function verifyCase(entry, doBuild) {
     "tsconfig.json",
     ".env.example",
     "README.md",
-    "shipkit.config.json",
+    "app-template.config.json",
     "design.md",
     "AGENTS.md",
     "CLAUDE.md",
@@ -570,10 +576,12 @@ async function verifyCase(entry, doBuild) {
     "ShipYourProduct", "Uncorne", "make1day",
     "Makerkit", "Supastarter", "ShipFast",
   ];
-  // These are wire-level identifiers, not branding — renaming them would
-  // break already-issued license keys and MCP client configs.
-  const KEEP_WIRE =
-    /X-ShipKit-Entitlement|shipkit\.config\.json|x-shipkit-license|shipkit\.db|SK1\./;
+  // Wire identifiers are now brand-neutral (app-template.config.json,
+  // x-app-license, X-App-Entitlement, app.db) - only the opaque SK1. key
+  // prefix remains, which is not a brand string. Anything spelling our
+  // legacy or product name is banned outright.
+  const KEEP_WIRE = /SK1\./;
+  const STRAY_BRANDS = /ShipKit|shipkit/i;
   const TEXT_FILE =
     /\.(ts|tsx|js|mjs|cjs|json|md|mdx|mdc|txt|css|scss|html|yml|yaml|toml|sql|py|sh)$/i;
   for (const rel of files) {
@@ -593,7 +601,7 @@ async function verifyCase(entry, doBuild) {
     }
     const stray = src
       .split("\n")
-      .filter((line) => line.includes("ShipKit") && !KEEP_WIRE.test(line));
+      .filter((line) => STRAY_BRANDS.test(line) && !KEEP_WIRE.test(line));
     assert(
       stray.length === 0,
       `legacy ShipKit string leaked into customer ${rel}`,
@@ -773,6 +781,15 @@ async function verifyCase(entry, doBuild) {
       `skill file mismatch: ${rel}`,
     );
   }
+  // Setup onboarding ships its two CLIs with the skill - and only then.
+  assert(
+    exists("scripts/setup-doctor.mjs") === config.skills.includes("setup"),
+    "setup-doctor must ship exactly when the setup skill is selected",
+  );
+  assert(
+    exists("scripts/setup-wizard.mjs") === config.skills.includes("setup"),
+    "setup-wizard must ship exactly when the setup skill is selected",
+  );
 
   // Generated docs must be real, and the manifest must reflect the picks.
   const design = await read("design.md");
@@ -814,7 +831,7 @@ async function verifyCase(entry, doBuild) {
   const docSpec = JSON.parse(await read("ai/doc-spec.json"));
   assert(docSpec.config?.style === config.style, "ai/doc-spec.json style mismatch");
   assert(docSpec.labels?.skills?.length === config.skills.length, "doc-spec skill count mismatch");
-  assert(docSpec.catalog?.skills?.length === 16, "doc-spec catalogue must contain all 16 skills");
+  assert(docSpec.catalog?.skills?.length === 18, "doc-spec catalogue must contain all 18 skills");
   assert(
     Object.keys(docSpec.catalog?.styles ?? {}).length === 16,
     "doc-spec catalogue must contain all 16 palettes",
@@ -825,7 +842,7 @@ async function verifyCase(entry, doBuild) {
     "skills/README.md was not regenerated for this build",
   );
 
-  const manifest = JSON.parse(await read("shipkit.config.json"));
+  const manifest = JSON.parse(await read("app-template.config.json"));
   // buildConfigJson wraps the selections under `config`.
   const picks = manifest.config ?? manifest;
   assert(picks.style === config.style, "manifest.config.style mismatch");

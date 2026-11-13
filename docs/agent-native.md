@@ -13,14 +13,14 @@ lib/generator/spec.ts          (TypeScript：从 BuilderConfig + PALETTES + 选�
 scripts/lib/ai-docs.mjs        (零依赖 ESM：唯一的文档渲染器，buildDocSet(spec))
         │
         ├──► lib/generator/pack.ts  → 打包时把 buildDocSet() 的结果写进 ZIP
-        └──► scripts/ai-docs.mjs   → 客户工程内读 shipkit.config.json（主源）
+        └──► scripts/ai-docs.mjs   → 客户工程内读 app-template.config.json（主源）
                                      + ai/doc-spec.json（目录），写回同样的文件
              scripts/ai-setup.mjs  → 只刷新 .cursor/rules/* 与 CLAUDE.md
 ```
 
 `ai/doc-spec.json` 随 ZIP 一起交付，包含 `config` 缓存、**全 12 个 skill 的元数据**、
 **全 11 套风格**（10 套 palette + Doodle 手绘主题，各自含 token/HEX/radius/texture）、字体栈和全部选项 label。
-`shipkit.config.json` 是**选项的主源**：`ai-docs` / `ai-setup` 每次运行都先读它，
+`app-template.config.json` 是**选项的主源**：`ai-docs` / `ai-setup` 每次运行都先读它，
 再用 catalog 重新派生 labels 与 style（`deriveSpec()`），因此改 manifest 才会真正改文档。
 **不要手改输出文件。**
 
@@ -56,7 +56,7 @@ Windows/macOS 默认文件系统大小写不敏感，同时保留两个名字会
 ## 4. 配置变更后一键重建
 
 ```bash
-# 修改 shipkit.config.json 或 ai/doc-spec.json
+# 修改 app-template.config.json 或 ai/doc-spec.json
 npm run ai:docs     # 重建全部文档 + 顺带刷新工具集成
 npm run ai:setup    # 只刷新 .cursor/rules 与 CLAUDE.md
 npm run ai:setup -- --tool cursor

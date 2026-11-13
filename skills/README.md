@@ -22,4 +22,4 @@ rules that point at these playbooks.
 
 > Only the skills selected in the Builder are copied into a generated project,
 > and this index is regenerated to list exactly those. Run `npm run ai:docs`
-> after changing `shipkit.config.json`.
+> after changing `app-template.config.json`.

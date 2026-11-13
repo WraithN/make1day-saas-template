@@ -52,7 +52,7 @@ jobs:
           NEXT_TELEMETRY_DISABLED: "1"
         run: |
           set -euo pipefail
-          npx next dev -p 3000 > /tmp/shipkit-dev.log 2>&1 &
+          npx next dev -p 3000 > /tmp/make1day-dev.log 2>&1 &
           DEV_PID=$!
           trap 'kill "$DEV_PID" 2>/dev/null || true' EXIT
           ready=0
@@ -63,19 +63,19 @@ jobs:
             fi
             if ! kill -0 "$DEV_PID" 2>/dev/null; then
               echo "dev server exited early"
-              cat /tmp/shipkit-dev.log
+              cat /tmp/make1day-dev.log
               exit 1
             fi
             sleep 2
           done
           if [ "$ready" -ne 1 ]; then
             echo "dev server did not become ready"
-            cat /tmp/shipkit-dev.log
+            cat /tmp/make1day-dev.log
             exit 1
           fi
           node scripts/verify-matrix.mjs --case "${{ matrix.case }}" --base http://127.0.0.1:3000 || {
             echo "── dev server log (tail) ──"
-            tail -n 120 /tmp/shipkit-dev.log || true
+            tail -n 120 /tmp/make1day-dev.log || true
             echo "── runtime versions ──"
             node --version; npm --version
             node node_modules/typescript/bin/tsc --version || true
