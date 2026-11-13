@@ -163,7 +163,7 @@ the selected skills/*.md playbooks and the three offline ai-*.mjs scripts.
 
 One renderer, one spec, zero drift:
   lib/generator/spec.ts -> ai/doc-spec.json (config cache + FULL catalogue of
-  13 skills and 11 palettes) -> scripts/lib/ai-docs.mjs (deriveSpec +
+  16 skills and 11 palettes) -> scripts/lib/ai-docs.mjs (deriveSpec +
   buildDocSet) -> pack.ts (site) AND scripts/ai-docs.mjs (customer project).
   shipkit.config.json is the SOURCE OF TRUTH: both CLIs re-read it on every
   run and re-derive labels + style from the catalogue, so editing selections
@@ -398,10 +398,10 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
 - Static preflight: "node scripts/waffo-preflight.mjs --strict" (no network,
   never prints secrets). Live readiness: GET /api/payments/self-check.
 - Generated-template CI: .github/workflows/generated-matrix.yml + 
-  "node scripts/verify-matrix.mjs --all". 19 cases cover all 6 gateways, all
+  "node scripts/verify-matrix.mjs --all". 20 cases cover all 6 gateways, all
   11 styles, all 3 deploy targets, RAG/dashboard/skills on-off, AND both
   consoles on / off / each alone; each case downloads a real ZIP, asserts
-  AGENTS.md / scoped rules / Cursor rules / CLAUDE.md / 13 skills / ai:docs
+  AGENTS.md / scoped rules / Cursor rules / CLAUDE.md / 16 skills / ai:docs
   scripts / console pruning / no dead console links, then runs tsc --noEmit
   inside the extracted project.
 - Supabase migrations: 0001_init.sql, 0002_rag.sql, 0003_licenses.sql,
@@ -492,7 +492,7 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
   login. Supabase Auth remains the recommended production path.
 - These three areas are make1day.dev-site-only (pruned from every customer ZIP), so
   the downloaded starter has no built-in support form, password-reset page or
-  transactional mail of its own. The 18-case build matrix is unchanged: no new
+  transactional mail of its own. The 20-case build matrix is unchanged: no new
   cases and no new required-file assertions were needed; the new site-only
   paths are asserted ABSENT by scripts/verify-matrix.mjs instead.
 
@@ -502,9 +502,9 @@ Compared with ShipFast (~$199), Divjoy (~$199), VibeReady ($149-399),
 Makerkit (~$299), Supastarter ($299-1,499) and Open SaaS ($0): make1day.dev is the
 only one in this set that BOTH prunes unselected modules out of the downloaded
 source AND generates a root AGENTS.md, a style-specific design.md, scoped rules
-and 13 skills — all rebuildable with npm run ai:docs — at a $249 regular price,
+and 16 skills — all rebuildable with npm run ai:docs — at a $249 regular price,
 with llms.txt/llms-full.txt, an OpenAPI 3.1 contract, an MCP scaffold_project
-tool, selectable user/admin consoles and a public 18-case build matrix.
+tool, selectable user/admin consoles and a public 20-case build matrix.
 Deep B2B multi-tenancy/IaC remains the stronger choice at Makerkit,
 Supastarter or VibeReady. Full reasoning: docs/competitive-analysis.md.
 `;

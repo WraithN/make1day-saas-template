@@ -32,7 +32,8 @@ export default async function HomePage() {
   // Same ladder as /pricing: the buy button charges the effective price and
   // the struck anchor is the regular price while the BF window runs.
   const bf = bfActive();
-  const buyoutPrice = effectivePrice("buyout");
+  const buyoutPrice = effectivePrice("buyout", "core");
+  const studioPrice = effectivePrice("buyout", "studio");
   const carePrice = effectivePrice("care");
 
   // Pricing on the home page reuses the same plan data as /pricing, but with
@@ -52,7 +53,7 @@ export default async function HomePage() {
     },
     {
       id: "buyout",
-      name: "Buyout",
+      name: "Buyout Core",
       price: `$${buyoutPrice}`,
       originalPrice: bf ? `$${PRICES.buyout.regular}` : `$${PRICES.buyout.list}`,
       launch: true,
@@ -63,9 +64,30 @@ export default async function HomePage() {
         "pricing.buyout.f2",
         "pricing.buyout.f3",
         "pricing.buyout.f4",
+        "pricing.buyout.f5",
+        "pricing.buyout.f6",
       ],
       ctaKey: "pricing.buyLicense",
-      priceId: priceForPlan("buyout") || null,
+      priceId: priceForPlan("buyout", "core") || null,
+    },
+    {
+      id: "studio",
+      pkg: "studio",
+      name: "Buyout Studio",
+      price: `$${studioPrice}`,
+      originalPrice: bf ? `$${PRICES.buyout.regular + 100}` : undefined,
+      bf,
+      period: "",
+      once: true,
+      features: [
+        "pricing.studio.f1",
+        "pricing.studio.f2",
+        "pricing.studio.f3",
+        "pricing.studio.f4",
+        "pricing.studio.f5",
+      ],
+      ctaKey: "pricing.buyLicense",
+      priceId: priceForPlan("buyout", "studio") || null,
       highlight: true,
     },
     {
@@ -81,7 +103,6 @@ export default async function HomePage() {
         "pricing.care.f3",
         "pricing.care.f4",
         "pricing.care.f5",
-        "pricing.care.f6",
       ],
       ctaKey: "pricing.subscribe",
       priceId: priceForPlan("care") || null,

@@ -36,6 +36,8 @@ export const compareContent: Record<
     },
     rows: [
       { feature: "One-time price", shipkit: "$249 one-time", shipfast: "~$199–249", makerkit: "$299–599", supastarter: "$299–1,499" },
+      { feature: "Payment compliance", shipkit: "per-gateway machine-readable contract + npm run compliance:check", shipfast: "—", makerkit: "—", supastarter: "—" },
+      { feature: "Durable AI pipelines", shipkit: "Inngest steps + admin canvas", shipfast: "—", makerkit: "—", supastarter: "—" },
       { feature: "Ongoing plan", shipkit: "12 mo free updates + optional $9/mo Care", shipfast: "None (lifetime updates)", makerkit: "Tiered licenses", supastarter: "All-access upgrade" },
       { feature: "Framework", shipkit: "Next.js 15 App Router", shipfast: "Next.js", makerkit: "Next.js (monorepo)", supastarter: "Next.js / Nuxt" },
       { feature: "Auth", shipkit: "Email + OAuth (Google/GitHub/Apple/Microsoft)", shipfast: "Google + magic link", makerkit: "Deep RBAC", supastarter: "Multiple providers" },
@@ -73,6 +75,8 @@ export const compareContent: Record<
     },
     rows: [
       { feature: "一次性价格", shipkit: "$249 一次性", shipfast: "约 $199–249", makerkit: "$299–599", supastarter: "$299–1,499" },
+      { feature: "支付合规", shipkit: "各网关机器可读契约 + npm run compliance:check", shipfast: "—", makerkit: "—", supastarter: "—" },
+      { feature: "耐用 AI 管线", shipkit: "Inngest 步骤 + 管理画布", shipfast: "—", makerkit: "—", supastarter: "—" },
       { feature: "持续服务", shipkit: "12 个月免费更新 + 可选 $9/月 Care", shipfast: "无（终身更新）", makerkit: "分级授权", supastarter: "全通升级" },
       { feature: "框架", shipkit: "Next.js 15 App Router", shipfast: "Next.js", makerkit: "Next.js（monorepo）", supastarter: "Next.js / Nuxt" },
       { feature: "登录", shipkit: "邮箱 + OAuth（Google/GitHub/Apple/Microsoft）", shipfast: "Google + magic link", makerkit: "深度 RBAC", supastarter: "多供应商" },

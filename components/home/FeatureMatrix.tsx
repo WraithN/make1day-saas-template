@@ -9,6 +9,8 @@ const LEADS: { i: number; tone: string }[] = [
   { i: 2, tone: "card-cream" },
   { i: 3, tone: "card-pink" },
   { i: 4, tone: "" },
+  { i: 5, tone: "card-mint" },
+  { i: 6, tone: "card-cream" },
 ];
 
 export function FeatureMatrix({ lang }: { lang: Lang }) {
