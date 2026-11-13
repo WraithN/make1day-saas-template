@@ -694,16 +694,18 @@ export function buildAiIndex(selected: AiProvider[]): string {
   }`);
   }
   if (openaiSel) {
-    modelBranches.push(`  // OpenAI itself gets the first-party provider; custom or
-  // compatible endpoints use the OpenAI-compatible provider instead.
-  if (key === "openai" && cfg.baseURL === "https://api.openai.com/v1") {
-    return createOpenAI({ apiKey: cfg.apiKey }).chat(cfg.model);
-  }
-  return createOpenAICompatible({
-    name: key,
-    baseURL: cfg.baseURL,
-    apiKey: cfg.apiKey,
-  })(cfg.model);`);
+    modelBranches.push(`  if (cfg.kind === "openai-compatible") {
+    // OpenAI itself gets the first-party provider; custom or compatible
+    // endpoints use the OpenAI-compatible provider instead.
+    if (key === "openai" && cfg.baseURL === "https://api.openai.com/v1") {
+      return createOpenAI({ apiKey: cfg.apiKey }).chat(cfg.model);
+    }
+    return createOpenAICompatible({
+      name: key,
+      baseURL: cfg.baseURL,
+      apiKey: cfg.apiKey,
+    })(cfg.model);
+  }`);
   }
 
   return imports.join("\n") + `
