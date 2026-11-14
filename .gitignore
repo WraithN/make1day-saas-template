@@ -42,3 +42,7 @@ next-env.d.ts
 # operator memory + supabase CLI cache
 .workbuddy/
 supabase/.temp/
+
+# playwright
+playwright-report/
+test-results/

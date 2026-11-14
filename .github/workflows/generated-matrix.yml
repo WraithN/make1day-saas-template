@@ -91,3 +91,20 @@ jobs:
             node node_modules/typescript/bin/tsc --noEmit -p ".matrix-out/${{ matrix.case }}/tsconfig.json" --traceResolution 2>&1 | grep -E "Resolving module '(@supabase/ssr|cookie)'|Module name '(@supabase/ssr|cookie)' was" | head -40 || true
             exit 1
           }
+
+  e2e:
+    name: E2E (login + checkout + AI)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Playwright E2E (runner's preinstalled Chrome, no download)
+        env:
+          E2E_CHANNEL: chrome
+        run: npx playwright test

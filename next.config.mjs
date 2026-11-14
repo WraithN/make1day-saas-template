@@ -34,6 +34,10 @@ const repoRoot = fileURLToPath(new URL(".", import.meta.url));
 
 const nextConfig = {
   reactStrictMode: true,
+  // E2E (Playwright) and dev probes reach the dev server over 127.0.0.1 while
+  // Next serves its _next/* assets on the canonical origin; allow both so the
+  // dev-mode cross-origin warning does not fire.
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   // Pin the tracing root to this repo: Next's auto-detection can pick an
   // ancestor directory when stray lockfiles exist above the project (it then
   // traces the whole home directory and dev compilation stalls).

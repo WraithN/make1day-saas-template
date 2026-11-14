@@ -89,7 +89,7 @@ export function ChatDemo() {
   return (
     <div className="card">
       <div className="eyebrow mb-2">{t("chatDemo.eyebrow")}</div>
-      <div className="min-h-[120px] rounded-lg border border-line bg-bg p-3 text-sm text-ink-soft">
+      <div className="min-h-[120px] rounded-lg border border-line bg-bg p-3 text-sm text-ink-soft" data-testid="ai-reply">
         {reply ? (
           <span className="whitespace-pre-wrap text-ink">{reply}</span>
         ) : (
@@ -113,12 +113,13 @@ export function ChatDemo() {
         </select>
         <input
           className="input flex-1"
+          data-testid="ai-input"
           placeholder={t("chatDemo.placeholder")}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && send()}
         />
-        <button className="btn-solid" onClick={send} disabled={busy}>
+        <button className="btn-solid" onClick={send} disabled={busy} data-testid="ai-send">
           {busy ? "…" : t("chatDemo.send")}
         </button>
       </div>

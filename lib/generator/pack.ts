@@ -252,6 +252,9 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
       "rag:bench",
       // setup skills re-add these conditionally; never leave a dead alias.
       "launch:check",
+      // E2E is a build-time concern: playwright is not a customer dependency.
+      "test:e2e",
+      "test:e2e:headed",
     ];
     const scripts = (pkg.scripts as Record<string, string> | undefined) ?? {};
     const next = { ...scripts };
