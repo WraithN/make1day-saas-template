@@ -88,10 +88,12 @@ async function meter(key: string, cfg: ProviderConfig, usage: SdkUsage, outChars
 export async function chat(providerKey: string, messages: ChatMessage[]): Promise<string> {
   const { key, cfg } = await effective(providerKey);
   if (!cfg.apiKey) return "\n[AI error] No API key configured for this provider.";
+  const { instructions, rest } = splitChatMessages(messages);
   try {
     const result = await generateText({
       model: languageModel(key, cfg),
-      messages: messages as ModelMessage[],
+      ...(instructions ? { instructions } : {}),
+      messages: rest,
       temperature: 0.4,
     });
     await meter(key, cfg, result.usage as SdkUsage);
@@ -124,10 +126,30 @@ const NO_KEY_TEXT =
   "Until then the endpoint returns the built-in demo reply.";
 
 /**
+ * AI SDK v7 rejects system-role entries inside `messages`
+ * ("System messages are not allowed in the prompt or fields - use the
+ * instructions option instead"). Split once at the boundary so every caller
+ * can keep passing the classic [{system},{user},...] shape.
+ */
+function splitChatMessages(messages: ChatMessage[]): {
+  instructions: string;
+  rest: ModelMessage[];
+} {
+  const instructions = messages
+    .filter((m) => m.role === "system")
+    .map((m) => m.content)
+    .join("\n\n");
+  const rest = messages.filter((m) => m.role !== "system") as ModelMessage[];
+  return { instructions, rest };
+}
+
+/**
  * Real token streaming via the AI SDK: each `yield` is one incremental text
  * chunk. Errors are deliberately NOT swallowed — a provider that has a key
  * but fails (bad key, balance, timeout, unknown model) throws, so the caller
- * can log the real error instead of surfacing a fake friendly answer.
+ * can log the real error instead of surfacing a fake friendly answer. The v7
+ * stream swallows failures into an empty textStream by default, so onError
+ * is captured explicitly and re-thrown after the loop.
  */
 export async function* streamChatChunks(
   providerKey: string | undefined,
@@ -138,16 +160,28 @@ export async function* streamChatChunks(
     yield NO_KEY_TEXT;
     return;
   }
+  const { instructions, rest } = splitChatMessages(messages);
+  let streamError: Error | null = null;
   const result = streamText({
     model: languageModel(key, cfg),
-    messages: messages as ModelMessage[],
+    ...(instructions ? { instructions } : {}),
+    messages: rest,
     temperature: 0.4,
+    onError: (e) => {
+      // AI SDK v7 hands onError an { error } wrapper, not the Error itself.
+      const inner = (e as { error?: unknown })?.error ?? e;
+      streamError =
+        inner instanceof Error
+          ? inner
+          : new Error(String((inner as { message?: string })?.message ?? JSON.stringify(inner)));
+    },
   });
   let outChars = 0;
   for await (const delta of result.textStream) {
     outChars += delta.length;
     yield delta;
   }
+  if (streamError) throw streamError;
   // After the stream finishes the SDK resolves the usage it captured from
   // the provider's final chunk - exactly what the ledger needs.
   let usage: SdkUsage = null;

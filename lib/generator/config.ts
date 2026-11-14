@@ -261,7 +261,10 @@ export const SKILL_OPTIONS: { id: SkillId; label: string; note: string }[] = [
 export const DEFAULT_CONFIG: BuilderConfig = {
   appName: "my-saas",
   auth: ["google", "github"],
-  payment: ["creem"],
+  // Waffo Pancake is the product default MoR - mirrors env.ts's
+  // PAYMENT_PROVIDER default, .env.example, the pricing copy and
+  // docs/waffo.md. Creem/Stripe/PayPal/Lemon Squeezy are Builder choices.
+  payment: ["waffo"],
   ai: ["openai"],
   features: ["landing", "dashboard", "account", "admin", "premium"],
   deploy: "vercel",

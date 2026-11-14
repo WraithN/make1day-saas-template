@@ -49,7 +49,10 @@ node scripts/setup-wizard.mjs     # local 127.0.0.1 page to paste keys -> .env.l
    DASHBOARD → Authentication → Providers with the shared redirect URI
    `https://<ref>.supabase.co/auth/v1/callback` - they are NOT `.env.local`
    values; the wizard's OAuth tab lists where to create each client.
-4. **Verify.** `npm install`, then `npm run dev`, then hit
+4. **Verify.** `npm install`, then `npm run dev`, then `npm run launch:check`
+   (exit 0 required before any launch: it checks the baked site URL, gateway
+   completeness, test-vs-prod payment mode, Supabase persistence, admin
+   credentials, mail delivery, AI keys and placeholder branding) and finally
    `http://localhost:3000/api/payments/self-check` → `missing` must be empty
    for the selected gateway. Supabase: `npx supabase db push` after the URL
    keys are in. The build itself must stay green with NO secrets (lazy

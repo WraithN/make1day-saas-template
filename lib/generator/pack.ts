@@ -170,6 +170,7 @@ export async function listProjectFiles(
     ".env.example",
     "README.md",
     "app-template.config.json",
+    ".github/workflows/ci.yml",
     "app/globals.css",
     "lib/payments/index.ts",
   );
@@ -199,7 +200,7 @@ export async function listProjectFiles(
     files.push("docs/dpa-template.md");
   }
   if (config.skills.includes("setup")) {
-    files.push("scripts/setup-doctor.mjs", "scripts/setup-wizard.mjs");
+    files.push("scripts/setup-doctor.mjs", "scripts/setup-wizard.mjs", "scripts/launch-check.mjs");
   }
 
   return Array.from(new Set(files)).sort();
@@ -249,6 +250,8 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
       "smoke:ai:quota:supabase",
       "smoke:ai:stream",
       "rag:bench",
+      // setup skills re-add these conditionally; never leave a dead alias.
+      "launch:check",
     ];
     const scripts = (pkg.scripts as Record<string, string> | undefined) ?? {};
     const next = { ...scripts };
@@ -262,6 +265,7 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
     if (config.skills.includes("setup")) {
       next["setup:doctor"] = "node scripts/setup-doctor.mjs";
       next["setup:wizard"] = "node scripts/setup-wizard.mjs";
+      next["launch:check"] = "node scripts/launch-check.mjs";
     }
     if (config.skills.includes("workflow")) {
       next["inngest:dev"] = "npx -y inngest-cli@latest dev";
@@ -557,7 +561,40 @@ export async function buildProjectZip(config: BuilderConfig): Promise<Uint8Array
       "scripts/setup-wizard.mjs",
       await fs.readFile(path.join(root, "scripts/setup-wizard.mjs"), "utf8"),
     );
+    zip.file(
+      "scripts/launch-check.mjs",
+      await fs.readFile(path.join(root, "scripts/launch-check.mjs"), "utf8"),
+    );
   }
+
+  // Generated-project CI: the review said "template lacks CI/CD" - the fix
+  // belongs here, so every customer repo arrives with green-on-merge gates
+  // instead of discovering breakage in production. Brand-free by design.
+  const ci = [
+    "name: CI",
+    "",
+    "on:",
+    "  push:",
+    "    branches: [main]",
+    "  pull_request:",
+    "    branches: [main]",
+    "",
+    "jobs:",
+    "  checks:",
+    "    runs-on: ubuntu-latest",
+    "    steps:",
+    "      - uses: actions/checkout@v4",
+    "      - uses: actions/setup-node@v4",
+    "        with:",
+    "          node-version: 22",
+    "      - run: npm install --no-audit --no-fund",
+    "      - run: npm run typecheck",
+    "      - run: npm run build",
+    config.skills.includes("agents") ? "      - run: npm run agents:lint" : null,
+    config.skills.includes("compliance") ? "      - run: npm run compliance:check" : null,
+    "",
+  ].filter((l) => l !== null).join("\n");
+  zip.file(".github/workflows/ci.yml", ci);
 
   // Final white-label pass. Individual rewrites above cover the pages we
   // generate, but the ZIP also carries skills/*.md, agent docs, scripts and

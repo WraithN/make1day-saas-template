@@ -161,7 +161,7 @@ them to a customer:
   portal's id (customer vs subscription) and the exact status/event names are
   **需按你的 Lemon Squeezy 账户核对** — the adapter degrades to `null` when the
   portal URL cannot be fetched.
-- AI chat now streams token-by-token (OpenAI / Anthropic / Gemini) as incremental `text/plain` chunks and enforces a per-user daily quota (`AI_MESSAGES_PER_DAY`, default 50, HTTP 429 `ai_quota_exceeded` when exhausted). The 429 carries `resetAt` = next 00:00 UTC, an accurate `Retry-After` and `X-AI-Quota-*` headers. Provider errors are logged server-side instead of being disguised as a reply. RAG ingest/query require a signed-in user with an active subscription.
+- AI chat now streams token-by-token (OpenAI / Anthropic / Gemini) as NDJSON events (`{"type":"start"|"token"|"error"|"done"}`, header `X-AI-Protocol: ndjson-events-v1`) and enforces a per-user daily quota (`AI_MESSAGES_PER_DAY`, default 50, HTTP 429 `ai_quota_exceeded` when exhausted). The 429 carries `resetAt` = next 00:00 UTC, an accurate `Retry-After` and `X-AI-Quota-*` headers. A provider that fails before the first token ends the stream with a typed `provider_failed` error event and is NOT charged; provider errors are logged server-side, never disguised as a reply. RAG ingest/query require a signed-in user with an active subscription.
 - `/admin` and `/api/stats` are **closed by default** in production: if `ADMIN_USER` / `ADMIN_PASSWORD` are not set they return `503` (open only in dev, with a loud warning). Stats are durable in the `pageviews` table when a service role is configured, falling back to a local JSON file in dev.
 - Both consoles now support **profile mutation** (`/api/profile` PATCH), an **org/RBAC model** (`profiles.role` + `organizations`/`memberships` tables, `lib/org.ts`), and a **customer billing portal** (`/api/billing/portal`, real for Stripe/Creem; PayPal/Waffo fall back to a contact-support path). The operator user directory reads from Supabase Auth + the `profiles` table when `SUPABASE_SERVICE_ROLE_KEY` is set; without it, accounts and roles live in the local SQLite database (`.data/shipkit.db`) and the role column is really writable. `npm run export:profiles` moves the local roles across when you switch to Supabase.
 - Multi-tenancy is real but partial: `0007_orgs.sql` (organizations + memberships + RLS) and `lib/org.ts` helpers ship with every build, while the workspace UI (`/account/workspaces`, switcher) and `/api/org` routes ship ONLY when both `multitenancy` and `account` are selected. Run the migration yourself and add `.eq("org_id", ...)` to your own domain tables.
@@ -200,8 +200,8 @@ cp .env.example .env.local
 #   → Waffo Pancake go-live: cp .env.waffo-pancake.example .env.local
 #     then run: node scripts/waffo-preflight.mjs --strict
 
-# 4. set up the database (run supabase/migrations/0001_init.sql
-#    in the Supabase SQL editor, or `supabase db push`)
+# 4. set up the database (apply ALL migrations in order:
+#    npx supabase db push  -  or run every file in supabase/migrations/)
 
 # 5. run
 npm run dev
@@ -222,8 +222,13 @@ time, not at build time.
 2. Copy **Project URL** and **anon public key** into `NEXT_PUBLIC_SUPABASE_URL`
    and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 3. Copy the **service role key** into `SUPABASE_SERVICE_ROLE_KEY` (server-only).
-4. Run `supabase/migrations/0001_init.sql` in **SQL Editor** — it creates
-   `profiles`, `subscriptions`, RLS policies, and the signup trigger.
+4. Apply ALL migrations - `npx supabase db push` (recommended, tracks version)
+   or run every file in `supabase/migrations/` in numeric order. **0001_init.sql
+   alone is not enough**: the code depends on later migrations
+   (`0003` licenses, `0004` profiles+RBAC, `0005` orders, `0006` observability,
+   `0007` orgs, `0008` traffic, `0009` `consume_ai_usage`, `0011` delivery &
+   governance, `0012`-`0016` update-window/pkg/billing/workflows) - a missing
+   one fails late, inside a business request.
    The `subscriptions` table is **provider-agnostic**: it stores a `provider`
    column plus `provider_customer_id` / `provider_subscription_id`, so you can
    switch gateways without a schema change.

@@ -31,6 +31,7 @@ NEXT_PRIVATE_SUPPRESS_TRACE=1 npx next build
 LICENSE_GATE=off npx next start -p 3000   # matrix server, read-only .next
 node scripts/verify-matrix.mjs --all --base http://127.0.0.1:3000
 npm run smoke                              # licence gate + AI quota/stream runtime suites
+npm run launch:check                       # go-live gates (site URL, gateway, mail, branding)
 node scripts/waffo-preflight.mjs --strict
 npm run agents:lint                      # AGENTS.md / scoped rules / skills index contract
 ```
@@ -93,6 +94,7 @@ will 404 every route. Stop dev → delete `.next` → build → start.
 - [ ] clean `npx next build` (dev server stopped, `.next` removed)
 - [ ] `verify-matrix --all` passes (ZIP extracted + type-checked per case)
 - [ ] `npm run smoke` passes (paywall, preview quota, AI quota/stream, RAG auth)
+- [ ] `npm run launch:check` passes before any go-live claim (site URL baked, gateway complete & not test-mode against a real domain, mail sends, no placeholder branding)
 - [ ] if a payment adapter changed: `npm run probe:webhook -- --provider <id> --grant`
       plus one real sandbox checkout, and a completed payment creates exactly
       one `licenses` row (`docs/payment-testing.md`)

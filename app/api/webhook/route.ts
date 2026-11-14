@@ -106,26 +106,44 @@ export async function POST(req: Request) {
   });
 
   // Signature verification happens BEFORE any business logic (Waffo docs).
-  // A gateway only verifies its own signatures, so try each enabled provider
-  // until one accepts the payload; the rest throw and we move on.
+  // PAYMENT_PROVIDER is a dispatch list, not a suggestion: only adapters
+  // named there may claim an event. Trying every wired adapter would let a
+  // correctly-signed-but-unexpected gateway (e.g. an old Stripe secret still
+  // in the dashboard) provision licenses from a channel this site no longer
+  // operates - and makes "which protocol handled this?" unanswerable.
+  const allowed = env
+    .paymentProvider()
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  const candidates = providers.filter((candidate) =>
+    allowed.includes(candidate.name),
+  );
   let provider: PaymentProvider | undefined;
   let events: NormalizedSubEvent[] | undefined;
-  for (const candidate of providers) {
+  for (const candidate of candidates) {
     if (candidate.name === "none") continue;
     try {
       events = await candidate.verifyWebhook(rawBody, headers);
       provider = candidate;
       break;
     } catch {
-      // not this provider's payload — try the next enabled gateway
+      // not this provider's payload - the list may name several gateways
     }
   }
   if (!provider || !events) {
+    // 400 for anything the allowed gateways cannot verify: unsigned, wrongly
+    // signed, or signed by a provider this deployment does not dispatch to.
+    logger.warn("webhook rejected", {
+      allowed,
+      len: rawBody.length,
+    });
     return NextResponse.json(
       { error: "Webhook verification failed" },
       { status: 400 },
     );
   }
+  logger.info("webhook accepted", { provider: provider.name, events: events.length });
 
   const okBody = () =>
     env.waffoFlavor() === "acquiring" && provider!.name === "waffo"

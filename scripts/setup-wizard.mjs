@@ -511,7 +511,7 @@ function render(L) {
  <form id="f">${cards.join("\n")}
  <div class="actions"><button type="button" class="save" onclick="save()">${T("save")}</button><span class="done" id="done"></span></div></form>
  <details><summary>${T("advanced")} ${advancedVars.length} ${T("advancedTail")}</summary>${advFields}</details>
- <p class="privacy">${T("nextSteps")} <code>npm run dev</code> · ${T("webhookNote")}</p>
+ <p class="privacy">${T("nextSteps")} <code>npm run dev</code> · <code>npm run launch:check</code> · ${T("webhookNote")}</p>
 </main>
 <script>
 const L=${JSON.stringify(L)};

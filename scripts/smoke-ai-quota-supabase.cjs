@@ -236,8 +236,8 @@ async function main() {
   check("call 3 is refused (429)", r3.status === 429, `status=${r3.status}`);
 
   check(
-    "the Supabase RPC was used (not the local fallback)",
-    rpcCalls === 3,
+    "the Supabase RPC was used for the two GENERATED replies (429 refusal is a read-only pre-check that must not reach the RPC)",
+    rpcCalls === 2,
     `rpcCalls=${rpcCalls} payloads=${JSON.stringify(rpcPayloads)}`,
   );
   check(

@@ -7,17 +7,12 @@ import { adminClosedResponse } from "@/lib/admin-guard";
 import { assertSameOrigin, isServerToServerApi } from "@/lib/csrf";
 import { verifyAdminSession } from "@/lib/admin-cookie-sig";
 
+import { adminEmails, productId, publicSiteUrl, showAiSurfaces, showVideoStudio, supabaseAnonKey, supabaseUrl } from "@/lib/config/edge";
+
 const LANGS = ["en", "zh", "ja", "fr", "de"];
 /** Non-English locales get a URL path prefix (/zh/pricing). EN is the
  *  bare path, so it never grows a second homepage. */
 const LOCALE_PREFIXES = ["zh", "ja", "fr", "de"];
-
-function adminAllowlist(): string[] {
-  return (process.env.ADMIN_EMAILS ?? "")
-    .split(",")
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -27,7 +22,7 @@ export async function middleware(request: NextRequest) {
   // once a custom domain is live. While SITE_URL still equals the vercel.app
   // host (pre-switch) nothing redirects, so preview URLs keep working.
   if (process.env.NODE_ENV === "production") {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+    const siteUrl = publicSiteUrl();
     const canonHost = siteUrl ? new URL(siteUrl).host : "";
     const host = request.headers.get("host") ?? "";
     const apex = canonHost.replace(/^www\./, "");
@@ -92,7 +87,7 @@ export async function middleware(request: NextRequest) {
   // on the selling site as disqualifying). Customer builds ship this same
   // middleware with SHOW_VIDEO_STUDIO unset (= visible).
   if (
-    (process.env.SHOW_VIDEO_STUDIO ?? "true").toLowerCase() === "false" &&
+    !showVideoStudio() &&
     (logicalPath === "/video" || logicalPath.startsWith("/video/"))
   ) {
     return NextResponse.rewrite(new URL("/_not-found", request.url), {
@@ -105,7 +100,7 @@ export async function middleware(request: NextRequest) {
   // moderation gate compiled in) but operates none of them itself, so no
   // visitor-facing generation endpoint exists on the selling site.
   if (
-    (process.env.SHOW_AI_SURFACES ?? "true").toLowerCase() === "false" &&
+    !showAiSurfaces() &&
     (logicalPath === "/rag" ||
       logicalPath.startsWith("/rag/") ||
       logicalPath === "/api/ai" ||
@@ -231,8 +226,8 @@ export async function middleware(request: NextRequest) {
     return withLangCookie(forward());
   }
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const url = supabaseUrl();
+  const anon = supabaseAnonKey();
 
   // If Supabase isn't configured yet, use the LOCAL password session (or the
   // development demo cookie) instead of leaving the user console wide open.
@@ -247,8 +242,8 @@ export async function middleware(request: NextRequest) {
   let response = forward();
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    anon,
     {
       cookies: {
         getAll() {
@@ -292,13 +287,13 @@ export async function middleware(request: NextRequest) {
         .from("profiles")
         .select("role")
         .eq("id", user.id)
-        .eq("product", process.env.PRODUCT_ID?.trim() || "default")
+        .eq("product", productId())
         .maybeSingle();
       isAdminByRole = data?.role === "admin" || data?.role === "staff";
     } catch {
       // profiles table / role column not yet migrated — fall back to seed.
     }
-    const isAdminBySeed = adminAllowlist().includes(
+    const isAdminBySeed = adminEmails().includes(
       (user.email ?? "").toLowerCase(),
     );
     if (!isAdminByRole && !isAdminBySeed) {

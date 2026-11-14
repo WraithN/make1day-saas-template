@@ -6,8 +6,9 @@
  *
  *   1. the reply arrives in SEVERAL chunks over time (not one buffered blob)
  *   2. the chunks concatenate into the exact upstream text
- *   3. an upstream HTTP 401 is surfaced as "[AI provider error]" and the
- *      provider's internal message is NOT leaked to the browser
+ *   3. an upstream HTTP 401 ends the NDJSON stream with a provider_failed
+ *      error event, no token text (and no quota charge), and the provider's
+ *      internal message is NOT leaked to the browser
  *   4. the real upstream error IS written to the server log
  *
  * Usage: node scripts/smoke-ai-stream.cjs
@@ -74,7 +75,9 @@ const fake = http.createServer((req, res) => {
         setTimeout(tick, 110);
         return;
       }
-      res.write(frame({}));
+      // terminator frame: delta omitted, finish_reason "stop" (the SDK
+      // rejects a stream that ends without an explicit finish reason)
+      res.write(frame(null));
       res.write("data: [DONE]\n\n");
       res.end();
     };
@@ -150,7 +153,7 @@ async function readStream(message) {
   });
   const chunks = [];
   const times = [];
-  if (!res.body) return { status: res.status, chunks, times, text: "" };
+  if (!res.body) return { status: res.status, chunks, times, raw: "", text: "", events: [] };
   const reader = res.body.getReader();
   const dec = new TextDecoder();
   for (;;) {
@@ -159,11 +162,30 @@ async function readStream(message) {
     times.push(Date.now());
     chunks.push(dec.decode(value, { stream: true }));
   }
+  const raw = chunks.join("") + dec.decode();
+  // NDJSON events from /api/ai (protocol v1): parse into token text + events.
+  const events = raw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((l) => {
+      try {
+        return JSON.parse(l);
+      } catch {
+        return { type: "unparsed", raw: l };
+      }
+    });
+  const text = events
+    .filter((e) => e.type === "token")
+    .map((e) => e.text)
+    .join("");
   return {
     status: res.status,
     chunks,
     times,
-    text: chunks.join("") + dec.decode(),
+    raw,
+    text,
+    events,
   };
 }
 
@@ -197,9 +219,16 @@ async function main() {
       `spread=${spread}ms`,
     );
     check(
-      "chunks concatenate into the exact upstream text",
+      "token events concatenate into the exact upstream text",
       ok.text === TOKENS.join(""),
       JSON.stringify(ok.text),
+    );
+    check(
+      "stream is typed NDJSON with a clean done event",
+      ok.events.some((e) => e.type === "start") &&
+        ok.events.some((e) => e.type === "token") &&
+        ok.events.some((e) => e.type === "done"),
+      ok.events.map((e) => e.type).join(","),
     );
     check(
       "no demo/mock reply leaks into a configured-provider response",
@@ -210,14 +239,19 @@ async function main() {
     const bad = await readStream("TRIGGER_UPSTREAM_FAILURE");
     check("upstream failure still returns 200 stream", bad.status === 200, `status=${bad.status}`);
     check(
-      "upstream failure is surfaced as an AI provider error",
-      bad.text.includes("[AI provider error]"),
+      "upstream failure surfaces as a typed provider_failed error event (not prose)",
+      bad.events.some((e) => e.type === "error" && e.code === "provider_failed"),
+      bad.events.map((e) => e.type + (e.code ? ":" + e.code : "")).join(","),
+    );
+    check(
+      "a failed provider emits NO token text (error is machine-detectable, not disguised as an answer)",
+      bad.text === "",
       JSON.stringify(bad.text),
     );
     check(
       "provider internals are not leaked to the browser",
-      !bad.text.includes(SECRET_PROVIDER_ERROR),
-      JSON.stringify(bad.text),
+      !bad.raw.includes(SECRET_PROVIDER_ERROR),
+      JSON.stringify(bad.raw.slice(0, 200)),
     );
     check(
       "upstream was actually called twice",

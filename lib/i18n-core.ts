@@ -451,6 +451,8 @@ export const dict: Record<Lang, Record<string, string>> = {
     "chatDemo.eyebrow": "LIVE AI DEMO",
     "chatDemo.hint":
       "Ask the make1day.dev assistant anything about shipping your SaaS…",
+      "chatDemo.errProvider": "The AI provider could not finish this request - no quota was used. Try again.",
+      "chatDemo.errGeneric": "The AI reply could not be completed. Try again.",
     "chatDemo.placeholder": "e.g. What should I build first for an AI CRM?",
     "chatDemo.send": "Send",
 
@@ -976,6 +978,8 @@ export const dict: Record<Lang, Record<string, string>> = {
 
     "chatDemo.eyebrow": "AI 实时演示",
     "chatDemo.hint": "向 make1day.dev 助手提问任何关于交付 SaaS 的问题…",
+    "chatDemo.errProvider": "模型这次没能完成回复——本次未消耗额度，请重试。",
+    "chatDemo.errGeneric": "AI 回复未能完成，请重试。",
     "chatDemo.placeholder": "例如：做 AI CRM 应该先搭什么？",
     "chatDemo.send": "发送",
 
@@ -1481,6 +1485,8 @@ export const dict: Record<Lang, Record<string, string>> = {
 
     "chatDemo.eyebrow": "AI ライブデモ",
     "chatDemo.hint": "make1day.dev アシスタントに SaaS 構築について何でも質問を。",
+    "chatDemo.errProvider": "AIプロバイダーが処理を完了できませんでした - クォータは消費されていません。もう一度お試しください。",
+    "chatDemo.errGeneric": "AI応答を完了できませんでした。もう一度お試しください。",
     "chatDemo.placeholder": "例：AI CRM ならまず何を作るべき？",
     "chatDemo.send": "送信",
 
@@ -1962,6 +1968,8 @@ export const dict: Record<Lang, Record<string, string>> = {
 
     "chatDemo.eyebrow": "DÉMO IA EN DIRECT",
     "chatDemo.hint": "Posez à l'assistant make1day.dev toute question sur votre SaaS…",
+    "chatDemo.errProvider": "Le fournisseur IA n'a pas pu terminer - aucun quota consommé. Réessayez.",
+    "chatDemo.errGeneric": "La réponse IA n'a pas pu aboutir. Réessayez.",
     "chatDemo.placeholder": "ex : que construire d'abord pour un CRM IA ?",
     "chatDemo.send": "Envoyer",
 
@@ -2456,6 +2464,8 @@ export const dict: Record<Lang, Record<string, string>> = {
 
     "chatDemo.eyebrow": "LIVE-KI-DEMO",
     "chatDemo.hint": "Stellen Sie dem make1day.dev-Assistenten beliebige Fragen zum Launch Ihres SaaS…",
+    "chatDemo.errProvider": "Der AI-Anbieter konnte die Anfrage nicht abschließen - kein Quota verbraucht. Bitte erneut versuchen.",
+    "chatDemo.errGeneric": "Die AI-Antwort konnte nicht abgeschlossen werden. Bitte erneut versuchen.",
     "chatDemo.placeholder": "z. B. Was sollte ich zuerst für ein AI-CRM bauen?",
     "chatDemo.send": "Senden",
 

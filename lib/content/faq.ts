@@ -58,7 +58,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "Which AI providers are supported?",
-        a: "Three families, all streaming:\n\n- **OpenAI-compatible:** OpenAI, OpenRouter, DeepSeek, Groq\n- **Anthropic:** Claude\n- **Google:** Gemini\n\n`/api/ai` streams token-by-token as incremental `text/plain` from all three, and enforces a per-user daily quota (`AI_MESSAGES_PER_DAY`, default 50). Exhausted budgets get HTTP 429 with a truthful `Retry-After`.\n\nProvider errors are logged server-side instead of being disguised as a successful reply.",
+        a: "Three families, all streaming:\n\n- **OpenAI-compatible:** OpenAI, OpenRouter, DeepSeek, Groq\n- **Anthropic:** Claude\n- **Google:** Gemini\n\n`/api/ai` streams token-by-token as NDJSON token events from all three, and enforces a per-user daily quota (`AI_MESSAGES_PER_DAY`, default 50). Exhausted budgets get HTTP 429 with a truthful `Retry-After`.\n\nProvider errors are logged server-side instead of being disguised as a successful reply.",
       },
       {
         q: "What AI coding documents come inside the downloaded ZIP?",
@@ -150,7 +150,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "支持哪些 AI 供应商？",
-        a: "三大类，全部支持流式：\n\n- **OpenAI 兼容**：OpenAI、OpenRouter、DeepSeek、Groq\n- **Anthropic**：Claude\n- **Google**：Gemini\n\n`/api/ai` 对三家都按 token 以增量 `text/plain` 流式返回，并有每用户每日配额（`AI_MESSAGES_PER_DAY`，默认 50），用尽返回 429 且 `Retry-After` 为真实剩余秒数。provider 报错会记录在服务端日志，不再伪装成正常回复。",
+        a: "三大类，全部支持流式：\n\n- **OpenAI 兼容**：OpenAI、OpenRouter、DeepSeek、Groq\n- **Anthropic**：Claude\n- **Google**：Gemini\n\n`/api/ai` 对三家都按 token 以 NDJSON 事件流流式返回，并有每用户每日配额（`AI_MESSAGES_PER_DAY`，默认 50），用尽返回 429 且 `Retry-After` 为真实剩余秒数。provider 报错会记录在服务端日志，不再伪装成正常回复。",
       },
       {
         q: "下载的 ZIP 里有哪些给 AI coding agent 用的文档？",
@@ -234,7 +234,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "AI 機能は何が入っていますか？",
-        a: "OpenAI 互換（OpenAI / OpenRouter / DeepSeek / Groq）、Anthropic Claude、Google Gemini に対し、/api/ai が text/plain の真のストリーミングを返します。ユーザーごとの 1 日あたりメッセージ上限（AI_MESSAGES_PER_DAY、既定 50）があり、超過時は 429 と実際の Retry-After を返します。",
+        a: "OpenAI 互換（OpenAI / OpenRouter / DeepSeek / Groq）、Anthropic Claude、Google Gemini に対し、/api/ai が NDJSON イベントで真のストリーミングを返します。ユーザーごとの 1 日あたりメッセージ上限（AI_MESSAGES_PER_DAY、既定 50）があり、超過時は 429 と実際の Retry-After を返します。",
       },
       {
         q: "RAG は本物に動きますか？",
@@ -291,7 +291,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "Quelles sont les capacités IA ?",
-        a: "/api/ai diffuse réellement le texte en flux (text/plain) depuis les API compatibles OpenAI (OpenAI / OpenRouter / DeepSeek / Groq), Anthropic Claude et Google Gemini. Un quota quotidien par utilisateur est appliqué (AI_MESSAGES_PER_DAY, 50 par défaut) ; le dépassement renvoie 429 avec un Retry-After exact.",
+        a: "/api/ai diffuse réellement le texte en flux NDJSON (événements token) depuis les API compatibles OpenAI (OpenAI / OpenRouter / DeepSeek / Groq), Anthropic Claude et Google Gemini. Un quota quotidien par utilisateur est appliqué (AI_MESSAGES_PER_DAY, 50 par défaut) ; le dépassement renvoie 429 avec un Retry-After exact.",
       },
       {
         q: "Le RAG fonctionne-t-il réellement ?",
@@ -348,7 +348,7 @@ export const faqContent: Record<string, FaqLang> = {
       },
       {
         q: "Welche KI-Funktionen sind enthalten?",
-        a: "/api/ai liefert echtes text/plain-Streaming für OpenAI-kompatible APIs (OpenAI / OpenRouter / DeepSeek / Groq), Anthropic Claude und Google Gemini. Pro Nutzer gilt ein Tageskontingent (AI_MESSAGES_PER_DAY, Standard 50); bei Erschöpfung antwortet die API mit 429 und einem korrekten Retry-After.",
+        a: "/api/ai liefert echtes NDJSON-Streaming für OpenAI-kompatible APIs (OpenAI / OpenRouter / DeepSeek / Groq), Anthropic Claude und Google Gemini. Pro Nutzer gilt ein Tageskontingent (AI_MESSAGES_PER_DAY, Standard 50); bei Erschöpfung antwortet die API mit 429 und einem korrekten Retry-After.",
       },
       {
         q: "Funktioniert das RAG-Modul wirklich?",

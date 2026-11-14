@@ -24,6 +24,7 @@
     "rebrand": "node scripts/rebrand.mjs",
     "agents:lint": "node scripts/agents-lint.mjs",
     "smoke:moderation": "node scripts/smoke-moderation.cjs",
+    "launch:check": "node scripts/launch-check.mjs",
     "compliance:check": "node scripts/payment-compliance-check.mjs"
   },
   "dependencies": {

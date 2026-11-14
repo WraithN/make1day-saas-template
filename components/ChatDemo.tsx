@@ -39,10 +39,46 @@ export function ChatDemo() {
       }
       const reader = res.body!.getReader();
       const dec = new TextDecoder();
+      // NDJSON events (app/api/ai/route.ts): {"type":"start"} / token / error
+      // / done. Prose and machine state are finally separate channels - an
+      // upstream failure surfaces as an error, not as a fake answer.
+      let buf = "";
+      let failed = false;
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        setReply((p) => p + dec.decode(value, { stream: true }));
+        buf += dec.decode(value, { stream: true });
+        let nl: number;
+        while ((nl = buf.indexOf("\n")) >= 0) {
+          const line = buf.slice(0, nl).trim();
+          buf = buf.slice(nl + 1);
+          if (!line) continue;
+          try {
+            const ev = JSON.parse(line) as { type?: string; text?: string; code?: string };
+            if (ev.type === "token" && ev.text) setReply((p) => p + ev.text);
+            else if (ev.type === "error") {
+              failed = true;
+              setErr(
+                ev.code === "provider_failed"
+                  ? t("chatDemo.errProvider")
+                  : t("chatDemo.errGeneric"),
+              );
+            }
+          } catch {
+            /* ignore malformed line */
+          }
+        }
+      }
+      if (!failed) {
+        const tail = buf.trim();
+        if (tail) {
+          try {
+            const ev = JSON.parse(tail) as { type?: string; text?: string };
+            if (ev.type === "token" && ev.text) setReply((p) => p + ev.text);
+          } catch {
+            /* ignore */
+          }
+        }
       }
     } catch {
       setErr("Network error");

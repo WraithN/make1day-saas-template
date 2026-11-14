@@ -476,10 +476,12 @@ export function GET() {
           tags: ["AI"],
           summary: "Multi-provider streaming chat (plan-gated outside demo mode)",
           description:
-            "Real token-by-token streaming for OpenAI-compatible, Anthropic and Gemini providers. " +
-            "A demo session is unlimited; signed-in subscribers are charged one message per day " +
-            "from AI_MESSAGES_PER_DAY (default 50, UTC-day bucket). Provider failures are logged " +
-            "server-side and surfaced as a generic [AI provider error] text, never as a fake reply.",
+            "Real token-by-token streaming for OpenAI-compatible, Anthropic and Gemini providers over NDJSON events " +
+            "(one JSON object per line: type=start|token|error|done). A demo session is unlimited; signed-in " +
+            "subscribers consume one unit per generated reply from AI_MESSAGES_PER_DAY (default 50, UTC-day bucket); " +
+            "the unit is charged from the first real token, so a provider that fails before generating is NOT charged. " +
+            "Provider failures are logged server-side and surfaced as a typed error event (code provider_failed) with no " +
+            "token text, never as a fake reply.",
           security: [{ supabaseSession: [] }, {}],
           requestBody: {
             required: true,
@@ -499,8 +501,9 @@ export function GET() {
           responses: {
             "200": {
               description:
-                "Incremental plain-text stream (text/plain; charset=utf-8), one chunk per provider token. " +
-                "Carries X-AI-Quota-Limit / X-AI-Quota-Used / X-AI-Quota-Remaining for billed users.",
+                "NDJSON stream (application/x-ndjson; charset=utf-8): {\"type\":\"token\",\"text\":…} lines, " +
+                "closed by {\"type\":\"done\"} or an {\"type\":\"error\",\"code\":\"provider_failed\"} event. " +
+                "Carries X-AI-Protocol: ndjson-events-v1 and X-AI-Quota-Limit / -Used / -Remaining for billed users.",
             },
             "400": err("Invalid message"),
             "401": err("Unauthorized"),

@@ -331,7 +331,7 @@ touches card data. After the buyer finishes, they are returned to
 
 ## Implementation notes (current code)
 
-- **Creem is the default gateway** (`PAYMENT_PROVIDER=creem`), for this site and
+- **Waffo Pancake is the default gateway** (`PAYMENT_PROVIDER=waffo`), for this site and
   for the Builder's default project. To switch to Waffo later, set
   `PAYMENT_PROVIDER=waffo` (with `WAFFO_FLAVOR=pancake`); the single
   `getPaymentProvider()` / `verifyWebhook` abstraction means **no code change** —

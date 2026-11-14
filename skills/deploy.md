@@ -33,6 +33,9 @@ globs: .env.example, next.config.mjs, wrangler.toml, middleware.ts, app/**/route
 `npx tsc --noEmit` → clean `next build` → `next start` smoke-test `/`, `/pricing`, `/llms.txt` → `/api/payments/self-check` returns `ready: true`.
 
 ## Deploy gate (mandatory before first production release)
+`npm run launch:check` must exit `0` (site URL baked, gateway complete and
+NOT in test mode against a real domain, Supabase + migrations, mail
+delivery, no placeholder branding), and
 `npm run compliance:check --url="https://<staging-or-production>"` must exit
 `0` — the compliance skill's audit workflow (detect → fetch live platform
 policies → local checks → data-protection checklist → fix) is the release

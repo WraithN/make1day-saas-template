@@ -41,7 +41,7 @@ export const compareContent: Record<
       { feature: "Ongoing plan", shipkit: "12 mo free updates + optional $9/mo Care", shipfast: "None (lifetime updates)", makerkit: "Tiered licenses", supastarter: "All-access upgrade" },
       { feature: "Framework", shipkit: "Next.js 15 App Router", shipfast: "Next.js", makerkit: "Next.js (monorepo)", supastarter: "Next.js / Nuxt" },
       { feature: "Auth", shipkit: "Email + OAuth (Google/GitHub/Apple/Microsoft)", shipfast: "Google + magic link", makerkit: "Deep RBAC", supastarter: "Multiple providers" },
-      { feature: "Payments", shipkit: "Creem (default), Stripe, PayPal, Waffo", shipfast: "Stripe", makerkit: "Stripe", supastarter: "Stripe + others" },
+      { feature: "Payments", shipkit: "Waffo (default MoR), Stripe, PayPal, Creem, Lemon Squeezy", shipfast: "Stripe", makerkit: "Stripe", supastarter: "Stripe + others" },
       { feature: "Multi-tenancy", shipkit: "Optional helper", shipfast: "No", makerkit: "Yes (deepest)", supastarter: "Yes" },
       { feature: "AI feature", shipkit: "Chat + working hybrid RAG", shipfast: "Minimal", makerkit: "Partial", supastarter: "Yes" },
       { feature: "Custom 1:1 work", shipkit: "30-min call, fixed quote", shipfast: "No", makerkit: "No", supastarter: "No" },

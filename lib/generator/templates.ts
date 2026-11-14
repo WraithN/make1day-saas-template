@@ -263,7 +263,10 @@ export function buildReadme(c: BuilderConfig): string {
   lines.push(`cp .env.example .env.local`);
   lines.push(`#   → fill Supabase + your selected providers`);
   lines.push(``);
-  lines.push(`# 3. database (run supabase/migrations/0001_init.sql in Supabase SQL editor)`);
+  lines.push(`# 3. database - apply ALL migrations in numeric order:`);
+  lines.push(`#     npx supabase db push     (tracks version, recommended)`);
+  lines.push(`#     0001_init.sql alone misses licenses, RBAC, orders, ai_usage`);
+  lines.push(`#     functions, billing and workflow tables - those fail later.`);
   lines.push(``);
   lines.push(`# 4. run`);
   lines.push(`npm run dev`);

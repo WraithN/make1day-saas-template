@@ -497,6 +497,8 @@ async function verifyCase(entry, doBuild) {
 
   // White-label: every generated project must ship an MIT LICENSE file.
   assert(exists("LICENSE"), "LICENSE missing from ZIP");
+  // Generated CI gates ship in every project (the "no CI/CD" review gap).
+  assert(exists(".github/workflows/ci.yml"), "customer CI missing from ZIP");
 
   // The hand-drawn ink-outline CSS is style-specific: it must ship for the
   // doodle palette and must NOT leak into any of the other 10 palettes.
@@ -789,6 +791,10 @@ async function verifyCase(entry, doBuild) {
   assert(
     exists("scripts/setup-wizard.mjs") === config.skills.includes("setup"),
     "setup-wizard must ship exactly when the setup skill is selected",
+  );
+  assert(
+    exists("scripts/launch-check.mjs") === config.skills.includes("setup"),
+    "launch-check must ship exactly when the setup skill is selected",
   );
 
   // Generated docs must be real, and the manifest must reflect the picks.

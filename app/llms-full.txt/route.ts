@@ -428,7 +428,7 @@ Operational views: /admin/licenses (operator sign-in), GET /api/payments/self-ch
   come from WAFFO_ACQUIRING_* env vars (make1day.dev invents none) and the signing
   string / response shape / webhook attribution are 需按你的 Waffo 合同核对 —
   see docs/waffo.md §5. Pancake is complete.
-- AI chat streams token-by-token (OpenAI / Anthropic / Gemini) as incremental text/plain chunks and enforces a per-user daily quota (AI_MESSAGES_PER_DAY, default 50, HTTP 429 ai_quota_exceeded when exhausted). The 429 body's resetAt is the NEXT 00:00 UTC and Retry-After the real seconds remaining; X-AI-Quota-* headers report the counter. RAG ingest/query require a signed-in user with an active subscription. Runtime regressions are checked by scripts/smoke-ai-stream.cjs and scripts/smoke-ai-quota*.cjs.
+- AI chat streams token-by-token (OpenAI / Anthropic / Gemini) as NDJSON events ({type:start|token|error|done}, X-AI-Protocol: ndjson-events-v1) and enforces a per-user daily quota (AI_MESSAGES_PER_DAY, default 50, HTTP 429 ai_quota_exceeded when exhausted). The 429 body's resetAt is the NEXT 00:00 UTC and Retry-After the real seconds remaining; X-AI-Quota-* headers report the counter. A provider that fails before the first token emits a typed provider_failed error event and is not charged. RAG ingest/query require a signed-in user with an active subscription. Runtime regressions are checked by scripts/smoke-ai-stream.cjs and scripts/smoke-ai-quota*.cjs.
 - /admin is CLOSED in every environment when ADMIN_USER / ADMIN_PASSWORD (or
   Supabase) are unconfigured; weak passwords are rejected in production, and
   operator sessions use an HMAC-signed cookie verified at the Edge. /account
